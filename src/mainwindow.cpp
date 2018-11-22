@@ -2,7 +2,6 @@
 #include <QTextStream>
 
 #include "mainwindow.h"
-#include "version.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

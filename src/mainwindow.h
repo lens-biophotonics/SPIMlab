@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMenuBar>
+#include "version.h"
 
 
 class MainWindow : public QMainWindow
