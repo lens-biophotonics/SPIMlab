@@ -22,7 +22,8 @@ void MainWindow::setupUi()
     aboutAction->setObjectName("aboutAction");
     aboutAction->setShortcut(Qt::Key_F1);
 
-    QMenuBar *menuBar = new QMenuBar(this);
+    QMenuBar *menuBar = new QMenuBar();
+    setMenuBar(menuBar);
 
     QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
