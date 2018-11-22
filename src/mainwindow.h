@@ -18,11 +18,6 @@ private slots:
     void on_aboutAction_triggered();
 
 private:
-    QMenuBar *menuBar;
-
-    QAction *aboutAction;
-
-    void setupActions();
     void setupUi();
 };
 

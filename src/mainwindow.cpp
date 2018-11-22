@@ -6,7 +6,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setupActions();
     setupUi();
     QMetaObject::connectSlotsByName(this);
 }
@@ -16,19 +15,16 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::setupActions()
+void MainWindow::setupUi()
 {
-    aboutAction = new QAction(this);
+    QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
     aboutAction->setObjectName("aboutAction");
     aboutAction->setShortcut(Qt::Key_F1);
-}
 
-void MainWindow::setupUi()
-{
-    menuBar = new QMenuBar(this);
+    QMenuBar *menuBar = new QMenuBar(this);
 
-    QMenu* helpMenu = menuBar->addMenu("?");
+    QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
 }
 
