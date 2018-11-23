@@ -1,5 +1,7 @@
 #include <QMessageBox>
 #include <QTextStream>
+#include <QApplication>
+#include <QCloseEvent>
 
 #include "mainwindow.h"
 #include "logwidget.h"
@@ -23,6 +25,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
+    QAction *quitAction = new QAction(this);
+    quitAction->setText("&Quit");
+    quitAction->setObjectName("quitAction");
+    quitAction->setShortcut(QKeySequence("Ctrl+Q"));
+
     QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
     aboutAction->setObjectName("aboutAction");
@@ -30,6 +37,9 @@ void MainWindow::setupUi()
 
     QMenuBar *menuBar = new QMenuBar();
     setMenuBar(menuBar);
+
+    QMenu *fileMenu = menuBar->addMenu("&File");
+    fileMenu->addAction(quitAction);
 
     QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
@@ -57,4 +67,27 @@ void MainWindow::on_aboutAction_triggered()
     msgBox.setWindowTitle(QString("About %1").arg(PROGRAM_NAME));
     msgBox.setIconPixmap(QPixmap(":/res/logo_lens.png"));
     msgBox.exec();
+}
+
+void MainWindow::on_quitAction_triggered()
+{
+    closeEvent();
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    QMessageBox::StandardButton ret =
+            QMessageBox::question(
+                this, QString("Closing %1").arg(PROGRAM_NAME),
+                QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+    if(ret != QMessageBox::Yes) {
+        if(e) {
+            e->ignore();
+        }
+        return;
+    }
+
+    qApp->quit();
 }
