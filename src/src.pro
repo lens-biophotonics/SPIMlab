@@ -19,3 +19,8 @@ HEADERS += \
 
 RESOURCES += \
     ../resources.qrc
+
+WITH_HARDWARE {
+    DEFINES += WITH_HARDWARE
+    LIBS += -lnidaqmx
+}

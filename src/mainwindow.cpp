@@ -76,6 +76,7 @@ void MainWindow::on_quitAction_triggered()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
+#ifdef WITH_HARDWARE
     QMessageBox::StandardButton ret =
             QMessageBox::question(
                 this, QString("Closing %1").arg(PROGRAM_NAME),
@@ -88,6 +89,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
         }
         return;
     }
-
+#else
+    Q_UNUSED(e)
+#endif
     qApp->quit();
 }
