@@ -5,8 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SPIMlab
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     version.cpp \
     logwidget.cpp \
     logger.cpp
@@ -23,4 +23,9 @@ RESOURCES += \
 WITH_HARDWARE {
     DEFINES += WITH_HARDWARE
     LIBS += -lnidaqmx
+}
+
+CONFIG(debug) {
+    DISTFILES += \
+        ../.astylerc \
 }
