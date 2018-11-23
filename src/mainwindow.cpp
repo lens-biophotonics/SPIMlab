@@ -2,6 +2,12 @@
 #include <QTextStream>
 
 #include "mainwindow.h"
+#include "logwidget.h"
+#include "logger.h"
+
+
+Logger *logger = new Logger("MainWindow");
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -27,6 +33,9 @@ void MainWindow::setupUi()
 
     QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
+
+    LogWidget *centralWidget = new LogWidget(this);
+    setCentralWidget(centralWidget);
 }
 
 void MainWindow::on_aboutAction_triggered()

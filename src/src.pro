@@ -7,11 +7,15 @@ TARGET = SPIMlab
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    version.cpp
+    version.cpp \
+    logwidget.cpp \
+    logger.cpp
 
 HEADERS += \
     mainwindow.h \
-    version.h
+    version.h \
+    logwidget.h \
+    logger.h
 
 RESOURCES += \
     ../resources.qrc
