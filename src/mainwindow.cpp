@@ -4,8 +4,8 @@
 #include <QCloseEvent>
 
 #include "mainwindow.h"
-#include "logwidget.h"
 #include "logger.h"
+#include "centralwidget.h"
 
 
 Logger *logger = new Logger("MainWindow");
@@ -44,7 +44,7 @@ void MainWindow::setupUi()
     QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
 
-    LogWidget *centralWidget = new LogWidget(this);
+    CentralWidget *centralWidget = new CentralWidget(this);
     setCentralWidget(centralWidget);
 }
 

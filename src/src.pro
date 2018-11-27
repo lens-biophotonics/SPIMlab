@@ -10,14 +10,16 @@ SOURCES += \
     version.cpp \
     logwidget.cpp \
     logger.cpp \
-    nidevice.cpp
+    nidevice.cpp \
+    centralwidget.cpp
 
 HEADERS += \
     mainwindow.h \
     version.h \
     logwidget.h \
     logger.h \
-    nidevice.h
+    nidevice.h \
+    centralwidget.h
 
 RESOURCES += \
     ../resources.qrc
