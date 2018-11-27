@@ -12,7 +12,8 @@ SOURCES += \
     logger.cpp \
     nidevice.cpp \
     centralwidget.cpp \
-    cameradisplay.cpp
+    cameradisplay.cpp \
+    cameratrigger.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -21,7 +22,8 @@ HEADERS += \
     logger.h \
     nidevice.h \
     centralwidget.h \
-    cameradisplay.h
+    cameradisplay.h \
+    cameratrigger.h
 
 RESOURCES += \
     ../resources.qrc
