@@ -80,10 +80,10 @@ void MainWindow::closeEvent(QCloseEvent *e)
 {
 #ifdef WITH_HARDWARE
     QMessageBox::StandardButton ret =
-            QMessageBox::question(
-                this, QString("Closing %1").arg(PROGRAM_NAME),
-                QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        QMessageBox::question(
+            this, QString("Closing %1").arg(PROGRAM_NAME),
+            QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if(ret != QMessageBox::Yes) {
         if(e) {
