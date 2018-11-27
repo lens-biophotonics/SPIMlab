@@ -1,7 +1,4 @@
 #include "nidevice.h"
-#include "logger.h"
-
-static Logger *logger = new Logger("NIDevice");
 
 
 NIDevice::NIDevice() :

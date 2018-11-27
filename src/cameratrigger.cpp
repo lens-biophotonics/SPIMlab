@@ -1,7 +1,7 @@
 #include "cameratrigger.h"
-#include "logger.h"
+#include "logmanager.h"
 
-static Logger logger("CameraTrigger");
+static Logger *logger = LogManager::getInstance().getLogger("CameraTrigger");
 
 #define CHANNEL_NAME "cameraTriggerCOPulseChan"
 
@@ -39,8 +39,8 @@ bool CameraTrigger::initializeTasks(QString physicalChannel) {
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
 #endif
 
-    logger.info(QString("Created Counter Output using %1, terminal: %2").arg(
-                    physicalChannel, getTerm()));
+    logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
+                     physicalChannel, getTerm()));
     return true;
 }
 

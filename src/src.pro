@@ -14,7 +14,8 @@ SOURCES += \
     centralwidget.cpp \
     cameradisplay.cpp \
     cameratrigger.cpp \
-    galvoramp.cpp
+    galvoramp.cpp \
+    logmanager.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -25,7 +26,8 @@ HEADERS += \
     centralwidget.h \
     cameradisplay.h \
     cameratrigger.h \
-    galvoramp.h
+    galvoramp.h \
+    logmanager.h
 
 RESOURCES += \
     ../resources.qrc

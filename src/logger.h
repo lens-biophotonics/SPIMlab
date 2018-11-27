@@ -3,6 +3,7 @@
 
 #include <QEvent>
 #include <QString>
+#include <QObject>
 
 
 /**
@@ -16,12 +17,14 @@ enum MsgType {
 
 
 
-class Logger
+class Logger : public QObject
 {
+    Q_OBJECT
 public:
-    Logger(QString name="");
+    Logger(QString name = "");
 
-    void info(QString msg, MsgType type=MSG_NORMAL);
+public slots:
+    void info(QString msg, MsgType type = MSG_NORMAL);
     void error(QString errMsg);
     void critical(QString msg);
 
@@ -40,7 +43,7 @@ class MessageEvent : public QEvent
 public:
     static const QEvent::Type TYPE;
 
-    MessageEvent(QString msg, MsgType type=MSG_NORMAL);
+    MessageEvent(QString msg, MsgType type = MSG_NORMAL);
     virtual ~MessageEvent() {}
 
     MsgType getType();

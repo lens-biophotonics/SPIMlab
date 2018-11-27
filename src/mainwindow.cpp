@@ -4,11 +4,11 @@
 #include <QCloseEvent>
 
 #include "mainwindow.h"
-#include "logger.h"
+#include "logmanager.h"
 #include "centralwidget.h"
 
 
-static Logger *logger = new Logger("MainWindow");
+static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
 
 
 MainWindow::MainWindow(QWidget *parent)
