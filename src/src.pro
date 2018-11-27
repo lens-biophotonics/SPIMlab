@@ -13,7 +13,8 @@ SOURCES += \
     nidevice.cpp \
     centralwidget.cpp \
     cameradisplay.cpp \
-    cameratrigger.cpp
+    cameratrigger.cpp \
+    galvoramp.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -23,7 +24,8 @@ HEADERS += \
     nidevice.h \
     centralwidget.h \
     cameradisplay.h \
-    cameratrigger.h
+    cameratrigger.h \
+    galvoramp.h
 
 RESOURCES += \
     ../resources.qrc
