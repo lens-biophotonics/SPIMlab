@@ -33,10 +33,12 @@ void LogWidget::logMessage(QString msg, MsgType type) {
         msg.replace(QRegExp("<"),"&lt;");
     if(msg.contains(QRegExp(">")))
         msg.replace(QRegExp(">"),"&gt;");
-    if(msg.contains(QRegExp("\\n")))
-        msg.replace(QRegExp("\\n"),QString("<br>").append(timeString));
-    if(msg.contains(QRegExp("\\r")))
-        msg.replace(QRegExp("\\r"),"");
+    if(msg.contains(QRegExp("\n*$")))
+        msg.replace(QRegExp("\n*$"), "");
+    if(msg.contains(QRegExp("\n")))
+        msg.replace(QRegExp("\n"), QString("<br>").append(timeString));
+    if(msg.contains(QRegExp("\r")))
+        msg.replace(QRegExp("\r"),"");
 
     msg.prepend(timeString);
     if(type == MSG_ERROR) {
