@@ -11,7 +11,8 @@ SOURCES += \
     logwidget.cpp \
     logger.cpp \
     nidevice.cpp \
-    centralwidget.cpp
+    centralwidget.cpp \
+    cameradisplay.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -19,10 +20,14 @@ HEADERS += \
     logwidget.h \
     logger.h \
     nidevice.h \
-    centralwidget.h
+    centralwidget.h \
+    cameradisplay.h
 
 RESOURCES += \
     ../resources.qrc
+
+LIBS += \
+    -lqwt-qt5
 
 WITH_HARDWARE {
     DEFINES += WITH_HARDWARE
