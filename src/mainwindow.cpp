@@ -8,7 +8,7 @@
 #include "centralwidget.h"
 
 
-Logger *logger = new Logger("MainWindow");
+static Logger *logger = new Logger("MainWindow");
 
 
 MainWindow::MainWindow(QWidget *parent)
