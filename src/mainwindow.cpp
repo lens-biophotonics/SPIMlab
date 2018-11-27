@@ -46,6 +46,8 @@ void MainWindow::setupUi()
 
     CentralWidget *centralWidget = new CentralWidget(this);
     setCentralWidget(centralWidget);
+
+    setMinimumSize(1024, 768);
 }
 
 void MainWindow::on_aboutAction_triggered()
