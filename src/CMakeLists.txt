@@ -5,6 +5,7 @@ if(NOT DEMO_MODE)
 endif()
 
 set(SPIMlab_SRCS
+    ../resources.qrc
     main.cpp
     mainwindow.cpp
     version.cpp
