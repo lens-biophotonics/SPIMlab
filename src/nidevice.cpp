@@ -2,7 +2,6 @@
 
 NIDevice::NIDevice() : QObject()
 {
-    errBuff = (char *)calloc(sizeof(char), 2048);
 }
 
 NIDevice::~NIDevice()

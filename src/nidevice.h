@@ -65,7 +65,7 @@ protected slots:
 protected:
     QStringList errorList;
     bool lastOpWasSuccessful;
-    char *errBuff;
+    char errBuff[2048];
 };
 
 #endif // NIDEVICE_H
