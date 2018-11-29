@@ -26,4 +26,14 @@ add_custom_target(
 )
 
 add_executable(SPIMlab ${SPIMlab_SRCS} ${OTHER_FILES})
-target_link_libraries(SPIMlab Qt5::Widgets ${QWT_LIBRARY})
+target_link_libraries(SPIMlab
+    Qt5::Widgets
+    ${QWT_LIBRARY}
+)
+
+if (NOT DEMO_MODE)
+    target_link_libraries(SPIMlab
+        ${NIDAQMX_LIBRARY}
+        ${DCAMAPI_LIBRARY}
+    )
+endif ()
