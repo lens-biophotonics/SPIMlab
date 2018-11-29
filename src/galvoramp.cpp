@@ -7,7 +7,6 @@ using namespace std;
 
 GalvoRamp::GalvoRamp() : NIDevice()
 {
-
 }
 
 GalvoRamp::~GalvoRamp()
@@ -31,14 +30,14 @@ bool GalvoRamp::initializeTasks(QString physicalChannel, QString triggerSource)
             10.0,  // maxVal
             DAQmx_Val_Volts,  // units
             NULL  // customScaleName
-        )
-    );
+            )
+        );
     DAQmxErrChkRetFalse(DAQmxCfgDigEdgeStartTrig(
                             task,
                             triggerSource.toLatin1(),
                             DAQmx_Val_Rising
-                        )
-                       );
+                            )
+                        );
     DAQmxErrChkRetFalse(DAQmxSetStartTrigRetriggerable(task, true));
 #else
     Q_UNUSED(triggerSource)
@@ -46,7 +45,8 @@ bool GalvoRamp::initializeTasks(QString physicalChannel, QString triggerSource)
     return true;
 }
 
-bool GalvoRamp::start() {
+bool GalvoRamp::start()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(
         DAQmxCfgSampClkTiming(
@@ -56,8 +56,8 @@ bool GalvoRamp::start() {
             DAQmx_Val_Rising,
             DAQmx_Val_FiniteSamps,
             waveform.size()
-        )
-    );
+            )
+        );
     DAQmxErrChkRetFalse(
         DAQmxWriteAnalogF64(
             task,
@@ -68,46 +68,47 @@ bool GalvoRamp::start() {
             waveform.data(),
             NULL,
             NULL  // reserved
-        )
-    );
+            )
+        );
 
     DAQmxErrChkRetFalse(DAQmxStartTask(task));
 #endif
     return true;
 }
 
-bool GalvoRamp::stop() {
+bool GalvoRamp::stop()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxStopTask(task));
 #endif
     return true;
 }
 
-bool GalvoRamp::clearTasks() {
+bool GalvoRamp::clearTasks()
+{
 #ifdef WITH_HARDWARE
-    if(task) {
+    if (task)
         DAQmxErrChkRetFalse(DAQmxClearTask(task));
-    }
+
 #endif
     return true;
 }
 
-void GalvoRamp::createWaveform(uint nSamples, uint nRamp, double offset,
-                               double amplitude, int delay, double rate)
+void GalvoRamp::createWaveform(uint nSamples, uint nRamp, double offset, double amplitude,
+                               int delay,
+                               double rate)
 {
     this->rate = rate;
     QVector<double> temp(nSamples, 0);
     double halfAmplitude = 0.5 * amplitude;
     uint i = 0;
-    for (; i < nRamp; ++i) {
+    for (; i < nRamp; ++i)
         temp[i] = offset - halfAmplitude + amplitude * i / nRamp;
-    }
     uint nRamp2 = nSamples - nRamp;
-    for (; i < nSamples; ++i) {
+    for (; i < nSamples; ++i)
         temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
-    }
 
-    if(delay == 0) {
+    if (delay == 0) {
         waveform = temp;
         return;
     }
@@ -116,11 +117,10 @@ void GalvoRamp::createWaveform(uint nSamples, uint nRamp, double offset,
     waveform.clear();
     waveform.reserve(nSamples);
 
-    if(delay > 0) {
+    if (delay > 0) {
         waveform << temp.mid(nSamples - delay - 1, delay);
         waveform << temp.mid(0, nSamples - delay);
-    }
-    else {
+    } else {
         delay = -delay;
         waveform << temp.mid(delay, nSamples - delay);
         waveform << temp.mid(0, delay);

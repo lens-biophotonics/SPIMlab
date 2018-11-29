@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QTabWidget>
 
-
 class CentralWidget : public QWidget
 {
     Q_OBJECT

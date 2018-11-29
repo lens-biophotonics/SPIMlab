@@ -5,7 +5,6 @@
 #include <QMenuBar>
 #include "version.h"
 
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -20,7 +19,7 @@ private slots:
 
 private:
     void setupUi();
-    void closeEvent(QCloseEvent *e=NULL);
+    void closeEvent(QCloseEvent *e = NULL);
 };
 
 #endif // MAINWINDOW_H

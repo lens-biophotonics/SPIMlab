@@ -9,7 +9,6 @@
 #ifndef NIDEVICE_H
 #define NIDEVICE_H
 
-
 /**
  * \brief Wraps the call to the given function around some logic for error
  * checking
@@ -21,9 +20,9 @@
  * \param functionCall The function to be called
  */
 #define DAQmxErrChk(functionCall) { \
-    if(DAQmxFailed(functionCall)) { \
-        NIDevice::onError(); \
-    } \
+        if (DAQmxFailed(functionCall)) { \
+            NIDevice::onError(); \
+        } \
 }
 
 /**
@@ -31,10 +30,10 @@
  * return false
  */
 #define DAQmxErrChkRetFalse(functionCall) { \
-    if(DAQmxFailed(functionCall)) { \
-        NIDevice::onError(); \
-        return false; \
-    } \
+        if (DAQmxFailed(functionCall)) { \
+            NIDevice::onError(); \
+            return false; \
+        } \
 }
 
 #include <NIDAQmx.h>

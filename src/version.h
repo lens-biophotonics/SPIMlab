@@ -13,7 +13,7 @@
 
 #define BUILD_DATE __DATE__
 
-extern QString getProgramVersionString(bool includingProgramName=false);
+extern QString getProgramVersionString(bool includingProgramName = false);
 extern QString getProgramName();
 
 #endif // VERSION_H

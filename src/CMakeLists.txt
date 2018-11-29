@@ -20,8 +20,15 @@ set(SPIMlab_SRCS
 )
 
 set(OTHER_FILES
-    ../.astylerc
+    ../uncrustify.cfg
     ../.gitignore
+)
+
+add_custom_target(
+    uncrustify
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND
+    uncrustify -c ../uncrustify.cfg --no-backup *.cpp *.h
 )
 
 add_executable(SPIMlab ${SPIMlab_SRCS} ${OTHER_FILES})

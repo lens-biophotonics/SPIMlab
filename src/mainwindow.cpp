@@ -7,12 +7,9 @@
 #include "logmanager.h"
 #include "centralwidget.h"
 
-
 static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
 
-
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setupUi();
     QMetaObject::connectSlotsByName(this);
@@ -20,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
 }
 
 void MainWindow::setupUi()
@@ -79,16 +75,14 @@ void MainWindow::on_quitAction_triggered()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
 #ifdef WITH_HARDWARE
-    QMessageBox::StandardButton ret =
-        QMessageBox::question(
-            this, QString("Closing %1").arg(PROGRAM_NAME),
-            QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    QMessageBox::StandardButton ret = QMessageBox::question(
+        this, QString("Closing %1").arg(PROGRAM_NAME),
+        QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
-    if(ret != QMessageBox::Yes) {
-        if(e) {
+    if (ret != QMessageBox::Yes) {
+        if (e)
             e->ignore();
-        }
         return;
     }
 #else

@@ -5,7 +5,6 @@
 #include <QTextEdit>
 #include "logger.h"
 
-
 class LogWidget : public QWidget
 {
     Q_OBJECT

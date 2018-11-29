@@ -1,13 +1,12 @@
 #include "nidevice.h"
 
-
-NIDevice::NIDevice() :
-    QObject()
+NIDevice::NIDevice() : QObject()
 {
-    errBuff = (char*)calloc(sizeof(char), 2048);
+    errBuff = (char *)calloc(sizeof(char), 2048);
 }
 
-NIDevice::~NIDevice() {
+NIDevice::~NIDevice()
+{
     free(errBuff);
 }
 
@@ -15,7 +14,8 @@ NIDevice::~NIDevice() {
  * @brief Recovers the string description of the last occurred error
  */
 
-void NIDevice::onError() {
+void NIDevice::onError()
+{
 #ifdef WITH_HARDWARE
     DAQmxGetExtendedErrorInfo(errBuff, 2048);
 #endif

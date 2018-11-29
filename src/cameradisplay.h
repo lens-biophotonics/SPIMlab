@@ -5,7 +5,6 @@
 #include <qwt/qwt_matrix_raster_data.h>
 #include <qwt/qwt_color_map.h>
 
-
 class CameraDisplay : public QwtPlot
 {
 public:
@@ -20,11 +19,10 @@ private:
 
 
 
-class ColorMap: public QwtLinearColorMap
+class ColorMap : public QwtLinearColorMap
 {
 public:
-    ColorMap(QColor from = Qt::black, QColor to = Qt::white):
-        QwtLinearColorMap( from , to )
+    ColorMap(QColor from = Qt::black, QColor to = Qt::white) : QwtLinearColorMap(from, to)
     {
         setColorInterval(from, to);
         setMode(ScaledColors);

@@ -16,7 +16,8 @@ CameraTrigger::~CameraTrigger()
     clearTasks();
 }
 
-bool CameraTrigger::initializeTasks(QString physicalChannel) {
+bool CameraTrigger::initializeTasks(QString physicalChannel)
+{
     clearTasks();
     this->physicalChannel = physicalChannel;
 #ifdef WITH_HARDWARE
@@ -32,8 +33,8 @@ bool CameraTrigger::initializeTasks(QString physicalChannel) {
             0,  // initialDelay
             freq,
             dutyCycle
-        )
-    );
+            )
+        );
 
     DAQmxErrChkRetFalse(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
@@ -44,18 +45,21 @@ bool CameraTrigger::initializeTasks(QString physicalChannel) {
     return true;
 }
 
-void CameraTrigger::setFrequency(double Hz) {
+void CameraTrigger::setFrequency(double Hz)
+{
     freq = Hz;
 }
 
-double CameraTrigger::getFrequency() {
+double CameraTrigger::getFrequency()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxGetCOPulseFreq(task, CHANNEL_NAME, &freq));
 #endif
     return freq;
 }
 
-void CameraTrigger::setTriggerTerm(QString term) {
+void CameraTrigger::setTriggerTerm(QString term)
+{
     triggerTerm = term;
 }
 
@@ -74,9 +78,9 @@ QString CameraTrigger::getTerm()
 #ifdef WITH_HARDWARE
     char buff[100];
     DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME, buff, 100));
-    if(!lastOpWasSuccessful) {
+    if (!lastOpWasSuccessful)
         return QString(buff);
-    }
+
 #endif
     return QString();
 }
@@ -91,13 +95,13 @@ bool CameraTrigger::setTerm(QString term)
     return true;
 }
 
-bool CameraTrigger::start() {
+bool CameraTrigger::start()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
-    if(isFreeRun) {
+    if (isFreeRun) {
         DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
-    }
-    else {
+    } else {
         DAQmxErrChkRetFalse(
             DAQmxCfgDigEdgeStartTrig(
                 task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
@@ -107,18 +111,20 @@ bool CameraTrigger::start() {
     return true;
 }
 
-bool CameraTrigger::stop() {
+bool CameraTrigger::stop()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxStopTask(task));
 #endif
     return true;
 }
 
-bool CameraTrigger::clearTasks() {
+bool CameraTrigger::clearTasks()
+{
 #ifdef WITH_HARDWARE
-    if(task) {
+    if (task)
         DAQmxErrChkRetFalse(DAQmxClearTask(task));
-    }
+
 #endif
     return true;
 }

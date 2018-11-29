@@ -5,7 +5,6 @@
 #include <QString>
 #include <QObject>
 
-
 /**
  * @brief Type of log message.
  */
@@ -14,8 +13,6 @@ enum MsgType {
     MSG_NORMAL = 0, /**< A normal message.*/
     MSG_ERROR = 1 /**< An error message (will be displayed in red in the log window).*/
 }; /**< Type of logged message.*/
-
-
 
 class Logger : public QObject
 {
@@ -53,6 +50,5 @@ private:
     MsgType type;
     QString msg;
 };
-
 
 #endif // LOGGER_H

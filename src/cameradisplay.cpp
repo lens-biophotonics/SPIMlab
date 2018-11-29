@@ -21,9 +21,8 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QwtPlot(parent)
 
     QVector<double> vec = QVector<double>(NROWS * NCOLS, 0.);
     for (int i = 0; i < vec.size(); ++i) {
-        double a  = rand() / 1e6;
+        double a = rand() / 1e6;
         vec[i] = a;
-
     }
     data->setValueMatrix(vec, NCOLS);
     data->setInterval(Qt::ZAxis, QwtInterval(0, 2000));
@@ -35,10 +34,12 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QwtPlot(parent)
     replot();
 }
 
-int CameraDisplay::heightForWidth(int w) const {
+int CameraDisplay::heightForWidth(int w) const
+{
     return w;
 }
 
-bool CameraDisplay::hasHeightForWidth() const {
+bool CameraDisplay::hasHeightForWidth() const
+{
     return true;
 }

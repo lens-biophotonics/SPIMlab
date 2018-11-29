@@ -4,10 +4,8 @@
 
 #include "logmanager.h"
 
-
 Logger::Logger(QString name) : QObject(NULL), name(name)
 {
-
 }
 
 void Logger::info(QString msg, MsgType type)
@@ -31,16 +29,18 @@ void Logger::critical(QString msg)
 
 const QEvent::Type MessageEvent::TYPE = (QEvent::Type)QEvent::registerEventType();
 
-MessageEvent::MessageEvent(QString msg, MsgType type) :
-    QEvent(TYPE) {
+MessageEvent::MessageEvent(QString msg, MsgType type) : QEvent(TYPE)
+{
     this->msg = msg;
     this->type = type;
 }
 
-MsgType MessageEvent::getType() {
+MsgType MessageEvent::getType()
+{
     return type;
 }
 
-QString MessageEvent::getMsg() {
+QString MessageEvent::getMsg()
+{
     return msg;
 }

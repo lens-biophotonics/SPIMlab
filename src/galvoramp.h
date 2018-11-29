@@ -5,7 +5,6 @@
 
 #include "nidevice.h"
 
-
 class GalvoRamp : public NIDevice
 {
 public:

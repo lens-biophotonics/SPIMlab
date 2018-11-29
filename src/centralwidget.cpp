@@ -4,13 +4,13 @@
 #include "cameradisplay.h"
 #include "logwidget.h"
 
-
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi();
 }
 
-void CentralWidget::setupUi() {
+void CentralWidget::setupUi()
+{
     QTabWidget *tabWidget = new QTabWidget();
 
     LogWidget *logWidget = new LogWidget();
