@@ -26,9 +26,13 @@ public:
     bool stop();
 
 private:
+#ifdef NIDAQMX_HEADERS
     TaskHandle task;
-    QString physicalChannel, triggerTerm;
-    float64 freq, dutyCycle;
+#endif
+    QString physicalChannel;
+    QString triggerTerm;
+    float64 freq;
+    float64 dutyCycle;
     bool isFreeRun;
 
     bool clearTasks();

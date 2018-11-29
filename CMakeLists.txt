@@ -12,8 +12,17 @@ set(CMAKE_AUTORCC ON)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-find_package(Qt5Widgets CONFIG REQUIRED)
-find_package(Qwt REQUIRED)
+option(DEMO_MODE "Demo mode: simulate hardware" OFF)
 
+if (NOT DEMO_MODE)
+    add_definitions(-DWITH_HARDWARE)
+else ()
+    message(AUTHOR_WARNING "Configuring in DEMO mode")
+endif ()
+
+find_package(NI-DAQmx REQUIRED NOT DEMO_MODE)
+find_package(DCAM-API REQUIRED NOT DEMO_MODE)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qwt REQUIRED)
 
 add_subdirectory(src)

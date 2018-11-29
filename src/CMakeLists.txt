@@ -1,9 +1,3 @@
-option(DEMO_MODE "Demo mode" OFF)
-
-if(NOT DEMO_MODE)
-    ADD_DEFINITIONS(-DWITH_HARDWARE)
-endif()
-
 set(SPIMlab_SRCS
     ../resources.qrc
     main.cpp
