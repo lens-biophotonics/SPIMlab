@@ -1,5 +1,5 @@
-#include <qwt/qwt_plot_spectrogram.h>
-#include <qwt/qwt_scale_engine.h>
+#include <qwt_plot_spectrogram.h>
+#include <qwt_scale_engine.h>
 
 #include "cameradisplay.h"
 

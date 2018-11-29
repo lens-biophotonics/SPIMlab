@@ -1,9 +1,9 @@
 #ifndef CAMERADISPLAY_H
 #define CAMERADISPLAY_H
 
-#include <qwt/qwt_plot.h>
-#include <qwt/qwt_matrix_raster_data.h>
-#include <qwt/qwt_color_map.h>
+#include <qwt_plot.h>
+#include <qwt_matrix_raster_data.h>
+#include <qwt_color_map.h>
 
 class CameraDisplay : public QwtPlot
 {
