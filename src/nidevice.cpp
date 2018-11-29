@@ -1,5 +1,7 @@
 #include "nidevice.h"
 
+using namespace NI;
+
 NIDevice::NIDevice() : QObject()
 {
 }

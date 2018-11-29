@@ -35,9 +35,12 @@
             return false; \
         } \
 }
+
+namespace NI {
 #ifdef NIDAQMX_HEADERS
 #include <NIDAQmx.h>
 #endif
+}
 #include <QStringList>
 #include <QObject>
 

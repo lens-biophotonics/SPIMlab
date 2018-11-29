@@ -3,6 +3,8 @@
 
 #include "nidevice.h"
 
+using namespace NI;
+
 class CameraTrigger : public NIDevice
 {
 public:
