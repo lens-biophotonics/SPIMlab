@@ -14,26 +14,25 @@ public:
     static LogManager &getInstance()
     {
         static LogManager instance; // Guaranteed to be destroyed.
-        // Instantiated on first use.
+                                    // Instantiated on first use.
         return instance;
     }
+
+    // C++ 11
+#if __cplusplus >= 201103L
+    LogManager(LogManager const &) = delete;
+    void operator=(LogManager const &) = delete;
+#else
+    // C++ 03
+    // Dont implement copy constructor and assignment operator
+    LogManager(LogManager const &);
+    void operator=(LogManager const &);
+#endif
 
     Logger *getLogger(QString name);
 private:
     LogManager();
     ~LogManager();
-
-// C++ 03
-// Dont implement copy constructor and assignment operator
-    LogManager(LogManager const &);
-    void operator=(LogManager const &);
-
-// C++ 11
-#if __STDC_VERSION__ >= 201103L
-public:
-    LogManager(LogManager const &) = delete;
-    void operator=(LogManager const &) = delete;
-#endif
 
     QMap<QString, Logger *> logMap;
 };
