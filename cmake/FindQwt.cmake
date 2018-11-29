@@ -27,16 +27,16 @@
 #
 # Once run this will define:
 #
-# QWT_FOUND       = system has QWT lib
-# QWT_LIBRARY     = full path to the QWT library
-# QWT_INCLUDE_DIR = where to find headers
+# Qwt_FOUND       = system has QWT lib
+# Qwt_LIBRARY     = full path to the QWT library
+# Qwt_INCLUDE_DIR = where to find headers
 #
 
 
-set(QWT_LIBRARY_NAMES qwt-qt5 qwt6-qt5 qwt qwt6)
+set(Qwt_LIBRARY_NAMES qwt-qt5 qwt6-qt5 qwt qwt6)
 
-find_library(QWT_LIBRARY
-  NAMES ${QWT_LIBRARY_NAMES}
+find_library(Qwt_LIBRARY
+  NAMES ${Qwt_LIBRARY_NAMES}
   PATHS
     /usr/lib
     /usr/local/lib
@@ -46,11 +46,11 @@ find_library(QWT_LIBRARY
 )
 
 set(_qwt_fw)
-if(QWT_LIBRARY MATCHES "/qwt.*\\.framework")
-  string(REGEX REPLACE "^(.*/qwt.*\\.framework).*$" "\\1" _qwt_fw "${QWT_LIBRARY}")
+if(Qwt_LIBRARY MATCHES "/qwt.*\\.framework")
+  string(REGEX REPLACE "^(.*/qwt.*\\.framework).*$" "\\1" _qwt_fw "${Qwt_LIBRARY}")
 endif()
 
-FIND_PATH(QWT_INCLUDE_DIR NAMES qwt.h PATHS
+FIND_PATH(Qwt_INCLUDE_DIR NAMES qwt.h PATHS
   "${_qwt_fw}/Headers"
   /usr/include
   /usr/local/include
@@ -60,18 +60,18 @@ FIND_PATH(QWT_INCLUDE_DIR NAMES qwt.h PATHS
   PATH_SUFFIXES qwt-qt5 qwt qwt6
 )
 
-IF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
-  SET(QWT_FOUND TRUE)
-ENDIF (QWT_INCLUDE_DIR AND QWT_LIBRARY)
+IF (Qwt_INCLUDE_DIR AND Qwt_LIBRARY)
+  SET(Qwt_FOUND TRUE)
+ENDIF (Qwt_INCLUDE_DIR AND Qwt_LIBRARY)
 
-IF (QWT_FOUND)
-  FILE(READ ${QWT_INCLUDE_DIR}/qwt_global.h qwt_header)
-  STRING(REGEX REPLACE "^.*QWT_VERSION_STR +\"([^\"]+)\".*$" "\\1" QWT_VERSION_STR "${qwt_header}")
-  IF (NOT QWT_FIND_QUIETLY)
-    MESSAGE(STATUS "Found Qwt: ${QWT_LIBRARY} (${QWT_VERSION_STR})")
-  ENDIF (NOT QWT_FIND_QUIETLY)
-ELSE (QWT_FOUND)
-  IF (QWT_FIND_REQUIRED)
+IF (Qwt_FOUND)
+  FILE(READ ${Qwt_INCLUDE_DIR}/qwt_global.h qwt_header)
+  STRING(REGEX REPLACE "^.*QWT_VERSION_STR +\"([^\"]+)\".*$" "\\1" Qwt_VERSION_STR "${qwt_header}")
+  IF (NOT Qwt_FIND_QUIETLY)
+    MESSAGE(STATUS "Found Qwt: ${Qwt_LIBRARY} (${Qwt_VERSION_STR})")
+  ENDIF (NOT Qwt_FIND_QUIETLY)
+ELSE (Qwt_FOUND)
+  IF (Qwt_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR "Could not find Qwt")
-  ENDIF (QWT_FIND_REQUIRED)
-ENDIF (QWT_FOUND)
+  ENDIF (Qwt_FIND_REQUIRED)
+ENDIF (Qwt_FOUND)
