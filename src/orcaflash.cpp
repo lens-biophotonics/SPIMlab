@@ -31,6 +31,11 @@ OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
 }
 
+OrcaFlash::~OrcaFlash()
+{
+    close();
+}
+
 bool OrcaFlash::open(int index)
 {
 #ifdef WITH_HARDWARE

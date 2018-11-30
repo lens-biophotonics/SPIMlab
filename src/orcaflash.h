@@ -16,6 +16,7 @@ class OrcaFlash : public QObject
     Q_OBJECT
 public:
     explicit OrcaFlash(QObject *parent = nullptr);
+    virtual ~OrcaFlash();
     bool open(int index);
     bool close();
 
