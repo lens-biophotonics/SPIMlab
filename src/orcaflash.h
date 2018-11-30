@@ -26,6 +26,9 @@ public:
 
     bool copyLastFrame(void *buf, size_t n);
 
+    double getExposureTime();
+    bool setExposureTime(double sec);
+
     QString getLastError();
 
 signals:
@@ -37,6 +40,7 @@ private:
     HAMAMATSU::HDCAM h;
 #endif
     int nCamera;
+    double exposureTime;
 
     void logLastError(QString label = "");
 };

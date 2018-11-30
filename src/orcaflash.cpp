@@ -156,3 +156,35 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
 #endif
     return true;
 }
+
+double OrcaFlash::getExposureTime()
+{
+#ifdef WITH_HARDWARE
+    double *pSec = nullptr;
+    if (!dcam_getexposuretime(h, pSec))
+    {
+        logLastError("getexposuretime");
+        return -1;
+    }
+
+    return *pSec;
+#else
+    return exposureTime;
+#endif
+}
+
+bool OrcaFlash::setExposureTime(double sec)
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_setexposuretime(h, sec))
+    {
+        logLastError("setexposuretime");
+        return false;
+    }
+
+    exposureTime = getExposureTime();
+#else
+    exposureTime = sec;
+#endif
+    return true;
+}
