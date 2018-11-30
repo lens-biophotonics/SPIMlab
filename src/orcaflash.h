@@ -32,6 +32,14 @@ public:
         POL_POSITIVE = HAMAMATSU::DCAM_TRIGPOL_POSITIVE,
     };
 
+    enum ORCA_STATUS {
+        STATUS_BUSY = HAMAMATSU::DCAM_STATUS_BUSY,
+        STATUS_ERROR = HAMAMATSU::DCAM_STATUS_ERROR,
+        STATUS_READY = HAMAMATSU::DCAM_STATUS_READY,
+        STATUS_STABLE = HAMAMATSU::DCAM_STATUS_STABLE,
+        STATUS_UNSTABLE = HAMAMATSU::DCAM_STATUS_UNSTABLE,
+    };
+
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
     bool open(int index);
@@ -50,6 +58,8 @@ public:
 
     ORCA_TRIGGER_POLARITY getTriggerPolarity();
     bool setTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
+
+    ORCA_STATUS getStatus();
 
     QString getLastError();
 

@@ -252,3 +252,19 @@ bool OrcaFlash::setTriggerPolarity(OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 #endif
     return true;
 }
+
+OrcaFlash::ORCA_STATUS OrcaFlash::getStatus()
+{
+#ifdef WITH_HARDWARE
+    _DWORD *pStatus = nullptr;
+    if (!dcam_getstatus(h, pStatus))
+    {
+        logLastError("getstatus");
+        return STATUS_ERROR;
+    }
+
+    return static_cast<ORCA_STATUS>(*pStatus);
+#else
+    return STATUS_READY;
+#endif
+}
