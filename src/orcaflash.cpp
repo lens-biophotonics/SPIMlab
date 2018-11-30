@@ -45,6 +45,17 @@ bool OrcaFlash::open(int index)
     return true;
 }
 
+bool OrcaFlash::close()
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_close(h)) {
+        logLastError("close");
+        return false;
+    }
+#endif
+    return true;
+}
+
 QString OrcaFlash::getLastError()
 {
 #ifdef WITH_HARDWARE
@@ -79,6 +90,22 @@ bool OrcaFlash::startFreeRun()
 
     if (!dcam_capture(h)) {
         logLastError("capture");
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool OrcaFlash::stop()
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_idle(h)) {
+        logLastError("idle");
+        return false;
+    }
+
+    if (!dcam_freeframe(h)) {
+        logLastError("freeframe");
         return false;
     }
 #endif

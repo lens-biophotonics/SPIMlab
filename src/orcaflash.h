@@ -17,7 +17,10 @@ class OrcaFlash : public QObject
 public:
     explicit OrcaFlash(QObject *parent = nullptr);
     bool open(int index);
+    bool close();
+
     bool startFreeRun();
+    bool stop();
 
     bool copyLastFrame(void *buf, size_t n);
 
