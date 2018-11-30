@@ -10,6 +10,7 @@ namespace HAMAMATSU {
 }
 
 int init_dcam();
+bool uninit_dcam();
 
 class OrcaFlash : public QObject
 {

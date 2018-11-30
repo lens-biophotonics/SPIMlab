@@ -26,6 +26,14 @@ int init_dcam()
     return nCamera;
 }
 
+bool uninit_dcam()
+{
+#ifdef WITH_HARDWARE
+    return dcam_uninit();
+#else
+    return true;
+#endif
+}
 
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
