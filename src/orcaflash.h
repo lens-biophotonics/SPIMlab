@@ -27,6 +27,11 @@ public:
         TRIGMODE_SYNCREADOUT = HAMAMATSU::DCAM_TRIGMODE_SYNCREADOUT,
     };
 
+    enum ORCA_TRIGGER_POLARITY {
+        POL_NEGATIVE = HAMAMATSU::DCAM_TRIGPOL_NEGATIVE,
+        POL_POSITIVE = HAMAMATSU::DCAM_TRIGPOL_POSITIVE,
+    };
+
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
     bool open(int index);
@@ -43,6 +48,9 @@ public:
     ORCA_TRIGGER_MODE getTriggerMode();
     bool setTriggerMode(ORCA_TRIGGER_MODE mode);
 
+    ORCA_TRIGGER_POLARITY getTriggerPolarity();
+    bool setTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
+
     QString getLastError();
 
 signals:
@@ -56,6 +64,7 @@ private:
     int nCamera;
     double exposureTime;
     ORCA_TRIGGER_MODE triggerMode;
+    ORCA_TRIGGER_POLARITY triggerPolarity;
 
     void logLastError(QString label = "");
 };

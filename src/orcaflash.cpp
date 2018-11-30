@@ -220,3 +220,35 @@ bool OrcaFlash::setTriggerMode(ORCA_TRIGGER_MODE mode)
 #endif
     return true;
 }
+
+OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
+{
+#ifdef WITH_HARDWARE
+    int32 *pPolarity = nullptr;
+    if (!dcam_gettriggerpolarity(h, pPolarity))
+    {
+        logLastError("gettriggerpolarity");
+        return triggerPolarity;
+    }
+
+    return static_cast<ORCA_TRIGGER_POLARITY>(*pPolarity);
+#else
+    return triggerPolarity;
+#endif
+}
+
+bool OrcaFlash::setTriggerPolarity(OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_settriggerpolarity(h, polarity))
+    {
+        logLastError("settriggerpolarity");
+        return false;
+    }
+
+    triggerPolarity = getTriggerPolarity();
+#else
+    triggerPolarity = polarity;
+#endif
+    return true;
+}
