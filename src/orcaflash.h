@@ -16,6 +16,17 @@ class OrcaFlash : public QObject
 {
     Q_OBJECT
 public:
+    enum ORCA_TRIGGER_MODE {
+        TRIGMODE_INTERNAL = HAMAMATSU::DCAM_TRIGMODE_INTERNAL,
+        TRIGMODE_EDGE = HAMAMATSU::DCAM_TRIGMODE_EDGE,
+        TRIGMODE_LEVEL = HAMAMATSU::DCAM_TRIGMODE_LEVEL,
+        TRIGMODE_SOFTWARE = HAMAMATSU::DCAM_TRIGMODE_SOFTWARE,
+        TRIGMODE_TDI = HAMAMATSU::DCAM_TRIGMODE_TDI,
+        TRIGMODE_TDIINTERNAL = HAMAMATSU::DCAM_TRIGMODE_TDIINTERNAL,
+        TRIGMODE_START = HAMAMATSU::DCAM_TRIGMODE_START,
+        TRIGMODE_SYNCREADOUT = HAMAMATSU::DCAM_TRIGMODE_SYNCREADOUT,
+    };
+
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
     bool open(int index);
@@ -29,6 +40,9 @@ public:
     double getExposureTime();
     bool setExposureTime(double sec);
 
+    ORCA_TRIGGER_MODE getTriggerMode();
+    bool setTriggerMode(ORCA_TRIGGER_MODE mode);
+
     QString getLastError();
 
 signals:
@@ -41,6 +55,7 @@ private:
 #endif
     int nCamera;
     double exposureTime;
+    ORCA_TRIGGER_MODE triggerMode;
 
     void logLastError(QString label = "");
 };

@@ -188,3 +188,35 @@ bool OrcaFlash::setExposureTime(double sec)
 #endif
     return true;
 }
+
+OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
+{
+#ifdef WITH_HARDWARE
+    int32 *pMode = nullptr;
+    if (!dcam_gettriggermode(h, pMode))
+    {
+        logLastError("getexposuretime");
+        return triggerMode;
+    }
+
+    return static_cast<ORCA_TRIGGER_MODE>(*pMode);
+#else
+    return triggerMode;
+#endif
+}
+
+bool OrcaFlash::setTriggerMode(ORCA_TRIGGER_MODE mode)
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_settriggermode(h, mode))
+    {
+        logLastError("settriggermode");
+        return false;
+    }
+
+    triggerMode = getTriggerMode();
+#else
+    triggerMode = mode;
+#endif
+    return true;
+}
