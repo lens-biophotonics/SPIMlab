@@ -183,14 +183,14 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
 double OrcaFlash::getExposureTime()
 {
 #ifdef WITH_HARDWARE
-    double *pSec = nullptr;
-    if (!dcam_getexposuretime(h, pSec))
+    double sec;
+    if (!dcam_getexposuretime(h, &sec))
     {
         logLastError("getexposuretime");
         return -1;
     }
-
-    return *pSec;
+    orcaLogger->info(QString("exposure time: %1").arg(sec));
+    return sec;
 #else
     return exposureTime;
 #endif
@@ -215,14 +215,14 @@ bool OrcaFlash::setExposureTime(double sec)
 OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
 {
 #ifdef WITH_HARDWARE
-    int32 *pMode = nullptr;
-    if (!dcam_gettriggermode(h, pMode))
+    int32 mode;
+    if (!dcam_gettriggermode(h, &mode))
     {
-        logLastError("getexposuretime");
+        logLastError("gettriggermode");
         return triggerMode;
     }
 
-    return static_cast<ORCA_TRIGGER_MODE>(*pMode);
+    return static_cast<ORCA_TRIGGER_MODE>(mode);
 #else
     return triggerMode;
 #endif
@@ -247,14 +247,14 @@ bool OrcaFlash::setTriggerMode(ORCA_TRIGGER_MODE mode)
 OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
 {
 #ifdef WITH_HARDWARE
-    int32 *pPolarity = nullptr;
-    if (!dcam_gettriggerpolarity(h, pPolarity))
+    int32 polarity;
+    if (!dcam_gettriggerpolarity(h, &polarity))
     {
         logLastError("gettriggerpolarity");
         return triggerPolarity;
     }
 
-    return static_cast<ORCA_TRIGGER_POLARITY>(*pPolarity);
+    return static_cast<ORCA_TRIGGER_POLARITY>(polarity);
 #else
     return triggerPolarity;
 #endif
@@ -279,14 +279,14 @@ bool OrcaFlash::setTriggerPolarity(OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 OrcaFlash::ORCA_STATUS OrcaFlash::getStatus()
 {
 #ifdef WITH_HARDWARE
-    _DWORD *pStatus = nullptr;
-    if (!dcam_getstatus(h, pStatus))
+    _DWORD status;
+    if (!dcam_getstatus(h, &status))
     {
         logLastError("getstatus");
         return STATUS_ERROR;
     }
 
-    return static_cast<ORCA_STATUS>(*pStatus);
+    return static_cast<ORCA_STATUS>(status);
 #else
     return STATUS_READY;
 #endif
