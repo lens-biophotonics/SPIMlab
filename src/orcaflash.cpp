@@ -80,6 +80,25 @@ QString OrcaFlash::getLastError()
 #endif
 }
 
+bool OrcaFlash::setGet(HAMAMATSU::_DCAMIDPROP property, double value,
+                       double *get)
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_setgetpropertyvalue(h, static_cast<int32>(property), &value)) {
+        logLastError("setgetvalue");
+        return false;
+    }
+    if (get != nullptr) {
+        *get = value;
+    }
+#else
+    Q_UNUSED(property)
+    Q_UNUSED(value)
+    Q_UNUSED(get)
+#endif
+    return true;
+}
+
 void OrcaFlash::logLastError(QString label)
 {
     if (!label.isEmpty())

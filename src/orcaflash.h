@@ -6,6 +6,7 @@
 namespace HAMAMATSU {
 #ifdef DCAMAPI_HEADERS
 #include <dcamapi.h>
+#include <dcamprop.h>
 #endif
 }
 
@@ -62,6 +63,8 @@ public:
     ORCA_STATUS getStatus();
 
     QString getLastError();
+
+    bool setGet(HAMAMATSU::_DCAMIDPROP property, double value, double *get);
 
 signals:
 
