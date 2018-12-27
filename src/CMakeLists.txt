@@ -8,10 +8,12 @@ set(SPIMlab_SRCS
     nidevice.cpp
     centralwidget.cpp
     cameraplot.cpp
+    cameradisplay.cpp
     cameratrigger.cpp
     galvoramp.cpp
     logmanager.cpp
     orcaflash.cpp
+    spimevent.cpp
 )
 
 set(OTHER_FILES

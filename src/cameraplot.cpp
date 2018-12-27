@@ -18,6 +18,9 @@ CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
     spectrogramPlot->setColorMap(colorMap);
 
     data = new QwtMatrixRasterData();
+    data->setInterval(Qt::ZAxis, QwtInterval(0, 65535));
+    data->setInterval(Qt::XAxis, QwtInterval(0, NCOLS));
+    data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
 
     QVector<double> vec = QVector<double>(NROWS * NCOLS, 0.);
     for (int i = 0; i < vec.size(); ++i) {
@@ -41,11 +44,8 @@ bool CameraPlot::hasHeightForWidth() const
     return true;
 }
 
-void CameraPlot::setData(QVector<double> vec)
+void CameraPlot::setData(QVector<double> &vec)
 {
     data->setValueMatrix(vec, NCOLS);
-    data->setInterval(Qt::ZAxis, QwtInterval(0, 2000));
-    data->setInterval(Qt::XAxis, QwtInterval(0, NCOLS));
-    data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
     replot();
 }

@@ -14,7 +14,7 @@ void CentralWidget::setupUi()
 
     LogWidget *logWidget = new LogWidget();
 
-    cameraDisplay = new CameraPlot(this);
+    cameraDisplay = new CameraDisplay(this);
 
     tabWidget->addTab(cameraDisplay, "Camera display");
     tabWidget->addTab(logWidget, "Messages");
@@ -22,4 +22,9 @@ void CentralWidget::setupUi()
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(tabWidget);
     setLayout(layout);
+}
+
+void CentralWidget::setCamera(OrcaFlash *camera)
+{
+    cameraDisplay->setCamera(camera);
 }

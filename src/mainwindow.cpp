@@ -2,16 +2,22 @@
 #include <QTextStream>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QToolBar>
+#include <QPushButton>
 
 #include "mainwindow.h"
 #include "logmanager.h"
 #include "centralwidget.h"
+#include "spimevent.h"
 
 static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    setupDevices();
+
     setupUi();
+
     QMetaObject::connectSlotsByName(this);
 }
 
@@ -41,9 +47,29 @@ void MainWindow::setupUi()
     helpMenu->addAction(aboutAction);
 
     CentralWidget *centralWidget = new CentralWidget(this);
+    centralWidget->setCamera(orca);
     setCentralWidget(centralWidget);
 
+    QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
+    startFreeRunPushButton->setObjectName("startFreeRunPushButton");
+    QPushButton *stopFreeRunPushButton = new QPushButton("Stop free run");
+    stopFreeRunPushButton->setObjectName("stopFreeRunPushButton");
+
+    QToolBar *toolbar = addToolBar("Main toolbar");
+    toolbar->addWidget(startFreeRunPushButton);
+    toolbar->addWidget(stopFreeRunPushButton);
+
     setMinimumSize(1024, 768);
+}
+
+void MainWindow::setupDevices()
+{
+#ifdef WITH_HARDWARE
+    init_dcam();
+#endif
+
+    orca = new OrcaFlash(this);
+    orca->open(0);
 }
 
 void MainWindow::on_aboutAction_triggered()
@@ -85,8 +111,25 @@ void MainWindow::closeEvent(QCloseEvent *e)
             e->ignore();
         return;
     }
+
+    uninit_dcam();
 #else
     Q_UNUSED(e)
 #endif
     qApp->quit();
+}
+
+void MainWindow::on_startFreeRunPushButton_clicked()
+{
+    orca->setExposureTime(0.010);
+    orca->startFreeRun();
+    QApplication::postEvent(
+        qApp, new SPIMEvent(SPIMEvent::START_FREE_RUN_REQUESTED));
+}
+
+void MainWindow::on_stopFreeRunPushButton_clicked()
+{
+    orca->stop();
+    QApplication::postEvent(
+        qApp, new SPIMEvent(SPIMEvent::STOP_FREE_RUN_REQUESTED));
 }

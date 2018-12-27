@@ -1,6 +1,9 @@
 #include "orcaflash.h"
-
 #include "logmanager.h"
+
+#ifndef WITH_HARDWARE
+#include <stdio.h>
+#endif
 
 static Logger *dcamLogger = LogManager::getInstance().getLogger("DCAM");
 static Logger *orcaLogger = LogManager::getInstance().getLogger("OrcaFlash");
@@ -162,7 +165,7 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
         return false;
     }
 
-    memcpy(buf, top, n);
+    memcpy(buf, top, n * 2);
 
     if (!dcam_unlockdata(h))
     {
@@ -170,8 +173,9 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
         return false;
     }
 #else
-    Q_UNUSED(buf)
-    Q_UNUSED(n)
+    FILE *f = fopen("/dev/urandom", "r");
+    fread(buf, 2, n, f);
+    fclose(f);
 #endif
     return true;
 }
