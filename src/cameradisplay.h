@@ -13,6 +13,8 @@ public:
     int heightForWidth(int w) const;
     bool hasHeightForWidth() const;
 
+    void setData(QVector<double> vec);
+
 private:
     QwtMatrixRasterData *data;
 };

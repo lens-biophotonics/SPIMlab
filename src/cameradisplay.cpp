@@ -24,11 +24,8 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QwtPlot(parent)
         double a = rand() / 1e6;
         vec[i] = a;
     }
-    data->setValueMatrix(vec, NCOLS);
-    data->setInterval(Qt::ZAxis, QwtInterval(0, 2000));
-    data->setInterval(Qt::XAxis, QwtInterval(0, NCOLS));
-    data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
 
+    setData(vec);
     spectrogramPlot->setData(data);
 
     replot();
@@ -42,4 +39,13 @@ int CameraDisplay::heightForWidth(int w) const
 bool CameraDisplay::hasHeightForWidth() const
 {
     return true;
+}
+
+void CameraDisplay::setData(QVector<double> vec)
+{
+    data->setValueMatrix(vec, NCOLS);
+    data->setInterval(Qt::ZAxis, QwtInterval(0, 2000));
+    data->setInterval(Qt::XAxis, QwtInterval(0, NCOLS));
+    data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
+    replot();
 }
