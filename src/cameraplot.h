@@ -1,14 +1,14 @@
-#ifndef CAMERADISPLAY_H
-#define CAMERADISPLAY_H
+#ifndef CAMERPLOT_H
+#define CAMERPLOT_H
 
 #include <qwt_plot.h>
 #include <qwt_matrix_raster_data.h>
 #include <qwt_color_map.h>
 
-class CameraDisplay : public QwtPlot
+class CameraPlot : public QwtPlot
 {
 public:
-    CameraDisplay(QWidget *parent = NULL);
+    CameraPlot(QWidget *parent = NULL);
 
     int heightForWidth(int w) const;
     bool hasHeightForWidth() const;
@@ -31,4 +31,4 @@ public:
     }
 };
 
-#endif // CAMERADISPLAY_H
+#endif // CAMERPLOT_H

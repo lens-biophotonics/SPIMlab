@@ -1,7 +1,6 @@
 #include <QHBoxLayout>
 
 #include "centralwidget.h"
-#include "cameradisplay.h"
 #include "logwidget.h"
 
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
@@ -15,7 +14,7 @@ void CentralWidget::setupUi()
 
     LogWidget *logWidget = new LogWidget();
 
-    CameraDisplay *cameraDisplay = new CameraDisplay();
+    cameraDisplay = new CameraPlot(this);
 
     tabWidget->addTab(cameraDisplay, "Camera display");
     tabWidget->addTab(logWidget, "Messages");

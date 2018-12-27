@@ -1,12 +1,12 @@
 #include <qwt_plot_spectrogram.h>
 #include <qwt_scale_engine.h>
 
-#include "cameradisplay.h"
+#include "cameraplot.h"
 
 #define NROWS 2048
 #define NCOLS 2048
 
-CameraDisplay::CameraDisplay(QWidget *parent) : QwtPlot(parent)
+CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
 {
     axisScaleEngine(xBottom)->setAttribute(QwtScaleEngine::Floating, true);
     axisScaleEngine(yLeft)->setAttribute(QwtScaleEngine::Floating, true);
@@ -31,17 +31,17 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QwtPlot(parent)
     replot();
 }
 
-int CameraDisplay::heightForWidth(int w) const
+int CameraPlot::heightForWidth(int w) const
 {
     return w;
 }
 
-bool CameraDisplay::hasHeightForWidth() const
+bool CameraPlot::hasHeightForWidth() const
 {
     return true;
 }
 
-void CameraDisplay::setData(QVector<double> vec)
+void CameraPlot::setData(QVector<double> vec)
 {
     data->setValueMatrix(vec, NCOLS);
     data->setInterval(Qt::ZAxis, QwtInterval(0, 2000));

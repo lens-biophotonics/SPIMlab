@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTabWidget>
 
+#include "cameraplot.h"
 class CentralWidget : public QWidget
 {
     Q_OBJECT
@@ -16,6 +17,8 @@ public slots:
 
 private:
     void setupUi();
+
+    CameraPlot *cameraDisplay;
 };
 
 #endif // CENTRALWIDGET_H

@@ -7,7 +7,7 @@ set(SPIMlab_SRCS
     logger.cpp
     nidevice.cpp
     centralwidget.cpp
-    cameradisplay.cpp
+    cameraplot.cpp
     cameratrigger.cpp
     galvoramp.cpp
     logmanager.cpp
