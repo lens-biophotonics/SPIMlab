@@ -46,7 +46,10 @@ public:
     bool open(int index);
     bool close();
 
-    bool startCapture(int32_t framecount = 10);
+    void setNFramesInBuffer(uint count);
+    uint nFramesInBuffer();
+
+    bool startCapture();
     bool stop();
 
     bool copyFrame(void *buf, size_t n, int32_t frame);
@@ -77,6 +80,7 @@ private:
 #endif
     int nCamera;
     double exposureTime;
+    uint _nFramesInBuffer;
     ORCA_TRIGGER_MODE triggerMode;
     ORCA_TRIGGER_POLARITY triggerPolarity;
 

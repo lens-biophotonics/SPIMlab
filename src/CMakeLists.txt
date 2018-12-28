@@ -16,7 +16,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED thread system)
 
 
 include_directories(
@@ -63,6 +63,8 @@ add_executable(SPIMlab ${SPIMlab_SRCS} ${OTHER_FILES})
 target_link_libraries(SPIMlab
     Qt5::Widgets
     ${Qwt_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
 )
 
 if (NOT DEMO_MODE)

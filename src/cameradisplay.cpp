@@ -42,7 +42,7 @@ void CameraDisplay::setupUi()
 
 void CameraDisplay::on_timer_timeout()
 {
-    SPIMHub::getInstance().camera()->copyLastFrame(buf, 2048 * 2048);
+    SPIMHub::getInstance().camera()->copyLastFrame(buf, 2048 * 2048 * 2);
 
     for (size_t i = 0; i < 2048 * 2048; ++i) {
         vec[i] = buf[i];

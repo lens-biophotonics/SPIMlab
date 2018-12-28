@@ -40,6 +40,7 @@ bool uninit_dcam()
 
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
+    setNFramesInBuffer(10);
 }
 
 OrcaFlash::~OrcaFlash()
@@ -70,6 +71,16 @@ bool OrcaFlash::close()
     }
 #endif
     return true;
+}
+
+void OrcaFlash::setNFramesInBuffer(uint count)
+{
+    _nFramesInBuffer = count;
+}
+
+uint OrcaFlash::nFramesInBuffer()
+{
+    return _nFramesInBuffer;
 }
 
 QString OrcaFlash::getLastError()
@@ -108,7 +119,7 @@ void OrcaFlash::logLastError(QString label)
     orcaLogger->error(getLastError().prepend(label));
 }
 
-bool OrcaFlash::startCapture(int32_t framecount)
+bool OrcaFlash::startCapture()
 {
 #ifdef WITH_HARDWARE
     dcam_freeframe(h);
@@ -126,8 +137,6 @@ bool OrcaFlash::startCapture(int32_t framecount)
         logLastError("capture");
         return false;
     }
-#else
-    Q_UNUSED(framecount)
 #endif
     return true;
 }
@@ -166,7 +175,7 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
         return false;
     }
 
-    memcpy(buf, top, n * 2);
+    memcpy(buf, top, n);
 
     if (!dcam_unlockdata(h))
     {
@@ -176,7 +185,7 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 #else
     Q_UNUSED(frame)
     FILE * f = fopen("/dev/urandom", "r");
-    fread(buf, 2, n, f);
+    fread(buf, 2, n / 2, f);
     fclose(f);
 #endif
     return true;

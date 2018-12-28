@@ -123,7 +123,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::on_startCapturePushButton_clicked()
 {
-    SPIMHub::getInstance().startFreeRun();
+    SPIMHub::getInstance().startAcquisition();
 }
 
 void MainWindow::on_stopCapturePushButton_clicked()

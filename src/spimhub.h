@@ -2,6 +2,7 @@
 #define SPIMHUB_H
 
 #include <boost/signals2/signal.hpp>
+#include <boost/thread.hpp>
 
 #include "orcaflash.h"
 
@@ -33,6 +34,7 @@ public:
     void setCamera(OrcaFlash *camera);
 
     void startFreeRun();
+    void startAcquisition();
     void stop();
 
     simpleSignal_t captureStarted;
@@ -42,6 +44,7 @@ private:
     SPIMHub();
 
     OrcaFlash *orca;
+    boost::thread *thread;
 };
 
 #endif // SPIMHUB_H
