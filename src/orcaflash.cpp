@@ -8,7 +8,7 @@
 static Logger *dcamLogger = LogManager::getInstance().getLogger("DCAM");
 static Logger *orcaLogger = LogManager::getInstance().getLogger("OrcaFlash");
 
-using namespace HAMAMATSU;
+using namespace DCAM;
 
 int init_dcam()
 {
@@ -83,8 +83,7 @@ QString OrcaFlash::getLastError()
 #endif
 }
 
-bool OrcaFlash::setGet(HAMAMATSU::_DCAMIDPROP property, double value,
-                       double *get)
+bool OrcaFlash::setGet(DCAM::_DCAMIDPROP property, double value, double *get)
 {
 #ifdef WITH_HARDWARE
     if (!dcam_setgetpropertyvalue(h, static_cast<int32>(property), &value)) {
