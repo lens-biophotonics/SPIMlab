@@ -3,13 +3,28 @@
 
 #include <QWidget>
 #include <QTextEdit>
-#include "logger.h"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2/deconstruct.hpp>
+
+#include "logmanager.h"
+
+
+namespace bs2 = boost::signals2;
 
 class LogWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit LogWidget(QWidget *parent = 0);
+
+    template<typename T> friend
+    void adl_postconstruct(const boost::shared_ptr<T> &sp, LogWidget *)
+    {
+        LogManager::getInstance().newLogMessage.connect(
+            newLogMsg_t::slot_type(
+                &LogWidget::logMessage, sp.get(), _1, _2).track(sp));
+    }
+
 
 signals:
 
@@ -18,7 +33,8 @@ public slots:
 private:
     QTextEdit *textEdit;
 
-    bool eventFilter(QObject *obj, QEvent *event);
+    friend class bs2::deconstruct_access;
+    explicit LogWidget(QWidget *parent = 0);
     void logMessage(QString msg, MsgType type);
 };
 

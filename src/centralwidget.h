@@ -4,8 +4,12 @@
 #include <QWidget>
 #include <QTabWidget>
 
+#include <boost/shared_ptr.hpp>
+
 #include "cameradisplay.h"
 #include "orcaflash.h"
+#include "logwidget.h"
+
 
 class CentralWidget : public QWidget
 {
@@ -23,6 +27,7 @@ private:
     void setupUi();
 
     CameraDisplay *cameraDisplay;
+    boost::shared_ptr<LogWidget> logWidget;
 };
 
 #endif // CENTRALWIDGET_H

@@ -16,8 +16,14 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
+find_package(Boost REQUIRED)
 
-include_directories(${Qwt_INCLUDE_DIR} ${DCAMAPI_INCLUDE_DIR})
+
+include_directories(
+    ${Qwt_INCLUDE_DIR}
+    ${DCAMAPI_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
+)
 
 if (UNIX)
     add_definitions(-DLINUX)  # needed for DCAM-API

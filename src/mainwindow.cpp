@@ -14,9 +14,9 @@ static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setupDevices();
-
     setupUi();
+
+    setupDevices();
 
     QMetaObject::connectSlotsByName(this);
 }

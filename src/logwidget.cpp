@@ -1,8 +1,8 @@
 #include <QVBoxLayout>
 #include <QTime>
-#include <QApplication>
 
 #include "logwidget.h"
+#include "logmanager.h"
 
 LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
 {
@@ -11,18 +11,6 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     textEdit = new QTextEdit();
     layout->addWidget(textEdit);
     setLayout(layout);
-
-    qApp->installEventFilter(this);
-}
-
-bool LogWidget::eventFilter(QObject *obj, QEvent *event)
-{
-    if (event->type() == MessageEvent::TYPE) {
-        MessageEvent *e = (MessageEvent *)event;
-        logMessage(e->getMsg(), e->getType());
-        return true;
-    }
-    return false;
 }
 
 void LogWidget::logMessage(QString msg, MsgType type)

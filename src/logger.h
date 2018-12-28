@@ -30,25 +30,4 @@ private:
 };
 
 
-
-/**
- * @brief The event generated when a new message is sent for logging.
- */
-
-class MessageEvent : public QEvent
-{
-public:
-    static const QEvent::Type TYPE;
-
-    MessageEvent(QString msg, MsgType type = MSG_NORMAL);
-    virtual ~MessageEvent() {}
-
-    MsgType getType();
-    QString getMsg();
-
-private:
-    MsgType type;
-    QString msg;
-};
-
 #endif // LOGGER_H

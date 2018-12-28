@@ -1,7 +1,11 @@
 #include <QHBoxLayout>
 
+#include <boost/signals2/deconstruct.hpp>
+
 #include "centralwidget.h"
-#include "logwidget.h"
+
+namespace bs2 = boost::signals2;
+
 
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
 {
@@ -12,12 +16,11 @@ void CentralWidget::setupUi()
 {
     QTabWidget *tabWidget = new QTabWidget();
 
-    LogWidget *logWidget = new LogWidget();
-
+    logWidget = bs2::deconstruct<LogWidget>();
     cameraDisplay = new CameraDisplay(this);
 
     tabWidget->addTab(cameraDisplay, "Camera display");
-    tabWidget->addTab(logWidget, "Messages");
+    tabWidget->addTab(logWidget.get(), "Messages");
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(tabWidget);
