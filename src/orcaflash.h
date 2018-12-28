@@ -46,9 +46,10 @@ public:
     bool open(int index);
     bool close();
 
-    bool startCapture();
+    bool startCapture(int32_t framecount = 10);
     bool stop();
 
+    bool copyFrame(void *buf, size_t n, int32_t frame);
     bool copyLastFrame(void *buf, size_t n);
 
     double getExposureTime();

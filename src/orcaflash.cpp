@@ -108,7 +108,7 @@ void OrcaFlash::logLastError(QString label)
     orcaLogger->error(getLastError().prepend(label));
 }
 
-bool OrcaFlash::startCapture()
+bool OrcaFlash::startCapture(int32_t framecount)
 {
 #ifdef WITH_HARDWARE
     dcam_freeframe(h);
@@ -117,7 +117,7 @@ bool OrcaFlash::startCapture()
         return false;
     }
 
-    if (!dcam_allocframe(h, 10)) {
+    if (!dcam_allocframe(h, framecount)) {
         logLastError("allocframe");
         return false;
     }
@@ -126,6 +126,8 @@ bool OrcaFlash::startCapture()
         logLastError("capture");
         return false;
     }
+#else
+    Q_UNUSED(framecount)
 #endif
     return true;
 }
@@ -146,7 +148,7 @@ bool OrcaFlash::stop()
     return true;
 }
 
-bool OrcaFlash::copyLastFrame(void *buf, size_t n)
+bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 {
 #ifdef WITH_HARDWARE
     void *top;
@@ -158,7 +160,7 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
         return false;
     }
 
-    if (!dcam_lockdata(h, &top, &rowbytes, -1))
+    if (!dcam_lockdata(h, &top, &rowbytes, frame))
     {
         logLastError("lockdata");
         return false;
@@ -172,11 +174,17 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
         return false;
     }
 #else
-    FILE *f = fopen("/dev/urandom", "r");
+    Q_UNUSED(frame)
+    FILE * f = fopen("/dev/urandom", "r");
     fread(buf, 2, n, f);
     fclose(f);
 #endif
     return true;
+}
+
+bool OrcaFlash::copyLastFrame(void *buf, size_t n)
+{
+    return copyFrame(buf, n, -1);
 }
 
 double OrcaFlash::getExposureTime()
