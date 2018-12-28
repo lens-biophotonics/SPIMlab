@@ -5,7 +5,6 @@
 #include <QMenuBar>
 
 #include "version.h"
-#include "orcaflash.h"
 
 class MainWindow : public QMainWindow
 {
@@ -25,8 +24,6 @@ private:
     void setupUi();
     void setupDevices();
     void closeEvent(QCloseEvent *e = NULL);
-
-    OrcaFlash *orca;
 };
 
 #endif // MAINWINDOW_H

@@ -44,7 +44,7 @@ set(SPIMlab_SRCS
     galvoramp.cpp
     logmanager.cpp
     orcaflash.cpp
-    spimevent.cpp
+    spimhub.cpp
 )
 
 set(OTHER_FILES

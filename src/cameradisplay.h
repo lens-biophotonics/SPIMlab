@@ -4,20 +4,33 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2/deconstruct.hpp>
+
+#include "spimhub.h"
 #include "cameraplot.h"
-#include "orcaflash.h"
+
+namespace bs2 = boost::signals2;
 
 class CameraDisplay : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CameraDisplay(QWidget *parent = nullptr);
+    template<typename T> friend
+    void adl_postconstruct(const boost::shared_ptr<T> &sp, CameraDisplay *)
+    {
+        SPIMHub::getInstance().freeRunStarted.connect(
+            simpleSignal_t::slot_type(
+                &CameraDisplay::startRefreshTimer, sp.get()).track(sp));
+        SPIMHub::getInstance().stopped.connect(
+            simpleSignal_t::slot_type(
+                &CameraDisplay::stopRefreshTimer, sp.get()).track(sp));
+    }
+
     virtual ~CameraDisplay();
 
-    void startRefreshTimer(int msec = 100);
+    void startRefreshTimer();
     void stopRefreshTimer();
-
-    void setCamera(OrcaFlash *camera);
 
 signals:
 
@@ -25,14 +38,14 @@ public slots:
 
 private:
     CameraPlot *plot;
-    OrcaFlash *orca;
     QTimer *timer;
     uint16_t *buf;
     QVector<double> vec;
 
+    friend class bs2::deconstruct_access;
+    explicit CameraDisplay(QWidget *parent = nullptr);
 
     void setupUi();
-    bool eventFilter(QObject *obj, QEvent *event);
 
 private slots:
     void on_timer_timeout();

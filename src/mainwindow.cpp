@@ -5,10 +5,11 @@
 #include <QToolBar>
 #include <QPushButton>
 
+#include "spimhub.h"
+
 #include "mainwindow.h"
 #include "logmanager.h"
 #include "centralwidget.h"
-#include "spimevent.h"
 
 static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
 
@@ -47,7 +48,6 @@ void MainWindow::setupUi()
     helpMenu->addAction(aboutAction);
 
     CentralWidget *centralWidget = new CentralWidget(this);
-    centralWidget->setCamera(orca);
     setCentralWidget(centralWidget);
 
     QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
@@ -68,8 +68,10 @@ void MainWindow::setupDevices()
     init_dcam();
 #endif
 
-    orca = new OrcaFlash(this);
+    OrcaFlash *orca = new OrcaFlash(this);
     orca->open(0);
+
+    SPIMHub::getInstance().setCamera(orca);
 }
 
 void MainWindow::on_aboutAction_triggered()
@@ -121,15 +123,10 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::on_startFreeRunPushButton_clicked()
 {
-    orca->setExposureTime(0.010);
-    orca->startFreeRun();
-    QApplication::postEvent(
-        qApp, new SPIMEvent(SPIMEvent::START_FREE_RUN_REQUESTED));
+    SPIMHub::getInstance().startFreeRun();
 }
 
 void MainWindow::on_stopFreeRunPushButton_clicked()
 {
-    orca->stop();
-    QApplication::postEvent(
-        qApp, new SPIMEvent(SPIMEvent::STOP_FREE_RUN_REQUESTED));
+    SPIMHub::getInstance().stop();
 }

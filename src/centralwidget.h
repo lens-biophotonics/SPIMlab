@@ -17,8 +17,6 @@ class CentralWidget : public QWidget
 public:
     explicit CentralWidget(QWidget *parent = 0);
 
-    void setCamera(OrcaFlash *camera);
-
 signals:
 
 public slots:
@@ -26,7 +24,7 @@ public slots:
 private:
     void setupUi();
 
-    CameraDisplay *cameraDisplay;
+    boost::shared_ptr<CameraDisplay> cameraDisplay;
     boost::shared_ptr<LogWidget> logWidget;
 };
 
