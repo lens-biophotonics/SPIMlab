@@ -108,7 +108,7 @@ void OrcaFlash::logLastError(QString label)
     orcaLogger->error(getLastError().prepend(label));
 }
 
-bool OrcaFlash::startFreeRun()
+bool OrcaFlash::startCapture()
 {
 #ifdef WITH_HARDWARE
     dcam_freeframe(h);

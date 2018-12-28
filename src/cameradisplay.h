@@ -19,7 +19,7 @@ public:
     template<typename T> friend
     void adl_postconstruct(const boost::shared_ptr<T> &sp, CameraDisplay *)
     {
-        SPIMHub::getInstance().freeRunStarted.connect(
+        SPIMHub::getInstance().captureStarted.connect(
             simpleSignal_t::slot_type(
                 &CameraDisplay::startRefreshTimer, sp.get()).track(sp));
         SPIMHub::getInstance().stopped.connect(

@@ -35,7 +35,7 @@ public:
     void startFreeRun();
     void stop();
 
-    simpleSignal_t freeRunStarted;
+    simpleSignal_t captureStarted;
     simpleSignal_t stopped;
 
 private:

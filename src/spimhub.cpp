@@ -17,8 +17,8 @@ void SPIMHub::setCamera(OrcaFlash *camera)
 void SPIMHub::startFreeRun()
 {
     orca->setExposureTime(0.010);
-    orca->startFreeRun();
-    freeRunStarted();
+    orca->startCapture();
+    captureStarted();
 }
 
 void SPIMHub::stop()

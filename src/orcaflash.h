@@ -46,7 +46,7 @@ public:
     bool open(int index);
     bool close();
 
-    bool startFreeRun();
+    bool startCapture();
     bool stop();
 
     bool copyLastFrame(void *buf, size_t n);

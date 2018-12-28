@@ -50,14 +50,14 @@ void MainWindow::setupUi()
     CentralWidget *centralWidget = new CentralWidget(this);
     setCentralWidget(centralWidget);
 
-    QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
-    startFreeRunPushButton->setObjectName("startFreeRunPushButton");
-    QPushButton *stopFreeRunPushButton = new QPushButton("Stop free run");
-    stopFreeRunPushButton->setObjectName("stopFreeRunPushButton");
+    QPushButton *startCapturePushButton = new QPushButton("Start capture");
+    startCapturePushButton->setObjectName("startCapturePushButton");
+    QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
+    stopCapturePushButton->setObjectName("stopCapturePushButton");
 
     QToolBar *toolbar = addToolBar("Main toolbar");
-    toolbar->addWidget(startFreeRunPushButton);
-    toolbar->addWidget(stopFreeRunPushButton);
+    toolbar->addWidget(startCapturePushButton);
+    toolbar->addWidget(stopCapturePushButton);
 
     setMinimumSize(1024, 768);
 }
@@ -121,12 +121,12 @@ void MainWindow::closeEvent(QCloseEvent *e)
     qApp->quit();
 }
 
-void MainWindow::on_startFreeRunPushButton_clicked()
+void MainWindow::on_startCapturePushButton_clicked()
 {
     SPIMHub::getInstance().startFreeRun();
 }
 
-void MainWindow::on_stopFreeRunPushButton_clicked()
+void MainWindow::on_stopCapturePushButton_clicked()
 {
     SPIMHub::getInstance().stop();
 }

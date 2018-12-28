@@ -17,8 +17,8 @@ public:
 private slots:
     void on_aboutAction_triggered();
     void on_quitAction_triggered();
-    void on_startFreeRunPushButton_clicked();
-    void on_stopFreeRunPushButton_clicked();
+    void on_startCapturePushButton_clicked();
+    void on_stopCapturePushButton_clicked();
 
 private:
     void setupUi();
