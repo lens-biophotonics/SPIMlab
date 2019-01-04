@@ -169,19 +169,11 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
         return false;
     }
 
-    if (!dcam_lockdata(h, &top, &rowbytes, frame))
-    {
-        logLastError("lockdata");
-        return false;
-    }
+    lockData(&top, &rowbytes, frame);
 
     memcpy(buf, top, n);
 
-    if (!dcam_unlockdata(h))
-    {
-        logLastError("unlockdata");
-        return false;
-    }
+    unlockData();
 #else
     Q_UNUSED(frame)
     FILE * f = fopen("/dev/urandom", "r");
@@ -194,6 +186,34 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 bool OrcaFlash::copyLastFrame(void *buf, size_t n)
 {
     return copyFrame(buf, n, -1);
+}
+
+bool OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, int32_t frame)
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_lockdata(h, pTop, pRowbytes, frame))
+    {
+        logLastError("lockdata");
+        return false;
+    }
+#else
+    Q_UNUSED(pTop)
+    Q_UNUSED(pRowbytes)
+    Q_UNUSED(frame)
+#endif
+    return true;
+}
+
+bool OrcaFlash::unlockData()
+{
+#ifdef WITH_HARDWARE
+    if (!dcam_unlockdata(h))
+    {
+        logLastError("unlockdata");
+        return false;
+    }
+#endif
+    return true;
 }
 
 double OrcaFlash::getExposureTime()

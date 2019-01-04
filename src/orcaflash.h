@@ -54,6 +54,8 @@ public:
 
     bool copyFrame(void *buf, size_t n, int32_t frame);
     bool copyLastFrame(void *buf, size_t n);
+    bool lockData(void **pTop, int32_t *pRowbytes, int32_t frame);
+    bool unlockData();
 
     double getExposureTime();
     bool setExposureTime(double sec);
