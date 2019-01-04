@@ -1,5 +1,7 @@
 #include <QVBoxLayout>
 #include <QTime>
+#include <QTextBlock>
+#include <QTextCursor>
 
 #include "logwidget.h"
 #include "logmanager.h"
@@ -11,6 +13,9 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     textEdit = new QTextEdit();
     layout->addWidget(textEdit);
     setLayout(layout);
+
+    qRegisterMetaType<QTextBlock>("QTextBlock");
+    qRegisterMetaType<QTextCursor>("QTextCursor");
 }
 
 void LogWidget::logMessage(QString msg, MsgType type)
