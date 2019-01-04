@@ -128,7 +128,7 @@ bool OrcaFlash::startCapture()
         return false;
     }
 
-    if (!dcam_allocframe(h, framecount)) {
+    if (!dcam_allocframe(h, _nFramesInBuffer)) {
         logLastError("allocframe");
         return false;
     }
