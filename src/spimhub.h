@@ -13,11 +13,7 @@ typedef bs2::signal<void ()> simpleSignal_t;
 class SPIMHub
 {
 public:
-    static SPIMHub &getInstance()
-    {
-        static SPIMHub instance;
-        return instance;
-    }
+    static SPIMHub* getInstance();
 
 // C++ 11
 #if __cplusplus >= 201103L
@@ -43,6 +39,7 @@ public:
 
 private:
     SPIMHub();
+    static SPIMHub* inst;
 
     OrcaFlash *orca;
     boost::thread *thread;

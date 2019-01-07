@@ -71,7 +71,7 @@ void MainWindow::setupDevices()
     OrcaFlash *orca = new OrcaFlash(this);
     orca->open(0);
 
-    SPIMHub::getInstance().setCamera(orca);
+    SPIMHub::getInstance()->setCamera(orca);
 }
 
 void MainWindow::on_aboutAction_triggered()
@@ -123,10 +123,10 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::on_startCapturePushButton_clicked()
 {
-    SPIMHub::getInstance().startAcquisition();
+    SPIMHub::getInstance()->startAcquisition();
 }
 
 void MainWindow::on_stopCapturePushButton_clicked()
 {
-    SPIMHub::getInstance().requestStop();
+    SPIMHub::getInstance()->requestStop();
 }

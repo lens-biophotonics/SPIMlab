@@ -11,6 +11,8 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
     buf = new uint16_t[2048 * 2048];
     vec = QVector<double>(2048 * 2048);
 
+    hub = SPIMHub::getInstance();
+
     setupUi();
 
     QMetaObject::connectSlotsByName(this);
@@ -42,7 +44,7 @@ void CameraDisplay::setupUi()
 
 void CameraDisplay::on_timer_timeout()
 {
-    SPIMHub::getInstance().camera()->copyLastFrame(buf, 2048 * 2048 * 2);
+    hub->camera()->copyLastFrame(buf, 2048 * 2048 * 2);
 
     for (size_t i = 0; i < 2048 * 2048; ++i) {
         vec[i] = buf[i];

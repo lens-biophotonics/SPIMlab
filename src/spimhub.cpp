@@ -5,12 +5,23 @@
 #include "spimhub.h"
 #include "logmanager.h"
 
+
+SPIMHub* SPIMHub::inst = nullptr;
+
 Logger *logger = LogManager::getInstance().getLogger("SPIMHub");
 
 
 SPIMHub::SPIMHub()
 {
     thread = nullptr;
+}
+
+SPIMHub *SPIMHub::getInstance()
+{
+    if (!inst) {
+        inst = new SPIMHub();
+    }
+    return inst;
 }
 
 OrcaFlash *SPIMHub::camera()

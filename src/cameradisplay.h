@@ -19,10 +19,10 @@ public:
     template<typename T> friend
     void adl_postconstruct(const boost::shared_ptr<T> &sp, CameraDisplay *)
     {
-        SPIMHub::getInstance().captureStarted.connect(
+        SPIMHub::getInstance()->captureStarted.connect(
             simpleSignal_t::slot_type(
                 &CameraDisplay::startRefreshTimer, sp.get()).track(sp));
-        SPIMHub::getInstance().stopped.connect(
+        SPIMHub::getInstance()->stopped.connect(
             simpleSignal_t::slot_type(
                 &CameraDisplay::stopRefreshTimer, sp.get()).track(sp));
     }
@@ -41,6 +41,7 @@ private:
     QTimer *timer;
     uint16_t *buf;
     QVector<double> vec;
+    SPIMHub *hub;
 
     friend class bs2::deconstruct_access;
     explicit CameraDisplay(QWidget *parent = nullptr);
