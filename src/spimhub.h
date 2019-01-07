@@ -36,6 +36,7 @@ public:
     void startFreeRun();
     void startAcquisition();
     void stop();
+    void requestStop();
 
     simpleSignal_t captureStarted;
     simpleSignal_t stopped;
@@ -45,6 +46,9 @@ private:
 
     OrcaFlash *orca;
     boost::thread *thread;
+    bool stopRequested;
+
+    void worker(uint framecount);
 };
 
 #endif // SPIMHUB_H
