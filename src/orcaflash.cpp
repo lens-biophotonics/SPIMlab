@@ -177,7 +177,7 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 #else
     Q_UNUSED(frame)
     FILE * f = fopen("/dev/urandom", "r");
-    fread(buf, 2, n / 2, f);
+    fread(buf, 1, n, f);
     fclose(f);
 #endif
     return true;
