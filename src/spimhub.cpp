@@ -3,7 +3,7 @@
 
 SPIMHub* SPIMHub::inst = nullptr;
 
-Logger *logger = LogManager::getInstance().getLogger("SPIMHub");
+static Logger *logger = LogManager::getInstance().getLogger("SPIMHub");
 
 
 SPIMHub::SPIMHub()
