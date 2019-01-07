@@ -1,17 +1,21 @@
 #ifndef SPIMHUB_H
 #define SPIMHUB_H
 
-#include <boost/signals2/signal.hpp>
-#include <boost/thread.hpp>
+#include <QObject>
+#include <QThread>
 
+#include <boost/signals2/signal.hpp>
+
+#include "savestackworker.h"
 #include "orcaflash.h"
 
 namespace bs2 = boost::signals2;
 
 typedef bs2::signal<void ()> simpleSignal_t;
 
-class SPIMHub
+class SPIMHub : public QObject
 {
+    Q_OBJECT
 public:
     static SPIMHub* getInstance();
 
@@ -29,23 +33,21 @@ public:
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);
 
+    simpleSignal_t captureStarted;
+    simpleSignal_t stopped;
+
+public slots:
     void startFreeRun();
     void startAcquisition();
     void stop();
-    void requestStop();
-
-    simpleSignal_t captureStarted;
-    simpleSignal_t stopped;
 
 private:
     SPIMHub();
     static SPIMHub* inst;
 
     OrcaFlash *orca;
-    boost::thread *thread;
-    bool stopRequested;
-
-    void worker(uint framecount);
+    QThread *thread;
+    SaveStackWorker *worker;
 };
 
 #endif // SPIMHUB_H

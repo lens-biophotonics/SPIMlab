@@ -128,5 +128,5 @@ void MainWindow::on_startCapturePushButton_clicked()
 
 void MainWindow::on_stopCapturePushButton_clicked()
 {
-    SPIMHub::getInstance()->requestStop();
+    SPIMHub::getInstance()->stop();
 }
