@@ -60,14 +60,32 @@ void SPIMHub::worker(uint framecount)
 {
     int fd = open("/mnt/ramdisk/output.bin", O_WRONLY | O_CREAT | O_TRUNC, 0666);
     size_t n = 2 * 2048 * 2048;
-    uint16_t *buf = static_cast<uint16_t*>(malloc(n));
+#ifdef WITH_HARDWARE
+    void *buf;
+    int32_t rowBytes;
+#else
+    void *buf = malloc(n);
+#endif
     for (uint i = 0; i < framecount && !stopRequested; ++i) {
-        orca->copyFrame(buf, n, i % orca->nFramesInBuffer());
+        int32_t frame = static_cast<int32_t>(i % orca->nFramesInBuffer());
+#ifdef WITH_HARDWARE
+        orca->lockData(&buf, &rowBytes, frame);
+#else
+        orca->copyFrame(buf, n, frame);
+#endif
+
         write(fd, buf, n);
+
+#ifdef WITH_HARDWARE
+        orca->unlockData();
+#endif
     }
 
-    logger->info("worker done");
+#ifndef WITH_HARDWARE
     free(buf);
+#endif
+
+    logger->info("worker done");
     close(fd);
     stop();
 }
