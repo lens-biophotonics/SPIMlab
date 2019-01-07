@@ -7,6 +7,7 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
 {
     timer = new QTimer(this);
     timer->setObjectName("timer");
+    timer->setInterval(500);
 
     buf = new uint16_t[2048 * 2048];
     vec = QVector<double>(2048 * 2048);
@@ -15,22 +16,15 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
 
     setupUi();
 
+    connect(hub, SIGNAL(captureStarted()), timer, SLOT(start()));
+    connect(hub, SIGNAL(stopped()), timer, SLOT(stop()));
+
     QMetaObject::connectSlotsByName(this);
 }
 
 CameraDisplay::~CameraDisplay()
 {
     delete[] buf;
-}
-
-void CameraDisplay::startRefreshTimer()
-{
-    timer->start(100);
-}
-
-void CameraDisplay::stopRefreshTimer()
-{
-    timer->stop();
 }
 
 void CameraDisplay::setupUi()

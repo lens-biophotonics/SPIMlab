@@ -4,14 +4,8 @@
 #include <QObject>
 #include <QThread>
 
-#include <boost/signals2/signal.hpp>
-
 #include "savestackworker.h"
 #include "orcaflash.h"
-
-namespace bs2 = boost::signals2;
-
-typedef bs2::signal<void ()> simpleSignal_t;
 
 class SPIMHub : public QObject
 {
@@ -33,8 +27,9 @@ public:
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);
 
-    simpleSignal_t captureStarted;
-    simpleSignal_t stopped;
+signals:
+    void captureStarted();
+    void stopped();
 
 public slots:
     void startFreeRun();

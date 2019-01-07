@@ -4,33 +4,15 @@
 #include <QWidget>
 #include <QTimer>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals2/deconstruct.hpp>
-
 #include "spimhub.h"
 #include "cameraplot.h"
-
-namespace bs2 = boost::signals2;
 
 class CameraDisplay : public QWidget
 {
     Q_OBJECT
 public:
-    template<typename T> friend
-    void adl_postconstruct(const boost::shared_ptr<T> &sp, CameraDisplay *)
-    {
-        SPIMHub::getInstance()->captureStarted.connect(
-            simpleSignal_t::slot_type(
-                &CameraDisplay::startRefreshTimer, sp.get()).track(sp));
-        SPIMHub::getInstance()->stopped.connect(
-            simpleSignal_t::slot_type(
-                &CameraDisplay::stopRefreshTimer, sp.get()).track(sp));
-    }
-
+    explicit CameraDisplay(QWidget *parent = nullptr);
     virtual ~CameraDisplay();
-
-    void startRefreshTimer();
-    void stopRefreshTimer();
 
 signals:
 
@@ -42,9 +24,6 @@ private:
     uint16_t *buf;
     QVector<double> vec;
     SPIMHub *hub;
-
-    friend class bs2::deconstruct_access;
-    explicit CameraDisplay(QWidget *parent = nullptr);
 
     void setupUi();
 

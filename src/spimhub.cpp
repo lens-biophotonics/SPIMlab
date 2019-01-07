@@ -35,7 +35,7 @@ void SPIMHub::startFreeRun()
     orca->setExposureTime(0.010);
     orca->setNFramesInBuffer(10);
     orca->startCapture();
-    captureStarted();
+    emit captureStarted();
 }
 
 void SPIMHub::startAcquisition()
@@ -56,7 +56,7 @@ void SPIMHub::startAcquisition()
 
     orca->setNFramesInBuffer(100);
     orca->startCapture();
-    captureStarted();
+    emit captureStarted();
 }
 
 void SPIMHub::stop()
@@ -67,5 +67,5 @@ void SPIMHub::stop()
         thread = nullptr;
     }
     orca->stop();
-    stopped();
+    emit stopped();
 }
