@@ -6,9 +6,6 @@
 
 #include "logmanager.h"
 
-
-namespace bs2 = boost::signals2;
-
 class LogWidget : public QWidget
 {
     Q_OBJECT
@@ -22,6 +19,7 @@ public slots:
 private:
     QTextEdit *textEdit;
 
+private slots:
     void logMessage(QString msg, MsgType type);
 };
 

@@ -5,8 +5,8 @@
 #include <stdio.h>
 #endif
 
-static Logger *dcamLogger = LogManager::getInstance().getLogger("DCAM");
-static Logger *orcaLogger = LogManager::getInstance().getLogger("OrcaFlash");
+static Logger *dcamLogger = LogManager::getInstance()->getLogger("DCAM");
+static Logger *orcaLogger = LogManager::getInstance()->getLogger("OrcaFlash");
 
 using namespace DCAM;
 

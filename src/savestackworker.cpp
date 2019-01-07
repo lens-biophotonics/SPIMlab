@@ -7,7 +7,7 @@
 #include "savestackworker.h"
 #include "spimhub.h"
 
-static Logger *logger = LogManager::getInstance().getLogger("SaveStackWorker");
+static Logger *logger = LogManager::getInstance()->getLogger("SaveStackWorker");
 
 SaveStackWorker::SaveStackWorker(QObject *parent) : QObject(parent)
 {

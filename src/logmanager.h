@@ -2,26 +2,18 @@
 #define LOGMANAGER_H
 
 #include <QMap>
-#include <boost/signals2/signal.hpp>
+#include <QObject>
 #include "logger.h"
 
 /**
  * @brief The LogManager class is a singleton factory for Loggers.
  */
 
-typedef boost::signals2::signal<void (QString msg, MsgType type)> newLogMsg_t;
-
-class LogManager
+class LogManager : public QObject
 {
+    Q_OBJECT
 public:
-    static LogManager &getInstance()
-    {
-        static LogManager instance; // Guaranteed to be destroyed.
-                                    // Instantiated on first use.
-        return instance;
-    }
-
-    newLogMsg_t newLogMessage;
+    static LogManager* getInstance();
 
     // C++ 11
 #if __cplusplus >= 201103L
@@ -35,10 +27,15 @@ public:
 #endif
 
     Logger *getLogger(QString name);
+
+signals:
+    void newLogMessage(QString msg, MsgType type);
+
 private:
     LogManager();
     ~LogManager();
 
+    static LogManager* inst;
     QMap<QString, Logger *> logMap;
 };
 

@@ -11,7 +11,7 @@
 #include "logmanager.h"
 #include "centralwidget.h"
 
-static Logger *logger = LogManager::getInstance().getLogger("MainWindow");
+static Logger *logger = LogManager::getInstance()->getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
