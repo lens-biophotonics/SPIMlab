@@ -21,8 +21,6 @@ public slots:
 private:
     CameraPlot *plot;
     QTimer *timer;
-    uint16_t *buf;
-    QVector<double> vec;
     SPIMHub *hub;
 
     void setupUi();

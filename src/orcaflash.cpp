@@ -190,6 +190,7 @@ bool OrcaFlash::copyLastFrame(void *buf, size_t n)
 
 bool OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, int32_t frame)
 {
+    mutex.lock();
 #ifdef WITH_HARDWARE
     if (!dcam_lockdata(h, pTop, pRowbytes, frame))
     {
@@ -206,6 +207,7 @@ bool OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, int32_t frame)
 
 bool OrcaFlash::unlockData()
 {
+    mutex.unlock();
 #ifdef WITH_HARDWARE
     if (!dcam_unlockdata(h))
     {

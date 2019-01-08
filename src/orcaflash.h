@@ -2,6 +2,7 @@
 #define ORCAFLASH_H
 
 #include <QObject>
+#include <QMutex>
 
 namespace DCAM {
 #ifdef DCAMAPI_HEADERS
@@ -82,9 +83,11 @@ private:
 #endif
     int nCamera;
     double exposureTime;
-    uint _nFramesInBuffer;
     ORCA_TRIGGER_MODE triggerMode;
     ORCA_TRIGGER_POLARITY triggerPolarity;
+
+    QMutex mutex;
+    uint _nFramesInBuffer;
 
     void logLastError(QString label = "");
 };

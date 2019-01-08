@@ -1,5 +1,6 @@
 #include <QHBoxLayout>
 #include <QtDebug>
+#include <sys/types.h>
 
 #include "cameradisplay.h"
 
@@ -8,9 +9,6 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
     timer = new QTimer(this);
     timer->setObjectName("timer");
     timer->setInterval(500);
-
-    buf = new uint16_t[2048 * 2048];
-    vec = QVector<double>(2048 * 2048);
 
     hub = SPIMHub::getInstance();
 
@@ -24,7 +22,6 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
 
 CameraDisplay::~CameraDisplay()
 {
-    delete[] buf;
 }
 
 void CameraDisplay::setupUi()
@@ -38,11 +35,20 @@ void CameraDisplay::setupUi()
 
 void CameraDisplay::on_timer_timeout()
 {
-    hub->camera()->copyLastFrame(buf, 2048 * 2048 * 2);
-
-    for (size_t i = 0; i < 2048 * 2048; ++i) {
-        vec[i] = buf[i];
+    QVector<double> vec(2048 * 2048);
+    OrcaFlash *camera = hub->camera();
+#ifdef WITH_HARDWARE
+    void *top;
+    int32_t rowBytes;
+    camera->lockData(&top, &rowBytes, -1);
+    const uint16_t *p = static_cast<const uint16_t *>(top);
+    for (int i = 0; i < 2048 * 2048; ++i) {
+        vec[i] = p[i];
     }
+    camera->unlockData();
+#else
+    camera->copyLastFrame(vec.data(), 2048 * 2048 * sizeof(double));
+#endif
 
     plot->setData(vec);
 }
