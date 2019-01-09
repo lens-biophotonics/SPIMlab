@@ -52,10 +52,10 @@ void SPIMHub::startAcquisition()
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, SIGNAL(finished()), this, SLOT(stop()));
 
-    thread->start();
-
     orca->setNFramesInBuffer(100);
     orca->startCapture();
+
+    thread->start();
     emit captureStarted();
 }
 
