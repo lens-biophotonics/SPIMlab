@@ -68,6 +68,9 @@ public:
     bool setTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
 
     ORCA_STATUS getStatus();
+    QString getStatusString();
+    static QString statusString(OrcaFlash::ORCA_STATUS status);
+    void logStatusString();
 
     QString getLastError();
 

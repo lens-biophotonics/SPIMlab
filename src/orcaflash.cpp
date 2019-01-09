@@ -329,3 +329,29 @@ OrcaFlash::ORCA_STATUS OrcaFlash::getStatus()
     return STATUS_READY;
 #endif
 }
+
+QString OrcaFlash::getStatusString()
+{
+    return statusString(getStatus());
+}
+
+QString OrcaFlash::statusString(OrcaFlash::ORCA_STATUS status)
+{
+    switch (status) {
+    case OrcaFlash::STATUS_BUSY:
+        return "busy";
+    case OrcaFlash::STATUS_ERROR:
+        return "error";
+    case OrcaFlash::STATUS_READY:
+        return "ready";
+    case OrcaFlash::STATUS_STABLE:
+        return "stable";
+    case OrcaFlash::STATUS_UNSTABLE:
+        return "unstable";
+    }
+}
+
+void OrcaFlash::logStatusString()
+{
+    orcaLogger->info(QString("Camera status: %1").arg(getStatusString()));
+}
