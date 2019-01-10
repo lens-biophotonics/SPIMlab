@@ -10,6 +10,13 @@ SPIMHub::SPIMHub()
 {
     thread = nullptr;
     worker = nullptr;
+
+    init_dcam();
+}
+
+SPIMHub::~SPIMHub()
+{
+    uninit_dcam();
 }
 
 SPIMHub *SPIMHub::getInstance()

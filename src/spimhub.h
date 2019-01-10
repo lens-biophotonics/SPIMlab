@@ -11,6 +11,7 @@ class SPIMHub : public QObject
 {
     Q_OBJECT
 public:
+    virtual ~SPIMHub();
     static SPIMHub* getInstance();
 
 // C++ 11

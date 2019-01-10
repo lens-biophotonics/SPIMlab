@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
+    delete SPIMHub::getInstance();
 }
 
 void MainWindow::setupUi()
@@ -64,10 +65,6 @@ void MainWindow::setupUi()
 
 void MainWindow::setupDevices()
 {
-#ifdef WITH_HARDWARE
-    init_dcam();
-#endif
-
     OrcaFlash *orca = new OrcaFlash(this);
     orca->open(0);
 
@@ -113,8 +110,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
             e->ignore();
         return;
     }
-
-    uninit_dcam();
 #else
     Q_UNUSED(e)
 #endif
