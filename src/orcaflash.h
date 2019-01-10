@@ -55,6 +55,8 @@ public:
 
     bool copyFrame(void *buf, size_t n, int32_t frame);
     bool copyLastFrame(void *buf, size_t n);
+    bool wait(DCAM::_DWORD timeout = 1000,
+              DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
     bool lockData(void **pTop, int32_t *pRowbytes, int32_t frame);
     bool unlockData();
 

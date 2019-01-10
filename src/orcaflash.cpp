@@ -163,17 +163,19 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
     void *top;
     int32 rowbytes;
 
-    _DWORD dwEvent = DCAMCAP_EVENT_FRAMEREADY;
-    if (!dcam_wait(h, &dwEvent, 1000, nullptr)) {
-        logLastError("wait");
+    if (!wait()) {
         return false;
     }
 
-    lockData(&top, &rowbytes, frame);
+    if (!lockData(&top, &rowbytes, frame)) {
+        return false;
+    }
 
     memcpy(buf, top, n);
 
-    unlockData();
+    if (!unlockData()) {
+        return false;
+    }
 #else
     Q_UNUSED(frame)
     FILE * f = fopen("/dev/urandom", "r");
@@ -186,6 +188,21 @@ bool OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 bool OrcaFlash::copyLastFrame(void *buf, size_t n)
 {
     return copyFrame(buf, n, -1);
+}
+
+bool OrcaFlash::wait(_DWORD timeout, DCAMWAIT_EVENT event)
+{
+#ifdef WITH_HARDWARE
+    _DWORD dwEvent = event;
+    if (!dcam_wait(h, &dwEvent, timeout, nullptr)) {
+        logLastError("wait");
+        return false;
+    }
+#else
+    Q_UNUSED(timeout)
+    Q_UNUSED(event)
+#endif
+    return true;
 }
 
 bool OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, int32_t frame)
