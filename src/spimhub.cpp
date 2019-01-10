@@ -51,7 +51,7 @@ void SPIMHub::startAcquisition()
 
     thread = new QThread();
     worker = new SaveStackWorker();
-    worker->setFrameCount(40);
+    worker->setFrameCount(100);
     worker->moveToThread(thread);
 
     connect(thread, SIGNAL(started()), worker, SLOT(saveToFile()));
@@ -59,6 +59,7 @@ void SPIMHub::startAcquisition()
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, SIGNAL(finished()), this, SLOT(stop()));
 
+    orca->setExposureTime(0.2);
     orca->setNFramesInBuffer(100);
     orca->startCapture();
 
