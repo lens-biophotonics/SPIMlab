@@ -16,6 +16,7 @@ SPIMHub::SPIMHub()
 
 SPIMHub::~SPIMHub()
 {
+    delete orca;
     uninit_dcam();
 }
 
