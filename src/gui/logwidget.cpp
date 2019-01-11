@@ -1,8 +1,9 @@
 #include <QVBoxLayout>
 #include <QTime>
 
+#include "core/logmanager.h"
+
 #include "logwidget.h"
-#include "logmanager.h"
 
 LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
 {

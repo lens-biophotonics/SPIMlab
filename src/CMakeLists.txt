@@ -12,40 +12,6 @@ else ()
     message(AUTHOR_WARNING "Configuring in DEMO mode")
 endif ()
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qwt REQUIRED)
-find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
-find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
-
-
-include_directories(
-    ${Qwt_INCLUDE_DIR}
-    ${DCAMAPI_INCLUDE_DIR}
-)
-
-if (UNIX)
-    add_definitions(-DLINUX)  # needed for DCAM-API
-endif ()
-
-set(SPIMlab_SRCS
-    ../resources.qrc
-    main.cpp
-    mainwindow.cpp
-    version.cpp
-    logwidget.cpp
-    logger.cpp
-    nidevice.cpp
-    centralwidget.cpp
-    cameraplot.cpp
-    cameradisplay.cpp
-    cameratrigger.cpp
-    galvoramp.cpp
-    logmanager.cpp
-    orcaflash.cpp
-    spimhub.cpp
-    savestackworker.cpp
-)
-
 set(OTHER_FILES
     ../uncrustify.cfg
     ../.gitignore
@@ -54,19 +20,10 @@ set(OTHER_FILES
 add_custom_target(
     uncrustify
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    SOURCES ${OTHER_FILES}
     COMMAND
     uncrustify -c ../uncrustify.cfg --no-backup *.cpp *.h
 )
 
-add_executable(SPIMlab ${SPIMlab_SRCS} ${OTHER_FILES})
-target_link_libraries(SPIMlab
-    Qt5::Widgets
-    ${Qwt_LIBRARY}
-)
-
-if (NOT DEMO_MODE)
-    target_link_libraries(SPIMlab
-        ${NIDAQMX_LIBRARY}
-        ${DCAMAPI_LIBRARY}
-    )
-endif ()
+add_subdirectory(core)
+add_subdirectory(gui)

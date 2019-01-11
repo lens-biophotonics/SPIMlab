@@ -5,10 +5,10 @@
 #include <QToolBar>
 #include <QPushButton>
 
-#include "spimhub.h"
+#include "core/spimhub.h"
+#include "core/logmanager.h"
 
 #include "mainwindow.h"
-#include "logmanager.h"
 #include "centralwidget.h"
 
 static Logger *logger = LogManager::getInstance()->getLogger("MainWindow");

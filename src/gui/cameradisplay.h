@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "spimhub.h"
+#include "core/spimhub.h"
 #include "cameraplot.h"
 
 class CameraDisplay : public QWidget

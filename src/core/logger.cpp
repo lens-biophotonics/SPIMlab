@@ -1,6 +1,3 @@
-#include <QMessageBox>
-#include <QMap>
-
 #include "logmanager.h"
 
 
@@ -22,5 +19,4 @@ void Logger::error(QString errMsg)
 void Logger::critical(QString msg)
 {
     error(msg);
-    QMessageBox::critical(nullptr, "Error", msg);
 }

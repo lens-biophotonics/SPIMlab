@@ -4,9 +4,6 @@
 #include <QWidget>
 #include <QTabWidget>
 
-#include "orcaflash.h"
-
-
 class CentralWidget : public QWidget
 {
     Q_OBJECT
