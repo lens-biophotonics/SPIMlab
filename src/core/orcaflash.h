@@ -93,6 +93,7 @@ private:
 
     QMutex mutex;
     uint _nFramesInBuffer;
+    bool _isOpen;
 
     void logLastError(QString label = "");
 };

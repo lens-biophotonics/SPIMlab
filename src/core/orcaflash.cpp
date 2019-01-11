@@ -41,6 +41,7 @@ bool uninit_dcam()
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
     setNFramesInBuffer(10);
+    _isOpen = false;
 }
 
 OrcaFlash::~OrcaFlash()
@@ -59,17 +60,22 @@ bool OrcaFlash::open(int index)
     Q_UNUSED(index)
 #endif
     orcaLogger->info(QString("Camera %1 opened").arg(index));
+    _isOpen = true;
     return true;
 }
 
 bool OrcaFlash::close()
 {
+    if (!_isOpen) {
+        return true;
+    }
 #ifdef WITH_HARDWARE
     if (!dcam_close(h)) {
         logLastError("close");
         return false;
     }
 #endif
+    _isOpen = false;
     return true;
 }
 
