@@ -21,7 +21,8 @@ public:
     Logger(QString name = "");
 
 public slots:
-    void info(QString msg, MsgType type = MSG_NORMAL);
+    void msg(QString str, MsgType type = MSG_NORMAL);
+    void info(QString msg);
     void error(QString errMsg);
     void critical(QString msg);
 

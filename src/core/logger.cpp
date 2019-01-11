@@ -5,15 +5,20 @@ Logger::Logger(QString name) : QObject(nullptr), name(name)
 {
 }
 
-void Logger::info(QString msg, MsgType type)
+void Logger::msg(QString str, MsgType type)
 {
-    msg.prepend(QString("[%1] ").arg(name));
-    emit LogManager::getInstance()->newLogMessage(msg, type);
+    str.prepend(QString("[%1] ").arg(name));
+    emit LogManager::getInstance()->newLogMessage(str, type);
+}
+
+void Logger::info(QString msg)
+{
+    this->msg(msg);
 }
 
 void Logger::error(QString errMsg)
 {
-    info(errMsg, MSG_ERROR);
+    msg(errMsg, MSG_ERROR);
 }
 
 void Logger::critical(QString msg)
