@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QTimer>
 
-#include "core/spimhub.h"
 #include "cameraplot.h"
 
 class CameraDisplay : public QWidget
@@ -21,7 +20,6 @@ public slots:
 private:
     CameraPlot *plot;
     QTimer *timer;
-    SPIMHub *hub;
 
     void setupUi();
 

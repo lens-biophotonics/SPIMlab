@@ -7,8 +7,6 @@ State::State(MACHINE_STATE type, QState *parent) : QState(parent), type(type)
 
 StateMachine::StateMachine() : QStateMachine()
 {
-    SPIMHub *hub = SPIMHub::getInstance();
-
     uninitState = newState(STATE_UNINITIALIZED);
     setInitialState(uninitState);
 
@@ -18,9 +16,9 @@ StateMachine::StateMachine() : QStateMachine()
     readyState = newState(STATE_READY);
     capturingState = newState(STATE_CAPTURING);
 
-    uninitState->addTransition(hub, &SPIMHub::initialized, readyState);
-    readyState->addTransition(hub, &SPIMHub::captureStarted, capturingState);
-    capturingState->addTransition(hub, &SPIMHub::stopped, readyState);
+    uninitState->addTransition(&spimHub(), &SPIMHub::initialized, readyState);
+    readyState->addTransition(&spimHub(), &SPIMHub::captureStarted, capturingState);
+    capturingState->addTransition(&spimHub(), &SPIMHub::stopped, readyState);
 
     QMetaObject::connectSlotsByName(this);
 
@@ -38,4 +36,10 @@ QState *StateMachine::newState(MACHINE_STATE type, QState *parent)
     map[type] = state;
     addState(state);
     return state;
+}
+
+StateMachine &stateMachine()
+{
+    static auto instance = std::make_unique<StateMachine>();
+    return *instance;
 }

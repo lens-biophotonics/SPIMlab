@@ -7,6 +7,7 @@
 #include <QStatusBar>
 
 #include "core/spimhub.h"
+#include "core/statemachine.h"
 #include "core/logmanager.h"
 
 #include "mainwindow.h"
@@ -25,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-    delete SPIMHub::getInstance();
 }
 
 void MainWindow::setupUi()
@@ -58,23 +58,22 @@ void MainWindow::setupUi()
 
     setMinimumSize(1024, 768);
 
-    StateMachine *sm = SPIMHub::getInstance()->stateMachine();
     QState *s;
 
-    s = sm->getState(STATE_UNINITIALIZED);
+    s = stateMachine().getState(STATE_UNINITIALIZED);
     s->assignProperty(statusLabel, "text", "Uninitialized");
 
-    s = sm->getState(STATE_READY);
+    s = stateMachine().getState(STATE_READY);
     s->assignProperty(statusLabel, "text", "Ready");
 
-    s = sm->getState(STATE_CAPTURING);
+    s = stateMachine().getState(STATE_CAPTURING);
     s->assignProperty(statusLabel, "text", "Capturing");
 }
 
 void MainWindow::setupDevices()
 {
     OrcaFlash *orca = new OrcaFlash(this);
-    SPIMHub::getInstance()->setCamera(orca);
+    spimHub().setCamera(orca);
 }
 
 void MainWindow::on_aboutAction_triggered()

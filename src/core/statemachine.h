@@ -43,5 +43,5 @@ private:
     QMap<MACHINE_STATE, QState *> map;
 };
 
-
+StateMachine& stateMachine();
 #endif // STATEMACHINE_H

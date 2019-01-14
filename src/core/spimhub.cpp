@@ -1,7 +1,6 @@
+#include <memory>
 #include "spimhub.h"
 #include "logmanager.h"
-
-SPIMHub* SPIMHub::inst = nullptr;
 
 static Logger *logger = LogManager::getInstance()->getLogger("SPIMHub");
 
@@ -14,7 +13,6 @@ SPIMHub::SPIMHub()
 
 SPIMHub::~SPIMHub()
 {
-    delete orca;
     uninit_dcam();
 }
 
@@ -26,15 +24,6 @@ void SPIMHub::initialize()
     emit initialized();
 }
 
-SPIMHub *SPIMHub::getInstance()
-{
-    if (!inst) {
-        inst = new SPIMHub();
-        inst->sm = new StateMachine();
-    }
-    return inst;
-}
-
 OrcaFlash *SPIMHub::camera()
 {
     return orca;
@@ -43,11 +32,6 @@ OrcaFlash *SPIMHub::camera()
 void SPIMHub::setCamera(OrcaFlash *camera)
 {
     orca = camera;
-}
-
-StateMachine *SPIMHub::stateMachine()
-{
-    return sm;
 }
 
 void SPIMHub::startFreeRun()
@@ -89,4 +73,10 @@ void SPIMHub::stop()
     }
     orca->stop();
     emit stopped();
+}
+
+SPIMHub &spimHub()
+{
+    static auto instance = std::make_unique<SPIMHub>();
+    return *instance;
 }

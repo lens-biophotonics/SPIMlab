@@ -18,7 +18,7 @@ void SaveStackWorker::saveToFile()
     stopRequested = false;
     int fd = open("/mnt/ramdisk/output.bin", O_WRONLY | O_CREAT | O_TRUNC, 0666);
     size_t n = 2 * 2048 * 2048;
-    OrcaFlash *orca = SPIMHub::getInstance()->camera();
+    OrcaFlash *orca = spimHub().camera();
     const uint nFramesInBuffer = orca->nFramesInBuffer();
 #ifdef WITH_HARDWARE
     void *buf;
