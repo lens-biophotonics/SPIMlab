@@ -10,8 +10,6 @@ SPIMHub::SPIMHub()
 {
     thread = nullptr;
     worker = nullptr;
-
-    init_dcam();
 }
 
 SPIMHub::~SPIMHub()
@@ -20,10 +18,19 @@ SPIMHub::~SPIMHub()
     uninit_dcam();
 }
 
+void SPIMHub::initialize()
+{
+    init_dcam();
+    orca->open(0);
+
+    emit initialized();
+}
+
 SPIMHub *SPIMHub::getInstance()
 {
     if (!inst) {
         inst = new SPIMHub();
+        inst->sm = new StateMachine();
     }
     return inst;
 }
@@ -36,6 +43,11 @@ OrcaFlash *SPIMHub::camera()
 void SPIMHub::setCamera(OrcaFlash *camera)
 {
     orca = camera;
+}
+
+StateMachine *SPIMHub::stateMachine()
+{
+    return sm;
 }
 
 void SPIMHub::startFreeRun()

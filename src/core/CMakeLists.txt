@@ -21,6 +21,7 @@ set(SRC
     orcaflash.cpp
     savestackworker.cpp
     spimhub.cpp
+    statemachine.cpp
 )
 
 add_library(SPIMlabCore SHARED ${SRC})

@@ -5,6 +5,7 @@
 #include <QThread>
 
 #include "savestackworker.h"
+#include "statemachine.h"
 #include "orcaflash.h"
 
 class SPIMHub : public QObject
@@ -25,10 +26,15 @@ public:
     void operator=(SPIMHub const &);
 #endif
 
+    void initialize();
+
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);
 
+    StateMachine *stateMachine();
+
 signals:
+    void initialized();
     void captureStarted();
     void stopped();
 
@@ -39,10 +45,12 @@ public slots:
 
 private:
     SPIMHub();
+
     static SPIMHub* inst;
 
     OrcaFlash *orca;
     QThread *thread;
+    StateMachine *sm;
     SaveStackWorker *worker;
 };
 
