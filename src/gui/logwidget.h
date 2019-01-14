@@ -10,7 +10,7 @@ class LogWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit LogWidget(QWidget *parent = 0);
+    explicit LogWidget(QWidget *parent = nullptr);
 
 signals:
 

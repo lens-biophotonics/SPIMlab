@@ -8,7 +8,7 @@
 class CameraPlot : public QwtPlot
 {
 public:
-    CameraPlot(QWidget *parent = NULL);
+    CameraPlot(QWidget *parent = nullptr);
 
     int heightForWidth(int w) const;
     bool hasHeightForWidth() const;
@@ -24,11 +24,7 @@ private:
 class ColorMap : public QwtLinearColorMap
 {
 public:
-    ColorMap(QColor from = Qt::black, QColor to = Qt::white) : QwtLinearColorMap(from, to)
-    {
-        setColorInterval(from, to);
-        setMode(ScaledColors);
-    }
+    ColorMap(QColor from = Qt::black, QColor to = Qt::white);
 };
 
 #endif // CAMERPLOT_H

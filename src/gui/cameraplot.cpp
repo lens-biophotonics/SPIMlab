@@ -49,3 +49,9 @@ void CameraPlot::setData(QVector<double> &vec)
     data->setValueMatrix(vec, NCOLS);
     replot();
 }
+
+ColorMap::ColorMap(QColor from, QColor to) : QwtLinearColorMap(from, to)
+{
+    setColorInterval(from, to);
+    setMode(ScaledColors);
+}
