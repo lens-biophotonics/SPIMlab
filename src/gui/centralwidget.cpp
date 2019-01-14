@@ -3,6 +3,7 @@
 #include "centralwidget.h"
 #include "cameradisplay.h"
 #include "logwidget.h"
+#include "controlwidget.h"
 
 
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
@@ -20,7 +21,10 @@ void CentralWidget::setupUi()
     tabWidget->addTab(cameraDisplay, "Camera display");
     tabWidget->addTab(logWidget, "Messages");
 
+    ControlWidget *controlWidget = new ControlWidget();
+
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(tabWidget);
+    layout->addWidget(controlWidget);
     setLayout(layout);
 }

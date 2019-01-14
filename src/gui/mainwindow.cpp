@@ -3,7 +3,6 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QToolBar>
-#include <QPushButton>
 #include <QLabel>
 #include <QStatusBar>
 
@@ -53,21 +52,6 @@ void MainWindow::setupUi()
     CentralWidget *centralWidget = new CentralWidget(this);
     setCentralWidget(centralWidget);
 
-
-    QPushButton *initPushButton = new QPushButton("Initialize");
-    initPushButton->setObjectName("initPushButton");
-
-    QPushButton *startCapturePushButton = new QPushButton("Start capture");
-    startCapturePushButton->setObjectName("startCapturePushButton");
-
-    QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
-    stopCapturePushButton->setObjectName("stopCapturePushButton");
-
-    QToolBar *toolbar = addToolBar("Main toolbar");
-    toolbar->addWidget(initPushButton);
-    toolbar->addWidget(startCapturePushButton);
-    toolbar->addWidget(stopCapturePushButton);
-
     QLabel *statusLabel = new QLabel();
     statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     statusBar()->addWidget(statusLabel);
@@ -79,20 +63,12 @@ void MainWindow::setupUi()
 
     s = sm->getState(STATE_UNINITIALIZED);
     s->assignProperty(statusLabel, "text", "Uninitialized");
-    s->assignProperty(initPushButton, "enabled", true);
-    s->assignProperty(startCapturePushButton, "enabled", false);
-    s->assignProperty(stopCapturePushButton, "enabled", false);
 
     s = sm->getState(STATE_READY);
     s->assignProperty(statusLabel, "text", "Ready");
-    s->assignProperty(initPushButton, "enabled", false);
-    s->assignProperty(startCapturePushButton, "enabled", true);
-    s->assignProperty(stopCapturePushButton, "enabled", false);
 
     s = sm->getState(STATE_CAPTURING);
     s->assignProperty(statusLabel, "text", "Capturing");
-    s->assignProperty(startCapturePushButton, "enabled", false);
-    s->assignProperty(stopCapturePushButton, "enabled", true);
 }
 
 void MainWindow::setupDevices()
@@ -144,19 +120,4 @@ void MainWindow::closeEvent(QCloseEvent *e)
     Q_UNUSED(e)
 #endif
     qApp->quit();
-}
-
-void MainWindow::on_initPushButton_clicked()
-{
-    SPIMHub::getInstance()->initialize();
-}
-
-void MainWindow::on_startCapturePushButton_clicked()
-{
-    SPIMHub::getInstance()->startAcquisition();
-}
-
-void MainWindow::on_stopCapturePushButton_clicked()
-{
-    SPIMHub::getInstance()->stop();
 }
