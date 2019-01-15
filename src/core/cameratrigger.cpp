@@ -1,7 +1,7 @@
 #include "cameratrigger.h"
 #include "logmanager.h"
 
-static Logger *logger = LogManager::getInstance()->getLogger("CameraTrigger");
+static Logger *logger = getLogger("CameraTrigger");
 
 #define CHANNEL_NAME "cameraTriggerCOPulseChan"
 

@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "statemachine.h"
 #include "spimhub.h"
 

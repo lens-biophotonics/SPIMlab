@@ -3,11 +3,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "logmanager.h"
+#include "logger.h"
 #include "savestackworker.h"
 #include "spimhub.h"
 
-static Logger *logger = LogManager::getInstance()->getLogger("SaveStackWorker");
+static Logger *logger = getLogger("SaveStackWorker");
 
 SaveStackWorker::SaveStackWorker(QObject *parent) : QObject(parent)
 {

@@ -13,8 +13,7 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(textEdit);
     setLayout(layout);
 
-    LogManager *lm = LogManager::getInstance();
-    connect(lm, SIGNAL(newLogMessage(QString, MsgType)),
+    connect(&logManager(), SIGNAL(newLogMessage(QString, MsgType)),
             this, SLOT(logMessage(QString, MsgType)));
 }
 

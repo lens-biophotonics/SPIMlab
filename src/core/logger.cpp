@@ -8,7 +8,7 @@ Logger::Logger(QString name) : QObject(nullptr), name(name)
 void Logger::msg(QString str, MsgType type)
 {
     str.prepend(QString("[%1] ").arg(name));
-    emit LogManager::getInstance()->newLogMessage(str, type);
+    emit logManager().newLogMessage(str, type);
 }
 
 void Logger::info(QString msg)
@@ -24,4 +24,9 @@ void Logger::error(QString errMsg)
 void Logger::critical(QString msg)
 {
     error(msg);
+}
+
+Logger *getLogger(QString name)
+{
+    return logManager().getLogger(name);
 }

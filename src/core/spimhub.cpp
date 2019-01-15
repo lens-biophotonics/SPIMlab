@@ -1,8 +1,9 @@
 #include <memory>
-#include "spimhub.h"
-#include "logmanager.h"
 
-static Logger *logger = LogManager::getInstance()->getLogger("SPIMHub");
+#include "spimhub.h"
+#include "logger.h"
+
+static Logger *logger = getLogger("SPIMHub");
 
 
 SPIMHub::SPIMHub()

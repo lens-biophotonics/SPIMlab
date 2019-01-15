@@ -1,12 +1,12 @@
 #include "orcaflash.h"
-#include "logmanager.h"
+#include "logger.h"
 
 #ifndef WITH_HARDWARE
 #include <stdio.h>
 #endif
 
-static Logger *dcamLogger = LogManager::getInstance()->getLogger("DCAM");
-static Logger *orcaLogger = LogManager::getInstance()->getLogger("OrcaFlash");
+static Logger *dcamLogger = getLogger("DCAM");
+static Logger *orcaLogger = getLogger("OrcaFlash");
 
 using namespace DCAM;
 
