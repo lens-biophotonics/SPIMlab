@@ -1,6 +1,9 @@
 #include "nidevice.h"
+#include "logger.h"
 
 using namespace NI;
+
+static Logger *logger = getLogger("NI");
 
 NIDevice::NIDevice() : QObject()
 {

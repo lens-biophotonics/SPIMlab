@@ -36,13 +36,9 @@
         } \
 }
 
-namespace NI {
-#ifdef NIDAQMX_HEADERS
-#include <NIDAQmx.h>
-#endif
-}
-#include <QStringList>
 #include <QObject>
+
+#include "natinst.h"
 
 /**
  * @brief The NIDevice class provides common functions for operations with

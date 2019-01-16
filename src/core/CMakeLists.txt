@@ -22,6 +22,7 @@ set(SRC
     savestackworker.cpp
     spimhub.cpp
     statemachine.cpp
+    natinst.cpp
 )
 
 add_library(SPIMlabCore SHARED ${SRC})
