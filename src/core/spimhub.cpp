@@ -33,6 +33,7 @@ OrcaFlash *SPIMHub::camera()
 void SPIMHub::setCamera(OrcaFlash *camera)
 {
     orca = camera;
+    orca->setParent(this);
 }
 
 void SPIMHub::startFreeRun()

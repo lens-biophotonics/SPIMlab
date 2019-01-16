@@ -76,7 +76,7 @@ void MainWindow::setupUi()
 
 void MainWindow::setupDevices()
 {
-    OrcaFlash *orca = new OrcaFlash(this);
+    OrcaFlash *orca = new OrcaFlash();
     spimHub().setCamera(orca);
 }
 
