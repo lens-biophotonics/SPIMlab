@@ -5,7 +5,7 @@ using namespace NI;
 
 static Logger *logger = getLogger("NI");
 
-NIAbstractTask::NIAbstractTask() : QObject()
+NIAbstractTask::NIAbstractTask(QObject *parent) : QObject(parent)
 {
 }
 

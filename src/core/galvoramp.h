@@ -10,7 +10,7 @@ using namespace NI;
 class GalvoRamp : public NIAbstractTask
 {
 public:
-    GalvoRamp();
+    GalvoRamp(QObject *parent);
     ~GalvoRamp();
 
     void setPhysicalChannels(QString channel);

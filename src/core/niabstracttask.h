@@ -49,7 +49,7 @@ class NIAbstractTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit NIAbstractTask();
+    explicit NIAbstractTask(QObject *parent = nullptr);
     virtual ~NIAbstractTask();
 
 signals:

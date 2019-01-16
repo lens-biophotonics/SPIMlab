@@ -7,7 +7,7 @@ static Logger *logger = getLogger("CameraTrigger");
 
 #define CHANNEL_NAME "cameraTriggerCOPulseChan"
 
-CameraTrigger::CameraTrigger() : NIAbstractTask()
+CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
 {
     freq = 50;
     dutyCycle = 0.1;

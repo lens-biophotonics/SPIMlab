@@ -5,7 +5,7 @@ using namespace NI;
 
 #define CHANNEL_NAME "galvoRampAOChan"
 
-GalvoRamp::GalvoRamp() : NIAbstractTask()
+GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
 {
 }
 
