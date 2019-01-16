@@ -94,17 +94,16 @@ bool GalvoRamp::clearTasks()
     return true;
 }
 
-void GalvoRamp::createWaveform(uint nSamples, uint nRamp, double offset, double amplitude,
-                               int delay,
-                               double rate)
+void GalvoRamp::createWaveform(int nSamples, int nRamp, double offset,
+                               double amplitude, int delay, double rate)
 {
     this->rate = rate;
     QVector<double> temp(nSamples, 0);
     double halfAmplitude = 0.5 * amplitude;
-    uint i = 0;
+    int i = 0;
     for (; i < nRamp; ++i)
         temp[i] = offset - halfAmplitude + amplitude * i / nRamp;
-    uint nRamp2 = nSamples - nRamp;
+    int nRamp2 = nSamples - nRamp;
     for (; i < nSamples; ++i)
         temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
 

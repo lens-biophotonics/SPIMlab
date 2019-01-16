@@ -14,7 +14,7 @@ public:
     ~GalvoRamp();
 
     bool initializeTasks(QString physicalChannel, QString triggerSource);
-    void createWaveform(uint nSamples, uint rampSamples, double offset,
+    void createWaveform(int nSamples, int rampSamples, double offset,
                         double amplitude, int delay, double rate);
 
     bool start();
