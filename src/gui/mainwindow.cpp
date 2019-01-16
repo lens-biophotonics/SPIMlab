@@ -5,6 +5,7 @@
 #include <QToolBar>
 #include <QLabel>
 #include <QStatusBar>
+#include <QSettings>
 
 #include "core/spimhub.h"
 #include "core/statemachine.h"
@@ -20,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setupUi();
 
     setupDevices();
+
+    loadSettings();
 
     QMetaObject::connectSlotsByName(this);
 }
@@ -77,6 +80,26 @@ void MainWindow::setupDevices()
     spimHub().setCamera(orca);
 }
 
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MainWindow");
+    settings.setValue("mainWindowGeometry", saveGeometry());
+    settings.setValue("mainWindowState", saveState());
+    settings.endGroup();
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("MainWindow");
+    restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+    restoreState(settings.value("mainWindowState").toByteArray());
+    settings.endGroup();
+}
+
 void MainWindow::on_aboutAction_triggered()
 {
     QMessageBox msgBox;
@@ -112,5 +135,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
     }
 #endif
 
+    saveSettings();
     QMainWindow::closeEvent(e);
 }

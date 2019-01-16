@@ -1,4 +1,5 @@
 #include <QHBoxLayout>
+#include <QSettings>
 
 #include "centralwidget.h"
 #include "cameradisplay.h"
@@ -10,11 +11,17 @@
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi();
+    loadSettings();
+}
+
+CentralWidget::~CentralWidget()
+{
+    saveSettings();
 }
 
 void CentralWidget::setupUi()
 {
-    QTabWidget *tabWidget = new QTabWidget();
+    tabWidget = new QTabWidget();
 
     LogWidget *logWidget = new LogWidget();
     CameraDisplay *cameraDisplay = new CameraDisplay();
@@ -30,4 +37,22 @@ void CentralWidget::setupUi()
     layout->addWidget(tabWidget);
     layout->addWidget(controlWidget);
     setLayout(layout);
+}
+
+void CentralWidget::saveSettings()
+{
+    QSettings settings;
+
+    settings.beginGroup("CentralWidget");
+    settings.setValue("tabWidget_currentIndex", tabWidget->currentIndex());
+    settings.endGroup();
+}
+
+void CentralWidget::loadSettings()
+{
+    QSettings settings;
+    settings.beginGroup("CentralWidget");
+    tabWidget->setCurrentIndex(
+        settings.value("tabWidget_currentIndex").toInt());
+    settings.endGroup();
 }
