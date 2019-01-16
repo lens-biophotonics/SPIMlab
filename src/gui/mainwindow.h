@@ -16,7 +16,6 @@ public:
 
 private slots:
     void on_aboutAction_triggered();
-    void on_quitAction_triggered();
 
 private:
     void setupUi();

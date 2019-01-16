@@ -34,6 +34,7 @@ void MainWindow::setupUi()
     quitAction->setText("&Quit");
     quitAction->setObjectName("quitAction");
     quitAction->setShortcut(QKeySequence("Ctrl+Q"));
+    connect(quitAction, &QAction::triggered, this, &MainWindow::close);
 
     QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
@@ -97,11 +98,6 @@ void MainWindow::on_aboutAction_triggered()
     msgBox.exec();
 }
 
-void MainWindow::on_quitAction_triggered()
-{
-    closeEvent();
-}
-
 void MainWindow::closeEvent(QCloseEvent *e)
 {
 #ifdef WITH_HARDWARE
@@ -111,12 +107,10 @@ void MainWindow::closeEvent(QCloseEvent *e)
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if (ret != QMessageBox::Yes) {
-        if (e)
-            e->ignore();
+        e->ignore();
         return;
     }
-#else
-    Q_UNUSED(e)
 #endif
-    qApp->quit();
+
+    QMainWindow::closeEvent(e);
 }
