@@ -70,7 +70,7 @@ protected:
 
 private:
     virtual bool initializeTask() = 0;
-    char errBuff[2048];
+    char *errBuff;
 };
 
 #endif // NIABSTRACTTASK_H

@@ -7,11 +7,12 @@ static Logger *logger = getLogger("NI");
 
 NIAbstractTask::NIAbstractTask(QObject *parent) : QObject(parent)
 {
+    errBuff = new char[2048];
 }
 
 NIAbstractTask::~NIAbstractTask()
 {
-    free(errBuff);
+    delete[] errBuff;
 }
 
 bool NIAbstractTask::start()
