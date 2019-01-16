@@ -3,6 +3,7 @@
 #include "centralwidget.h"
 #include "cameradisplay.h"
 #include "logwidget.h"
+#include "settingswidget.h"
 #include "controlwidget.h"
 
 
@@ -17,8 +18,10 @@ void CentralWidget::setupUi()
 
     LogWidget *logWidget = new LogWidget();
     CameraDisplay *cameraDisplay = new CameraDisplay();
+    SettingsWidget *settingsWidget = new SettingsWidget();
 
     tabWidget->addTab(cameraDisplay, "Camera display");
+    tabWidget->addTab(settingsWidget, "Settings");
     tabWidget->addTab(logWidget, "Messages");
 
     ControlWidget *controlWidget = new ControlWidget();

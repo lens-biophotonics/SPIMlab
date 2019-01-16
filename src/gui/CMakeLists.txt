@@ -15,6 +15,7 @@ set(SPIMlab_SRCS
     version.cpp
     logwidget.cpp
     controlwidget.cpp
+    settingswidget.cpp
     centralwidget.cpp
     cameraplot.cpp
     cameradisplay.cpp
