@@ -57,6 +57,7 @@ void SPIMHub::startAcquisition()
     connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, SIGNAL(finished()), this, SLOT(stop()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
     orca->setExposureTime(0.2);
     orca->setNFramesInBuffer(100);
@@ -70,7 +71,6 @@ void SPIMHub::stop()
 {
     if (thread && thread->isRunning()) {
         thread->requestInterruption();
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
         thread = nullptr;
     }
     orca->stop();
