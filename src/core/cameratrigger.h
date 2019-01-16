@@ -1,17 +1,16 @@
 #ifndef CAMERATRIGGER_H
 #define CAMERATRIGGER_H
 
-#include "nidevice.h"
+#include "niabstracttask.h"
 
-using namespace NI;
-
-class CameraTrigger : public NIDevice
+class CameraTrigger : public NIAbstractTask
 {
 public:
     CameraTrigger();
     ~CameraTrigger();
 
-    bool initializeTasks(QString physicalChannel);
+    void setPhysicalChannel(QString channel);
+    bool initializeTask();
 
     void setFrequency(double Hz);
     double getFrequency();
@@ -24,20 +23,12 @@ public:
 
     void setTriggerTerm(QString term);
 
-    bool start();
-    bool stop();
-
 private:
-#ifdef NIDAQMX_HEADERS
-    TaskHandle task;
-#endif
     QString physicalChannel;
     QString triggerTerm;
-    float64 freq;
-    float64 dutyCycle;
+    NI::float64 freq;
+    NI::float64 dutyCycle;
     bool isFreeRun;
-
-    bool clearTasks();
 };
 
 #endif // CAMERATRIGGER_H

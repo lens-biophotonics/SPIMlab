@@ -6,22 +6,21 @@
  * \ingroup Hardware
  */
 
-#ifndef NIDEVICE_H
-#define NIDEVICE_H
+#ifndef NIABSTRACTTASK_H
+#define NIABSTRACTTASK_H
 
 /**
  * \brief Wraps the call to the given function around some logic for error
  * checking
  *
- * If an error has occurred during the function call, then
- * NIDevice::lastOpWasSuccessful is set to true, false otherwise. Additionally,
- * the NIDevice::onError() slot is called.
+ * If an error has occurred during the function call, the
+ * NIAbstractTask::onError() slot is called.
  *
  * \param functionCall The function to be called
  */
 #define DAQmxErrChk(functionCall) { \
         if (DAQmxFailed(functionCall)) { \
-            NIDevice::onError(); \
+            onError(); \
         } \
 }
 
@@ -31,7 +30,7 @@
  */
 #define DAQmxErrChkRetFalse(functionCall) { \
         if (DAQmxFailed(functionCall)) { \
-            NIDevice::onError(); \
+            onError(); \
             return false; \
         } \
 }
@@ -41,31 +40,37 @@
 #include "natinst.h"
 
 /**
- * @brief The NIDevice class provides common functions for operations with
- * National Instruments drivers.
+ * @brief The NIAbstractTask class is an abstract wrapper for a DAQmx Task.
  *
  * \ingroup NationalInstruments
  */
 
-class NIDevice : public QObject
+class NIAbstractTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit NIDevice();
-    virtual ~NIDevice();
+    explicit NIAbstractTask();
+    virtual ~NIAbstractTask();
 
 signals:
-    void errorOccurred(QString error);
+    void error();
 
 public slots:
+    bool start();
+    bool stop();
+    bool clear();
 
 protected slots:
     void onError();
 
 protected:
-    QStringList errorList;
-    bool lastOpWasSuccessful;
+#ifdef NIDAQMX_HEADERS
+    NI::TaskHandle task;
+#endif
+
+private:
+    virtual bool initializeTask() = 0;
     char errBuff[2048];
 };
 
-#endif // NIDEVICE_H
+#endif // NIABSTRACTTASK_H

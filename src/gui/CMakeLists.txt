@@ -1,5 +1,6 @@
 find_package(Qt5Widgets REQUIRED)
 find_package(Qwt REQUIRED)
+find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
 
 include_directories(

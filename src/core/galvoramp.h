@@ -3,30 +3,31 @@
 
 #include <QVector>
 
-#include "nidevice.h"
+#include "niabstracttask.h"
 
 using namespace NI;
 
-class GalvoRamp : public NIDevice
+class GalvoRamp : public NIAbstractTask
 {
 public:
     GalvoRamp();
     ~GalvoRamp();
 
-    bool initializeTasks(QString physicalChannel, QString triggerSource);
+    void setPhysicalChannels(QString channel);
+    void setTriggerSource(QString source);
+
     void createWaveform(int nSamples, int rampSamples, double offset,
                         double amplitude, int delay, double rate);
 
-    bool start();
-    bool stop();
+protected:
+    virtual bool initializeTask();
 
 private:
-    TaskHandle task;
     double rate;
-    QString physicalChannel, triggerTerm;
+    QString physicalChannel;
+    QString triggerTerm;
+    QString triggerSource;
     QVector<double> waveform;
-
-    bool clearTasks();
 };
 
 #endif // GALVORAMP_H

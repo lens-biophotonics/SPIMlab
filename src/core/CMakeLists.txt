@@ -17,7 +17,7 @@ set(SRC
     galvoramp.cpp
     logger.cpp
     logmanager.cpp
-    nidevice.cpp
+    niabstracttask.cpp
     orcaflash.cpp
     savestackworker.cpp
     spimhub.cpp

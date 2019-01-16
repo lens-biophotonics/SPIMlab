@@ -1,23 +1,31 @@
 #include <iostream>
 #include "galvoramp.h"
 
-using namespace std;
+using namespace NI;
 
 #define CHANNEL_NAME "galvoRampAOChan"
 
-GalvoRamp::GalvoRamp() : NIDevice()
+GalvoRamp::GalvoRamp() : NIAbstractTask()
 {
 }
 
 GalvoRamp::~GalvoRamp()
 {
-    clearTasks();
+    clear();
 }
 
-bool GalvoRamp::initializeTasks(QString physicalChannel, QString triggerSource)
+void GalvoRamp::setPhysicalChannels(QString channel)
 {
-    clearTasks();
-    this->physicalChannel = physicalChannel;
+    physicalChannel = channel;
+}
+
+void GalvoRamp::setTriggerSource(QString source)
+{
+    triggerSource = source;
+}
+
+bool GalvoRamp::initializeTask()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxCreateTask("galvoRampAO", &task));
 
@@ -39,15 +47,7 @@ bool GalvoRamp::initializeTasks(QString physicalChannel, QString triggerSource)
                             )
                         );
     DAQmxErrChkRetFalse(DAQmxSetStartTrigRetriggerable(task, true));
-#else
-    Q_UNUSED(triggerSource)
-#endif
-    return true;
-}
 
-bool GalvoRamp::start()
-{
-#ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(
         DAQmxCfgSampClkTiming(
             task,
@@ -70,26 +70,6 @@ bool GalvoRamp::start()
             NULL  // reserved
             )
         );
-
-    DAQmxErrChkRetFalse(DAQmxStartTask(task));
-#endif
-    return true;
-}
-
-bool GalvoRamp::stop()
-{
-#ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxStopTask(task));
-#endif
-    return true;
-}
-
-bool GalvoRamp::clearTasks()
-{
-#ifdef WITH_HARDWARE
-    if (task)
-        DAQmxErrChkRetFalse(DAQmxClearTask(task));
-
 #endif
     return true;
 }

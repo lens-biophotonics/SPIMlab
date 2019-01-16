@@ -1,11 +1,13 @@
 #include "cameratrigger.h"
 #include "logmanager.h"
 
+using namespace NI;
+
 static Logger *logger = getLogger("CameraTrigger");
 
 #define CHANNEL_NAME "cameraTriggerCOPulseChan"
 
-CameraTrigger::CameraTrigger() : NIDevice()
+CameraTrigger::CameraTrigger() : NIAbstractTask()
 {
     freq = 50;
     dutyCycle = 0.1;
@@ -13,13 +15,16 @@ CameraTrigger::CameraTrigger() : NIDevice()
 
 CameraTrigger::~CameraTrigger()
 {
-    clearTasks();
+    clear();
 }
 
-bool CameraTrigger::initializeTasks(QString physicalChannel)
+void CameraTrigger::setPhysicalChannel(QString channel)
 {
-    clearTasks();
-    this->physicalChannel = physicalChannel;
+    this->physicalChannel = channel;
+}
+
+bool CameraTrigger::initializeTask()
+{
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxCreateTask("cameraTriggerCOPulse", &task));
 
@@ -38,6 +43,15 @@ bool CameraTrigger::initializeTasks(QString physicalChannel)
 
     DAQmxErrChkRetFalse(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
+
+    DAQmxErrChkRetFalse(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
+    if (isFreeRun) {
+        DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
+    } else {
+        DAQmxErrChkRetFalse(
+            DAQmxCfgDigEdgeStartTrig(
+                task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
+    }
 #endif
 
     logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
@@ -78,8 +92,7 @@ QString CameraTrigger::getTerm()
 #ifdef WITH_HARDWARE
     char buff[100];
     DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME, buff, 100));
-    if (!lastOpWasSuccessful)
-        return QString(buff);
+    return QString(buff);
 
 #endif
     return QString();
@@ -91,40 +104,6 @@ bool CameraTrigger::setTerm(QString term)
     DAQmxErrChkRetFalse(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
 #else
     Q_UNUSED(term);
-#endif
-    return true;
-}
-
-bool CameraTrigger::start()
-{
-#ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
-    if (isFreeRun) {
-        DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
-    } else {
-        DAQmxErrChkRetFalse(
-            DAQmxCfgDigEdgeStartTrig(
-                task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
-    }
-    DAQmxErrChkRetFalse(DAQmxStartTask(task));
-#endif
-    return true;
-}
-
-bool CameraTrigger::stop()
-{
-#ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxStopTask(task));
-#endif
-    return true;
-}
-
-bool CameraTrigger::clearTasks()
-{
-#ifdef WITH_HARDWARE
-    if (task)
-        DAQmxErrChkRetFalse(DAQmxClearTask(task));
-
 #endif
     return true;
 }
