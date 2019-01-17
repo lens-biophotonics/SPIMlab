@@ -14,7 +14,7 @@ GalvoRamp::~GalvoRamp()
     clear();
 }
 
-void GalvoRamp::setPhysicalChannels(QString channel)
+void GalvoRamp::setPhysicalChannel(QString channel)
 {
     physicalChannel = channel;
     clear();

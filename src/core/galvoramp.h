@@ -13,7 +13,7 @@ public:
     GalvoRamp(QObject *parent);
     ~GalvoRamp();
 
-    void setPhysicalChannels(QString channel);
+    void setPhysicalChannel(QString channel);
     void setTriggerSource(QString source);
 
     void setCameraParams(int nSamples, int nRamp, double rate);
