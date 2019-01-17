@@ -14,7 +14,7 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 void ControlWidget::setupUi()
 {
     QPushButton *initPushButton = new QPushButton("Initialize");
-    initPushButton->setObjectName("initPushButton");
+    connect(initPushButton, &QPushButton::clicked, &spim(), &SPIM::initialize);
 
     QPushButton *startCapturePushButton = new QPushButton("Start capture");
     startCapturePushButton->setObjectName("startCapturePushButton");
@@ -47,11 +47,6 @@ void ControlWidget::setupUi()
     setLayout(layout);
 
     QMetaObject::connectSlotsByName(this);
-}
-
-void ControlWidget::on_initPushButton_clicked()
-{
-    spim().initialize();
 }
 
 void ControlWidget::on_startCapturePushButton_clicked()

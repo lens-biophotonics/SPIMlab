@@ -22,6 +22,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     loadSettings();
 
+    QThread *thread = new QThread();
+    spim().moveToThread(thread);
+    thread->start();
+
     QMetaObject::connectSlotsByName(this);
 }
 

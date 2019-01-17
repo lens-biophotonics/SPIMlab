@@ -14,7 +14,6 @@ signals:
 public slots:
 
 private slots:
-    void on_initPushButton_clicked();
     void on_startCapturePushButton_clicked();
     void on_stopCapturePushButton_clicked();
 

@@ -16,9 +16,6 @@ public:
     SPIM(QObject *parent=nullptr);
     virtual ~SPIM();
 
-    void initialize();
-    void uninitialize();
-
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);
 
@@ -33,6 +30,8 @@ public slots:
     void startFreeRun();
     void startAcquisition();
     void stop();
+    void initialize();
+    void uninitialize();
 
 private:
     OrcaFlash *orca = nullptr;
