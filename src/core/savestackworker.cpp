@@ -33,12 +33,8 @@ void SaveStackWorker::saveToFile()
         }
         int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
 #ifdef WITH_HARDWARE
-        if (!orca->wait()) {
-            continue;
-        }
-        if (!orca->lockData(&buf, &rowBytes, frame)) {
-            continue;
-        }
+        orca->wait();
+        orca->lockData(&buf, &rowBytes, frame);
 #else
         orca->copyFrame(buf, n, frame);
 #endif

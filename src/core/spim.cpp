@@ -20,7 +20,7 @@ void SPIM::initialize()
 {
     init_dcam();
     orca->open(0);
-    orca->setTriggerMode(OrcaFlash::TRIGMODE_START);
+    orca->setGetTriggerMode(OrcaFlash::TRIGMODE_START);
 
     cameraTrigger = new CameraTrigger(this);
     galvoRamp = new GalvoRamp(this);

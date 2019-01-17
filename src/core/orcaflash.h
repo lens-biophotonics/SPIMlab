@@ -44,30 +44,30 @@ public:
 
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
-    bool open(int index);
-    bool close();
+    void open(int index);
+    void close();
 
     void setNFramesInBuffer(uint count);
     uint nFramesInBuffer();
 
-    bool startCapture();
-    bool stop();
+    void startCapture();
+    void stop();
 
-    bool copyFrame(void *buf, size_t n, int32_t frame);
-    bool copyLastFrame(void *buf, size_t n);
-    bool wait(DCAM::_DWORD timeout = 1000,
+    void copyFrame(void *buf, size_t n, int32_t frame);
+    void copyLastFrame(void *buf, size_t n);
+    void wait(DCAM::_DWORD timeout = 1000,
               DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
-    bool lockData(void **pTop, int32_t *pRowbytes, int32_t frame);
-    bool unlockData();
+    void lockData(void **pTop, int32_t *pRowbytes, int32_t frame);
+    void unlockData();
 
     double getExposureTime();
     double setGetExposureTime(double sec);
 
     ORCA_TRIGGER_MODE getTriggerMode();
-    bool setTriggerMode(ORCA_TRIGGER_MODE mode);
+    ORCA_TRIGGER_MODE setGetTriggerMode(ORCA_TRIGGER_MODE mode);
 
     ORCA_TRIGGER_POLARITY getTriggerPolarity();
-    bool setTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
+    ORCA_TRIGGER_POLARITY setGetTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
 
     ORCA_STATUS getStatus();
     QString getStatusString();
@@ -76,7 +76,7 @@ public:
 
     QString getLastError();
 
-    bool setGet(DCAM::_DCAMIDPROP property, double value, double *get);
+    double setGet(DCAM::_DCAMIDPROP property, double value);
     double getPropertyValue(DCAM::_DCAMIDPROP property);
     double getLineInterval();
     int nOfLines();
@@ -98,7 +98,7 @@ private:
     uint _nFramesInBuffer;
     bool _isOpen;
 
-    void logLastError(QString label = "");
+    QString logLastError(QString label = "");
 };
 
 #endif // ORCAFLASH_H
