@@ -28,10 +28,12 @@ protected:
 private:
     QString physicalChannel;
     QString triggerTerm;
+    QString term;
     NI::float64 freq;
     bool isFreeRun;
 
     void configureTriggering();
+    void configureTerm();
 };
 
 #endif // CAMERATRIGGER_H

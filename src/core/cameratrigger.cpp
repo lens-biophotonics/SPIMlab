@@ -45,8 +45,8 @@ void CameraTrigger::initializeTask_impl()
     DAQmxErrChk(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
 
-
     configureTriggering();
+    configureTerm();
 #endif
 
     logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
@@ -65,6 +65,11 @@ void CameraTrigger::configureTriggering()
                 task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
     }
 #endif
+}
+
+void CameraTrigger::configureTerm()
+{
+    DAQmxErrChk(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
 }
 
 void CameraTrigger::setFrequency(double Hz)
@@ -119,9 +124,8 @@ QString CameraTrigger::getTerm()
 
 void CameraTrigger::setTerm(QString term)
 {
-#ifdef WITH_HARDWARE
-    DAQmxErrChk(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
-#else
-    Q_UNUSED(term);
-#endif
+    this->term = term;
+    if (isInitialized()) {
+        configureTerm();
+    }
 }
