@@ -6,11 +6,11 @@ using namespace NI;
 static Logger *logger = getLogger("CameraTrigger");
 
 #define CHANNEL_NAME "cameraTriggerCOPulseChan"
+#define DUTY_CYCLE 0.1
 
 CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
 {
     freq = 50;
-    dutyCycle = 0.1;
 }
 
 CameraTrigger::~CameraTrigger()
@@ -20,10 +20,11 @@ CameraTrigger::~CameraTrigger()
 
 void CameraTrigger::setPhysicalChannel(QString channel)
 {
-    this->physicalChannel = channel;
+    physicalChannel = channel;
+    clear();
 }
 
-bool CameraTrigger::initializeTask()
+bool CameraTrigger::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxCreateTask("cameraTriggerCOPulse", &task));
@@ -37,20 +38,15 @@ bool CameraTrigger::initializeTask()
             DAQmx_Val_Low,  // idleState
             0,  // initialDelay
             freq,
-            dutyCycle
+            DUTY_CYCLE
             )
         );
 
     DAQmxErrChkRetFalse(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
 
-    DAQmxErrChkRetFalse(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
-    if (isFreeRun) {
-        DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
-    } else {
-        DAQmxErrChkRetFalse(
-            DAQmxCfgDigEdgeStartTrig(
-                task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
+    if (!configureTriggering()) {
+        return false;
     }
 #endif
 
@@ -59,9 +55,29 @@ bool CameraTrigger::initializeTask()
     return true;
 }
 
+
+bool CameraTrigger::configureTriggering()
+{
+#ifdef WITH_HARDWARE
+    if (isFreeRun) {
+        DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
+    } else {
+        DAQmxErrChkRetFalse(
+            DAQmxCfgDigEdgeStartTrig(
+                task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
+    }
+#endif
+    return true;
+}
+
 void CameraTrigger::setFrequency(double Hz)
 {
     freq = Hz;
+#ifdef WITH_HARDWARE
+    if (isInitialized()) {
+        DAQmxErrChk(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
+    }
+#endif
 }
 
 double CameraTrigger::getFrequency()
@@ -75,11 +91,17 @@ double CameraTrigger::getFrequency()
 void CameraTrigger::setTriggerTerm(QString term)
 {
     triggerTerm = term;
+    if (isInitialized()) {
+        configureTriggering();
+    }
 }
 
 void CameraTrigger::setFreeRunEnabled(bool enable)
 {
     isFreeRun = enable;
+    if (isInitialized()) {
+        configureTriggering();
+    }
 }
 
 bool CameraTrigger::isFreeRunEnabled()

@@ -52,10 +52,13 @@ public:
     explicit NIAbstractTask(QObject *parent = nullptr);
     virtual ~NIAbstractTask();
 
+    bool isInitialized();
+
 signals:
     void error();
 
 public slots:
+    bool initializeTask();
     bool start();
     bool stop();
     bool clear();
@@ -69,8 +72,9 @@ protected:
 #endif
 
 private:
-    virtual bool initializeTask() = 0;
+    virtual bool initializeTask_impl() = 0;
     char *errBuff;
+    bool initialized = false;
 };
 
 #endif // NIABSTRACTTASK_H

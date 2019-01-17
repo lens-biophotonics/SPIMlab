@@ -16,18 +16,30 @@ public:
     void setPhysicalChannels(QString channel);
     void setTriggerSource(QString source);
 
-    void createWaveform(int nSamples, int rampSamples, double offset,
-                        double amplitude, int delay, double rate);
+    void setCameraParams(int nSamples, int nRamp, double rate);
+
+    void setupWaveform(double offset, double amplitude, int delay);
 
 protected:
-    virtual bool initializeTask();
+    virtual bool initializeTask_impl();
 
 private:
     double rate;
+    int nSamples;
+    int nRamp;
+
     QString physicalChannel;
     QString triggerTerm;
     QString triggerSource;
     QVector<double> waveform;
+
+    double offset;
+    double amplitude;
+    int delay;
+
+    bool configureTiming();
+    bool write();
+    void computeWaveform();
 };
 
 #endif // GALVORAMP_H

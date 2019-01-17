@@ -15,10 +15,25 @@ NIAbstractTask::~NIAbstractTask()
     delete[] errBuff;
 }
 
-bool NIAbstractTask::start()
+bool NIAbstractTask::isInitialized()
+{
+    return initialized;
+}
+
+bool NIAbstractTask::initializeTask()
 {
     clear();
-    initializeTask();
+    return initializeTask_impl();
+}
+
+bool NIAbstractTask::start()
+{
+    if (!initialized) {
+        if (!initializeTask()) {
+            return false;
+        }
+        initialized = true;
+    }
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxStartTask(task));
 #endif
@@ -40,6 +55,7 @@ bool NIAbstractTask::clear()
         DAQmxErrChkRetFalse(DAQmxClearTask(task));
 
 #endif
+    initialized = false;
     return true;
 }
 

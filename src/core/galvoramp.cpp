@@ -17,14 +17,41 @@ GalvoRamp::~GalvoRamp()
 void GalvoRamp::setPhysicalChannels(QString channel)
 {
     physicalChannel = channel;
+    clear();
 }
 
 void GalvoRamp::setTriggerSource(QString source)
 {
     triggerSource = source;
+    clear();
 }
 
-bool GalvoRamp::initializeTask()
+void GalvoRamp::setCameraParams(int nSamples, int nRamp, double rate)
+{
+    this->nSamples = nSamples;
+    this->nRamp = nRamp;
+    this->rate = rate;
+
+    if (isInitialized()) {
+        computeWaveform();
+        configureTiming();
+        write();
+    }
+}
+
+void GalvoRamp::setupWaveform(double offset, double amplitude, int delay)
+{
+    this->offset = offset;
+    this->amplitude = amplitude;
+    this->delay = delay;
+
+    if (isInitialized()) {
+        computeWaveform();
+        write();
+    }
+}
+
+bool GalvoRamp::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(DAQmxCreateTask("galvoRampAO", &task));
@@ -48,6 +75,21 @@ bool GalvoRamp::initializeTask()
                         );
     DAQmxErrChkRetFalse(DAQmxSetStartTrigRetriggerable(task, true));
 
+    if (!configureTiming()) {
+        return false;
+    }
+
+    if (!write()) {
+        return false;
+    }
+
+#endif
+    return true;
+}
+
+bool GalvoRamp::configureTiming()
+{
+#ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(
         DAQmxCfgSampClkTiming(
             task,
@@ -55,9 +97,16 @@ bool GalvoRamp::initializeTask()
             rate,  // samples per second per channel
             DAQmx_Val_Rising,
             DAQmx_Val_FiniteSamps,
-            waveform.size()
+            static_cast<uInt64>(nSamples)
             )
         );
+#endif
+    return true;
+}
+
+bool GalvoRamp::write()
+{
+#ifdef WITH_HARDWARE
     DAQmxErrChkRetFalse(
         DAQmxWriteAnalogF64(
             task,
@@ -74,10 +123,8 @@ bool GalvoRamp::initializeTask()
     return true;
 }
 
-void GalvoRamp::createWaveform(int nSamples, int nRamp, double offset,
-                               double amplitude, int delay, double rate)
+void GalvoRamp::computeWaveform()
 {
-    this->rate = rate;
     QVector<double> temp(nSamples, 0);
     double halfAmplitude = 0.5 * amplitude;
     int i = 0;

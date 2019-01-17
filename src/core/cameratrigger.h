@@ -10,7 +10,7 @@ public:
     ~CameraTrigger();
 
     void setPhysicalChannel(QString channel);
-    bool initializeTask();
+    bool initializeTask_impl();
 
     void setFrequency(double Hz);
     double getFrequency();
@@ -27,8 +27,9 @@ private:
     QString physicalChannel;
     QString triggerTerm;
     NI::float64 freq;
-    NI::float64 dutyCycle;
     bool isFreeRun;
+
+    bool configureTriggering();
 };
 
 #endif // CAMERATRIGGER_H
