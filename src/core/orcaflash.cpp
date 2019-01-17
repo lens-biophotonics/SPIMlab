@@ -118,6 +118,34 @@ bool OrcaFlash::setGet(DCAM::_DCAMIDPROP property, double value, double *get)
     return true;
 }
 
+double OrcaFlash::getPropertyValue(DCAM::_DCAMIDPROP property)
+{
+    double ret = 0;
+#ifdef WITH_HARDWARE
+    if (!dcam_getpropertyvalue(h, static_cast<int32>(property), &ret)) {
+        logLastError("dcam_getpropertyvalue");
+    };
+#else
+    Q_UNUSED(property)
+#endif
+    return ret;
+}
+
+double OrcaFlash::getFrameRate()
+{
+    return getPropertyValue(DCAM_IDPROP_INTERNALFRAMERATE);
+}
+
+double OrcaFlash::getLineInterval()
+{
+    return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);
+}
+
+int OrcaFlash::nOfLines()
+{
+    return 2048;
+}
+
 void OrcaFlash::logLastError(QString label)
 {
     if (!label.isEmpty())

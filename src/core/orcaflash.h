@@ -77,6 +77,10 @@ public:
     QString getLastError();
 
     bool setGet(DCAM::_DCAMIDPROP property, double value, double *get);
+    double getPropertyValue(DCAM::_DCAMIDPROP property);
+    double getFrameRate();
+    double getLineInterval();
+    int nOfLines();
 
 signals:
 
