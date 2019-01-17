@@ -53,6 +53,7 @@ public:
     virtual ~NIAbstractTask();
 
     bool isInitialized();
+    bool isTaskDone();
 
 signals:
     void error();

@@ -20,6 +20,17 @@ bool NIAbstractTask::isInitialized()
     return initialized;
 }
 
+bool NIAbstractTask::isTaskDone()
+{
+#ifdef WITH_HARDWARE
+    bool32 done;
+    DAQmxErrChk(DAQmxIsTaskDone(task, &done));
+    return static_cast<bool>(done);
+#else
+    return true;
+#endif
+}
+
 bool NIAbstractTask::initializeTask()
 {
     clear();
