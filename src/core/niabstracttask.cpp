@@ -19,7 +19,7 @@ NIAbstractTask::~NIAbstractTask()
 
 bool NIAbstractTask::isInitialized()
 {
-    return initialized;
+    return task != nullptr;
 }
 
 bool NIAbstractTask::isTaskDone()
@@ -41,9 +41,8 @@ void NIAbstractTask::initializeTask()
 
 void NIAbstractTask::start()
 {
-    if (!initialized) {
+    if (!task) {
         initializeTask();
-        initialized = true;
     }
 #ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxStartTask(task));
@@ -59,12 +58,11 @@ void NIAbstractTask::stop()
 
 void NIAbstractTask::clear()
 {
-#ifdef WITH_HARDWARE
-    if (task)
-        DAQmxErrChk(DAQmxClearTask(task));
-
-#endif
-    initialized = false;
+    if (!task) {
+        return;
+    }
+    DAQmxErrChk(DAQmxClearTask(task));
+    task = nullptr;
 }
 
 /**

@@ -56,14 +56,13 @@ public slots:
 protected:
     [[ noreturn ]] void onError();
 #ifdef NIDAQMX_HEADERS
-    NI::TaskHandle task;
+    NI::TaskHandle task = nullptr;
 #endif
 
 private:
     virtual void initializeTask_impl() = 0;
 
     char *errBuff;
-    bool initialized = false;
 };
 
 #endif // NIABSTRACTTASK_H
