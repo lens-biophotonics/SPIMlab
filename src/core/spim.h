@@ -35,10 +35,11 @@ public slots:
 
 private:
     OrcaFlash *orca = nullptr;
-    QThread *thread;
-    SaveStackWorker *worker;
+    QThread *thread = nullptr;
+    SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
     GalvoRamp *galvoRamp = nullptr;
+
     void setExposureTime(double expTime);
 };
 

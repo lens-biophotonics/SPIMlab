@@ -9,8 +9,6 @@ static Logger *logger = getLogger("SPIMHub");
 
 SPIM::SPIM()
 {
-    thread = nullptr;
-    worker = nullptr;
 }
 
 SPIM::~SPIM()
