@@ -5,9 +5,11 @@ using namespace NI;
 
 static Logger *logger = getLogger("NI");
 
+#define ERRBUF_SIZE 2048
+
 NIAbstractTask::NIAbstractTask(QObject *parent) : QObject(parent)
 {
-    errBuff = new char[2048];
+    errBuff = new char[ERRBUF_SIZE];
 }
 
 NIAbstractTask::~NIAbstractTask()
@@ -73,7 +75,7 @@ void NIAbstractTask::clear()
 void NIAbstractTask::onError()
 {
 #ifdef WITH_HARDWARE
-    DAQmxGetExtendedErrorInfo(errBuff, 2048);
+    DAQmxGetExtendedErrorInfo(errBuff, ERRBUF_SIZE);
 #endif
     logger->error(errBuff);
     throw std::runtime_error(errBuff);
