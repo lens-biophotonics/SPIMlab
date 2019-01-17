@@ -19,7 +19,6 @@ private slots:
 
 private:
     void setupUi();
-    void setupDevices();
     void saveSettings();
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);

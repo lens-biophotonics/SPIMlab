@@ -20,8 +20,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setupUi();
 
-    setupDevices();
-
     loadSettings();
 
     QMetaObject::connectSlotsByName(this);
@@ -72,12 +70,6 @@ void MainWindow::setupUi()
 
     s = stateMachine().getState(STATE_CAPTURING);
     s->assignProperty(statusLabel, "text", "Capturing");
-}
-
-void MainWindow::setupDevices()
-{
-    OrcaFlash *orca = new OrcaFlash();
-    spim().setCamera(orca);
 }
 
 void MainWindow::saveSettings()
@@ -136,5 +128,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
 #endif
 
     saveSettings();
+    spim().uninitialize();
     QMainWindow::closeEvent(e);
 }

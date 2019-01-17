@@ -17,6 +17,7 @@ public:
     virtual ~SPIM();
 
     void initialize();
+    void uninitialize();
 
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);

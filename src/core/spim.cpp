@@ -13,12 +13,13 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
 
 SPIM::~SPIM()
 {
-    uninit_dcam();
 }
 
 void SPIM::initialize()
 {
     init_dcam();
+
+    orca = new OrcaFlash();
     orca->open(0);
     orca->setGetTriggerMode(OrcaFlash::TRIGMODE_START);
 
@@ -28,15 +29,15 @@ void SPIM::initialize()
     emit initialized();
 }
 
+void SPIM::uninitialize()
+{
+    delete orca;
+    uninit_dcam();
+}
+
 OrcaFlash *SPIM::camera()
 {
     return orca;
-}
-
-void SPIM::setCamera(OrcaFlash *camera)
-{
-    orca = camera;
-    orca->setParent(this);
 }
 
 void SPIM::setupCameraTrigger(QString COPhysicalChan, QString terminal)
