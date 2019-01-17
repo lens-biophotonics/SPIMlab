@@ -64,7 +64,7 @@ bool GalvoRamp::initializeTask_impl()
             -10.0,  // minVal
             10.0,  // maxVal
             DAQmx_Val_Volts,  // units
-            NULL  // customScaleName
+            nullptr // customScaleName
             )
         );
     DAQmxErrChkRetFalse(DAQmxCfgDigEdgeStartTrig(
@@ -94,7 +94,7 @@ bool GalvoRamp::configureTiming()
     DAQmxErrChkRetFalse(
         DAQmxCfgSampClkTiming(
             task,
-            NULL,  // clock source (onboard if NULL)
+            nullptr,  // clock source (onboard if NULL)
             rate,  // samples per second per channel
             DAQmx_Val_Rising,
             DAQmx_Val_FiniteSamps,
@@ -116,8 +116,8 @@ bool GalvoRamp::write()
             10,  // timeout in seconds
             DAQmx_Val_GroupByChannel,
             waveform.data(),
-            NULL,
-            NULL  // reserved
+            nullptr,
+            nullptr  // reserved
             )
         );
 #endif
