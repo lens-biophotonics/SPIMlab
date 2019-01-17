@@ -2,7 +2,7 @@
 #include <QtDebug>
 #include <sys/types.h>
 
-#include "core/spimhub.h"
+#include "core/spim.h"
 #include "cameradisplay.h"
 
 CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
@@ -13,8 +13,8 @@ CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
 
     setupUi();
 
-    connect(&spimHub(), SIGNAL(captureStarted()), timer, SLOT(start()));
-    connect(&spimHub(), SIGNAL(stopped()), timer, SLOT(stop()));
+    connect(&spim(), SIGNAL(captureStarted()), timer, SLOT(start()));
+    connect(&spim(), SIGNAL(stopped()), timer, SLOT(stop()));
 
     QMetaObject::connectSlotsByName(this);
 }
@@ -35,7 +35,7 @@ void CameraDisplay::setupUi()
 void CameraDisplay::on_timer_timeout()
 {
     QVector<double> vec(2048 * 2048);
-    OrcaFlash *camera = spimHub().camera();
+    OrcaFlash *camera = spim().camera();
 #ifdef WITH_HARDWARE
     void *top;
     int32_t rowBytes;

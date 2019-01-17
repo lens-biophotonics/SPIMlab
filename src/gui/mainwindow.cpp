@@ -7,7 +7,7 @@
 #include <QStatusBar>
 #include <QSettings>
 
-#include "core/spimhub.h"
+#include "core/spim.h"
 #include "core/statemachine.h"
 #include "core/logmanager.h"
 
@@ -77,7 +77,7 @@ void MainWindow::setupUi()
 void MainWindow::setupDevices()
 {
     OrcaFlash *orca = new OrcaFlash();
-    spimHub().setCamera(orca);
+    spim().setCamera(orca);
 }
 
 void MainWindow::saveSettings()

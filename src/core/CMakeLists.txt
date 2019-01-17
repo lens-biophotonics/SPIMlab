@@ -20,7 +20,7 @@ set(SRC
     niabstracttask.cpp
     orcaflash.cpp
     savestackworker.cpp
-    spimhub.cpp
+    spim.cpp
     statemachine.cpp
     natinst.cpp
 )

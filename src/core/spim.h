@@ -7,12 +7,12 @@
 #include "savestackworker.h"
 #include "orcaflash.h"
 
-class SPIMHub : public QObject
+class SPIM : public QObject
 {
     Q_OBJECT
 public:
-    SPIMHub();
-    virtual ~SPIMHub();
+    SPIM();
+    virtual ~SPIM();
 
     void initialize();
 
@@ -35,6 +35,6 @@ private:
     SaveStackWorker *worker;
 };
 
-SPIMHub& spimHub();
+SPIM& spim();
 
 #endif // SPIMHUB_H

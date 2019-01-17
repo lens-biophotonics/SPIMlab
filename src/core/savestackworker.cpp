@@ -5,7 +5,7 @@
 
 #include "logger.h"
 #include "savestackworker.h"
-#include "spimhub.h"
+#include "spim.h"
 
 static Logger *logger = getLogger("SaveStackWorker");
 
@@ -18,7 +18,7 @@ void SaveStackWorker::saveToFile()
     stopRequested = false;
     int fd = open("/mnt/ramdisk/output.bin", O_WRONLY | O_CREAT | O_TRUNC, 0666);
     size_t n = 2 * 2048 * 2048;
-    OrcaFlash *orca = spimHub().camera();
+    OrcaFlash *orca = spim().camera();
     const uint nFramesInBuffer = orca->nFramesInBuffer();
 #ifdef WITH_HARDWARE
     void *buf;

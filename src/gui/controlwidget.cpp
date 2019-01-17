@@ -3,7 +3,7 @@
 #include <QSpacerItem>
 
 #include "controlwidget.h"
-#include "core/spimhub.h"
+#include "core/spim.h"
 #include "core/statemachine.h"
 
 ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
@@ -51,15 +51,15 @@ void ControlWidget::setupUi()
 
 void ControlWidget::on_initPushButton_clicked()
 {
-    spimHub().initialize();
+    spim().initialize();
 }
 
 void ControlWidget::on_startCapturePushButton_clicked()
 {
-    spimHub().startAcquisition();
+    spim().startAcquisition();
 }
 
 void ControlWidget::on_stopCapturePushButton_clicked()
 {
-    spimHub().stop();
+    spim().stop();
 }

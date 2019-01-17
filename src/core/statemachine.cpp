@@ -1,7 +1,7 @@
 #include <memory>
 
 #include "statemachine.h"
-#include "spimhub.h"
+#include "spim.h"
 
 State::State(MACHINE_STATE type, QState *parent) : QState(parent), type(type)
 {
@@ -18,9 +18,9 @@ StateMachine::StateMachine() : QStateMachine()
     readyState = newState(STATE_READY);
     capturingState = newState(STATE_CAPTURING);
 
-    uninitState->addTransition(&spimHub(), &SPIMHub::initialized, readyState);
-    readyState->addTransition(&spimHub(), &SPIMHub::captureStarted, capturingState);
-    capturingState->addTransition(&spimHub(), &SPIMHub::stopped, readyState);
+    uninitState->addTransition(&spim(), &SPIM::initialized, readyState);
+    readyState->addTransition(&spim(), &SPIM::captureStarted, capturingState);
+    capturingState->addTransition(&spim(), &SPIM::stopped, readyState);
 
     QMetaObject::connectSlotsByName(this);
 

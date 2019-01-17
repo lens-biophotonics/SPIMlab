@@ -1,23 +1,23 @@
 #include <memory>
 
-#include "spimhub.h"
+#include "spim.h"
 #include "logger.h"
 
 static Logger *logger = getLogger("SPIMHub");
 
 
-SPIMHub::SPIMHub()
+SPIM::SPIM()
 {
     thread = nullptr;
     worker = nullptr;
 }
 
-SPIMHub::~SPIMHub()
+SPIM::~SPIM()
 {
     uninit_dcam();
 }
 
-void SPIMHub::initialize()
+void SPIM::initialize()
 {
     init_dcam();
     orca->open(0);
@@ -25,18 +25,18 @@ void SPIMHub::initialize()
     emit initialized();
 }
 
-OrcaFlash *SPIMHub::camera()
+OrcaFlash *SPIM::camera()
 {
     return orca;
 }
 
-void SPIMHub::setCamera(OrcaFlash *camera)
+void SPIM::setCamera(OrcaFlash *camera)
 {
     orca = camera;
     orca->setParent(this);
 }
 
-void SPIMHub::startFreeRun()
+void SPIM::startFreeRun()
 {
     orca->setExposureTime(0.010);
     orca->setNFramesInBuffer(10);
@@ -44,7 +44,7 @@ void SPIMHub::startFreeRun()
     emit captureStarted();
 }
 
-void SPIMHub::startAcquisition()
+void SPIM::startAcquisition()
 {
     logger->info("Start acquisition");
 
@@ -67,7 +67,7 @@ void SPIMHub::startAcquisition()
     emit captureStarted();
 }
 
-void SPIMHub::stop()
+void SPIM::stop()
 {
     if (thread && thread->isRunning()) {
         thread->requestInterruption();
@@ -77,8 +77,8 @@ void SPIMHub::stop()
     emit stopped();
 }
 
-SPIMHub &spimHub()
+SPIM &spim()
 {
-    static auto instance = std::make_unique<SPIMHub>();
+    static auto instance = std::make_unique<SPIM>();
     return *instance;
 }
