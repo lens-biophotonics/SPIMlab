@@ -21,6 +21,8 @@ public:
     OrcaFlash *camera();
     void setCamera(OrcaFlash *camera);
 
+    void setupCameraTrigger(QString COPhysicalChan, QString terminal);
+
 signals:
     void initialized();
     void captureStarted();

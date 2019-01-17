@@ -41,6 +41,14 @@ void SPIM::setCamera(OrcaFlash *camera)
     orca->setParent(this);
 }
 
+void SPIM::setupCameraTrigger(QString COPhysicalChan, QString terminal)
+{
+    cameraTrigger->setPhysicalChannel(COPhysicalChan);
+    cameraTrigger->setTerm(terminal);
+
+    galvoRamp->setTriggerSource(terminal);
+}
+
 void SPIM::startFreeRun()
 {
     orca->setGetExposureTime(0.010);
