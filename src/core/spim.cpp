@@ -7,7 +7,7 @@
 static Logger *logger = getLogger("SPIMHub");
 
 
-SPIM::SPIM()
+SPIM::SPIM(QObject *parent) : QObject(parent)
 {
 }
 
@@ -104,6 +104,6 @@ void SPIM::setExposureTime(double expTime)
 
 SPIM &spim()
 {
-    static auto instance = std::make_unique<SPIM>();
+    static auto instance = std::make_unique<SPIM>(nullptr);
     return *instance;
 }

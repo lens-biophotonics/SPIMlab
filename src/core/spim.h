@@ -13,7 +13,7 @@ class SPIM : public QObject
 {
     Q_OBJECT
 public:
-    SPIM();
+    SPIM(QObject *parent=nullptr);
     virtual ~SPIM();
 
     void initialize();
