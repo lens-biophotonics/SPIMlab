@@ -6,6 +6,8 @@
 
 #include "savestackworker.h"
 #include "orcaflash.h"
+#include "cameratrigger.h"
+#include "galvoramp.h"
 
 class SPIM : public QObject
 {
@@ -30,9 +32,12 @@ public slots:
     void stop();
 
 private:
-    OrcaFlash *orca;
+    OrcaFlash *orca = nullptr;
     QThread *thread;
     SaveStackWorker *worker;
+    CameraTrigger *cameraTrigger = nullptr;
+    GalvoRamp *galvoRamp = nullptr;
+    void setExposureTime(double expTime);
 };
 
 SPIM& spim();

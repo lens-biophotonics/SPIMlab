@@ -1,4 +1,5 @@
 #include <memory>
+#include <cmath>
 
 #include "spim.h"
 #include "logger.h"
@@ -21,6 +22,10 @@ void SPIM::initialize()
 {
     init_dcam();
     orca->open(0);
+    orca->setTriggerMode(OrcaFlash::TRIGMODE_START);
+
+    cameraTrigger = new CameraTrigger(this);
+    galvoRamp = new GalvoRamp(this);
 
     emit initialized();
 }
@@ -38,7 +43,7 @@ void SPIM::setCamera(OrcaFlash *camera)
 
 void SPIM::startFreeRun()
 {
-    orca->setExposureTime(0.010);
+    orca->setGetExposureTime(0.010);
     orca->setNFramesInBuffer(10);
     orca->startCapture();
     emit captureStarted();
@@ -59,7 +64,7 @@ void SPIM::startAcquisition()
     connect(worker, SIGNAL(finished()), this, SLOT(stop()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    orca->setExposureTime(0.2);
+    orca->setGetExposureTime(0.2);
     orca->setNFramesInBuffer(100);
     orca->startCapture();
 
@@ -75,6 +80,19 @@ void SPIM::stop()
     }
     orca->stop();
     emit stopped();
+}
+
+void SPIM::setExposureTime(double expTime)
+{
+    expTime = orca->setGetExposureTime(expTime);
+
+    double lineint = orca->getLineInterval();
+    int nOfLines = orca->nOfLines();
+
+    int nSamples = static_cast<int>(round(expTime / lineint + nOfLines));
+
+    galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineint);
+    cameraTrigger->setFrequency(0.98 * orca->getFrameRate());
 }
 
 SPIM &spim()

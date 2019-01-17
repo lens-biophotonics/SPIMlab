@@ -61,7 +61,7 @@ public:
     bool unlockData();
 
     double getExposureTime();
-    bool setExposureTime(double sec);
+    double setGetExposureTime(double sec);
 
     ORCA_TRIGGER_MODE getTriggerMode();
     bool setTriggerMode(ORCA_TRIGGER_MODE mode);

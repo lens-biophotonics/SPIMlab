@@ -285,20 +285,20 @@ double OrcaFlash::getExposureTime()
 #endif
 }
 
-bool OrcaFlash::setExposureTime(double sec)
+double OrcaFlash::setGetExposureTime(double sec)
 {
 #ifdef WITH_HARDWARE
     if (!dcam_setexposuretime(h, sec))
     {
         logLastError("setexposuretime");
-        return false;
+        return exposureTime;
     }
 
     exposureTime = getExposureTime();
 #else
     exposureTime = sec;
 #endif
-    return true;
+    return exposureTime;
 }
 
 OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
