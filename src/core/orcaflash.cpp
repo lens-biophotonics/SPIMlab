@@ -146,6 +146,11 @@ void OrcaFlash::setOutputTrigger(OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_SOURCE, source);
 }
 
+void OrcaFlash::setSensorMode(OrcaFlash::ORCA_SENSOR_MODE mode)
+{
+    setPropertyValue(DCAM_IDPROP_SENSORMODE, mode);
+}
+
 int OrcaFlash::nOfLines()
 {
     return 2048;
