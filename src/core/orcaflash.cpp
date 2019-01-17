@@ -132,7 +132,11 @@ void OrcaFlash::setPropertyValue(DCAM::_DCAMIDPROP property, double value)
 
 double OrcaFlash::getLineInterval()
 {
+#ifdef WITH_HARDWARE
     return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);
+#else
+    return 0.01;
+#endif
 }
 
 void OrcaFlash::setOutputTrigger(OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
@@ -224,6 +228,9 @@ double OrcaFlash::getExposureTime()
 {
     double sec = 0.0;
     CALL_THROW(dcam_getexposuretime(h, &sec));
+#ifndef WITH_HARDWARE
+    sec = 0.1;
+#endif
     exposureTime = sec;
     return exposureTime;
 }
