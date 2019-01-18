@@ -67,11 +67,11 @@ void SPIM::startAcquisition()
     worker->setFrameCount(100);
     worker->moveToThread(thread);
 
-    connect(thread, SIGNAL(started()), worker, SLOT(saveToFile()));
-    connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    connect(worker, SIGNAL(finished()), this, SLOT(stop()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, &QThread::started, worker, &SaveStackWorker::saveToFile);
+    connect(worker, &SaveStackWorker::finished, thread, &QThread::quit);
+    connect(worker, &SaveStackWorker::finished, worker, &SaveStackWorker::deleteLater);
+    connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
     orca->setGetExposureTime(0.2);
     orca->setNFramesInBuffer(100);

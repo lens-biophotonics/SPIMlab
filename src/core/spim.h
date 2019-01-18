@@ -13,7 +13,7 @@ class SPIM : public QObject
 {
     Q_OBJECT
 public:
-    SPIM(QObject *parent=nullptr);
+    SPIM(QObject *parent = nullptr);
     virtual ~SPIM();
 
     OrcaFlash *camera();
@@ -21,17 +21,17 @@ public:
 
     void setupCameraTrigger(QString COPhysicalChan, QString terminal);
 
-signals:
-    void initialized();
-    void captureStarted();
-    void stopped();
-
 public slots:
     void startFreeRun();
     void startAcquisition();
     void stop();
     void initialize();
     void uninitialize();
+
+signals:
+    void initialized();
+    void captureStarted();
+    void stopped();
 
 private:
     OrcaFlash *orca = nullptr;
