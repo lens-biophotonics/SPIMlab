@@ -32,6 +32,7 @@ signals:
     void initialized();
     void captureStarted();
     void stopped();
+    void error(const QString);
 
 private:
     OrcaFlash *orca = nullptr;
@@ -41,6 +42,9 @@ private:
     GalvoRamp *galvoRamp = nullptr;
 
     void setExposureTime(double expTime);
+
+private slots:
+    void onError(const QString &errMsg);
 };
 
 SPIM& spim();

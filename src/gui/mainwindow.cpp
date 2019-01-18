@@ -35,6 +35,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
+    connect(&spim(), &SPIM::error, this, [ = ](QString s) {
+        QMessageBox::critical(nullptr, "Error", s);
+    });
     QAction *quitAction = new QAction(this);
     quitAction->setText("&Quit");
     quitAction->setObjectName("quitAction");
