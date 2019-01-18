@@ -51,12 +51,12 @@ void GalvoRamp::setupWaveform(double offset, double amplitude, int delay)
     }
 }
 
-bool GalvoRamp::initializeTask_impl()
+void GalvoRamp::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxCreateTask("galvoRampAO", &task));
+    DAQmxErrChk(DAQmxCreateTask("galvoRampAO", &task));
 
-    DAQmxErrChkRetFalse(
+    DAQmxErrChk(
         DAQmxCreateAOVoltageChan(
             task,
             physicalChannel.toLatin1(),
@@ -67,31 +67,25 @@ bool GalvoRamp::initializeTask_impl()
             nullptr // customScaleName
             )
         );
-    DAQmxErrChkRetFalse(DAQmxCfgDigEdgeStartTrig(
-                            task,
-                            triggerSource.toLatin1(),
-                            DAQmx_Val_Rising
-                            )
-                        );
-    DAQmxErrChkRetFalse(DAQmxSetStartTrigRetriggerable(task, true));
+    DAQmxErrChk(
+        DAQmxCfgDigEdgeStartTrig(
+            task,
+            triggerSource.toLatin1(),
+            DAQmx_Val_Rising
+            )
+        );
+    DAQmxErrChk(DAQmxSetStartTrigRetriggerable(task, true));
 
     computeWaveform();
-    if (!configureTiming()) {
-        return false;
-    }
-
-    if (!write()) {
-        return false;
-    }
-
+    configureTiming();
+    write();
 #endif
-    return true;
 }
 
-bool GalvoRamp::configureTiming()
+void GalvoRamp::configureTiming()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(
+    DAQmxErrChk(
         DAQmxCfgSampClkTiming(
             task,
             nullptr,  // clock source (onboard if NULL)
@@ -102,13 +96,12 @@ bool GalvoRamp::configureTiming()
             )
         );
 #endif
-    return true;
 }
 
-bool GalvoRamp::write()
+void GalvoRamp::write()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(
+    DAQmxErrChk(
         DAQmxWriteAnalogF64(
             task,
             waveform.size(),
@@ -121,7 +114,6 @@ bool GalvoRamp::write()
             )
         );
 #endif
-    return true;
 }
 
 void GalvoRamp::computeWaveform()

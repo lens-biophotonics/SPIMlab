@@ -24,12 +24,12 @@ void CameraTrigger::setPhysicalChannel(QString channel)
     clear();
 }
 
-bool CameraTrigger::initializeTask_impl()
+void CameraTrigger::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxCreateTask("cameraTriggerCOPulse", &task));
+    DAQmxErrChk(DAQmxCreateTask("cameraTriggerCOPulse", &task));
 
-    DAQmxErrChkRetFalse(
+    DAQmxErrChk(
         DAQmxCreateCOPulseChanFreq(
             task,
             physicalChannel.toLatin1(),
@@ -42,32 +42,29 @@ bool CameraTrigger::initializeTask_impl()
             )
         );
 
-    DAQmxErrChkRetFalse(
+    DAQmxErrChk(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
 
-    if (!configureTriggering()) {
-        return false;
-    }
+
+    configureTriggering();
 #endif
 
     logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
                      physicalChannel, getTerm()));
-    return true;
 }
 
 
-bool CameraTrigger::configureTriggering()
+void CameraTrigger::configureTriggering()
 {
 #ifdef WITH_HARDWARE
     if (isFreeRun) {
-        DAQmxErrChkRetFalse(DAQmxDisableStartTrig(task));
+        DAQmxErrChk(DAQmxDisableStartTrig(task));
     } else {
-        DAQmxErrChkRetFalse(
+        DAQmxErrChk(
             DAQmxCfgDigEdgeStartTrig(
                 task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
     }
 #endif
-    return true;
 }
 
 void CameraTrigger::setFrequency(double Hz)
@@ -83,7 +80,7 @@ void CameraTrigger::setFrequency(double Hz)
 double CameraTrigger::getFrequency()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxGetCOPulseFreq(task, CHANNEL_NAME, &freq));
+    DAQmxErrChk(DAQmxGetCOPulseFreq(task, CHANNEL_NAME, &freq));
 #endif
     return freq;
 }
@@ -120,12 +117,11 @@ QString CameraTrigger::getTerm()
     return QString();
 }
 
-bool CameraTrigger::setTerm(QString term)
+void CameraTrigger::setTerm(QString term)
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
+    DAQmxErrChk(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
 #else
     Q_UNUSED(term);
 #endif
-    return true;
 }

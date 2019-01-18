@@ -13,25 +13,14 @@
  * \brief Wraps the call to the given function around some logic for error
  * checking
  *
- * If an error has occurred during the function call, the
- * NIAbstractTask::onError() slot is called.
+ * If an error has occurred during the function call, NIAbstractTask::onError()
+ * is called.
  *
  * \param functionCall The function to be called
  */
 #define DAQmxErrChk(functionCall) { \
         if (DAQmxFailed(functionCall)) { \
             onError(); \
-        } \
-}
-
-/**
- * \brief As DAQmxErrChk, but make the function that refers to this macro
- * return false
- */
-#define DAQmxErrChkRetFalse(functionCall) { \
-        if (DAQmxFailed(functionCall)) { \
-            onError(); \
-            return false; \
         } \
 }
 
@@ -59,21 +48,20 @@ signals:
     void error();
 
 public slots:
-    bool initializeTask();
-    bool start();
-    bool stop();
-    bool clear();
-
-protected slots:
-    void onError();
+    void initializeTask();
+    void start();
+    void stop();
+    void clear();
 
 protected:
+    [[ noreturn ]] void onError();
 #ifdef NIDAQMX_HEADERS
     NI::TaskHandle task;
 #endif
 
 private:
-    virtual bool initializeTask_impl() = 0;
+    virtual void initializeTask_impl() = 0;
+
     char *errBuff;
     bool initialized = false;
 };

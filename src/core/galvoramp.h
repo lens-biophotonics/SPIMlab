@@ -21,7 +21,7 @@ public:
     void setupWaveform(double offset, double amplitude, int delay);
 
 protected:
-    virtual bool initializeTask_impl();
+    virtual void initializeTask_impl();
 
 private:
     double rate;
@@ -37,8 +37,8 @@ private:
     double amplitude;
     int delay;
 
-    bool configureTiming();
-    bool write();
+    void configureTiming();
+    void write();
     void computeWaveform();
 };
 

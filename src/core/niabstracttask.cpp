@@ -31,48 +31,43 @@ bool NIAbstractTask::isTaskDone()
 #endif
 }
 
-bool NIAbstractTask::initializeTask()
+void NIAbstractTask::initializeTask()
 {
     clear();
-    return initializeTask_impl();
+    initializeTask_impl();
 }
 
-bool NIAbstractTask::start()
+void NIAbstractTask::start()
 {
     if (!initialized) {
-        if (!initializeTask()) {
-            return false;
-        }
+        initializeTask();
         initialized = true;
     }
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxStartTask(task));
+    DAQmxErrChk(DAQmxStartTask(task));
 #endif
-    return true;
 }
 
-bool NIAbstractTask::stop()
+void NIAbstractTask::stop()
 {
 #ifdef WITH_HARDWARE
-    DAQmxErrChkRetFalse(DAQmxStopTask(task));
+    DAQmxErrChk(DAQmxStopTask(task));
 #endif
-    return true;
 }
 
-bool NIAbstractTask::clear()
+void NIAbstractTask::clear()
 {
 #ifdef WITH_HARDWARE
     if (task)
-        DAQmxErrChkRetFalse(DAQmxClearTask(task));
+        DAQmxErrChk(DAQmxClearTask(task));
 
 #endif
     initialized = false;
-    return true;
 }
 
 /**
- * @brief Recovers the string description of the last occurred error and emits
- * the error() signal.
+ * @brief Recovers the string description of the last occurred error and throws
+ * a std::runtime_error exception.
  */
 
 void NIAbstractTask::onError()
@@ -81,5 +76,5 @@ void NIAbstractTask::onError()
     DAQmxGetExtendedErrorInfo(errBuff, 2048);
 #endif
     logger->error(errBuff);
-    emit error();
+    throw std::runtime_error(errBuff);
 }
