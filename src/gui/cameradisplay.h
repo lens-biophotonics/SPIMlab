@@ -2,9 +2,10 @@
 #define CAMERADISPLAY_H
 
 #include <QWidget>
-#include <QTimer>
+#include <QThread>
 
 #include "cameraplot.h"
+
 
 class CameraDisplay : public QWidget
 {
@@ -16,15 +17,33 @@ public:
 signals:
 
 public slots:
+    void replot();
 
 private:
     CameraPlot *plot;
-    QTimer *timer;
+    QThread *thread;
+    QVector<double> vec;
 
     void setupUi();
+};
+
+
+class DisplayWorker : public QThread
+{
+    Q_OBJECT
+public:
+    DisplayWorker(double *data, QObject *parent = nullptr);
+    virtual ~DisplayWorker();
+
+signals:
+    void newImage();
 
 private slots:
-    void on_timer_timeout();
+    void updateImage();
+
+private:
+    QTimer *timer;
+    double *buf;
 };
 
 #endif // CAMERADISPLAY_H
