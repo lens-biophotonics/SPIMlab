@@ -121,9 +121,25 @@ double OrcaFlash::getPropertyValue(DCAM::_DCAMIDPROP property)
     return ret;
 }
 
+void OrcaFlash::setPropertyValue(DCAM::_DCAMIDPROP property, double value)
+{
+    CALL_THROW(dcam_setpropertyvalue(h, static_cast<int32>(property), value))
+#ifndef WITH_HARDWARE
+    Q_UNUSED(property)
+    Q_UNUSED(value)
+#endif
+}
+
 double OrcaFlash::getLineInterval()
 {
     return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);
+}
+
+void OrcaFlash::setOutputTrigger(OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
+                                 OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source)
+{
+    setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_KIND, kind);
+    setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_SOURCE, source);
 }
 
 int OrcaFlash::nOfLines()
