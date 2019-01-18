@@ -131,11 +131,6 @@ double OrcaFlash::getPropertyValue(DCAM::_DCAMIDPROP property)
     return ret;
 }
 
-double OrcaFlash::getFrameRate()
-{
-    return getPropertyValue(DCAM_IDPROP_INTERNALFRAMERATE);
-}
-
 double OrcaFlash::getLineInterval()
 {
     return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);

@@ -92,7 +92,8 @@ void SPIM::setExposureTime(double expTime)
     int nSamples = static_cast<int>(round(expTime / lineint + nOfLines));
 
     galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineint);
-    cameraTrigger->setFrequency(0.98 * orca->getFrameRate());
+    double frameRate = 1 / (expTime + (nOfLines + 10) * lineint);
+    cameraTrigger->setFrequency(0.98 * frameRate);
 }
 
 SPIM &spim()
