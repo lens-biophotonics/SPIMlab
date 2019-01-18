@@ -75,6 +75,7 @@ bool GalvoRamp::initializeTask_impl()
                         );
     DAQmxErrChkRetFalse(DAQmxSetStartTrigRetriggerable(task, true));
 
+    computeWaveform();
     if (!configureTiming()) {
         return false;
     }
