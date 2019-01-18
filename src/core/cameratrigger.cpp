@@ -21,7 +21,6 @@ void CameraTrigger::setPhysicalChannel(QString channel)
 
 void CameraTrigger::initializeTask_impl()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxCreateTask("cameraTriggerCOPulse", &task));
 
     DAQmxErrChk(
@@ -42,7 +41,6 @@ void CameraTrigger::initializeTask_impl()
 
     configureTriggering();
     configureTerm();
-#endif
 
     logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
                      physicalChannel, getTerm()));
@@ -51,7 +49,6 @@ void CameraTrigger::initializeTask_impl()
 
 void CameraTrigger::configureTriggering()
 {
-#ifdef WITH_HARDWARE
     if (isFreeRun) {
         DAQmxErrChk(DAQmxDisableStartTrig(task));
     } else {
@@ -59,7 +56,6 @@ void CameraTrigger::configureTriggering()
             DAQmxCfgDigEdgeStartTrig(
                 task, triggerTerm.toLatin1(), DAQmx_Val_Rising));
     }
-#endif
 }
 
 void CameraTrigger::configureTerm()
@@ -70,18 +66,14 @@ void CameraTrigger::configureTerm()
 void CameraTrigger::setFrequency(double Hz)
 {
     freq = Hz;
-#ifdef WITH_HARDWARE
     if (isInitialized()) {
         DAQmxErrChk(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
     }
-#endif
 }
 
 double CameraTrigger::getFrequency()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxGetCOPulseFreq(task, CHANNEL_NAME, &freq));
-#endif
     return freq;
 }
 
@@ -108,13 +100,9 @@ bool CameraTrigger::isFreeRunEnabled()
 
 QString CameraTrigger::getTerm()
 {
-#ifdef WITH_HARDWARE
     char buff[100];
     DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME, buff, 100));
     return QString(buff);
-
-#endif
-    return QString();
 }
 
 void CameraTrigger::setTerm(QString term)

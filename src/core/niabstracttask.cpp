@@ -25,13 +25,9 @@ bool NIAbstractTask::isInitialized()
 
 bool NIAbstractTask::isTaskDone()
 {
-#ifdef WITH_HARDWARE
-    bool32 done;
+    bool32 done = 1;
     DAQmxErrChk(DAQmxIsTaskDone(task, &done));
     return static_cast<bool>(done);
-#else
-    return true;
-#endif
 }
 
 void NIAbstractTask::initializeTask()
@@ -45,16 +41,12 @@ void NIAbstractTask::start()
     if (!task) {
         initializeTask();
     }
-#ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxStartTask(task));
-#endif
 }
 
 void NIAbstractTask::stop()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxStopTask(task));
-#endif
 }
 
 void NIAbstractTask::clear()

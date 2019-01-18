@@ -48,7 +48,6 @@ void GalvoRamp::setupWaveform(double offset, double amplitude, int delay)
 
 void GalvoRamp::initializeTask_impl()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(DAQmxCreateTask("galvoRampAO", &task));
 
     DAQmxErrChk(
@@ -74,12 +73,10 @@ void GalvoRamp::initializeTask_impl()
     computeWaveform();
     configureTiming();
     write();
-#endif
 }
 
 void GalvoRamp::configureTiming()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(
         DAQmxCfgSampClkTiming(
             task,
@@ -90,12 +87,10 @@ void GalvoRamp::configureTiming()
             static_cast<uInt64>(nSamples)
             )
         );
-#endif
 }
 
 void GalvoRamp::write()
 {
-#ifdef WITH_HARDWARE
     DAQmxErrChk(
         DAQmxWriteAnalogF64(
             task,
@@ -108,7 +103,6 @@ void GalvoRamp::write()
             nullptr  // reserved
             )
         );
-#endif
 }
 
 void GalvoRamp::computeWaveform()

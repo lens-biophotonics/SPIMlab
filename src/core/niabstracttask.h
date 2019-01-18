@@ -18,11 +18,15 @@
  *
  * \param functionCall The function to be called
  */
+#ifdef WITH_HARDWARE
 #define DAQmxErrChk(functionCall) { \
         if (DAQmxFailed(functionCall)) { \
             onError(); \
         } \
 }
+#else
+#define DAQmxErrChk(functionCall) {}
+#endif
 
 #include <QObject>
 
