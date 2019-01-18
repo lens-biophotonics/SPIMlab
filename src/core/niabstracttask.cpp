@@ -14,6 +14,7 @@ NIAbstractTask::NIAbstractTask(QObject *parent) : QObject(parent)
 
 NIAbstractTask::~NIAbstractTask()
 {
+    clear();
     delete[] errBuff;
 }
 

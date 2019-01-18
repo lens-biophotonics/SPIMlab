@@ -7,7 +7,6 @@ class CameraTrigger : public NIAbstractTask
 {
 public:
     CameraTrigger(QObject *parent = nullptr);
-    ~CameraTrigger();
 
     void setPhysicalChannel(QString channel);
 

@@ -9,11 +9,6 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
 {
 }
 
-GalvoRamp::~GalvoRamp()
-{
-    clear();
-}
-
 void GalvoRamp::setPhysicalChannel(QString channel)
 {
     physicalChannel = channel;

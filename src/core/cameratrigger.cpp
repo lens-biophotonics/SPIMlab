@@ -13,11 +13,6 @@ CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
     freq = 50;
 }
 
-CameraTrigger::~CameraTrigger()
-{
-    clear();
-}
-
 void CameraTrigger::setPhysicalChannel(QString channel)
 {
     physicalChannel = channel;

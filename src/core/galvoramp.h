@@ -11,7 +11,6 @@ class GalvoRamp : public NIAbstractTask
 {
 public:
     GalvoRamp(QObject *parent = nullptr);
-    ~GalvoRamp();
 
     void setPhysicalChannel(QString channel);
     void setTriggerSource(QString source);

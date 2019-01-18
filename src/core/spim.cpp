@@ -23,8 +23,8 @@ void SPIM::initialize()
     orca->open(0);
     orca->setGetTriggerMode(OrcaFlash::TRIGMODE_START);
 
-    cameraTrigger = new CameraTrigger(this);
-    galvoRamp = new GalvoRamp(this);
+    cameraTrigger = new CameraTrigger();
+    galvoRamp = new GalvoRamp();
 
     emit initialized();
 }
@@ -33,6 +33,8 @@ void SPIM::uninitialize()
 {
     delete orca;
     uninit_dcam();
+    delete cameraTrigger;
+    delete galvoRamp;
 }
 
 OrcaFlash *SPIM::camera()
