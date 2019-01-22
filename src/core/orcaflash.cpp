@@ -75,7 +75,7 @@ QString OrcaFlash::getLastError()
 #endif
 }
 
-double OrcaFlash::setGet(DCAM::_DCAMIDPROP property, double value)
+double OrcaFlash::setGet(_DCAMIDPROP property, double value)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
@@ -86,7 +86,7 @@ double OrcaFlash::setGet(DCAM::_DCAMIDPROP property, double value)
     return temp;
 }
 
-double OrcaFlash::getPropertyValue(DCAM::_DCAMIDPROP property)
+double OrcaFlash::getPropertyValue(_DCAMIDPROP property)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
@@ -96,7 +96,7 @@ double OrcaFlash::getPropertyValue(DCAM::_DCAMIDPROP property)
     return ret;
 }
 
-void OrcaFlash::setPropertyValue(DCAM::_DCAMIDPROP property, double value)
+void OrcaFlash::setPropertyValue(_DCAMIDPROP property, double value)
 {
     CALL_THROW(dcam_setpropertyvalue(h, static_cast<int32>(property), value))
 #ifndef WITH_HARDWARE
