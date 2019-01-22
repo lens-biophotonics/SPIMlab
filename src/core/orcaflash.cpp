@@ -207,6 +207,7 @@ void OrcaFlash::wait(_DWORD timeout, DCAMWAIT_EVENT event)
     _DWORD dwEvent = event;
     CALL_THROW(dcam_wait(h, &dwEvent, timeout, nullptr))
 #ifndef WITH_HARDWARE
+    Q_UNUSED(dwEvent)
     Q_UNUSED(timeout)
     Q_UNUSED(event)
 #endif
@@ -261,6 +262,9 @@ OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
 OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::setGetTriggerMode(ORCA_TRIGGER_MODE mode)
 {
     CALL_THROW(dcam_settriggermode(h, mode))
+#ifndef WITH_HARDWARE
+    Q_UNUSED(mode)
+#endif
     getTriggerMode();
     return triggerMode;
 }
@@ -274,9 +278,13 @@ OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
     return triggerPolarity;
 }
 
-OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::setGetTriggerPolarity(OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
+OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::setGetTriggerPolarity(
+    OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 {
     CALL_THROW(dcam_settriggerpolarity(h, polarity))
+#ifndef WITH_HARDWARE
+    Q_UNUSED(polarity)
+#endif
     getTriggerPolarity();
     return triggerPolarity;
 }
