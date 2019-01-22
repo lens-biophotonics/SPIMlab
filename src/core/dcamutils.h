@@ -8,7 +8,7 @@ namespace DCAM {
 #endif
 
 int init_dcam();
-bool uninit_dcam();
+void uninit_dcam();
 }
 
 #endif // DCAMUTILS_H

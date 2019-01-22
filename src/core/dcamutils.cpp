@@ -31,12 +31,14 @@ int init_dcam()
     return nCamera;
 }
 
-bool uninit_dcam()
+void uninit_dcam()
 {
 #ifdef WITH_HARDWARE
-    return dcam_uninit();
-#else
-    return true;
+    if (!dcam_uninit()) {
+        QString errMsg = "Cannot uninitialize dcam";
+        logger->critical(errMsg);
+        throw std::runtime_error(errMsg.toStdString());
+    }
 #endif
 }
 }
