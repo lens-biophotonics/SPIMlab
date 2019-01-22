@@ -70,6 +70,7 @@ public:
     virtual ~OrcaFlash();
     void open(int index);
     void close();
+    DCAM::ModelInfo *modelInfo();
 
     void setNFramesInBuffer(uint count);
     uint nFramesInBuffer();
@@ -117,7 +118,7 @@ private:
 #ifdef DCAMAPI_HEADERS
     DCAM::HDCAM h;
 #endif
-    int nCamera;
+    int cameraIndex;
     double exposureTime;
     ORCA_TRIGGER_MODE triggerMode;
     ORCA_TRIGGER_POLARITY triggerPolarity;

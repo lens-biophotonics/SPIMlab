@@ -37,6 +37,7 @@ void OrcaFlash::open(int index)
     CALL_THROW(dcam_open(&h, index))
     logger->info(QString("Camera %1 opened").arg(index));
     _isOpen = true;
+    cameraIndex = index;
 }
 
 void OrcaFlash::close()
@@ -46,6 +47,11 @@ void OrcaFlash::close()
     }
     CALL_THROW(dcam_close(h))
     _isOpen = false;
+}
+
+ModelInfo *OrcaFlash::modelInfo()
+{
+    return getModelInfo(cameraIndex);
 }
 
 void OrcaFlash::setNFramesInBuffer(uint count)
