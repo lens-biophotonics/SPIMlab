@@ -4,15 +4,8 @@
 #include <QObject>
 #include <QMutex>
 
-namespace DCAM {
-#ifdef DCAMAPI_HEADERS
-#include <dcamapi.h>
-#include <dcamprop.h>
-#endif
-}
+#include "dcamutils.h"
 
-int init_dcam();
-bool uninit_dcam();
 
 class OrcaFlash : public QObject
 {

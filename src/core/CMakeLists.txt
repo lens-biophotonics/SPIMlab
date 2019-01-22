@@ -18,6 +18,7 @@ set(SRC
     logger.cpp
     logmanager.cpp
     niabstracttask.cpp
+    dcamutils.cpp
     orcaflash.cpp
     savestackworker.cpp
     spim.cpp

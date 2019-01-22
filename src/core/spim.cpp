@@ -18,7 +18,7 @@ SPIM::~SPIM()
 void SPIM::initialize()
 {
     try {
-        init_dcam();
+        DCAM::init_dcam();
 
         orca = new OrcaFlash();
         orca->open(0);
@@ -38,7 +38,7 @@ void SPIM::uninitialize()
 {
     try {
         delete orca;
-        uninit_dcam();
+        DCAM::uninit_dcam();
         delete cameraTrigger;
         delete galvoRamp;
     } catch (std::runtime_error e) {

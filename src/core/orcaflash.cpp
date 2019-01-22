@@ -16,41 +16,10 @@
 #define CALL_THROW(func)
 #endif
 
-static Logger *dcamLogger = getLogger("DCAM");
-static Logger *orcaLogger = getLogger("OrcaFlash");
+static Logger *logger = getLogger("OrcaFlash");
 
 using namespace DCAM;
 
-int init_dcam()
-{
-    int nCamera;
-#ifdef WITH_HARDWARE
-    if (!dcam_init(nullptr, &nCamera)) {
-        QString errMsg = "Cannot initialize dcam";
-        dcamLogger->critical(errMsg);
-        throw std::runtime_error(errMsg.toStdString());
-    }
-
-    if (nCamera == 0) {
-        QString errMsg = "No cameras found";
-        dcamLogger->critical(errMsg);
-        throw std::runtime_error(errMsg.toStdString());
-    }
-#else
-    nCamera = 8;
-#endif
-    dcamLogger->info(QString("Found %1 cameras").arg(nCamera));
-    return nCamera;
-}
-
-bool uninit_dcam()
-{
-#ifdef WITH_HARDWARE
-    return dcam_uninit();
-#else
-    return true;
-#endif
-}
 
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
@@ -66,7 +35,7 @@ OrcaFlash::~OrcaFlash()
 void OrcaFlash::open(int index)
 {
     CALL_THROW(dcam_open(&h, index))
-    orcaLogger->info(QString("Camera %1 opened").arg(index));
+    logger->info(QString("Camera %1 opened").arg(index));
     _isOpen = true;
 }
 
@@ -161,7 +130,7 @@ QString OrcaFlash::logLastError(QString label)
     if (!label.isEmpty())
         label.append(" ");
     QString errMsg = getLastError().prepend(label);
-    orcaLogger->error(errMsg);
+    logger->error(errMsg);
     return errMsg;
 }
 
@@ -319,5 +288,5 @@ QString OrcaFlash::statusString(OrcaFlash::ORCA_STATUS status)
 
 void OrcaFlash::logStatusString()
 {
-    orcaLogger->info(QString("Camera status: %1").arg(getStatusString()));
+    logger->info(QString("Camera status: %1").arg(getStatusString()));
 }
