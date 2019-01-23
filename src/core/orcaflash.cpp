@@ -32,12 +32,17 @@ OrcaFlash::~OrcaFlash()
     close();
 }
 
-void OrcaFlash::open(int index)
+void OrcaFlash::open(const int index)
 {
     CALL_THROW(dcam_open(&h, index))
     logger->info(QString("Camera %1 opened").arg(index));
     _isOpen = true;
     cameraIndex = index;
+}
+
+void OrcaFlash::open(const QString idStr)
+{
+    open(getCameraIndex(idStr));
 }
 
 void OrcaFlash::close()

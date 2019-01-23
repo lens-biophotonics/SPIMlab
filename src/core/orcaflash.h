@@ -68,7 +68,8 @@ public:
 
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
-    void open(int index);
+    void open(const int index);
+    void open(const QString idStr);
     void close();
     DCAM::ModelInfo *modelInfo();
 
