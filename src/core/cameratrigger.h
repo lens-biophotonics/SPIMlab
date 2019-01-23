@@ -8,18 +8,18 @@ class CameraTrigger : public NIAbstractTask
 public:
     CameraTrigger(QObject *parent = nullptr);
 
-    void setPhysicalChannel(QString channel);
+    void setPhysicalChannel(const QString &channel);
 
-    void setFrequency(double Hz);
+    void setFrequency(const double Hz);
     double getFrequency();
 
-    void setFreeRunEnabled(bool enable);
-    bool isFreeRunEnabled();
+    void setFreeRunEnabled(const bool enable);
+    bool isFreeRunEnabled() const;
 
     QString getTerm();
     void setTerm(QString term);
 
-    void setTriggerTerm(QString term);
+    void setTriggerTerm(const QString &term);
 
 protected:
     void initializeTask_impl();

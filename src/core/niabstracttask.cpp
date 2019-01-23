@@ -63,7 +63,7 @@ void NIAbstractTask::clear()
  * a std::runtime_error exception.
  */
 
-void NIAbstractTask::onError()
+void NIAbstractTask::onError() const
 {
 #ifdef WITH_HARDWARE
     DAQmxGetExtendedErrorInfo(errBuff, ERRBUF_SIZE);

@@ -69,47 +69,47 @@ public:
     explicit OrcaFlash(QObject *parent = nullptr);
     virtual ~OrcaFlash();
     void open(const int index);
-    void open(const QString idStr);
+    void open(const QString &idStr);
     void close();
-    DCAM::ModelInfo *modelInfo();
+    const DCAM::ModelInfo *modelInfo();
 
-    void setNFramesInBuffer(uint count);
-    uint nFramesInBuffer();
+    void setNFramesInBuffer(const uint count);
+    uint nFramesInBuffer() const;
 
     void startCapture();
     void stop();
 
-    void copyFrame(void *buf, size_t n, int32_t frame);
-    void copyLastFrame(void *buf, size_t n);
-    void wait(DCAM::_DWORD timeout = 1000,
-              DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
-    void lockData(void **pTop, int32_t *pRowbytes, int32_t frame);
+    void copyFrame(void *buf, const size_t n, const int32_t frame);
+    void copyLastFrame(void *buf, const size_t n);
+    void wait(const DCAM::_DWORD timeout = 1000,
+              const DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
+    void lockData(void **pTop, int32_t *pRowbytes, const int32_t frame);
     void unlockData();
 
     double getExposureTime();
-    double setGetExposureTime(double sec);
+    double setGetExposureTime(const double sec);
 
     ORCA_TRIGGER_MODE getTriggerMode();
-    ORCA_TRIGGER_MODE setGetTriggerMode(ORCA_TRIGGER_MODE mode);
+    ORCA_TRIGGER_MODE setGetTriggerMode(const ORCA_TRIGGER_MODE mode);
 
     ORCA_TRIGGER_POLARITY getTriggerPolarity();
-    ORCA_TRIGGER_POLARITY setGetTriggerPolarity(ORCA_TRIGGER_POLARITY polarity);
+    ORCA_TRIGGER_POLARITY setGetTriggerPolarity(const ORCA_TRIGGER_POLARITY polarity);
 
     ORCA_STATUS getStatus();
     QString getStatusString();
-    static QString statusString(OrcaFlash::ORCA_STATUS status);
+    static QString statusString(const ORCA_STATUS status);
     void logStatusString();
 
     QString getLastError();
 
-    double setGet(DCAM::_DCAMIDPROP property, double value);
+    double setGet(DCAM::_DCAMIDPROP property, const double value);
     double getPropertyValue(DCAM::_DCAMIDPROP property);
-    void setPropertyValue(DCAM::_DCAMIDPROP property, double value);
+    void setPropertyValue(DCAM::_DCAMIDPROP property, const double value);
     double getLineInterval();
-    void setOutputTrigger(ORCA_OUTPUT_TRIGGER_KIND kind,
-                          ORCA_OUTPUT_TRIGGER_SOURCE source);
-    void setSensorMode(ORCA_SENSOR_MODE mode);
-    int nOfLines();
+    void setOutputTrigger(const ORCA_OUTPUT_TRIGGER_KIND kind,
+                          const ORCA_OUTPUT_TRIGGER_SOURCE source);
+    void setSensorMode(const ORCA_SENSOR_MODE mode);
+    int nOfLines() const;
 
 signals:
 
@@ -128,7 +128,7 @@ private:
     uint _nFramesInBuffer;
     bool _isOpen;
 
-    QString logLastError(QString label = "");
+    QString logLastError(const QString label = "");
 };
 
 #endif // ORCAFLASH_H

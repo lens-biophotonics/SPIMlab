@@ -20,7 +20,7 @@ private:
     QTextEdit *textEdit;
 
 private slots:
-    void logMessage(QString msg, MsgType type);
+    void logMessage(QString msg, const MsgType type);
 };
 
 #endif // LOGWIDGET_HLOGWIDGET_H

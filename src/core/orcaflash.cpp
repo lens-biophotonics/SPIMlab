@@ -40,7 +40,7 @@ void OrcaFlash::open(const int index)
     cameraIndex = index;
 }
 
-void OrcaFlash::open(const QString idStr)
+void OrcaFlash::open(const QString &idStr)
 {
     open(getCameraIndex(idStr));
 }
@@ -54,17 +54,17 @@ void OrcaFlash::close()
     _isOpen = false;
 }
 
-ModelInfo *OrcaFlash::modelInfo()
+const ModelInfo *OrcaFlash::modelInfo()
 {
     return getModelInfo(cameraIndex);
 }
 
-void OrcaFlash::setNFramesInBuffer(uint count)
+void OrcaFlash::setNFramesInBuffer(const uint count)
 {
     _nFramesInBuffer = count;
 }
 
-uint OrcaFlash::nFramesInBuffer()
+uint OrcaFlash::nFramesInBuffer() const
 {
     return _nFramesInBuffer;
 }
@@ -80,7 +80,7 @@ QString OrcaFlash::getLastError()
 #endif
 }
 
-double OrcaFlash::setGet(_DCAMIDPROP property, double value)
+double OrcaFlash::setGet(const _DCAMIDPROP property, const double value)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
@@ -91,7 +91,7 @@ double OrcaFlash::setGet(_DCAMIDPROP property, double value)
     return temp;
 }
 
-double OrcaFlash::getPropertyValue(_DCAMIDPROP property)
+double OrcaFlash::getPropertyValue(const _DCAMIDPROP property)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
@@ -101,7 +101,7 @@ double OrcaFlash::getPropertyValue(_DCAMIDPROP property)
     return ret;
 }
 
-void OrcaFlash::setPropertyValue(_DCAMIDPROP property, double value)
+void OrcaFlash::setPropertyValue(const _DCAMIDPROP property, const double value)
 {
     CALL_THROW(dcam_setpropertyvalue(h, static_cast<int32>(property), value))
 #ifndef WITH_HARDWARE
@@ -119,28 +119,27 @@ double OrcaFlash::getLineInterval()
 #endif
 }
 
-void OrcaFlash::setOutputTrigger(OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
-                                 OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source)
+void OrcaFlash::setOutputTrigger(
+    const OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
+    const OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source)
 {
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_KIND, kind);
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_SOURCE, source);
 }
 
-void OrcaFlash::setSensorMode(OrcaFlash::ORCA_SENSOR_MODE mode)
+void OrcaFlash::setSensorMode(const OrcaFlash::ORCA_SENSOR_MODE mode)
 {
     setPropertyValue(DCAM_IDPROP_SENSORMODE, mode);
 }
 
-int OrcaFlash::nOfLines()
+int OrcaFlash::nOfLines() const
 {
     return 2048;
 }
 
-QString OrcaFlash::logLastError(QString label)
+QString OrcaFlash::logLastError(const QString label)
 {
-    if (!label.isEmpty())
-        label.append(" ");
-    QString errMsg = getLastError().prepend(label);
+    QString errMsg = getLastError().prepend(label + " ");
     logger->error(errMsg);
     return errMsg;
 }
@@ -159,7 +158,7 @@ void OrcaFlash::stop()
     CALL_THROW(dcam_freeframe(h))
 }
 
-void OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
+void OrcaFlash::copyFrame(void *buf, const size_t n, const int32_t frame)
 {
 #ifdef WITH_HARDWARE
     void *top;
@@ -177,12 +176,12 @@ void OrcaFlash::copyFrame(void *buf, size_t n, int32_t frame)
 #endif
 }
 
-void OrcaFlash::copyLastFrame(void *buf, size_t n)
+void OrcaFlash::copyLastFrame(void *buf, const size_t n)
 {
     copyFrame(buf, n, -1);
 }
 
-void OrcaFlash::wait(_DWORD timeout, DCAMWAIT_EVENT event)
+void OrcaFlash::wait(const _DWORD timeout, const DCAMWAIT_EVENT event)
 {
     _DWORD dwEvent = event;
     CALL_THROW(dcam_wait(h, &dwEvent, timeout, nullptr))
@@ -193,7 +192,7 @@ void OrcaFlash::wait(_DWORD timeout, DCAMWAIT_EVENT event)
 #endif
 }
 
-void OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, int32_t frame)
+void OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, const int32_t frame)
 {
     mutex.lock();
     CALL_THROW(dcam_lockdata(h, pTop, pRowbytes, frame))
@@ -221,7 +220,7 @@ double OrcaFlash::getExposureTime()
     return exposureTime;
 }
 
-double OrcaFlash::setGetExposureTime(double sec)
+double OrcaFlash::setGetExposureTime(const double sec)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(sec)
@@ -239,7 +238,7 @@ OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
     return triggerMode;
 }
 
-OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::setGetTriggerMode(ORCA_TRIGGER_MODE mode)
+OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::setGetTriggerMode(const ORCA_TRIGGER_MODE mode)
 {
     CALL_THROW(dcam_settriggermode(h, mode))
 #ifndef WITH_HARDWARE
@@ -259,7 +258,7 @@ OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
 }
 
 OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::setGetTriggerPolarity(
-    OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
+    const OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 {
     CALL_THROW(dcam_settriggerpolarity(h, polarity))
 #ifndef WITH_HARDWARE
@@ -281,7 +280,7 @@ QString OrcaFlash::getStatusString()
     return statusString(getStatus());
 }
 
-QString OrcaFlash::statusString(OrcaFlash::ORCA_STATUS status)
+QString OrcaFlash::statusString(const OrcaFlash::ORCA_STATUS status)
 {
     switch (status) {
     case OrcaFlash::STATUS_BUSY:

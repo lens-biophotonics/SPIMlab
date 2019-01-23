@@ -47,12 +47,13 @@ void SPIM::uninitialize()
     }
 }
 
-OrcaFlash *SPIM::camera()
+OrcaFlash *SPIM::camera() const
 {
     return orca;
 }
 
-void SPIM::setupCameraTrigger(QString COPhysicalChan, QString terminal)
+void SPIM::setupCameraTrigger(
+    const QString &COPhysicalChan, const QString &terminal)
 {
     try {
         cameraTrigger->setPhysicalChannel(COPhysicalChan);
@@ -142,7 +143,7 @@ void SPIM::setExposureTime(double expTime)
     }
 }
 
-void SPIM::onError(const QString &errMsg)
+void SPIM::onError(const QString &errMsg) const
 {
     emit error(errMsg);
 }

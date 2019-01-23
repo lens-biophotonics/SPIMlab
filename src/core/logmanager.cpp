@@ -18,7 +18,13 @@ Logger *LogManager::getLogger(QString name)
 {
     Logger *logger;
     QMap<QString, Logger *>::iterator it = logMap.find(name);
-    logger = (it == logMap.end()) ? new Logger(name) : it.value();
+    if (it == logMap.end()) {
+        logger = new Logger(name);
+        logMap[name] = logger;
+    }
+    else {
+        logger = it.value();
+    }
     return logger;
 }
 

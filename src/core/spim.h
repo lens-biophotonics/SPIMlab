@@ -16,10 +16,10 @@ public:
     SPIM(QObject *parent = nullptr);
     virtual ~SPIM();
 
-    OrcaFlash *camera();
+    OrcaFlash *camera() const;
     void setCamera(OrcaFlash *camera);
 
-    void setupCameraTrigger(QString COPhysicalChan, QString terminal);
+    void setupCameraTrigger(const QString &COPhysicalChan, const QString &terminal);
 
 public slots:
     void startFreeRun();
@@ -29,10 +29,10 @@ public slots:
     void uninitialize();
 
 signals:
-    void initialized();
-    void captureStarted();
-    void stopped();
-    void error(const QString);
+    void initialized() const;
+    void captureStarted() const;
+    void stopped() const;
+    void error(const QString) const;
 
 private:
     OrcaFlash *orca = nullptr;
@@ -44,7 +44,7 @@ private:
     void setExposureTime(double expTime);
 
 private slots:
-    void onError(const QString &errMsg);
+    void onError(const QString &errMsg) const;
 };
 
 SPIM& spim();

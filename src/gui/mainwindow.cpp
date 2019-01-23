@@ -79,7 +79,7 @@ void MainWindow::setupUi()
     s->assignProperty(statusLabel, "text", "Capturing");
 }
 
-void MainWindow::saveSettings()
+void MainWindow::saveSettings() const
 {
     QSettings settings;
 
@@ -99,7 +99,7 @@ void MainWindow::loadSettings()
     settings.endGroup();
 }
 
-void MainWindow::on_aboutAction_triggered()
+void MainWindow::on_aboutAction_triggered() const
 {
     QMessageBox msgBox;
     QString text;

@@ -21,10 +21,10 @@ public:
     Logger(QString name = "");
 
 public slots:
-    void msg(QString str, MsgType type = MSG_NORMAL);
-    void info(QString msg);
-    void error(QString errMsg);
-    void critical(QString msg);
+    void msg(QString str, MsgType type = MSG_NORMAL) const;
+    void info(QString msg) const;
+    void error(QString errMsg) const;
+    void critical(QString msg) const;
 
 private:
     QString name;

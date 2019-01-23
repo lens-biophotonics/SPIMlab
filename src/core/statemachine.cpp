@@ -27,12 +27,12 @@ StateMachine::StateMachine() : QStateMachine()
     start();
 }
 
-QState *StateMachine::getState(MACHINE_STATE state)
+QState *StateMachine::getState(const MACHINE_STATE state) const
 {
     return map[state];
 }
 
-QState *StateMachine::newState(MACHINE_STATE type, QState *parent)
+QState *StateMachine::newState(const MACHINE_STATE type, QState *parent)
 {
     QState *state = new QState(parent);
     map[type] = state;

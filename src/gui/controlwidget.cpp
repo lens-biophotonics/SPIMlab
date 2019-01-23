@@ -17,10 +17,13 @@ void ControlWidget::setupUi()
     connect(initPushButton, &QPushButton::clicked, &spim(), &SPIM::initialize);
 
     QPushButton *startCapturePushButton = new QPushButton("Start capture");
-    startCapturePushButton->setObjectName("startCapturePushButton");
+    connect(startCapturePushButton, &QPushButton::clicked,
+            &spim(), &SPIM::startAcquisition);
+
 
     QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
-    stopCapturePushButton->setObjectName("stopCapturePushButton");
+    connect(stopCapturePushButton, &QPushButton::clicked,
+            &spim(), &SPIM::stop);
 
     QState *s;
 
@@ -47,14 +50,4 @@ void ControlWidget::setupUi()
     setLayout(layout);
 
     QMetaObject::connectSlotsByName(this);
-}
-
-void ControlWidget::on_startCapturePushButton_clicked()
-{
-    spim().startAcquisition();
-}
-
-void ControlWidget::on_stopCapturePushButton_clicked()
-{
-    spim().stop();
 }

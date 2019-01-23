@@ -9,7 +9,7 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
 {
 }
 
-void GalvoRamp::setPhysicalChannel(QString channel)
+void GalvoRamp::setPhysicalChannel(const QString &channel)
 {
     physicalChannel = channel;
     clear();
@@ -21,7 +21,8 @@ void GalvoRamp::setTriggerSource(QString source)
     clear();
 }
 
-void GalvoRamp::setCameraParams(int nSamples, int nRamp, double rate)
+void GalvoRamp::setCameraParams(
+    const int nSamples, const int nRamp, const double rate)
 {
     this->nSamples = nSamples;
     this->nRamp = nRamp;
@@ -34,7 +35,8 @@ void GalvoRamp::setCameraParams(int nSamples, int nRamp, double rate)
     }
 }
 
-void GalvoRamp::setupWaveform(double offset, double amplitude, int delay)
+void GalvoRamp::setupWaveform(
+    const double offset, const double amplitude, const int delay)
 {
     this->offset = offset;
     this->amplitude = amplitude;

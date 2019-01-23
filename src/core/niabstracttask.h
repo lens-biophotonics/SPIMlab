@@ -58,7 +58,7 @@ public slots:
     void clear();
 
 protected:
-    [[ noreturn ]] void onError();
+    [[ noreturn ]] void onError() const;
 #ifdef NIDAQMX_HEADERS
     NI::TaskHandle task = nullptr;
 #endif

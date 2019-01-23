@@ -44,7 +44,7 @@ bool CameraPlot::hasHeightForWidth() const
     return true;
 }
 
-void CameraPlot::setData(QVector<double> &vec)
+void CameraPlot::setData(const QVector<double> &vec)
 {
     data->setValueMatrix(vec, NCOLS);
     replot();

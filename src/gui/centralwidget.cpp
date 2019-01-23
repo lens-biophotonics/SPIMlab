@@ -39,7 +39,7 @@ void CentralWidget::setupUi()
     setLayout(layout);
 }
 
-void CentralWidget::saveSettings()
+void CentralWidget::saveSettings() const
 {
     QSettings settings;
 

@@ -13,7 +13,7 @@ CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
     freq = 50;
 }
 
-void CameraTrigger::setPhysicalChannel(QString channel)
+void CameraTrigger::setPhysicalChannel(const QString &channel)
 {
     physicalChannel = channel;
     clear();
@@ -63,7 +63,7 @@ void CameraTrigger::configureTerm()
     DAQmxErrChk(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
 }
 
-void CameraTrigger::setFrequency(double Hz)
+void CameraTrigger::setFrequency(const double Hz)
 {
     freq = Hz;
     if (isInitialized()) {
@@ -77,7 +77,7 @@ double CameraTrigger::getFrequency()
     return freq;
 }
 
-void CameraTrigger::setTriggerTerm(QString term)
+void CameraTrigger::setTriggerTerm(const QString &term)
 {
     triggerTerm = term;
     if (isInitialized()) {
@@ -85,7 +85,7 @@ void CameraTrigger::setTriggerTerm(QString term)
     }
 }
 
-void CameraTrigger::setFreeRunEnabled(bool enable)
+void CameraTrigger::setFreeRunEnabled(const bool enable)
 {
     isFreeRun = enable;
     if (isInitialized()) {
@@ -93,7 +93,7 @@ void CameraTrigger::setFreeRunEnabled(bool enable)
     }
 }
 
-bool CameraTrigger::isFreeRunEnabled()
+bool CameraTrigger::isFreeRunEnabled() const
 {
     return isFreeRun;
 }

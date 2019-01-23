@@ -17,7 +17,7 @@ public slots:
 
 private:
     void setupUi();
-    void saveSettings();
+    void saveSettings() const;
     void loadSettings();
 
     QTabWidget *tabWidget;

@@ -15,11 +15,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_aboutAction_triggered();
+    void on_aboutAction_triggered() const;
 
 private:
     void setupUi();
-    void saveSettings();
+    void saveSettings() const;
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
 };

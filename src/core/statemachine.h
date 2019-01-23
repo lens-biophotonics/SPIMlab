@@ -30,7 +30,7 @@ public:
 
     StateMachine();
 
-    QState *getState(MACHINE_STATE state);
+    QState *getState(const MACHINE_STATE state) const;
 
 private:
     QState *uninitState;
@@ -38,7 +38,7 @@ private:
     QState *capturingState;
     QState *errorState;
 
-    QState *newState(MACHINE_STATE type, QState *parent = nullptr);
+    QState *newState(const MACHINE_STATE type, QState *parent = nullptr);
 
     QMap<MACHINE_STATE, QState *> map;
 };

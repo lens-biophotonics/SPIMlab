@@ -16,7 +16,7 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     connect(&logManager(), &LogManager::newLogMessage, this, &LogWidget::logMessage);
 }
 
-void LogWidget::logMessage(QString msg, MsgType type)
+void LogWidget::logMessage(QString msg, const MsgType type)
 {
     if (msg.isEmpty())
         return;
