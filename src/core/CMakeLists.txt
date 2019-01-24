@@ -3,6 +3,7 @@ project(libSPIMlabCore)
 find_package(Qt5Core REQUIRED)
 find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
+find_package(PIGCS REQUIRED)
 
 if (UNIX)
     add_definitions(-DLINUX)  # needed for DCAM-API
@@ -29,6 +30,7 @@ set(SRC
 add_library(SPIMlabCore SHARED ${SRC})
 target_link_libraries(SPIMlabCore
     Qt5::Core
+    ${PIGCS_LIBRARY}
 )
 
 if (NOT DEMO_MODE)
