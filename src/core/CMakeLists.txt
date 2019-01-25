@@ -14,17 +14,21 @@ include_directories(
 )
 
 set(SRC
+    # National Instruments
+    natinst.cpp
+    niabstracttask.cpp
     cameratrigger.cpp
     galvoramp.cpp
-    logger.cpp
-    logmanager.cpp
-    niabstracttask.cpp
+
+    # Hamamatsu
     dcamutils.cpp
     orcaflash.cpp
+
+    logger.cpp
+    logmanager.cpp
     savestackworker.cpp
     spim.cpp
     statemachine.cpp
-    natinst.cpp
 )
 
 add_library(SPIMlabCore SHARED ${SRC})
