@@ -24,6 +24,9 @@ set(SRC
     dcamutils.cpp
     orcaflash.cpp
 
+    # PI
+    pidevice.cpp
+
     logger.cpp
     logmanager.cpp
     savestackworker.cpp
