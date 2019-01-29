@@ -22,10 +22,16 @@ void SPIM::initialize()
 
         orca = new OrcaFlash();
         orca->open(0);
-        orca->setGetTriggerMode(OrcaFlash::TRIGMODE_START);
+        orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
+        orca->setGetTriggerMode(OrcaFlash::TRIGMODE_EDGE);
+        orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
+                               OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
 
         cameraTrigger = new CameraTrigger();
         galvoRamp = new GalvoRamp();
+        galvoRamp->setPhysicalChannel("Dev1/ao0");
+        galvoRamp->setupWaveform(0.2, 2, 0);
+        setupCameraTrigger("Dev1/ctr0", "/Dev1/PFI0");
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -69,9 +75,14 @@ void SPIM::setupCameraTrigger(
 void SPIM::startFreeRun()
 {
     try {
-        orca->setGetExposureTime(0.010);
+        setExposureTime(0.0001);
         orca->setNFramesInBuffer(10);
         orca->startCapture();
+
+        cameraTrigger->setFreeRunEnabled(true);
+
+        galvoRamp->start();
+        cameraTrigger->start();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -84,6 +95,7 @@ void SPIM::startAcquisition()
     logger->info("Start acquisition");
 
     try {
+        cameraTrigger->setFreeRunEnabled(false);
         thread = new QThread();
         worker = new SaveStackWorker();
         worker->setFrameCount(100);
@@ -95,7 +107,6 @@ void SPIM::startAcquisition()
         connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
         connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        orca->setGetExposureTime(0.2);
         orca->setNFramesInBuffer(100);
         orca->startCapture();
 
@@ -116,6 +127,8 @@ void SPIM::stop()
             thread = nullptr;
         }
         orca->stop();
+        galvoRamp->stop();
+        cameraTrigger->stop();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

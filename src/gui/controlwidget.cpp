@@ -16,10 +16,9 @@ void ControlWidget::setupUi()
     QPushButton *initPushButton = new QPushButton("Initialize");
     connect(initPushButton, &QPushButton::clicked, &spim(), &SPIM::initialize);
 
-    QPushButton *startCapturePushButton = new QPushButton("Start capture");
+    QPushButton *startCapturePushButton = new QPushButton("Start free run");
     connect(startCapturePushButton, &QPushButton::clicked,
-            &spim(), &SPIM::startAcquisition);
-
+            &spim(), &SPIM::startFreeRun);
 
     QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
     connect(stopCapturePushButton, &QPushButton::clicked,
