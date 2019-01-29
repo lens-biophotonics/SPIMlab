@@ -24,6 +24,7 @@ set(SPIMlab_SRCS
 
 add_executable(SPIMlab ${SPIMlab_SRCS})
 target_link_libraries(SPIMlab
+    stdc++
     Qt5::Widgets
     ${Qwt_LIBRARY}
     SPIMlabCore
