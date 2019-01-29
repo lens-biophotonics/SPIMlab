@@ -27,6 +27,8 @@ set(SRC
     # PI
     pidevice.cpp
 
+    # Cobolt
+    cobolt.cpp
     serialport.cpp
 
     logger.cpp
