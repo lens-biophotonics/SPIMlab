@@ -27,6 +27,8 @@ set(SRC
     # PI
     pidevice.cpp
 
+    serialport.cpp
+
     logger.cpp
     logmanager.cpp
     savestackworker.cpp
@@ -39,6 +41,8 @@ target_link_libraries(SPIMlabCore
     Qt5::Core
     ${PIGCS_LIBRARY}
 )
+qt5_use_modules(SPIMlabCore Core SerialPort)
+
 
 if (NOT DEMO_MODE)
     target_link_libraries(SPIMlabCore
