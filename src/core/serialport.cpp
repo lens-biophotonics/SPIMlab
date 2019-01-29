@@ -112,6 +112,40 @@ void SerialPort::close()
     }
 }
 
+/**
+ * @brief Convenience function to retrieve a float.
+ * @param cmd The command to be sent.
+ * @return The retrieved float.
+ */
+
+float SerialPort::getFloat(const QString &cmd)
+{
+    QString str = transceive(cmd);
+    bool ok;
+    float f = str.toFloat(&ok);
+    if (!ok) {
+        throw std::runtime_error("Cannot convert string to float");
+    }
+    return f;
+}
+
+/**
+ * @brief Convenience function to retrieve an int.
+ * @param cmd The command to be sent.
+ * @return The retrieved int.
+ */
+
+int SerialPort::getInt(const QString &cmd)
+{
+    QString str = transceive(cmd);
+    bool ok;
+    int integer = str.toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error("Cannot convert string to int");
+    }
+    return integer;
+}
+
 void SerialPort::setTimeout(int ms)
 {
     _transceiveTimeout = ms;

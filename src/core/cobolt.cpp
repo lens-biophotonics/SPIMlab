@@ -28,28 +28,6 @@ SerialPort *Cobolt::serialPort() const
     return serial;
 }
 
-float Cobolt::getFloat(const QString &cmd)
-{
-    QString str = serial->transceive(cmd);
-    bool ok;
-    float f = str.toFloat(&ok);
-    if (!ok) {
-        throw std::runtime_error("Cannot convert string to float");
-    }
-    return f;
-}
-
-int Cobolt::getInt(const QString &cmd)
-{
-    QString str = serial->transceive(cmd);
-    bool ok;
-    int integer = str.toInt(&ok);
-    if (!ok) {
-        throw std::runtime_error("Cannot convert string to int");
-    }
-    return integer;
-}
-
 QString Cobolt::getSerialNumber()
 {
     return serial->transceive("gsn?");
@@ -62,7 +40,7 @@ QString Cobolt::getSerialNumber()
 
 float Cobolt::getOutputPower()
 {
-    return getFloat("pa?");
+    return serial->getFloat("pa?");
 }
 
 /**
@@ -72,17 +50,17 @@ float Cobolt::getOutputPower()
 
 float Cobolt::getDriveCurrent()
 {
-    return getFloat("i?");
+    return serial->getFloat("i?");
 }
 
 Cobolt::ON_OFF_STATE Cobolt::getOnOffState()
 {
-    int state = getInt("l?");
+    int state = serial->getInt("l?");
     return static_cast<ON_OFF_STATE>(state);
 }
 
 Cobolt::OPERATING_MODE Cobolt::getOperatingMode()
 {
-    int mode = getInt("gom?");
+    int mode = serial->getInt("gom?");
     return static_cast<OPERATING_MODE>(mode);
 }

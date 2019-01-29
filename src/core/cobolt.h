@@ -46,9 +46,6 @@ signals:
 
 private:
     SerialPort *serial = nullptr;
-
-    float getFloat(const QString &cmd);
-    int getInt(const QString &cmd);
 };
 
 #endif // COBOLT_H
