@@ -98,6 +98,7 @@ void SPIM::startAcquisition()
         cameraTrigger->setFreeRunEnabled(false);
         thread = new QThread();
         worker = new SaveStackWorker();
+        worker->setOutputFileName("output.raw");
         worker->setFrameCount(100);
         worker->moveToThread(thread);
 
@@ -105,6 +106,7 @@ void SPIM::startAcquisition()
         connect(worker, &SaveStackWorker::finished, thread, &QThread::quit);
         connect(worker, &SaveStackWorker::finished, worker, &SaveStackWorker::deleteLater);
         connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
+        connect(worker, &SaveStackWorker::error, this, &SPIM::onError);
         connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
         orca->setNFramesInBuffer(100);
@@ -156,9 +158,11 @@ void SPIM::setExposureTime(double expTime)
     }
 }
 
-void SPIM::onError(const QString &errMsg) const
+void SPIM::onError(const QString &errMsg)
 {
     emit error(errMsg);
+    logger->error(errMsg);
+    stop();
 }
 
 SPIM &spim()

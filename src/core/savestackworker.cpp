@@ -3,6 +3,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
+
 #include "logger.h"
 #include "savestackworker.h"
 #include "spim.h"
@@ -15,8 +19,14 @@ SaveStackWorker::SaveStackWorker(QObject *parent) : QObject(parent)
 
 void SaveStackWorker::saveToFile()
 {
+    QFileInfo fi = QFileInfo(outputFileName);
     stopRequested = false;
-    int fd = open("/mnt/ramdisk/output.bin", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    int fd = open(outputFileName.toStdString().c_str(),
+                  O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd < 0) {
+        emit error(QString("Cannot open output file %1").arg(outputFileName));
+        return;
+    }
     size_t n = 2 * 2048 * 2048;
     OrcaFlash *orca = spim().camera();
     const uint nFramesInBuffer = orca->nFramesInBuffer();
@@ -53,10 +63,29 @@ void SaveStackWorker::saveToFile()
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);
 
+    const QString mhdFileName = fi.baseName() + ".mhd";
+    QFile outFile(mhdFileName);
+    if (!outFile.open(QIODevice::WriteOnly)) {
+        emit error(QString("Cannot open output file %1").arg(mhdFileName));
+        return;
+    };
+    QTextStream out(&outFile);
+    out << "ObjectType = Image\n";
+    out << "NDims = 3\n";
+    out << "DimSize = 2048 2048 " << i << "\n";
+    out << "ElementType = MET_USHORT\n";
+    out << "ElementDataFile = " << fi.fileName() << "\n";
+    outFile.close();
+
     emit finished();
 }
 
 void SaveStackWorker::setFrameCount(uint count)
 {
     frameCount = count;
+}
+
+void SaveStackWorker::setOutputFileName(const QString &fname)
+{
+    outputFileName = fname;
 }
