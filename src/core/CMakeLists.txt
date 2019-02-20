@@ -25,6 +25,7 @@ set(SRC
     orcaflash.cpp
 
     # PI
+    pidaisychain.cpp
     pidevice.cpp
 
     # Cobolt

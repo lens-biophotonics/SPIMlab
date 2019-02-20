@@ -3,15 +3,25 @@
 
 #include <QObject>
 
+
 class PIDevice : public QObject
 {
     Q_OBJECT
 
 public:
     explicit PIDevice(QObject *parent = nullptr);
-    void openDaisyChain(const QString &description, const int deviceNumber);
+    virtual ~PIDevice();
+    void connect(const QString &portName, const int baud);
+    void connectDaisyChain(const QString &portName,
+                           const int deviceNumber);
+    void close();
 
+    bool isConnected();
     void move(const QString &axesStr, const double pos[]);
+
+    QStringList getAvailableStageTypes();
+
+    QString getErrorString();
 
 signals:
 
