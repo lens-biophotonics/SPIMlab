@@ -3,8 +3,6 @@
 
 #include <QString>
 
-#include <PI/PI_GCS2_DLL.h>
-
 #include "pidevice.h"
 #include "pidaisychain.h"
 
@@ -59,13 +57,69 @@ bool PIDevice::isConnected()
 }
 
 
-void PIDevice::move(const QString &axesStr, const double pos[])
+void PIDevice::move(const QString &axes, const double pos[])
 {
 #ifndef WITH_HARDWARE
-    Q_UNUSED(axesStr)
+    Q_UNUSED(axes)
     Q_UNUSED(pos)
 #endif
-    CALL_THROW(PI_MOV(id, axesStr.toLatin1(), pos));
+    CALL_THROW(PI_MOV(id, axes.toLatin1(), pos));
+}
+
+void PIDevice::setServoEnabled(const QString &axes, const QVector<int> &enable)
+{
+    if (axes.isEmpty()) {
+        return;
+    }
+#ifndef WITH_HARDWARE
+    Q_UNUSED(enable)
+#endif
+    CALL_THROW(PI_SVO(id, axes.toLatin1(), enable.constData()));
+}
+
+void PIDevice::fastMoveToPositiveLimit(const QString &axes)
+{
+    if (axes.isEmpty()) {
+        return;
+    }
+    CALL_THROW(PI_FPL(id, axes.toLatin1()));
+}
+
+void PIDevice::fastMoveToNegativeLimit(const QString &axes)
+{
+    if (axes.isEmpty()) {
+        return;
+    }
+    CALL_THROW(PI_FNL(id, axes.toLatin1()));
+}
+
+void PIDevice::fastMoveToReferenceSwitch(const QString &axes)
+{
+    if (axes.isEmpty()) {
+        return;
+    }
+    CALL_THROW(PI_FRF(id, axes.toLatin1()));
+}
+
+void PIDevice::loadStages(
+    const QString &axes, const QStringList &stages)
+{
+    if (axes.isEmpty() || stages.isEmpty()) {
+        return;
+    }
+    CALL_THROW(PI_CST(id, axes.toLatin1(), stages.join("\n").toLatin1()));
+}
+
+QStringList PIDevice::getStages(const QString &axes)
+{
+#ifndef WITH_HARDWARE
+    Q_UNUSED(axes)
+#endif
+    std::unique_ptr<char[]> buf(new char[1024]);
+    CALL_THROW(PI_qCST(id, axes.toLatin1(), buf.get(), 1024));
+    QStringList sl = QString(buf.get()).split("\n");
+    sl.removeAll(QString(""));
+    return sl;
 }
 
 QStringList PIDevice::getAvailableStageTypes()
