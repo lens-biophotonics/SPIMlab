@@ -71,10 +71,35 @@ void PIDevice::move(const QString &axesStr, const double pos[])
 QStringList PIDevice::getAvailableStageTypes()
 {
     std::unique_ptr<char[]> buf(new char[4096]);
+#ifdef WITH_HARDWARE
     CALL_THROW(PI_qVST(id, buf.get(), 4096));
+#endif
     QStringList sl = QString(buf.get()).replace(" ", "").split("\n");
     sl.removeAll(QString(""));
     return sl;
+}
+
+QString PIDevice::getAxisIdentifiers()
+{
+    std::unique_ptr<char[]> buf(new char[32]);
+    CALL_THROW(PI_qSAI(id, buf.get(), 32));
+    return QString(buf.get()).replace("\n", "");
+}
+
+QVector<int> PIDevice::getReferencedState(QString axes)
+{
+    int nOfAxes;
+    if (axes.isEmpty()) {
+        nOfAxes = getAxisIdentifiers().length();
+    }
+    else {
+        nOfAxes = axes.length();
+    }
+    QVector<BOOL> vec;
+    vec.resize(nOfAxes);
+    std::unique_ptr<BOOL[]> buf(new BOOL[static_cast<size_t>(nOfAxes)]);
+    CALL_THROW(PI_qFRF(id, "", vec.data()));
+    return vec;
 }
 
 QString PIDevice::getErrorString()

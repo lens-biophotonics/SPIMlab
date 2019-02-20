@@ -20,6 +20,8 @@ public:
     void move(const QString &axesStr, const double pos[]);
 
     QStringList getAvailableStageTypes();
+    QString getAxisIdentifiers();
+    QVector<int> getReferencedState(QString axes = "");
 
     QString getErrorString();
 
