@@ -29,7 +29,7 @@ private:
     int _nOfDevices;
 };
 
-PIDaisyChain *openDaisyChain(const QString &portName, const int baud = 115200);
+PIDaisyChain *openDaisyChain(const QString &portName, const int baud = 38400);
 void closeDaisyChain(const QString &portName);
 void closeAllDaisyChains();
 
