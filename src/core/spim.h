@@ -9,10 +9,21 @@
 #include "cameratrigger.h"
 #include "galvoramp.h"
 
+#include "pidevice.h"
+
 class SPIM : public QObject
 {
     Q_OBJECT
 public:
+    enum PI_DEVICES : int {
+        PI_DEVICE_X_AXIS,
+        PI_DEVICE_Y_AXIS,
+        PI_DEVICE_Z_AXIS,
+        PI_DEVICE_LEFT_OBJ_AXIS,
+        PI_DEVICE_RIGHT_OBJ_AXIS,
+    };
+
+
     SPIM(QObject *parent = nullptr);
     virtual ~SPIM();
 
@@ -20,6 +31,8 @@ public:
     void setCamera(OrcaFlash *camera);
 
     void setupCameraTrigger(const QString &COPhysicalChan, const QString &terminal);
+
+    PIDevice *piDevice(const PI_DEVICES dev) const;
 
 public slots:
     void startFreeRun();
@@ -41,10 +54,12 @@ private:
     CameraTrigger *cameraTrigger = nullptr;
     GalvoRamp *galvoRamp = nullptr;
 
+    QList<PIDevice *>piDevList;
+
     void setExposureTime(double expTime);
 
 private slots:
-    void onError(const QString &errMsg) const;
+    void onError(const QString &errMsg);
 };
 
 SPIM& spim();

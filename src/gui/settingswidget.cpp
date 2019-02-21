@@ -1,11 +1,12 @@
-#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QComboBox>
 
+#include "core/spim.h"
+
 #include "settingswidget.h"
-#include "core/natinst.h"
+#include "picontrollersettingswidget.h"
 
 SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -31,8 +32,36 @@ void SettingsWidget::setupUI()
 
     natinstGroupBox->setLayout(grid);
 
+    QHBoxLayout *piHLayout = new QHBoxLayout();
+    QHBoxLayout *piHLayout2 = new QHBoxLayout();
+    piHLayout->addWidget(
+        new PIControllerSettingsWidget(
+            "X Axis", spim().piDevice(SPIM::PI_DEVICE_X_AXIS)));
+    piHLayout->addWidget(
+        new PIControllerSettingsWidget(
+            "Y Axis", spim().piDevice(SPIM::PI_DEVICE_Y_AXIS)));
+    piHLayout->addWidget(
+        new PIControllerSettingsWidget(
+            "Z Axis", spim().piDevice(SPIM::PI_DEVICE_Z_AXIS)));
+    piHLayout->addStretch();
+
+    piHLayout2->addWidget(
+        new PIControllerSettingsWidget(
+            "Left Objective", spim().piDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS)));
+    piHLayout2->addWidget(
+        new PIControllerSettingsWidget(
+            "Right Objective",
+            spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS)));
+    piHLayout2->addStretch();
+
+    QHBoxLayout *niHLayout = new QHBoxLayout();
+    niHLayout->addWidget(natinstGroupBox);
+    niHLayout->addStretch();
+
     QVBoxLayout *vlayout = new QVBoxLayout();
-    vlayout->addWidget(natinstGroupBox);
+    vlayout->addLayout(piHLayout);
+    vlayout->addLayout(piHLayout2);
+    vlayout->addLayout(niHLayout);
     vlayout->addStretch();
 
     QHBoxLayout *hlayout = new QHBoxLayout(this);

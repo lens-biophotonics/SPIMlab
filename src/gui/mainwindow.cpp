@@ -65,8 +65,6 @@ void MainWindow::setupUi()
     statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     statusBar()->addWidget(statusLabel);
 
-    setMinimumSize(1024, 768);
-
     QState *s;
 
     s = stateMachine().getState(STATE_UNINITIALIZED);
