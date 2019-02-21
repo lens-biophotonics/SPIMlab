@@ -5,6 +5,7 @@
 
 
 #include <QObject>
+#include <QState>
 
 
 class PIDevice : public QObject
@@ -14,11 +15,9 @@ class PIDevice : public QObject
 public:
     explicit PIDevice(QObject *parent = nullptr);
     virtual ~PIDevice();
-    void connect(const QString &portName, const int baud);
-    void connectDaisyChain(const QString &portName,
-                           const int deviceNumber);
-    void close();
-
+    void connectSerial(const QString &portName, const int baud);
+    void connectDaisyChainSerial(const QString &portName,
+                                 const int deviceNumber, const int baud = 38400);
     bool isConnected();
 
     void move(const QString &axes, const double pos[]);
@@ -28,7 +27,7 @@ public:
     void fastMoveToNegativeLimit(const QString &axes = "");
     void fastMoveToReferenceSwitch(const QString &axes = "");
     void loadStages(const QString &axes, const QStringList &stages);
-    QStringList getStages(const QString &axes = "");
+    QStringList getStages(const QString &axes = "", bool stripAxes = false);
 
     QStringList getAvailableStageTypes();
     QString getAxisIdentifiers();
@@ -36,12 +35,29 @@ public:
 
     QString getErrorString();
 
+    int deviceNumber() const;
+    QString portName() const;
+    int baudRate() const;
+
+    QState *connectedState() const;
+    QState *disconnectedState() const;
+
 signals:
+    void connected();
+    void disconnected();
 
 public slots:
+    void close();
 
 private:
+    void setupStateMachine();
+
     int id;
+    int _deviceNumber = 1;
+    QString _portName;
+    QState *_connectedState = nullptr;
+    QState *_disconnectedState = nullptr;
+    int _baud = -1;
 };
 
 #endif // PIDEVICE_H

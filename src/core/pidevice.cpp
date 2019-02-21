@@ -2,9 +2,14 @@
 #include <memory>
 
 #include <QString>
+#include <QStateMachine>
 
+#include "logger.h"
 #include "pidevice.h"
 #include "pidaisychain.h"
+
+static Logger *logger = getLogger("PIDevice");
+
 
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
@@ -19,6 +24,7 @@
 
 PIDevice::PIDevice(QObject *parent) : QObject(parent)
 {
+    setupStateMachine();
 }
 
 PIDevice::~PIDevice()
@@ -26,25 +32,38 @@ PIDevice::~PIDevice()
     close();
 }
 
-void PIDevice::connect(const QString &portName, const int baud)
+void PIDevice::connectSerial(const QString &portName, const int baud)
 {
     id = PI_ConnectRS232ByDevName(portName.toStdString().c_str(), baud);
 
     if (id == -1) {
         throw std::runtime_error("PI_ConnectRS232ByDevName failed");
     }
+
+    _portName = portName;
+    _baud = baud;
+    emit connected();
 }
 
-void PIDevice::connectDaisyChain(
-    const QString &portName, const int deviceNumber)
+void PIDevice::connectDaisyChainSerial(
+    const QString &portName, const int deviceNumber, const int baud)
 {
-    id = openDaisyChain(portName, 38400)->connectDevice(deviceNumber);
+    id = openDaisyChain(portName, baud)->connectDevice(deviceNumber);
+
+    _portName = portName;
+    _baud = baud;
+    QString msg =
+        QString("Connected Daisy Chain device on port %1, device number %2");
+    msg = msg.arg(portName).arg(deviceNumber);
+    logger->info(msg);
+    emit connected();
 }
 
 void PIDevice::close()
 {
     PI_CloseConnection(id);
     id = -1;
+    emit disconnected();
 }
 
 bool PIDevice::isConnected()
@@ -110,7 +129,7 @@ void PIDevice::loadStages(
     CALL_THROW(PI_CST(id, axes.toLatin1(), stages.join("\n").toLatin1()));
 }
 
-QStringList PIDevice::getStages(const QString &axes)
+QStringList PIDevice::getStages(const QString &axes, bool stripAxes)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(axes)
@@ -119,6 +138,9 @@ QStringList PIDevice::getStages(const QString &axes)
     CALL_THROW(PI_qCST(id, axes.toLatin1(), buf.get(), 1024));
     QStringList sl = QString(buf.get()).split("\n");
     sl.removeAll(QString(""));
+    if (stripAxes) {
+        sl.replaceInStrings(QRegExp("\\d+="), "");
+    }
     return sl;
 }
 
@@ -161,4 +183,49 @@ QString PIDevice::getErrorString()
     std::unique_ptr<char[]> buf(new char[1024]);
     PI_TranslateError(PI_GetError(id), buf.get(), 1024);
     return QString(buf.get());
+}
+
+int PIDevice::deviceNumber() const
+{
+    return _deviceNumber;
+}
+
+QString PIDevice::portName() const
+{
+    return _portName;
+}
+
+int PIDevice::baudRate() const
+{
+    return _baud;
+}
+
+QState *PIDevice::connectedState() const
+{
+    return _connectedState;
+}
+
+QState *PIDevice::disconnectedState() const
+{
+    return _disconnectedState;
+}
+
+void PIDevice::setupStateMachine()
+{
+    _connectedState = new QState();
+    _disconnectedState = new QState();
+
+    _connectedState->addTransition(
+        this, &PIDevice::disconnected, _disconnectedState);
+
+    _disconnectedState->addTransition(
+        this, &PIDevice::connected, _connectedState);
+
+    QStateMachine *sm = new QStateMachine();
+
+    sm->addState(_connectedState);
+    sm->addState(_disconnectedState);
+
+    sm->setInitialState(_disconnectedState);
+    sm->start();
 }
