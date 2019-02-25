@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QStateMachine>
+#include <QSerialPortInfo>
 
 #include "logger.h"
 #include "pidevice.h"
@@ -40,18 +41,21 @@ void PIDevice::connectSerial(const QString &portName, const int baud)
         throw std::runtime_error("PI_ConnectRS232ByDevName failed");
     }
 
-    _portName = portName;
-    _baud = baud;
+    setPortName(portName);
+    setBaud(baud);
     emit connected();
 }
 
 void PIDevice::connectDaisyChainSerial(
     const QString &portName, const int deviceNumber, const int baud)
 {
-    id = openDaisyChain(portName, baud)->connectDevice(deviceNumber);
+    QString pName = QSerialPortInfo(portName).systemLocation();
+    id = openDaisyChain(pName, baud)->connectDevice(deviceNumber);
 
-    _portName = portName;
-    _baud = baud;
+    setPortName(portName);
+    setBaud(baud);
+    setDeviceNumber(deviceNumber);
+
     QString msg =
         QString("Connected Daisy Chain device on port %1, device number %2");
     msg = msg.arg(portName).arg(deviceNumber);
@@ -185,21 +189,6 @@ QString PIDevice::getErrorString()
     return QString(buf.get());
 }
 
-int PIDevice::deviceNumber() const
-{
-    return _deviceNumber;
-}
-
-QString PIDevice::portName() const
-{
-    return _portName;
-}
-
-int PIDevice::baudRate() const
-{
-    return _baud;
-}
-
 QState *PIDevice::connectedState() const
 {
     return _connectedState;
@@ -228,4 +217,34 @@ void PIDevice::setupStateMachine()
 
     sm->setInitialState(_disconnectedState);
     sm->start();
+}
+
+QString PIDevice::getPortName() const
+{
+    return portName;
+}
+
+void PIDevice::setPortName(const QString &value)
+{
+    portName = value;
+}
+
+int PIDevice::getBaud() const
+{
+    return baud;
+}
+
+void PIDevice::setBaud(int value)
+{
+    baud = value;
+}
+
+int PIDevice::getDeviceNumber() const
+{
+    return deviceNumber;
+}
+
+void PIDevice::setDeviceNumber(int value)
+{
+    deviceNumber = value;
 }

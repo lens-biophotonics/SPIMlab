@@ -35,12 +35,17 @@ public:
 
     QString getErrorString();
 
-    int deviceNumber() const;
-    QString portName() const;
-    int baudRate() const;
-
     QState *connectedState() const;
     QState *disconnectedState() const;
+
+    int getDeviceNumber() const;
+    void setDeviceNumber(int value);
+
+    int getBaud() const;
+    void setBaud(int value);
+
+    QString getPortName() const;
+    void setPortName(const QString &value);
 
 signals:
     void connected();
@@ -53,11 +58,13 @@ private:
     void setupStateMachine();
 
     int id;
-    int _deviceNumber = 1;
-    QString _portName;
+
+    int deviceNumber = -1;
+    int baud = -1;
+    QString portName;
+
     QState *_connectedState = nullptr;
     QState *_disconnectedState = nullptr;
-    int _baud = -1;
 };
 
 #endif // PIDEVICE_H

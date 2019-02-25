@@ -145,21 +145,16 @@ void PIControllerSettingsWidget::setupUI()
     QSize size = serialPortComboBox->size();
     size.setWidth(150);
     serialPortComboBox->setMaximumSize(size);
-    int currentIndex = -1;
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         if (info.manufacturer() != "PI") {
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
                         .arg(info.description())
-                        .arg(info.systemLocation())
+                        .arg(info.portName())
                         .arg(info.serialNumber());
-        serialPortComboBox->addItem(descr, info.systemLocation());
-        if (device->portName() == info.systemLocation()) {
-            currentIndex = serialPortComboBox->count() - 1;
-        }
+        serialPortComboBox->addItem(descr, info.portName());
     }
-    serialPortComboBox->setCurrentIndex(currentIndex);
 
     int row = 0;
     grid->addWidget(new QLabel("Serial port"), row, 0, 1, 1);
@@ -178,7 +173,7 @@ void PIControllerSettingsWidget::setupUI()
     deviceNumberSpinBox = new QSpinBox();
     deviceNumberSpinBox->setMinimum(1);
     deviceNumberSpinBox->setMaximum(17);
-    deviceNumberSpinBox->setValue(device->deviceNumber());
+    deviceNumberSpinBox->setValue(device->getDeviceNumber());
     grid->addWidget(new QLabel("Device number"), row, 0, 1, 1);
     grid->addWidget(deviceNumberSpinBox, row++, 1, 1, 1);
 
@@ -268,10 +263,22 @@ void PIControllerSettingsWidget::setupUI()
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
+
+    refreshValues();
 }
 
 void PIControllerSettingsWidget::refreshValues()
 {
+    const QString portName = device->getPortName();
+    int idx;
+    idx = serialPortComboBox->findData(device->getPortName());
+    serialPortComboBox->setCurrentIndex(idx);
+
+    idx = baudComboBox->findData(device->getBaud());
+    baudComboBox->setCurrentIndex(idx);
+
+    deviceNumberSpinBox->setValue(device->getDeviceNumber());
+
     if (!device->isConnected()) {
         return;
     }
@@ -288,16 +295,6 @@ void PIControllerSettingsWidget::refreshValues()
     }
     referencedStateLabel->setText(rsTxt);
     stagesLabel->setText(stages);
-
-    const QString portName = device->portName();
-    int idx;
-    idx = serialPortComboBox->findData(device->portName());
-    serialPortComboBox->setCurrentIndex(idx);
-
-    idx = baudComboBox->findData(device->baudRate());
-    baudComboBox->setCurrentIndex(idx);
-
-    deviceNumberSpinBox->setValue(device->deviceNumber());
 }
 
 void PIControllerSettingsWidget::connectDevice()

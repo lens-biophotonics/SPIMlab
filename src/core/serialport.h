@@ -11,6 +11,8 @@ public:
     void sendMsg(QString msg);
     void close();
 
+    static QSerialPortInfo findPortFromSerialNumber(const QString &sn);
+
     QString transceive(QString command);
     bool open(OpenMode mode = QIODevice::ReadWrite);
 

@@ -6,10 +6,12 @@
 #include <QLabel>
 #include <QStatusBar>
 #include <QSettings>
+#include <QSerialPortInfo>
 
 #include "core/spim.h"
 #include "core/statemachine.h"
 #include "core/logmanager.h"
+#include "core/serialport.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"
@@ -18,9 +20,9 @@ static Logger *logger = getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    setupUi();
-
     loadSettings();
+
+    setupUi();
 
     QThread *thread = new QThread();
     spim().moveToThread(thread);
@@ -85,6 +87,24 @@ void MainWindow::saveSettings() const
     settings.setValue("mainWindowGeometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
     settings.endGroup();
+
+    settings.beginGroup("SPIM");
+
+    QMapIterator<QString, PIDevice *> i(piSettingsPrefixMap);
+    while (i.hasNext()) {
+        i.next();
+        PIDevice *dev = i.value();
+        QString prefix = i.key();
+        settings.setValue(prefix + "portName", dev->getPortName());
+        settings.setValue(prefix + "baud", dev->getBaud());
+        settings.setValue(prefix + "deviceNumber", dev->getDeviceNumber());
+        if (!dev->getPortName().isEmpty()) {
+            QSerialPortInfo info(dev->getPortName());
+            settings.setValue(prefix + "serialNumber", info.serialNumber());
+        }
+    }
+
+    settings.endGroup();
 }
 
 void MainWindow::loadSettings()
@@ -94,6 +114,37 @@ void MainWindow::loadSettings()
     settings.beginGroup("MainWindow");
     restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
     restoreState(settings.value("mainWindowState").toByteArray());
+    settings.endGroup();
+
+    piSettingsPrefixMap["X_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_X_AXIS);
+    piSettingsPrefixMap["Y_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Y_AXIS);
+    piSettingsPrefixMap["Z_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Z_AXIS);
+    piSettingsPrefixMap["LO_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS);
+    piSettingsPrefixMap["RO_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS);
+
+    settings.beginGroup("SPIM");
+
+    QMapIterator<QString, PIDevice *> i(piSettingsPrefixMap);
+    while (i.hasNext()) {
+        i.next();
+        PIDevice *dev = i.value();
+        QString prefix = i.key();
+        dev->setBaud(settings.value(prefix + "baud", "").toInt());
+        dev->setDeviceNumber(settings.value(prefix + "deviceNumber", "").toInt());
+
+        QString sn = settings.value(prefix + "serialNumber").toString();
+
+        if (!sn.isEmpty()) {
+            QSerialPortInfo info = SerialPort::findPortFromSerialNumber(sn);
+            if (!info.portName().isEmpty()) {
+                dev->setPortName(info.portName());
+            }
+        }
+        else {
+            dev->setPortName(settings.value(prefix + "portName").toString());
+        }
+    }
+
     settings.endGroup();
 }
 
