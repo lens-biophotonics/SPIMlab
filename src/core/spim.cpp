@@ -4,6 +4,8 @@
 #include "spim.h"
 #include "logger.h"
 
+#include "pidaisychain.h"
+
 static Logger *logger = getLogger("SPIM");
 
 
@@ -43,6 +45,7 @@ void SPIM::initialize()
 void SPIM::uninitialize()
 {
     try {
+        closeAllDaisyChains();
         delete orca;
         DCAM::uninit_dcam();
         delete cameraTrigger;
