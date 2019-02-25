@@ -63,6 +63,16 @@ void PIDevice::connectDaisyChainSerial(
     emit connected();
 }
 
+void PIDevice::connectDevice()
+{
+    if (getDeviceNumber() > 0) {
+        connectDaisyChainSerial(getPortName(), getDeviceNumber(), getBaud());
+    }
+    else if (!getPortName().isEmpty()) {
+        connectSerial(getPortName(), getBaud());
+    }
+}
+
 void PIDevice::close()
 {
     PI_CloseConnection(id);

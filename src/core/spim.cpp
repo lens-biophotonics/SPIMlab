@@ -42,6 +42,10 @@ void SPIM::initialize()
         galvoRamp->setPhysicalChannel("Dev1/ao0");
         galvoRamp->setupWaveform(0.2, 2, 0);
         setupCameraTrigger("Dev1/ctr0", "/Dev1/PFI0");
+
+        foreach (PIDevice * dev, piDevList) {
+            dev->connectDevice();
+        }
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

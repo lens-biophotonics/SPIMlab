@@ -18,6 +18,9 @@ public:
     void connectSerial(const QString &portName, const int baud);
     void connectDaisyChainSerial(const QString &portName,
                                  const int deviceNumber, const int baud = 38400);
+
+    void connectDevice();
+
     bool isConnected();
 
     void move(const QString &axes, const double pos[]);
