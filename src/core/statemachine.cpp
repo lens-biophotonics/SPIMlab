@@ -22,8 +22,6 @@ StateMachine::StateMachine() : QStateMachine()
     readyState->addTransition(&spim(), &SPIM::captureStarted, capturingState);
     capturingState->addTransition(&spim(), &SPIM::stopped, readyState);
 
-    QMetaObject::connectSlotsByName(this);
-
     start();
 }
 
