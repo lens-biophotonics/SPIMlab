@@ -28,13 +28,11 @@ bool SerialPort::open(OpenMode mode)
 {
     if (!_serialNumber.isEmpty())
     {
-        foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-            if (info.serialNumber() == _serialNumber) {
-                logger->info(QString("Found serial number %1 on %2")
-                             .arg(info.serialNumber()).arg(info.portName()));
-                setPortName(info.portName());
-                break;
-            }
+        QSerialPortInfo info = findPortFromSerialNumber(_serialNumber);
+        if (!info.portName().isEmpty()) {
+            logger->info(QString("Found serial number %1 on %2")
+                         .arg(info.serialNumber()).arg(info.portName()));
+            setPort(info);
         }
     }
     bool ret = QSerialPort::open(mode);
@@ -110,6 +108,16 @@ void SerialPort::close()
         emit closed();
         logger->info("Disconnected");
     }
+}
+
+QSerialPortInfo SerialPort::findPortFromSerialNumber(const QString &sn)
+{
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        if (info.serialNumber() == sn) {
+            return info;
+        }
+    }
+    return QSerialPortInfo();
 }
 
 /**

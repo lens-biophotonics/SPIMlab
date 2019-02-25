@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QMenuBar>
+#include <QMap>
 
+#include <core/pidevice.h>
 #include "version.h"
 
 class MainWindow : public QMainWindow
@@ -22,6 +24,8 @@ private:
     void saveSettings() const;
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
+
+    QMap<QString, PIDevice *> piSettingsPrefixMap;
 };
 
 #endif // MAINWINDOW_H

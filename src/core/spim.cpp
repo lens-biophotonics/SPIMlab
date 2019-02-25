@@ -4,11 +4,24 @@
 #include "spim.h"
 #include "logger.h"
 
+#include "pidaisychain.h"
+
 static Logger *logger = getLogger("SPIM");
 
 
 SPIM::SPIM(QObject *parent) : QObject(parent)
 {
+    orca = new OrcaFlash(this);
+    cameraTrigger = new CameraTrigger(this);
+    galvoRamp = new GalvoRamp(this);
+
+    piDevList.reserve(5);
+
+    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice(this));
+    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice(this));
+    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice(this));
+    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice(this));
+    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice(this));
 }
 
 SPIM::~SPIM()
@@ -20,18 +33,19 @@ void SPIM::initialize()
     try {
         DCAM::init_dcam();
 
-        orca = new OrcaFlash();
         orca->open(0);
         orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
         orca->setGetTriggerMode(OrcaFlash::TRIGMODE_EDGE);
         orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
                                OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
 
-        cameraTrigger = new CameraTrigger();
-        galvoRamp = new GalvoRamp();
         galvoRamp->setPhysicalChannel("Dev1/ao0");
         galvoRamp->setupWaveform(0.2, 2, 0);
         setupCameraTrigger("Dev1/ctr0", "/Dev1/PFI0");
+
+        foreach (PIDevice * dev, piDevList) {
+            dev->connectDevice();
+        }
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -43,10 +57,9 @@ void SPIM::initialize()
 void SPIM::uninitialize()
 {
     try {
+        closeAllDaisyChains();
         delete orca;
         DCAM::uninit_dcam();
-        delete cameraTrigger;
-        delete galvoRamp;
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -70,6 +83,11 @@ void SPIM::setupCameraTrigger(
         onError(e.what());
         return;
     }
+}
+
+PIDevice *SPIM::piDevice(const SPIM::PI_DEVICES dev) const
+{
+    return piDevList.value(dev);
 }
 
 void SPIM::startFreeRun()
