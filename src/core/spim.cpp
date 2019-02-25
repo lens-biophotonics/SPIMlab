@@ -4,7 +4,7 @@
 #include "spim.h"
 #include "logger.h"
 
-static Logger *logger = getLogger("SPIMHub");
+static Logger *logger = getLogger("SPIM");
 
 
 SPIM::SPIM(QObject *parent) : QObject(parent)
