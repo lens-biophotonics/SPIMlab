@@ -9,6 +9,7 @@ public:
     CameraTrigger(QObject *parent = nullptr);
 
     void setPhysicalChannel(const QString &channel);
+    QString getPhysicalChannel() const;
 
     void setFrequency(const double Hz);
     double getFrequency();

@@ -46,6 +46,11 @@ void CameraTrigger::initializeTask_impl()
                      physicalChannel, getTerm()));
 }
 
+QString CameraTrigger::getPhysicalChannel() const
+{
+    return physicalChannel;
+}
+
 
 void CameraTrigger::configureTriggering()
 {
@@ -100,6 +105,9 @@ bool CameraTrigger::isFreeRunEnabled() const
 
 QString CameraTrigger::getTerm()
 {
+    if (!isInitialized()) {
+        return this->term;
+    }
     char buff[100];
     DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME, buff, 100));
     return QString(buff);

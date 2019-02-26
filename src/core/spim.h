@@ -34,6 +34,9 @@ public:
 
     PIDevice *piDevice(const PI_DEVICES dev) const;
 
+    CameraTrigger *getCameraTrigger() const;
+    GalvoRamp *getGalvoRamp() const;
+
 public slots:
     void startFreeRun();
     void startAcquisition();

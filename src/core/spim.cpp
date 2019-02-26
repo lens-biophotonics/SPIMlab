@@ -39,9 +39,7 @@ void SPIM::initialize()
         orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
                                OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
 
-        galvoRamp->setPhysicalChannel("Dev1/ao0");
         galvoRamp->setupWaveform(0.2, 2, 0);
-        setupCameraTrigger("Dev1/ctr0", "/Dev1/PFI0");
 
         foreach (PIDevice * dev, piDevList) {
             dev->connectDevice();
@@ -64,6 +62,16 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+GalvoRamp *SPIM::getGalvoRamp() const
+{
+    return galvoRamp;
+}
+
+CameraTrigger *SPIM::getCameraTrigger() const
+{
+    return cameraTrigger;
 }
 
 OrcaFlash *SPIM::camera() const

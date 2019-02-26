@@ -104,6 +104,13 @@ void MainWindow::saveSettings() const
         }
     }
 
+    settings.setValue("cameraTrigger.physicalChannel",
+                      spim().getCameraTrigger()->getPhysicalChannel());
+    settings.setValue("cameraTrigger.term",
+                      spim().getCameraTrigger()->getTerm());
+    settings.setValue("galvoRamp.physicalChannel",
+                      spim().getGalvoRamp()->getPhysicalChannel());
+
     settings.endGroup();
 }
 
@@ -144,6 +151,14 @@ void MainWindow::loadSettings()
             dev->setPortName(settings.value(prefix + "portName").toString());
         }
     }
+
+    CameraTrigger *ct = spim().getCameraTrigger();
+    ct->setPhysicalChannel(
+        settings.value("cameraTrigger.physicalChannel", "Dev1/ctr0").toString());
+    ct->setTerm(settings.value("cameraTrigger.term", "/Dev1/PFI0").toString());
+
+    spim().getGalvoRamp()->setPhysicalChannel(
+        settings.value("galvoRamp.physicalChannel", "Dev1/ao0").toString());
 
     settings.endGroup();
 }

@@ -77,6 +77,11 @@ void GalvoRamp::initializeTask_impl()
     write();
 }
 
+QString GalvoRamp::getPhysicalChannel() const
+{
+    return physicalChannel;
+}
+
 void GalvoRamp::configureTiming()
 {
     DAQmxErrChk(

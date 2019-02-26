@@ -1,12 +1,11 @@
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QComboBox>
+#include <QHBoxLayout>
 
 #include "core/spim.h"
 
 #include "settingswidget.h"
+#include "nisettingswidget.h"
 #include "picontrollersettingswidget.h"
+
 
 SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -15,23 +14,6 @@ SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 
 void SettingsWidget::setupUI()
 {
-    QGroupBox *natinstGroupBox = new QGroupBox("National Instruments");
-    QGridLayout *grid = new QGridLayout();
-
-    grid->addWidget(new QLabel("Camera Trigger"), 0, 0, 1, 2);
-
-    grid->addWidget(new QLabel("Counter"), 1, 0);
-    QComboBox *cameraTriggerCtrComboBox = new QComboBox();
-    cameraTriggerCtrComboBox->insertItems(0, NI::getCOPhysicalChans());
-    grid->addWidget(cameraTriggerCtrComboBox, 1, 1);
-
-    grid->addWidget(new QLabel("Term"), 2, 0);
-    QComboBox *cameraTriggerTermComboBox = new QComboBox();
-    cameraTriggerTermComboBox->addItems(NI::getTerminals());
-    grid->addWidget(cameraTriggerTermComboBox, 2, 1);
-
-    natinstGroupBox->setLayout(grid);
-
     QHBoxLayout *piHLayout = new QHBoxLayout();
     QHBoxLayout *piHLayout2 = new QHBoxLayout();
     piHLayout->addWidget(
@@ -54,8 +36,10 @@ void SettingsWidget::setupUI()
             spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS)));
     piHLayout2->addStretch();
 
+    NISettingsWidget *nisw = new NISettingsWidget();
+
     QHBoxLayout *niHLayout = new QHBoxLayout();
-    niHLayout->addWidget(natinstGroupBox);
+    niHLayout->addWidget(nisw);
     niHLayout->addStretch();
 
     QVBoxLayout *vlayout = new QVBoxLayout();
@@ -64,7 +48,7 @@ void SettingsWidget::setupUI()
     vlayout->addLayout(niHLayout);
     vlayout->addStretch();
 
-    QHBoxLayout *hlayout = new QHBoxLayout(this);
+    QHBoxLayout *hlayout = new QHBoxLayout();
     hlayout->addLayout(vlayout);
     hlayout->addStretch();
     setLayout(hlayout);

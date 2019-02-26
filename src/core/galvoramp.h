@@ -12,7 +12,9 @@ class GalvoRamp : public NIAbstractTask
 public:
     GalvoRamp(QObject *parent = nullptr);
 
+    QString getPhysicalChannel() const;
     void setPhysicalChannel(const QString &channel);
+
     void setTriggerSource(QString source);
 
     void setCameraParams(int nSamples, const int nRamp, const double rate);
