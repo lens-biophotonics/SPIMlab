@@ -22,6 +22,9 @@ public:
 
     void setTriggerTerm(const QString &term);
 
+    NI::float64 getInitialDelay() const;
+    void setInitialDelay(const NI::float64 &value);
+
 protected:
     void initializeTask_impl();
 
@@ -30,6 +33,7 @@ private:
     QString triggerTerm;
     QString term;
     NI::float64 freq;
+    NI::float64 initialDelay = 0;
     bool isFreeRun;
 
     void configureTriggering();

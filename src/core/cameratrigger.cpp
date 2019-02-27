@@ -30,7 +30,7 @@ void CameraTrigger::initializeTask_impl()
             CHANNEL_NAME,
             DAQmx_Val_Hz,  // units
             DAQmx_Val_Low,  // idleState
-            0,  // initialDelay
+            initialDelay,
             freq,
             DUTY_CYCLE
             )
@@ -44,6 +44,16 @@ void CameraTrigger::initializeTask_impl()
 
     logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
                      physicalChannel, getTerm()));
+}
+
+NI::float64 CameraTrigger::getInitialDelay() const
+{
+    return initialDelay;
+}
+
+void CameraTrigger::setInitialDelay(const NI::float64 &value)
+{
+    initialDelay = value;
 }
 
 QString CameraTrigger::getPhysicalChannel() const
