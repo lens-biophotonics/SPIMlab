@@ -3,12 +3,12 @@
 
 #include "core/spim.h"
 
-#include "centralwidget.h"
-#include "cameradisplay.h"
-#include "logwidget.h"
+#include "camerapage.h"
 #include "settingspage.h"
+#include "logwidget.h"
 #include "controlwidget.h"
 
+#include "centralwidget.h"
 
 CentralWidget::CentralWidget(QWidget *parent) : QWidget(parent)
 {
@@ -23,24 +23,11 @@ CentralWidget::~CentralWidget()
 
 void CentralWidget::setupUi()
 {
-    QWidget *cameraPage = new QWidget();
-    QHBoxLayout *hLayout = new QHBoxLayout();
-    hLayout->addWidget(new CameraDisplay(spim().getCamera(0)));
-    hLayout->addWidget(new CameraDisplay(spim().getCamera(1)));
-
-    QVBoxLayout *vLayout = new QVBoxLayout();
-    vLayout->addLayout(hLayout);
-    vLayout->addStretch();
-
-    cameraPage->setLayout(vLayout);
-
     tabWidget = new QTabWidget();
 
-    LogWidget *logWidget = new LogWidget();
-
-    tabWidget->addTab(cameraPage, "Camera display");
+    tabWidget->addTab(new CameraPage(), "Cameras");
     tabWidget->addTab(new SettingsPage(), "Settings");
-    tabWidget->addTab(logWidget, "Messages");
+    tabWidget->addTab(new LogWidget(), "Messages");
 
     ControlWidget *controlWidget = new ControlWidget();
 

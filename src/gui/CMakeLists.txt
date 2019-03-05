@@ -14,12 +14,17 @@ set(SPIMlab_SRCS
     main.cpp
     mainwindow.cpp
     version.cpp
-    logwidget.cpp
+
     controlwidget.cpp
     picontrollersettingswidget.cpp
     nisettingswidget.cpp
-    settingswidget.cpp
+    galvowaveformwidget.cpp
+
     centralwidget.cpp
+    camerapage.cpp
+    settingspage.cpp
+    logwidget.cpp
+
     cameraplot.cpp
     cameradisplay.cpp
 )
