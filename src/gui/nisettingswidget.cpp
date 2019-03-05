@@ -29,20 +29,20 @@ void NISettingsWidget::setupUI()
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getCOPhysicalChans());
         grid->addWidget(comboBox, row++, i * 2 + 1);
-        cameraTriggerCtrComboBox.insert(i, comboBox);
+        cameraTriggerCtrComboBoxList.insert(i, comboBox);
 
         grid->addWidget(new QLabel("Term"), row, 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getTerminals());
         grid->addWidget(comboBox, row++, i * 2 + 1);
-        cameraTriggerTermComboBox.insert(i, comboBox);
+        cameraTriggerTermComboBoxList.insert(i, comboBox);
 
         int idx;
         idx = comboBox->findData(
-            spim().getCameraTrigger()->getPhysicalChannel());
+            spim().getCameraTrigger()->getPhysicalChannel(i));
         comboBox->setCurrentIndex(idx);
 
-        idx = comboBox->findData(spim().getCameraTrigger()->getTerm());
+        idx = comboBox->findData(spim().getCameraTrigger()->getTerm(i));
         comboBox->setCurrentIndex(idx);
 
         grid->addWidget(new QLabel(QString("Galvo ramp %1").arg(i)),
@@ -51,7 +51,7 @@ void NISettingsWidget::setupUI()
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
         grid->addWidget(comboBox, row++, i * 2 + 1);
-        galvoRampComboBox.insert(i, comboBox);
+        galvoRampComboBoxList.insert(i, comboBox);
     }
 
     QPushButton *NIApplyPushButton = new QPushButton("Apply");
@@ -70,11 +70,13 @@ void NISettingsWidget::setupUI()
 
 void NISettingsWidget::apply()
 {
+    QStringList ctrs;
+    QStringList terms;
     for (int i = 0; i < 2; ++i) {
         spim().getGalvoRamp(i)->setPhysicalChannel(
-            galvoRampComboBox.at(i)->currentText());
+            galvoRampComboBoxList.at(i)->currentText());
+        ctrs << cameraTriggerCtrComboBoxList.at(i)->currentText();
+        terms << cameraTriggerTermComboBoxList.at(i)->currentText();
     }
-//    FIXME
-//    spim().setupCameraTrigger(cameraTriggerCtrComboBox->currentText(),
-//                              cameraTriggerTermComboBox->currentText());
+    spim().setupCameraTrigger(ctrs, terms);
 }

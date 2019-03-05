@@ -5,17 +5,19 @@ using namespace NI;
 
 static Logger *logger = getLogger("CameraTrigger");
 
-#define CHANNEL_NAME "cameraTriggerCOPulseChan"
+#define CHANNEL_NAME(n) "cameraTriggerCOPulseChan_" # n
 #define DUTY_CYCLE 0.1
 
 CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
 {
-    freq = 50;
+    for (int i = 0; i < 2; ++i) {
+        freqs.push_back(50);
+    }
 }
 
-void CameraTrigger::setPhysicalChannel(const QString &channel)
+void CameraTrigger::setPhysicalChannels(const QStringList &channels)
 {
-    physicalChannel = channel;
+    physicalChannels = channels;
     clear();
 }
 
@@ -23,44 +25,44 @@ void CameraTrigger::initializeTask_impl()
 {
     DAQmxErrChk(DAQmxCreateTask("cameraTriggerCOPulse", &task));
 
-    DAQmxErrChk(
-        DAQmxCreateCOPulseChanFreq(
-            task,
-            physicalChannel.toLatin1(),
-            CHANNEL_NAME,
-            DAQmx_Val_Hz,  // units
-            DAQmx_Val_Low,  // idleState
-            initialDelay,
-            freq,
-            DUTY_CYCLE
-            )
-        );
+    for (int i = 0; i < physicalChannels.count(); ++i) {
+        DAQmxErrChk(
+            DAQmxCreateCOPulseChanFreq(
+                task,
+                physicalChannels.at(i).toLatin1(),
+                CHANNEL_NAME(i),
+                DAQmx_Val_Hz,  // units
+                DAQmx_Val_Low,  // idleState
+                initialDelays.at(i),
+                freqs.at(i),
+                DUTY_CYCLE
+                )
+            );
+        logger->info(QString("Created Counter Output using %1, terminal: %2")
+                     .arg(physicalChannels.at(i), getTerm(i)));
+    }
 
     DAQmxErrChk(
         DAQmxCfgImplicitTiming(task, DAQmx_Val_ContSamps, 1000));
 
     configureTriggering();
-    configureTerm();
-
-    logger->info(QString("Created Counter Output using %1, terminal: %2").arg(
-                     physicalChannel, getTerm()));
+    configureTerms();
 }
 
-NI::float64 CameraTrigger::getInitialDelay() const
+NI::float64 CameraTrigger::getInitialDelay(const int number) const
 {
-    return initialDelay;
+    return initialDelays.at(number);
 }
 
-void CameraTrigger::setInitialDelay(const NI::float64 &value)
+void CameraTrigger::setInitialDelays(const QList<NI::float64> &values)
 {
-    initialDelay = value;
+    initialDelays = values;
 }
 
-QString CameraTrigger::getPhysicalChannel() const
+QString CameraTrigger::getPhysicalChannel(const int number) const
 {
-    return physicalChannel;
+    return physicalChannels.at(number);
 }
-
 
 void CameraTrigger::configureTriggering()
 {
@@ -73,23 +75,40 @@ void CameraTrigger::configureTriggering()
     }
 }
 
-void CameraTrigger::configureTerm()
+void CameraTrigger::configureTerms()
 {
-    DAQmxErrChk(DAQmxSetCOPulseTerm(task, CHANNEL_NAME, term.toLatin1()));
+    for (int i = 0; i < physicalChannels.count(); ++i) {
+        DAQmxErrChk(
+            DAQmxSetCOPulseTerm(task, CHANNEL_NAME(i), terms.at(i).toLatin1()));
+    }
+}
+
+void CameraTrigger::setFrequencies(const QList<double> Hz)
+{
+    freqs = Hz;
+    if (isInitialized()) {
+        for (int i = 0; i < physicalChannels.count(); ++i) {
+            DAQmxErrChk(DAQmxSetCOPulseFreq(task, CHANNEL_NAME(i), freqs.at(i)));
+        }
+    }
 }
 
 void CameraTrigger::setFrequency(const double Hz)
 {
-    freq = Hz;
-    if (isInitialized()) {
-        DAQmxErrChk(DAQmxSetCOPulseFreq(task, CHANNEL_NAME, freq));
+    QList<double> list;
+    list.reserve(physicalChannels.count());
+    for (int i = 0; i < physicalChannels.count(); ++i) {
+        list.insert(i, Hz);
     }
+    setFrequencies(list);
 }
 
-double CameraTrigger::getFrequency()
+double CameraTrigger::getFrequency(const int number)
 {
-    DAQmxErrChk(DAQmxGetCOPulseFreq(task, CHANNEL_NAME, &freq));
-    return freq;
+    double temp;
+    DAQmxErrChk(DAQmxGetCOPulseFreq(task, CHANNEL_NAME(number), &temp));
+    freqs.replace(number, temp);
+    return freqs.at(number);
 }
 
 void CameraTrigger::setTriggerTerm(const QString &term)
@@ -113,20 +132,20 @@ bool CameraTrigger::isFreeRunEnabled() const
     return isFreeRun;
 }
 
-QString CameraTrigger::getTerm()
+QString CameraTrigger::getTerm(const int number)
 {
     if (!isInitialized()) {
-        return this->term;
+        return this->terms.at(number);
     }
     char buff[100];
-    DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME, buff, 100));
+    DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME(number), buff, 100));
     return QString(buff);
 }
 
-void CameraTrigger::setTerm(QString term)
+void CameraTrigger::setTerms(QStringList terms)
 {
-    this->term = term;
+    this->terms = terms;
     if (isInitialized()) {
-        configureTerm();
+        configureTerms();
     }
 }

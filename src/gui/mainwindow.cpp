@@ -104,14 +104,14 @@ void MainWindow::saveSettings() const
         }
     }
 
-    settings.setValue("cameraTrigger.physicalChannel",
-                      spim().getCameraTrigger()->getPhysicalChannel());
-    settings.setValue("cameraTrigger.term",
-                      spim().getCameraTrigger()->getTerm());
-
     for (int i = 0; i < 2; ++i) {
         settings.setValue(QString("galvoRamp_%1.physicalChannel").arg(i),
                           spim().getGalvoRamp(i)->getPhysicalChannel());
+
+        settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
+                          spim().getCameraTrigger()->getPhysicalChannel(i));
+        settings.setValue(QString("cameraTrigger.term_%1").arg(i),
+                          spim().getCameraTrigger()->getTerm(i));
     }
 
     settings.endGroup();
@@ -155,16 +155,25 @@ void MainWindow::loadSettings()
         }
     }
 
-    CameraTrigger *ct = spim().getCameraTrigger();
-    ct->setPhysicalChannel(
-        settings.value("cameraTrigger.physicalChannel", "Dev1/ctr0").toString());
-    ct->setTerm(settings.value("cameraTrigger.term", "/Dev1/PFI0").toString());
+    QStringList physicalChannels;
+    QStringList terms;
 
     for (int i = 0; i < 2; ++i) {
         spim().getGalvoRamp(i)->setPhysicalChannel(
             settings.value(QString("galvoRamp_%1.physicalChannel").arg(i),
                            QString("Dev1/ao%1").arg(i)).toString());
+
+        physicalChannels << settings.value(
+            QString("cameraTrigger.physicalChannel_%1"),
+            QString("Dev1/ctr%1").arg(i)).toString();
+
+        terms << settings.value(QString("cameraTrigger.term_%1").arg(i),
+                                QString("/Dev1/PFI%1").arg(i)).toString();
     }
+
+    CameraTrigger *ct = spim().getCameraTrigger();
+    ct->setPhysicalChannels(physicalChannels);
+    ct->setTerms(terms);
 
     settings.endGroup();
 }

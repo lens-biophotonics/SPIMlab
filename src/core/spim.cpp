@@ -93,13 +93,15 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 }
 
 void SPIM::setupCameraTrigger(
-    const QString &COPhysicalChan, const QString &terminal)
+    const QStringList &COPhysicalChans, const QStringList &terminals)
 {
     try {
-        cameraTrigger->setPhysicalChannel(COPhysicalChan);
-        cameraTrigger->setTerm(terminal);
+        cameraTrigger->setPhysicalChannels(COPhysicalChans);
+        cameraTrigger->setTerms(terminals);
 
-//        galvoRamp->setTriggerSource(terminal);  FIXME
+        for (int i = 0; i < NGALVORAMPS; ++i) {
+            galvoList.at(i)->setTriggerSource(terminals.at(i));
+        }
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -222,7 +224,9 @@ void SPIM::setExposureTime(double expTime)
         }
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
-        cameraTrigger->setFrequencies(0.98 * frameRate);
+        double freq = 0.98 * frameRate;
+        cameraTrigger->setFrequency(freq);
+        cameraTrigger->setInitialDelays({0, 0.5 / freq});
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
