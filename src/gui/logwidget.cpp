@@ -37,6 +37,10 @@ void LogWidget::logMessage(QString msg, const MsgType type)
         msg.prepend("<span style='color:red'>");
         msg.append("</span>");
     }
+    else if (type == MSG_WARNING) {
+        msg.prepend("<span style='color:orange'>");
+        msg.append("</span>");
+    }
 
     msg.append("<br>");
 
