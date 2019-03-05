@@ -6,12 +6,17 @@
 
 #include "pidaisychain.h"
 
+#define NCAMS 2
+
 static Logger *logger = getLogger("SPIM");
 
 
 SPIM::SPIM(QObject *parent) : QObject(parent)
 {
-    orca = new OrcaFlash(this);
+    for (int i = 0; i < NCAMS; ++i) {
+        camList.insert(i, new OrcaFlash());
+    }
+
     cameraTrigger = new CameraTrigger(this);
     galvoRamp = new GalvoRamp(this);
 
@@ -33,11 +38,14 @@ void SPIM::initialize()
     try {
         DCAM::init_dcam();
 
-        orca->open(0);
-        orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
-        orca->setGetTriggerMode(OrcaFlash::TRIGMODE_EDGE);
-        orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
-                               OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
+        for (int i = 0; i < NCAMS; ++i) {
+            OrcaFlash *orca = camList.at(i);
+            orca->open(i);
+            orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
+            orca->setGetTriggerMode(OrcaFlash::TRIGMODE_EDGE);
+            orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
+                                   OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
+        }
 
         galvoRamp->setupWaveform(0.2, 2, 0);
 
@@ -56,7 +64,7 @@ void SPIM::uninitialize()
 {
     try {
         closeAllDaisyChains();
-        delete orca;
+        qDeleteAll(camList);
         DCAM::uninit_dcam();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -74,9 +82,9 @@ CameraTrigger *SPIM::getCameraTrigger() const
     return cameraTrigger;
 }
 
-OrcaFlash *SPIM::camera() const
+OrcaFlash *SPIM::getCamera(int camNumber) const
 {
-    return orca;
+    return camList.at(camNumber);
 }
 
 void SPIM::setupCameraTrigger(
@@ -102,8 +110,10 @@ void SPIM::startFreeRun()
 {
     try {
         setExposureTime(0.0001);
-        orca->setNFramesInBuffer(10);
-        orca->startCapture();
+        foreach(OrcaFlash * orca, camList) {
+            orca->setNFramesInBuffer(10);
+            orca->startCapture();
+        }
 
         cameraTrigger->setFreeRunEnabled(true);
 
@@ -135,8 +145,8 @@ void SPIM::startAcquisition()
         connect(worker, &SaveStackWorker::error, this, &SPIM::onError);
         connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        orca->setNFramesInBuffer(100);
-        orca->startCapture();
+//        orca->setNFramesInBuffer(100);  //FIXME
+//        orca->startCapture();
 
         thread->start();
     } catch (std::runtime_error e) {
@@ -154,7 +164,9 @@ void SPIM::stop()
             thread->requestInterruption();
             thread = nullptr;
         }
-        orca->stop();
+        foreach(OrcaFlash * orca, camList) {
+            orca->stop();
+        }
         galvoRamp->stop();
         cameraTrigger->stop();
     } catch (std::runtime_error e) {
@@ -167,11 +179,16 @@ void SPIM::stop()
 
 void SPIM::setExposureTime(double expTime)
 {
-    try {
-        expTime = orca->setGetExposureTime(expTime);
+    double lineint = -1;
+    int nOfLines = -1;
 
-        double lineint = orca->getLineInterval();
-        int nOfLines = orca->nOfLines();
+    try {
+        foreach(OrcaFlash * orca, camList) {
+            expTime = orca->setGetExposureTime(expTime);
+
+            lineint = orca->getLineInterval();
+            nOfLines = orca->nOfLines();
+        }
 
         int nSamples = static_cast<int>(round(expTime / lineint + nOfLines));
 

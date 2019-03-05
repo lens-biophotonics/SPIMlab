@@ -28,7 +28,8 @@ void SaveStackWorker::saveToFile()
         return;
     }
     size_t n = 2 * 2048 * 2048;
-    OrcaFlash *orca = spim().camera();
+//    OrcaFlash *orca = spim().getCamera();  // FIXME
+    OrcaFlash *orca;
     const uint nFramesInBuffer = orca->nFramesInBuffer();
 #ifdef WITH_HARDWARE
     void *buf;

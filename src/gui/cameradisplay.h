@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QThread>
 
+#include "core/orcaflash.h"
+
 #include "cameraplot.h"
 
 
@@ -11,7 +13,7 @@ class CameraDisplay : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CameraDisplay(QWidget *parent = nullptr);
+    explicit CameraDisplay(OrcaFlash *camera, QWidget *parent = nullptr);
     virtual ~CameraDisplay();
 
 signals:
@@ -23,6 +25,7 @@ private:
     CameraPlot *plot;
     QThread *thread;
     QVector<double> vec;
+    OrcaFlash *orca;
 
     void setupUi();
 };
@@ -32,7 +35,7 @@ class DisplayWorker : public QThread
 {
     Q_OBJECT
 public:
-    DisplayWorker(double *data, QObject *parent = nullptr);
+    DisplayWorker(OrcaFlash *orca, double *data, QObject *parent = nullptr);
     virtual ~DisplayWorker();
 
 signals:
@@ -43,6 +46,7 @@ private slots:
 
 private:
     QTimer *timer;
+    OrcaFlash *orca;
     double *buf;
 };
 

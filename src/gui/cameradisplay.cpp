@@ -7,14 +7,15 @@
 #include "cameradisplay.h"
 
 
-CameraDisplay::CameraDisplay(QWidget *parent) : QWidget(parent)
+CameraDisplay::CameraDisplay(OrcaFlash *camera, QWidget *parent) :
+    QWidget(parent), orca(camera)
 {
     setupUi();
 
     vec.resize(2048 * 2048);
 
     thread = new QThread(this);
-    DisplayWorker *worker = new DisplayWorker(vec.data());
+    DisplayWorker *worker = new DisplayWorker(orca, vec.data());
     connect(worker, &DisplayWorker::newImage, this, &CameraDisplay::replot);
     worker->moveToThread(thread);
     thread->start();
@@ -39,8 +40,9 @@ void CameraDisplay::setupUi()
     setLayout(layout);
 }
 
-DisplayWorker::DisplayWorker(double *data, QObject *parent) : QThread(parent)
+DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) : QThread(parent)
 {
+    orca = camera;
     buf = data;
     timer = new QTimer(this);
     timer->setInterval(500);
@@ -55,18 +57,17 @@ DisplayWorker::~DisplayWorker() {}
 
 void DisplayWorker::updateImage()
 {
-    OrcaFlash *camera = spim().camera();
 #ifdef WITH_HARDWARE
     void *top;
     int32_t rowBytes;
-    camera->lockData(&top, &rowBytes, -1);
+    orca->lockData(&top, &rowBytes, -1);
     const uint16_t *p = static_cast<const uint16_t *>(top);
     for (int i = 0; i < 2048 * 2048; ++i) {
         buf[i] = p[i];
     }
-    camera->unlockData();
+    orca->unlockData();
 #else
-    camera->copyLastFrame(buf, 2048 * 2048 * sizeof(double));
+    orca->copyLastFrame(buf, 2048 * 2048 * sizeof(double));
 #endif
 
     emit newImage();

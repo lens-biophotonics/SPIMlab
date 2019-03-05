@@ -27,8 +27,8 @@ public:
     SPIM(QObject *parent = nullptr);
     virtual ~SPIM();
 
-    OrcaFlash *camera() const;
-    void setCamera(OrcaFlash *camera);
+    OrcaFlash *getCamera(int camNumber) const;
+    void setCamera(OrcaFlash *getCamera);
 
     void setupCameraTrigger(const QString &COPhysicalChan, const QString &terminal);
 
@@ -51,13 +51,14 @@ signals:
     void error(const QString) const;
 
 private:
-    OrcaFlash *orca = nullptr;
     QThread *thread = nullptr;
     SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
     GalvoRamp *galvoRamp = nullptr;
 
     QList<PIDevice *>piDevList;
+    QList<OrcaFlash *>camList;
+
 
     void setExposureTime(double expTime);
 
