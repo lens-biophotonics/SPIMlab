@@ -108,8 +108,11 @@ void MainWindow::saveSettings() const
                       spim().getCameraTrigger()->getPhysicalChannel());
     settings.setValue("cameraTrigger.term",
                       spim().getCameraTrigger()->getTerm());
-    settings.setValue("galvoRamp.physicalChannel",
-                      spim().getGalvoRamp()->getPhysicalChannel());
+
+    for (int i = 0; i < 2; ++i) {
+        settings.setValue(QString("galvoRamp_%1.physicalChannel").arg(i),
+                          spim().getGalvoRamp(i)->getPhysicalChannel());
+    }
 
     settings.endGroup();
 }
@@ -157,8 +160,11 @@ void MainWindow::loadSettings()
         settings.value("cameraTrigger.physicalChannel", "Dev1/ctr0").toString());
     ct->setTerm(settings.value("cameraTrigger.term", "/Dev1/PFI0").toString());
 
-    spim().getGalvoRamp()->setPhysicalChannel(
-        settings.value("galvoRamp.physicalChannel", "Dev1/ao0").toString());
+    for (int i = 0; i < 2; ++i) {
+        spim().getGalvoRamp(i)->setPhysicalChannel(
+            settings.value(QString("galvoRamp_%1.physicalChannel").arg(i),
+                           QString("Dev1/ao%1").arg(i)).toString());
+    }
 
     settings.endGroup();
 }

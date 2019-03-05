@@ -17,36 +17,45 @@ void NISettingsWidget::setupUI()
     QGroupBox *natinstGroupBox = new QGroupBox("National Instruments");
     QGridLayout *grid = new QGridLayout();
 
+    QComboBox *comboBox;
+
     int row = 0;
-    grid->addWidget(new QLabel("Camera Trigger"), row++, 0, 1, 2);
+    for (int i = 0; i < 2; ++i) {
+        row = 0;
+        grid->addWidget(new QLabel(QString("Camera Trigger %1").arg(i)),
+                        row++, i * 2 + 0, 1, 2);
 
-    grid->addWidget(new QLabel("Counter"), row, 0);
-    cameraTriggerCtrComboBox = new QComboBox();
-    cameraTriggerCtrComboBox->insertItems(0, NI::getCOPhysicalChans());
-    grid->addWidget(cameraTriggerCtrComboBox, row++, 1);
+        grid->addWidget(new QLabel("Counter"), row, i * 2 + 0);
+        comboBox = new QComboBox();
+        comboBox->insertItems(0, NI::getCOPhysicalChans());
+        grid->addWidget(comboBox, row++, i * 2 + 1);
+        cameraTriggerCtrComboBox.insert(i, comboBox);
 
-    grid->addWidget(new QLabel("Term"), row, 0);
-    cameraTriggerTermComboBox = new QComboBox();
-    cameraTriggerTermComboBox->addItems(NI::getTerminals());
-    grid->addWidget(cameraTriggerTermComboBox, row++, 1);
+        grid->addWidget(new QLabel("Term"), row, 0);
+        comboBox = new QComboBox();
+        comboBox->addItems(NI::getTerminals());
+        grid->addWidget(comboBox, row++, i * 2 + 1);
+        cameraTriggerTermComboBox.insert(i, comboBox);
 
-    int idx;
-    idx = cameraTriggerCtrComboBox->findData(
-        spim().getCameraTrigger()->getPhysicalChannel());
-    cameraTriggerCtrComboBox->setCurrentIndex(idx);
+        int idx;
+        idx = comboBox->findData(
+            spim().getCameraTrigger()->getPhysicalChannel());
+        comboBox->setCurrentIndex(idx);
 
-    idx = cameraTriggerTermComboBox->findData(
-        spim().getCameraTrigger()->getTerm());
-    cameraTriggerTermComboBox->setCurrentIndex(idx);
+        idx = comboBox->findData(spim().getCameraTrigger()->getTerm());
+        comboBox->setCurrentIndex(idx);
 
-    grid->addWidget(new QLabel("Galvo ramp"), row++, 0, 1, 2);
-    grid->addWidget(new QLabel("Channel"), row, 0);
-    galvoRampComboBox = new QComboBox();
-    galvoRampComboBox->addItems(NI::getAOPhysicalChans());
-    grid->addWidget(galvoRampComboBox, row++, 1);
+        grid->addWidget(new QLabel(QString("Galvo ramp %1").arg(i)),
+                        row++, i * 2 + 0, 1, 2);
+        grid->addWidget(new QLabel("Channel"), row, i * 2 + 0);
+        comboBox = new QComboBox();
+        comboBox->addItems(NI::getAOPhysicalChans());
+        grid->addWidget(comboBox, row++, i * 2 + 1);
+        galvoRampComboBox.insert(i, comboBox);
+    }
 
     QPushButton *NIApplyPushButton = new QPushButton("Apply");
-    grid->addWidget(NIApplyPushButton, row++, 0, 1, 2);
+    grid->addWidget(NIApplyPushButton, row++, 0, 1, 4);
 
     natinstGroupBox->setLayout(grid);
 
@@ -61,7 +70,11 @@ void NISettingsWidget::setupUI()
 
 void NISettingsWidget::apply()
 {
-    spim().getGalvoRamp()->setPhysicalChannel(galvoRampComboBox->currentText());
-    spim().setupCameraTrigger(cameraTriggerCtrComboBox->currentText(),
-                              cameraTriggerTermComboBox->currentText());
+    for (int i = 0; i < 2; ++i) {
+        spim().getGalvoRamp(i)->setPhysicalChannel(
+            galvoRampComboBox.at(i)->currentText());
+    }
+//    FIXME
+//    spim().setupCameraTrigger(cameraTriggerCtrComboBox->currentText(),
+//                              cameraTriggerTermComboBox->currentText());
 }

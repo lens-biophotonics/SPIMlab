@@ -20,9 +20,9 @@ private slots:
 private:
     void setupUI();
 
-    QComboBox *galvoRampComboBox;
-    QComboBox *cameraTriggerCtrComboBox;
-    QComboBox *cameraTriggerTermComboBox;
+    QList<QComboBox *> galvoRampComboBox;
+    QList<QComboBox *> cameraTriggerCtrComboBox;
+    QList<QComboBox *> cameraTriggerTermComboBox;
 };
 
 #endif // NISETTINGSWIDGET_H

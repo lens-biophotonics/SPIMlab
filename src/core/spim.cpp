@@ -7,6 +7,7 @@
 #include "pidaisychain.h"
 
 #define NCAMS 2
+#define NGALVORAMPS 2
 
 static Logger *logger = getLogger("SPIM");
 
@@ -18,10 +19,12 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     cameraTrigger = new CameraTrigger(this);
-    galvoRamp = new GalvoRamp(this);
+
+    for (int i = 0; i < NGALVORAMPS; ++i) {
+        galvoList.insert(i, new GalvoRamp(this));
+    }
 
     piDevList.reserve(5);
-
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice(this));
     piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice(this));
     piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice(this));
@@ -47,7 +50,9 @@ void SPIM::initialize()
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
         }
 
-        galvoRamp->setupWaveform(0.2, 2, 0);
+        foreach(GalvoRamp * galvoRamp, galvoList) {
+            galvoRamp->setupWaveform(0.2, 2, 0);
+        }
 
         foreach (PIDevice * dev, piDevList) {
             dev->connectDevice();
@@ -72,9 +77,9 @@ void SPIM::uninitialize()
     }
 }
 
-GalvoRamp *SPIM::getGalvoRamp() const
+GalvoRamp *SPIM::getGalvoRamp(int number) const
 {
-    return galvoRamp;
+    return galvoList.at(number);
 }
 
 CameraTrigger *SPIM::getCameraTrigger() const
@@ -94,7 +99,7 @@ void SPIM::setupCameraTrigger(
         cameraTrigger->setPhysicalChannel(COPhysicalChan);
         cameraTrigger->setTerm(terminal);
 
-        galvoRamp->setTriggerSource(terminal);
+//        galvoRamp->setTriggerSource(terminal);  FIXME
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -117,7 +122,10 @@ void SPIM::startFreeRun()
 
         cameraTrigger->setFreeRunEnabled(true);
 
-        galvoRamp->start();
+        foreach(GalvoRamp * galvoRamp, galvoList) {
+            galvoRamp->start();
+        }
+
         cameraTrigger->start();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -167,7 +175,9 @@ void SPIM::stop()
         foreach(OrcaFlash * orca, camList) {
             orca->stop();
         }
-        galvoRamp->stop();
+        foreach(GalvoRamp * galvoRamp, galvoList) {
+            galvoRamp->stop();
+        }
         cameraTrigger->stop();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -179,22 +189,40 @@ void SPIM::stop()
 
 void SPIM::setExposureTime(double expTime)
 {
-    double lineint = -1;
+    double lineInterval = -1;
     int nOfLines = -1;
 
     try {
-        foreach(OrcaFlash * orca, camList) {
+        for (int i = 0; i < camList.count(); ++i) {
+            OrcaFlash *orca = camList.at(i);
             expTime = orca->setGetExposureTime(expTime);
 
-            lineint = orca->getLineInterval();
-            nOfLines = orca->nOfLines();
+            double tempDouble = orca->getLineInterval();
+            int tempInt = orca->nOfLines();
+
+            if (i > 0) {
+                if (fabs(tempDouble - lineInterval) < 0.001 || tempInt != nOfLines) {
+                    QString m("Different values for line interval and number of"
+                              "lines: Cam 0: %1 %2; Cam %3: %4 %5");
+                    m = m.arg(lineInterval).arg(nOfLines).arg(i).arg(tempDouble)
+                        .arg(tempInt);
+                    logger->warning(m);
+                }
+            }
+            else {
+                lineInterval = tempDouble;
+                nOfLines = tempInt;
+            }
         }
 
-        int nSamples = static_cast<int>(round(expTime / lineint + nOfLines));
+        int nSamples = static_cast<int>(round(expTime / lineInterval + nOfLines));
 
-        galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineint);
-        double frameRate = 1 / (expTime + (nOfLines + 10) * lineint);
-        cameraTrigger->setFrequency(0.98 * frameRate);
+        foreach(GalvoRamp * galvoRamp, galvoList) {
+            galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineInterval);
+        }
+
+        double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
+        cameraTrigger->setFrequencies(0.98 * frameRate);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

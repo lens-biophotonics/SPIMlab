@@ -35,7 +35,7 @@ public:
     PIDevice *piDevice(const PI_DEVICES dev) const;
 
     CameraTrigger *getCameraTrigger() const;
-    GalvoRamp *getGalvoRamp() const;
+    GalvoRamp *getGalvoRamp(int number) const;
 
 public slots:
     void startFreeRun();
@@ -54,10 +54,10 @@ private:
     QThread *thread = nullptr;
     SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
-    GalvoRamp *galvoRamp = nullptr;
 
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
+    QList<GalvoRamp *>galvoList;
 
 
     void setExposureTime(double expTime);
