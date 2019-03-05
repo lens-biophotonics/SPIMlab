@@ -6,7 +6,7 @@
 #include "centralwidget.h"
 #include "cameradisplay.h"
 #include "logwidget.h"
-#include "settingswidget.h"
+#include "settingspage.h"
 #include "controlwidget.h"
 
 
@@ -37,10 +37,9 @@ void CentralWidget::setupUi()
     tabWidget = new QTabWidget();
 
     LogWidget *logWidget = new LogWidget();
-    SettingsWidget *settingsWidget = new SettingsWidget();
 
     tabWidget->addTab(cameraPage, "Camera display");
-    tabWidget->addTab(settingsWidget, "Settings");
+    tabWidget->addTab(new SettingsPage(), "Settings");
     tabWidget->addTab(logWidget, "Messages");
 
     ControlWidget *controlWidget = new ControlWidget();

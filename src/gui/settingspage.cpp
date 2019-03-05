@@ -2,17 +2,17 @@
 
 #include "core/spim.h"
 
-#include "settingswidget.h"
+#include "settingspage.h"
 #include "nisettingswidget.h"
 #include "picontrollersettingswidget.h"
 
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 {
     setupUI();
 }
 
-void SettingsWidget::setupUI()
+void SettingsPage::setupUI()
 {
     QHBoxLayout *piHLayout = new QHBoxLayout();
     QHBoxLayout *piHLayout2 = new QHBoxLayout();
