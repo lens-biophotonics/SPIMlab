@@ -118,6 +118,16 @@ void PIDevice::setServoEnabled(const QString &axes, const QVector<int> &enable)
     CALL_THROW(PI_SVO(id, axes.toLatin1(), enable.constData()));
 }
 
+QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
+{
+    return *getVectorOfDoubles(axes, &PI_qTMN).get();
+}
+
+QVector<double> PIDevice::getTravelRangeHighEnd(const QString &axes)
+{
+    return *getVectorOfDoubles(axes, &PI_qTMX).get();
+}
+
 void PIDevice::fastMoveToPositiveLimit(const QString &axes)
 {
     if (axes.isEmpty()) {
@@ -233,6 +243,22 @@ void PIDevice::setupStateMachine()
 
     sm->setInitialState(_disconnectedState);
     sm->start();
+}
+
+std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
+    const QString &axes, PI_qVectorOfDoubles fp)
+{
+    auto vecup = std::make_unique<QVector<double>>();
+    const QString *myAxes = &axes;
+    QString temp;
+    if (axes.isEmpty()) {
+        temp = getAxisIdentifiers();
+        myAxes = &temp;
+    }
+    int nOfAxes = myAxes->length();
+    vecup.get()->resize(nOfAxes);
+    CALL_THROW(fp(id, myAxes->toLatin1(), vecup.get()->data()));
+    return vecup;
 }
 
 QString PIDevice::getVerboseName() const

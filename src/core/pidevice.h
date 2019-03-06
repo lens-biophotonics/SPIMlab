@@ -1,6 +1,8 @@
 #ifndef PIDEVICE_H
 #define PIDEVICE_H
 
+#include <memory>
+
 #include <PI/PI_GCS2_DLL.h>
 
 
@@ -8,6 +10,7 @@
 #include <QState>
 #include <QMutex>
 
+typedef BOOL (*PI_qVectorOfDoubles)(int, const char*, double*);
 
 class PIDevice : public QObject
 {
@@ -27,6 +30,10 @@ public:
 
     void move(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
+
+
+    QVector<double> getTravelRangeLowEnd(const QString &axes = "");
+    QVector<double> getTravelRangeHighEnd(const QString &axes = "");
 
     void fastMoveToPositiveLimit(const QString &axes = "");
     void fastMoveToNegativeLimit(const QString &axes = "");
@@ -64,6 +71,8 @@ public slots:
 
 private:
     void setupStateMachine();
+    std::unique_ptr<QVector<double>> getVectorOfDoubles(
+        const QString &axes, PI_qVectorOfDoubles fp);
 
     int id;
 
