@@ -85,6 +85,7 @@ void PIDevice::close()
 {
     PI_CloseConnection(id);
     id = -1;
+    axisIdentifiers.clear();
     emit disconnected();
 }
 
@@ -196,9 +197,13 @@ QStringList PIDevice::getAvailableStageTypes()
 
 QString PIDevice::getAxisIdentifiers()
 {
+    if (!axisIdentifiers.isEmpty()) {
+        return axisIdentifiers;
+    }
     std::unique_ptr<char[]> buf(new char[32]);
     CALL_THROW(PI_qSAI(id, buf.get(), 32));
-    return QString(buf.get()).replace("\n", "");
+    axisIdentifiers = QString(buf.get()).replace("\n", "");
+    return axisIdentifiers;
 }
 
 QVector<int> PIDevice::getReferencedState(QString axes)

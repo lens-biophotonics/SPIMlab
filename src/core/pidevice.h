@@ -80,6 +80,7 @@ private:
     int deviceNumber = -1;
     int baud = -1;
     QString portName;
+    QString axisIdentifiers;
 
     QState *_connectedState = nullptr;
     QState *_disconnectedState = nullptr;
