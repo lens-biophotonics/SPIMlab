@@ -75,7 +75,7 @@ private:
     std::unique_ptr<QVector<double>> getVectorOfDoubles(
         const QString &axes, PI_qVectorOfDoubles fp);
 
-    int id;
+    int id = -1;
 
     int deviceNumber = -1;
     int baud = -1;
