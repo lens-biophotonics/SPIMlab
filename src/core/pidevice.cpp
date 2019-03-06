@@ -128,6 +128,13 @@ QVector<double> PIDevice::getTravelRangeHighEnd(const QString &axes)
     return *getVectorOfDoubles(axes, &PI_qTMX).get();
 }
 
+QVector<double> PIDevice::getCurrentPosition(const QString &axes)
+{
+    auto ret = getVectorOfDoubles(axes, &PI_qPOS);
+    emit newPositions(axes.isEmpty() ? getAxisIdentifiers() : axes, *ret.get());
+    return *ret.get();
+}
+
 void PIDevice::fastMoveToPositiveLimit(const QString &axes)
 {
     if (axes.isEmpty()) {

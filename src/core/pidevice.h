@@ -31,9 +31,9 @@ public:
     void move(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
 
-
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
     QVector<double> getTravelRangeHighEnd(const QString &axes = "");
+    QVector<double> getCurrentPosition(const QString &axes = "");
 
     void fastMoveToPositiveLimit(const QString &axes = "");
     void fastMoveToNegativeLimit(const QString &axes = "");
@@ -65,6 +65,7 @@ public:
 signals:
     void connected();
     void disconnected();
+    void newPositions(const QString &axes, const QVector<double> &pos);
 
 public slots:
     void close();
