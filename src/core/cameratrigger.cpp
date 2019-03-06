@@ -5,7 +5,7 @@ using namespace NI;
 
 static Logger *logger = getLogger("CameraTrigger");
 
-#define CHANNEL_NAME(n) "cameraTriggerCOPulseChan_" # n
+#define CHANNEL_NAME(n) QString("cameraTriggerCOPulseChan_%1").arg(n).toLatin1()
 #define DUTY_CYCLE 0.1
 
 CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
@@ -38,8 +38,6 @@ void CameraTrigger::initializeTask_impl()
                 DUTY_CYCLE
                 )
             );
-        logger->info(QString("Created Counter Output using %1, terminal: %2")
-                     .arg(physicalChannels.at(i), getTerm(i)));
     }
 
     DAQmxErrChk(
@@ -47,6 +45,11 @@ void CameraTrigger::initializeTask_impl()
 
     configureTriggering();
     configureTerms();
+
+    for (int i = 0; i < physicalChannels.count(); ++i) {
+        logger->info(QString("Created Counter Output using %1, terminal: %2")
+                     .arg(physicalChannels.at(i), getTerm(i)));
+    }
 }
 
 NI::float64 CameraTrigger::getInitialDelay(const int number) const
