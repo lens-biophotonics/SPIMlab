@@ -107,6 +107,8 @@ void MainWindow::saveSettings() const
     for (int i = 0; i < 2; ++i) {
         settings.setValue(QString("galvoRamp_%1.physicalChannel").arg(i),
                           spim().getGalvoRamp(i)->getPhysicalChannel());
+        settings.setValue(QString("galvoRamp_%1.waveformParams").arg(i),
+                          spim().getGalvoRamp(i)->getWaveformParams());
 
         settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
                           spim().getCameraTrigger()->getPhysicalChannel(i));
@@ -159,9 +161,13 @@ void MainWindow::loadSettings()
     QStringList terms;
 
     for (int i = 0; i < 2; ++i) {
-        spim().getGalvoRamp(i)->setPhysicalChannel(
+        GalvoRamp *gr = spim().getGalvoRamp(i);
+        gr->setPhysicalChannel(
             settings.value(QString("galvoRamp_%1.physicalChannel").arg(i),
                            QString("Dev1/ao%1").arg(i)).toString());
+        gr->setWaveformParams(
+            settings.value(QString("galvoRamp_%1.waveformParams").arg(i),
+                           QList<QVariant>({0.2, 2, 0})).toList());
 
         physicalChannels << settings.value(
             QString("cameraTrigger.physicalChannel_%1"),

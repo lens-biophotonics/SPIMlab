@@ -16,21 +16,26 @@ void GalvoWaveformWidget::setupUI()
     QGridLayout *grid = new QGridLayout();
     int row = 0;
 
+    QList<QVariant> wp = galvoRamp->getWaveformParams();
+
     offsetSpinBox = new QDoubleSpinBox();
     offsetSpinBox->setRange(-10, 10);
     offsetSpinBox->setSuffix(" V");
+    offsetSpinBox->setValue(wp.at(0).toDouble());
     grid->addWidget(new QLabel("Offset"), row, 0, 1, 1);
     grid->addWidget(offsetSpinBox, row++, 1, 1, 1);
 
     amplitudeSpinBox = new QDoubleSpinBox();
     amplitudeSpinBox->setRange(-10, 10);
     amplitudeSpinBox->setSuffix(" V");
+    amplitudeSpinBox->setValue(wp.at(1).toDouble());
     grid->addWidget(new QLabel("Amplitude"), row, 0, 1, 1);
     grid->addWidget(amplitudeSpinBox, row++, 1, 1, 1);
 
     delaySpinBox = new QSpinBox();
     delaySpinBox->setRange(-1000, 1000);
     delaySpinBox->setSuffix(" samples");
+    delaySpinBox->setValue(wp.at(2).toInt());
     grid->addWidget(new QLabel("Delay"), row, 0, 1, 1);
     grid->addWidget(delaySpinBox, row++, 1, 1, 1);
 
@@ -50,6 +55,7 @@ void GalvoWaveformWidget::setupUI()
 
 void GalvoWaveformWidget::apply()
 {
-    galvoRamp->setupWaveform(offsetSpinBox->value(), amplitudeSpinBox->value(),
-                             delaySpinBox->value());
+    galvoRamp->setWaveformParams(
+        offsetSpinBox->value(), amplitudeSpinBox->value(),
+        delaySpinBox->value());
 }

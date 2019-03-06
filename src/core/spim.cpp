@@ -50,10 +50,6 @@ void SPIM::initialize()
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
         }
 
-        foreach(GalvoRamp * galvoRamp, galvoList) {
-            galvoRamp->setupWaveform(0.2, 2, 0);
-        }
-
         foreach (PIDevice * dev, piDevList) {
             dev->connectDevice();
         }

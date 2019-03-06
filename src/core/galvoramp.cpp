@@ -1,4 +1,5 @@
-#include <iostream>
+#include <QVariant>
+
 #include "galvoramp.h"
 
 using namespace NI;
@@ -35,7 +36,7 @@ void GalvoRamp::setCameraParams(
     }
 }
 
-void GalvoRamp::setupWaveform(
+void GalvoRamp::setWaveformParams(
     const double offset, const double amplitude, const int delay)
 {
     this->offset = offset;
@@ -46,6 +47,23 @@ void GalvoRamp::setupWaveform(
         computeWaveform();
         write();
     }
+}
+
+void GalvoRamp::setWaveformParams(const QList<QVariant> &list)
+{
+    setWaveformParams(list.at(0).toDouble(),
+                      list.at(1).toDouble(),
+                      list.at(2).toInt());
+}
+
+QList<QVariant> GalvoRamp::getWaveformParams() const
+{
+    QList<QVariant> list;
+    list.append(QVariant(offset));
+    list.append(QVariant(amplitude));
+    list.append(QVariant(delay));
+
+    return list;
 }
 
 void GalvoRamp::initializeTask_impl()

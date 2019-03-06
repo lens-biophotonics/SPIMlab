@@ -19,7 +19,9 @@ public:
 
     void setCameraParams(int nSamples, const int nRamp, const double rate);
 
-    void setupWaveform(double offset, const double amplitude, const int delay);
+    void setWaveformParams(double offset, const double amplitude, const int delay);
+    void setWaveformParams(const QList<QVariant> &list);
+    QList<QVariant> getWaveformParams() const;
 
 protected:
     virtual void initializeTask_impl();
