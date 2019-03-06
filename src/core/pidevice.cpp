@@ -101,11 +101,12 @@ bool PIDevice::isConnected()
 
 void PIDevice::move(const QString &axes, const double pos[])
 {
-#ifndef WITH_HARDWARE
-    Q_UNUSED(axes)
-    Q_UNUSED(pos)
-#endif
-    CALL_THROW(PI_MOV(id, axes.toLatin1(), pos));
+    callFunctionWithVectorOfDoubles(&PI_MOV, axes, pos);
+}
+
+void PIDevice::moveRelative(const QString &axes, const double pos[])
+{
+    callFunctionWithVectorOfDoubles(&PI_MVR, axes, pos);
 }
 
 void PIDevice::setServoEnabled(const QString &axes, const QVector<int> &enable)
@@ -271,6 +272,12 @@ std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
     vecup.get()->resize(nOfAxes);
     CALL_THROW(fp(id, myAxes->toLatin1(), vecup.get()->data()));
     return vecup;
+}
+
+void PIDevice::callFunctionWithVectorOfDoubles(
+    PI_vectorOfDoubles fp, const QString &axes, const double values[])
+{
+    CALL_THROW(fp(id, axes.toLatin1(), values));
 }
 
 QString PIDevice::getVerboseName() const

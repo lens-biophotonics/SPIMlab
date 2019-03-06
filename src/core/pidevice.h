@@ -11,6 +11,7 @@
 #include <QVector>
 
 typedef BOOL (*PI_qVectorOfDoubles)(int, const char*, double*);
+typedef BOOL (*PI_vectorOfDoubles)(int, const char*, const double*);
 
 class PIDevice : public QObject
 {
@@ -29,6 +30,7 @@ public:
     bool isConnected();
 
     void move(const QString &axes, const double pos[]);
+    void moveRelative(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
 
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
@@ -74,6 +76,8 @@ private:
     void setupStateMachine();
     std::unique_ptr<QVector<double>> getVectorOfDoubles(
         const PI_qVectorOfDoubles fp, const QString &axes);
+    void callFunctionWithVectorOfDoubles(
+        PI_vectorOfDoubles fp, const QString &axes, const double values[]);
 
     int id = -1;
 
