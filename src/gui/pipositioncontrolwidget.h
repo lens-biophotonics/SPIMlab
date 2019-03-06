@@ -27,7 +27,8 @@ private:
     void setupUI();
     void clear();
     void appendRow(const int row, const QString &name);
-    void setPos(const QString &name, const double pos);
+    void move(const QString &name, const double pos);
+    void moveRelative(const QString &name, const double pos);
 
 
     PIDevice *device;

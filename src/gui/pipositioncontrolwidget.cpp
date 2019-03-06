@@ -47,21 +47,53 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     currentPosLabelMap[name.at(0)] = currentPos;
     grid->addWidget(currentPos, row, col++, 1, 1);
     QDoubleSpinBox *sb = new QDoubleSpinBox();
+    double min = -10;
+    double max = 10;
     if (device->isConnected()) {
-        sb->setMinimum(device->getTravelRangeLowEnd(name).at(0));
-        sb->setMaximum(device->getTravelRangeHighEnd(name).at(0));
+        min = device->getTravelRangeLowEnd(name).at(0);
+        max = device->getTravelRangeHighEnd(name).at(0);
     }
+    sb->setRange(min, max);
     grid->addWidget(sb, row, col++, 1, 1);
     QPushButton *setPushButton = new QPushButton("Set");
     grid->addWidget(setPushButton, row, col++, 1, 1);
+
+    QFrame *line;
+    line = new QFrame();
+    line->setFrameShape(QFrame::VLine);
+    line->setFrameShadow(QFrame::Sunken);
+    grid->addWidget(line, row, col++, 1, 1);
+
+    QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
+    stepSpinBox->setRange(0, max);
+    grid->addWidget(stepSpinBox, row, col++, 1, 1);
+
+    QPushButton *plusPushButton = new QPushButton("+");
+    grid->addWidget(plusPushButton, row, col++, 1, 1);
+
+    QPushButton *minusPushButton = new QPushButton("-");
+    grid->addWidget(minusPushButton, row, col++, 1, 1);
+
     connect(setPushButton, &QPushButton::clicked, this, [ = ](){
-        setPos(name, sb->value());
+        move(name, sb->value());
+    });
+    connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
+        moveRelative(name, stepSpinBox->value());
+    });
+    connect(minusPushButton, &QPushButton::clicked, this, [ = ](){
+        moveRelative(name, -stepSpinBox->value());
     });
 }
 
-void PIPositionControlWidget::setPos(const QString &name, const double pos)
+void PIPositionControlWidget::move(const QString &name, const double pos)
 {
     device->move(name, &pos);
+}
+
+void PIPositionControlWidget::moveRelative(const QString &name,
+                                           const double pos)
+{
+    device->moveRelative(name, &pos);
 }
 
 void PIPositionControlWidget::updateUIConnect()
