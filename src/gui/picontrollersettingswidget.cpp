@@ -21,9 +21,8 @@ enum REFERENCE_ACTION {
 };
 
 PIControllerSettingsWidget::PIControllerSettingsWidget(
-    const QString &title,
     PIDevice *device,
-    QWidget *parent) : QWidget(parent), device(device), title(title)
+    QWidget *parent) : QWidget(parent), device(device)
 {
     setupUI();
     refreshValues();
@@ -212,7 +211,7 @@ void PIControllerSettingsWidget::setupUI()
     QPushButton *refreshPushButton = new QPushButton("Refresh");
     grid->addWidget(refreshPushButton, row++, 0, 1, 2);
 
-    QGroupBox *groubBox = new QGroupBox(title);
+    QGroupBox *groubBox = new QGroupBox(device->getVerboseName());
     groubBox->setLayout(grid);
 
     QVBoxLayout *vlayout = new QVBoxLayout();

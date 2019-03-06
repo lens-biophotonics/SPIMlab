@@ -25,11 +25,13 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     piDevList.reserve(5);
-    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice(this));
-    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice(this));
-    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice(this));
-    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice(this));
-    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice(this));
+    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
+    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
+    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z axis", this));
+    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS,
+                     new PIDevice("Left objective", this));
+    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS,
+                     new PIDevice("Right objective", this));
 }
 
 SPIM::~SPIM()

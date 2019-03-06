@@ -14,6 +14,7 @@ class PIDevice : public QObject
 
 public:
     explicit PIDevice(QObject *parent = nullptr);
+    explicit PIDevice(const QString &verboseName, QObject *parent = nullptr);
     virtual ~PIDevice();
     void connectSerial(const QString &portName, const int baud);
     void connectDaisyChainSerial(const QString &portName,
@@ -50,6 +51,9 @@ public:
     QString getPortName() const;
     void setPortName(const QString &value);
 
+    QString getVerboseName() const;
+    void setVerboseName(const QString &value);
+
 signals:
     void connected();
     void disconnected();
@@ -68,6 +72,8 @@ private:
 
     QState *_connectedState = nullptr;
     QState *_disconnectedState = nullptr;
+
+    QString verboseName;
 };
 
 #endif // PIDEVICE_H

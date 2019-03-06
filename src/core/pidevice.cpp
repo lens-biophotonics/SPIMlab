@@ -28,6 +28,12 @@ PIDevice::PIDevice(QObject *parent) : QObject(parent)
     setupStateMachine();
 }
 
+PIDevice::PIDevice(const QString &verboseName, QObject *parent) :
+    PIDevice (parent)
+{
+    setVerboseName(verboseName);
+}
+
 PIDevice::~PIDevice()
 {
     close();
@@ -227,6 +233,16 @@ void PIDevice::setupStateMachine()
 
     sm->setInitialState(_disconnectedState);
     sm->start();
+}
+
+QString PIDevice::getVerboseName() const
+{
+    return verboseName;
+}
+
+void PIDevice::setVerboseName(const QString &value)
+{
+    verboseName = value;
 }
 
 QString PIDevice::getPortName() const

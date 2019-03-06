@@ -15,10 +15,8 @@ class PIControllerSettingsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PIControllerSettingsWidget(
-        const QString &title,
-        PIDevice *device,
-        QWidget *parent = nullptr);
+    explicit PIControllerSettingsWidget(PIDevice *device,
+                                        QWidget *parent = nullptr);
 
 signals:
 
@@ -33,7 +31,6 @@ private:
     void setupUI();
     PIDevice *device;
 
-    QString title;
     QLabel *axisIdentifiersLabel;
     QLabel *referencedStateLabel;
     QLabel *stagesLabel;
