@@ -34,6 +34,7 @@ public:
                             const QStringList &terminals);
 
     PIDevice *piDevice(const PI_DEVICES dev) const;
+    QList<PIDevice *> piDevices() const;
 
     CameraTrigger *getCameraTrigger() const;
     GalvoRamp *getGalvoRamp(int number) const;

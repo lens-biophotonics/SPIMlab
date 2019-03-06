@@ -111,6 +111,11 @@ PIDevice *SPIM::piDevice(const SPIM::PI_DEVICES dev) const
     return piDevList.value(dev);
 }
 
+QList<PIDevice *> SPIM::piDevices() const
+{
+    return piDevList;
+}
+
 void SPIM::startFreeRun()
 {
     try {

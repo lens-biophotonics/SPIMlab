@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     setupUi();
 
+    updateTimer.setInterval(500);
+    connect(&updateTimer, &QTimer::timeout, this, &MainWindow::updatePIValues);
+
     QThread *thread = new QThread();
     spim().moveToThread(thread);
     thread->start();
@@ -82,6 +85,8 @@ void MainWindow::setupUi()
 
     s = stateMachine().getState(STATE_READY);
     s->assignProperty(statusLabel, "text", "Ready");
+    void (QTimer::* mySlot)() = &QTimer::start;
+    connect(s, &QState::entered, &updateTimer, mySlot);
 
     s = stateMachine().getState(STATE_CAPTURING);
     s->assignProperty(statusLabel, "text", "Capturing");
@@ -224,4 +229,14 @@ void MainWindow::closeEvent(QCloseEvent *e)
     saveSettings();
     spim().uninitialize();
     QMainWindow::closeEvent(e);
+}
+
+void MainWindow::updatePIValues()
+{
+    foreach (PIDevice * dev, spim().piDevices()) {
+        if (!dev->isConnected()) {
+            continue;
+        }
+        dev->getCurrentPosition();
+    }
 }

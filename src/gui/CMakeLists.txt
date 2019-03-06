@@ -19,6 +19,7 @@ set(SPIMlab_SRCS
     picontrollersettingswidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
+    pipositioncontrolwidget.cpp
 
     centralwidget.cpp
     camerapage.cpp
