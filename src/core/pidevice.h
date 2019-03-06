@@ -73,7 +73,7 @@ public slots:
 private:
     void setupStateMachine();
     std::unique_ptr<QVector<double>> getVectorOfDoubles(
-        const QString &axes, PI_qVectorOfDoubles fp);
+        const PI_qVectorOfDoubles fp, const QString &axes);
 
     int id = -1;
 

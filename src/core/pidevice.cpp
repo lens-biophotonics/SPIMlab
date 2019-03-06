@@ -121,17 +121,17 @@ void PIDevice::setServoEnabled(const QString &axes, const QVector<int> &enable)
 
 QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
 {
-    return *getVectorOfDoubles(axes, &PI_qTMN).get();
+    return *getVectorOfDoubles(&PI_qTMN, axes).get();
 }
 
 QVector<double> PIDevice::getTravelRangeHighEnd(const QString &axes)
 {
-    return *getVectorOfDoubles(axes, &PI_qTMX).get();
+    return *getVectorOfDoubles(&PI_qTMX, axes).get();
 }
 
 QVector<double> PIDevice::getCurrentPosition(const QString &axes)
 {
-    auto ret = getVectorOfDoubles(axes, &PI_qPOS);
+    auto ret = getVectorOfDoubles(&PI_qPOS, axes);
     emit newPositions(axes.isEmpty() ? getAxisIdentifiers() : axes, *ret.get());
     return *ret.get();
 }
@@ -258,7 +258,7 @@ void PIDevice::setupStateMachine()
 }
 
 std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
-    const QString &axes, PI_qVectorOfDoubles fp)
+    const PI_qVectorOfDoubles fp, const QString &axes)
 {
     auto vecup = std::make_unique<QVector<double>>();
     const QString *myAxes = &axes;
