@@ -20,6 +20,14 @@ static Logger *logger = getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    piSettingsPrefixMap["X_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_X_AXIS);
+    piSettingsPrefixMap["Y_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Y_AXIS);
+    piSettingsPrefixMap["Z_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Z_AXIS);
+    piSettingsPrefixMap["LO_AXIS."] =
+        spim().piDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS);
+    piSettingsPrefixMap["RO_AXIS."] =
+        spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS);
+
     loadSettings();
 
     setupUi();
@@ -127,12 +135,6 @@ void MainWindow::loadSettings()
     restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
     restoreState(settings.value("mainWindowState").toByteArray());
     settings.endGroup();
-
-    piSettingsPrefixMap["X_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_X_AXIS);
-    piSettingsPrefixMap["Y_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Y_AXIS);
-    piSettingsPrefixMap["Z_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Z_AXIS);
-    piSettingsPrefixMap["LO_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS);
-    piSettingsPrefixMap["RO_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS);
 
     settings.beginGroup("SPIM");
 
