@@ -186,15 +186,13 @@ QVector<int> PIDevice::getReferencedState(QString axes)
 {
     int nOfAxes;
     if (axes.isEmpty()) {
-        nOfAxes = getAxisIdentifiers().length();
+        axes = getAxisIdentifiers();
     }
-    else {
-        nOfAxes = axes.length();
-    }
+    nOfAxes = getAxisIdentifiers().length();
     QVector<BOOL> vec;
     vec.resize(nOfAxes);
     std::unique_ptr<BOOL[]> buf(new BOOL[static_cast<size_t>(nOfAxes)]);
-    CALL_THROW(PI_qFRF(id, "", vec.data()));
+    CALL_THROW(PI_qFRF(id, axes.toLatin1(), vec.data()));
     return vec;
 }
 
