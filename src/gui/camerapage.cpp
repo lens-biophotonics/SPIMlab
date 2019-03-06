@@ -17,6 +17,9 @@ CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
 
 void CameraPage::setupUI()
 {
+    QList<QWidget *> wList;  // list of widgets to be disabled during capturing
+    wList.reserve(6);
+
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
     for (int i = 0; i < 2; ++i) {
         QVBoxLayout *vLayout = new QVBoxLayout();
@@ -34,9 +37,7 @@ void CameraPage::setupUI()
     expTimeSpinBox->setSuffix(" ms");
     expTimeSpinBox->setValue(spim().getExposureTime());
     QPushButton *setExpTimePushButton = new QPushButton("Set");
-    setExpTimePushButton->setEnabled(false);
-    stateMachine().getState(STATE_READY)->assignProperty(
-        setExpTimePushButton, "enabled", true);
+    wList.append(setExpTimePushButton);
 
     QHBoxLayout *controlsHLayout0 = new QHBoxLayout();
     controlsHLayout0->addWidget(new QLabel("Exposure Time"));
@@ -49,8 +50,9 @@ void CameraPage::setupUI()
                 {SPIM::PI_DEVICE_X_AXIS,
                  SPIM::PI_DEVICE_Y_AXIS,
                  SPIM::PI_DEVICE_Z_AXIS})) {
-        controlsHLayout1->addWidget(new PIPositionControlWidget(
-                                        spim().piDevice(PIDEV)));
+        auto cw = new PIPositionControlWidget(spim().piDevice(PIDEV));
+        wList.append(cw);
+        controlsHLayout1->addWidget(cw);
     }
     controlsHLayout1->addStretch();
 
@@ -58,8 +60,9 @@ void CameraPage::setupUI()
     foreach(SPIM::PI_DEVICES PIDEV, QList<SPIM::PI_DEVICES>(
                 {SPIM::PI_DEVICE_LEFT_OBJ_AXIS,
                  SPIM::PI_DEVICE_RIGHT_OBJ_AXIS})) {
-        controlsHLayout2->addWidget(new PIPositionControlWidget(
-                                        spim().piDevice(PIDEV)));
+        auto cw = new PIPositionControlWidget(spim().piDevice(PIDEV));
+        wList.append(cw);
+        controlsHLayout2->addWidget(cw);
     }
     controlsHLayout2->addStretch();
 
@@ -71,6 +74,15 @@ void CameraPage::setupUI()
     vLayout->addStretch();
 
     setLayout(vLayout);
+
+    QState *readyState = stateMachine().getState(STATE_READY);
+    QState *capturingState = stateMachine().getState(STATE_CAPTURING);
+    QState *uninitState = stateMachine().getState(STATE_UNINITIALIZED);
+    foreach(auto w, wList) {
+        readyState->assignProperty(w, "enabled", true);
+        capturingState->assignProperty(w, "enabled", false);
+        uninitState->assignProperty(w, "enabled", false);
+    }
 
     connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
         spim().setExposureTime(expTimeSpinBox->value());
