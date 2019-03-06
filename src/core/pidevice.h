@@ -5,10 +5,10 @@
 
 #include <PI/PI_GCS2_DLL.h>
 
-
 #include <QObject>
 #include <QState>
 #include <QMutex>
+#include <QVector>
 
 typedef BOOL (*PI_qVectorOfDoubles)(int, const char*, double*);
 
