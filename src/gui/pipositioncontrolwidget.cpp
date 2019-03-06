@@ -15,7 +15,7 @@ PIPositionControlWidget::PIPositionControlWidget(
 void PIPositionControlWidget::appendDummyRows(const int number)
 {
     for (int i = 0; i < number; ++i) {
-        appendRow(i, "unknown");
+        appendRow(i, "1");
     }
 }
 
@@ -43,7 +43,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
 {
     int col = 0;
     grid->addWidget(new QLabel(QString("Axis %1").arg(name)), row, col++, 1, 1);
-    QLabel *currentPos = new QLabel("Unknown");
+    QLabel *currentPos = new QLabel("0.000");
     currentPosLabelMap[name.at(0)] = currentPos;
     grid->addWidget(currentPos, row, col++, 1, 1);
     QDoubleSpinBox *sb = new QDoubleSpinBox();
@@ -54,6 +54,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
         max = device->getTravelRangeHighEnd(name).at(0);
     }
     sb->setRange(min, max);
+    sb->setDecimals(3);
     grid->addWidget(sb, row, col++, 1, 1);
     QPushButton *setPushButton = new QPushButton("Set");
     grid->addWidget(setPushButton, row, col++, 1, 1);
