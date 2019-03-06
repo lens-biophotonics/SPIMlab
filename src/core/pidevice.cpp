@@ -18,7 +18,7 @@ static Logger *logger = getLogger("PIDevice");
 #define CALL_THROW(functionCall) \
     QMutexLocker ml(&mutex); \
     if (!functionCall) { \
-        throw std::runtime_error(std::string(FUNCNAME(functionCall)) + std::string(" error")); \
+        throw std::runtime_error(std::string(FUNCNAME(functionCall)) + ": " + getErrorString().toStdString()); \
     }
 #else
 #define CALL_THROW(func)
