@@ -1,7 +1,9 @@
 #include <QHBoxLayout>
 #include <QList>
+#include <QPushButton>
 
 #include "core/spim.h"
+#include "core/statemachine.h"
 
 #include "galvowaveformwidget.h"
 #include "pipositioncontrolwidget.h"
@@ -26,6 +28,22 @@ void CameraPage::setupUI()
         cameraHLayout->addLayout(vLayout);
     }
 
+    QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
+    expTimeSpinBox->setRange(0, 10000);
+    expTimeSpinBox->setDecimals(3);
+    expTimeSpinBox->setSuffix(" ms");
+    expTimeSpinBox->setValue(spim().getExposureTime());
+    QPushButton *setExpTimePushButton = new QPushButton("Set");
+    setExpTimePushButton->setEnabled(false);
+    stateMachine().getState(STATE_READY)->assignProperty(
+        setExpTimePushButton, "enabled", true);
+
+    QHBoxLayout *controlsHLayout0 = new QHBoxLayout();
+    controlsHLayout0->addWidget(new QLabel("Exposure Time"));
+    controlsHLayout0->addWidget(expTimeSpinBox);
+    controlsHLayout0->addWidget(setExpTimePushButton);
+    controlsHLayout0->addStretch();
+
     QHBoxLayout *controlsHLayout1 = new QHBoxLayout();
     foreach(SPIM::PI_DEVICES PIDEV, QList<SPIM::PI_DEVICES>(
                 {SPIM::PI_DEVICE_X_AXIS,
@@ -47,9 +65,14 @@ void CameraPage::setupUI()
 
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(cameraHLayout);
+    vLayout->addLayout(controlsHLayout0);
     vLayout->addLayout(controlsHLayout1);
     vLayout->addLayout(controlsHLayout2);
     vLayout->addStretch();
 
     setLayout(vLayout);
+
+    connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
+        spim().setExposureTime(expTimeSpinBox->value());
+    });
 }

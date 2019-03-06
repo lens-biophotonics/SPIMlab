@@ -75,6 +75,16 @@ void SPIM::uninitialize()
     }
 }
 
+double SPIM::getExposureTime() const
+{
+    return exposureTime;
+}
+
+void SPIM::setExposureTime(double ms)
+{
+    exposureTime = ms;
+}
+
 GalvoRamp *SPIM::getGalvoRamp(int number) const
 {
     return galvoList.at(number);
@@ -119,7 +129,7 @@ QList<PIDevice *> SPIM::piDevices() const
 void SPIM::startFreeRun()
 {
     try {
-        setExposureTime(0.0001);
+        _setExposureTime(exposureTime * 1000);
         foreach(OrcaFlash * orca, camList) {
             orca->setNFramesInBuffer(10);
             orca->startCapture();
@@ -192,7 +202,7 @@ void SPIM::stop()
     emit stopped();
 }
 
-void SPIM::setExposureTime(double expTime)
+void SPIM::_setExposureTime(double expTime)
 {
     double lineInterval = -1;
     int nOfLines = -1;

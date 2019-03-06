@@ -129,6 +129,8 @@ void MainWindow::saveSettings() const
                           spim().getCameraTrigger()->getTerm(i));
     }
 
+    settings.setValue("exposureTime", spim().getExposureTime());
+
     settings.endGroup();
 }
 
@@ -187,6 +189,8 @@ void MainWindow::loadSettings()
     CameraTrigger *ct = spim().getCameraTrigger();
     ct->setPhysicalChannels(physicalChannels);
     ct->setTerms(terms);
+
+    spim().setExposureTime(settings.value("exposureTime", 0.1).toDouble());
 
     settings.endGroup();
 }

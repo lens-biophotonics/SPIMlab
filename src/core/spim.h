@@ -39,6 +39,9 @@ public:
     CameraTrigger *getCameraTrigger() const;
     GalvoRamp *getGalvoRamp(int number) const;
 
+    double getExposureTime() const;
+    void setExposureTime(double ms);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -57,12 +60,13 @@ private:
     SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
 
+    double exposureTime;  // in ms
+
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
     QList<GalvoRamp *>galvoList;
 
-
-    void setExposureTime(double expTime);
+    void _setExposureTime(double expTime);
 
 private slots:
     void onError(const QString &errMsg);
