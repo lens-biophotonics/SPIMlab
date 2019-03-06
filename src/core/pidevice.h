@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QState>
+#include <QMutex>
 
 
 class PIDevice : public QObject
@@ -74,6 +75,7 @@ private:
     QState *_disconnectedState = nullptr;
 
     QString verboseName;
+    QMutex mutex;
 };
 
 #endif // PIDEVICE_H

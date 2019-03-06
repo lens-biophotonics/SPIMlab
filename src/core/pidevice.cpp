@@ -4,6 +4,7 @@
 #include <QString>
 #include <QStateMachine>
 #include <QSerialPortInfo>
+#include <QMutexLocker>
 
 #include "logger.h"
 #include "pidevice.h"
@@ -15,6 +16,7 @@ static Logger *logger = getLogger("PIDevice");
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
 #define CALL_THROW(functionCall) \
+    QMutexLocker ml(&mutex); \
     if (!functionCall) { \
         throw std::runtime_error(std::string(FUNCNAME(functionCall)) + std::string(" error")); \
     }
