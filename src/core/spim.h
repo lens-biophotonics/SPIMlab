@@ -52,7 +52,7 @@ signals:
     void error(const QString) const;
 
 private:
-    QThread *thread = nullptr;
+    QThread *acqThread = nullptr;
     SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
 
