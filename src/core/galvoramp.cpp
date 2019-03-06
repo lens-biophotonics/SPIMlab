@@ -136,8 +136,7 @@ void GalvoRamp::computeWaveform()
         waveform << temp.mid(nSamples - delay - 1, delay);
         waveform << temp.mid(0, nSamples - delay);
     } else {
-        delay = -delay;
-        waveform << temp.mid(delay, nSamples - delay);
-        waveform << temp.mid(0, delay);
+        waveform << temp.mid(delay, nSamples + delay);
+        waveform << temp.mid(0, -delay);
     }
 }
