@@ -120,6 +120,17 @@ void PIDevice::setServoEnabled(const QString &axes, const QVector<int> &enable)
     CALL_THROW(PI_SVO(id, axes.toLatin1(), enable.constData()));
 }
 
+/**
+ * @brief Set servo-control for all axes.
+ * @param enable
+ */
+
+void PIDevice::setServoEnabled(bool enable)
+{
+    QString axes = getAxisIdentifiers();
+    setServoEnabled(axes, QVector<int>(axes.length(), enable ? 1 : 0));
+}
+
 QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
 {
     return *getVectorOfDoubles(&PI_qTMN, axes).get();

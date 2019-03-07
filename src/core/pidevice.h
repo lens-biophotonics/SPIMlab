@@ -32,6 +32,7 @@ public:
     void move(const QString &axes, const double pos[]);
     void moveRelative(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
+    void setServoEnabled(bool enable);
 
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
     QVector<double> getTravelRangeHighEnd(const QString &axes = "");

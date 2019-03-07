@@ -59,6 +59,7 @@ void SPIM::initialize()
 
         foreach (PIDevice * dev, piDevList) {
             dev->connectDevice();
+            dev->setServoEnabled(true);
         }
     } catch (std::runtime_error e) {
         onError(e.what());
