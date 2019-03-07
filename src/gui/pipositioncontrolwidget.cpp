@@ -1,6 +1,7 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include <QDoubleSpinBox>
+#include <QMessageBox>
 
 #include "pipositioncontrolwidget.h"
 
@@ -89,13 +90,22 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
 
 void PIPositionControlWidget::move(const QString &name, const double pos)
 {
-    device->move(name, &pos);
+    try {
+        device->move(name, &pos);
+    }
+    catch (std::runtime_error e) {
+        QMessageBox::critical(nullptr, "Error", e.what());
+    }
 }
-
 void PIPositionControlWidget::moveRelative(const QString &name,
                                            const double pos)
 {
-    device->moveRelative(name, &pos);
+    try {
+        device->moveRelative(name, &pos);
+    }
+    catch (std::runtime_error e) {
+        QMessageBox::critical(nullptr, "Error", e.what());
+    }
 }
 
 void PIPositionControlWidget::updateUIConnect()
