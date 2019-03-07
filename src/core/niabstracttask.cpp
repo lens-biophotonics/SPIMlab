@@ -46,6 +46,9 @@ void NIAbstractTask::start()
 
 void NIAbstractTask::stop()
 {
+    if (!task) {
+        return;
+    }
     DAQmxErrChk(DAQmxStopTask(task));
 }
 

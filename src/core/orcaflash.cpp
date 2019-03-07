@@ -154,6 +154,9 @@ void OrcaFlash::startCapture()
 
 void OrcaFlash::stop()
 {
+    if (!_isOpen) {
+        return;
+    }
     CALL_THROW(dcam_idle(h))
     CALL_THROW(dcam_freeframe(h))
 }

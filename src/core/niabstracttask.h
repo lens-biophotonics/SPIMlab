@@ -20,6 +20,9 @@
  */
 #ifdef WITH_HARDWARE
 #define DAQmxErrChk(functionCall) { \
+        if (!task) { \
+            throw std::runtime_error("Task not initialized"); \
+        } \
         if (DAQmxFailed(functionCall)) { \
             onError(); \
         } \

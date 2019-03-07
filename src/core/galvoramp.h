@@ -5,8 +5,6 @@
 
 #include "niabstracttask.h"
 
-using namespace NI;
-
 class GalvoRamp : public NIAbstractTask
 {
 public:

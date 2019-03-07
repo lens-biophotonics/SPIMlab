@@ -248,9 +248,8 @@ void SPIM::_setExposureTime(double expTime)
 
 void SPIM::onError(const QString &errMsg)
 {
-    emit error(errMsg);
-    logger->error(errMsg);
     stop();
+    emit error(errMsg);
 }
 
 SPIM &spim()
