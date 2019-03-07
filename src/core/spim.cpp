@@ -41,7 +41,12 @@ SPIM::~SPIM()
 void SPIM::initialize()
 {
     try {
-        DCAM::init_dcam();
+        int nOfCameras = DCAM::init_dcam();
+        if (nOfCameras < NCAMS) {
+            throw std::runtime_error(
+                      QString("Found %1/%2 cameras").arg(
+                          nOfCameras, NCAMS).toStdString());
+        }
 
         for (int i = 0; i < NCAMS; ++i) {
             OrcaFlash *orca = camList.at(i);
