@@ -67,6 +67,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
 
     QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
     stepSpinBox->setRange(0, max);
+    stepSpinBox->setValue(0.1);
     grid->addWidget(stepSpinBox, row, col++, 1, 1);
 
     QPushButton *plusPushButton = new QPushButton("+");
