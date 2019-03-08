@@ -6,6 +6,7 @@
 #include <QGridLayout>
 
 #include "core/pidevice.h"
+#include "customspinbox.h"
 
 class PIPositionControlWidget : public QWidget
 {
@@ -15,7 +16,6 @@ public:
                                      QWidget *parent = nullptr);
 
     void appendDummyRows(const int number);
-signals:
 
 public slots:
 

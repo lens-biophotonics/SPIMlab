@@ -1,6 +1,5 @@
 #include <QGroupBox>
 #include <QPushButton>
-#include <QDoubleSpinBox>
 #include <QMessageBox>
 
 #include "pipositioncontrolwidget.h"
@@ -47,7 +46,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     QLabel *currentPos = new QLabel("0.000");
     currentPosLabelMap[name.at(0)] = currentPos;
     grid->addWidget(currentPos, row, col++, 1, 1);
-    QDoubleSpinBox *sb = new QDoubleSpinBox();
+    DoubleSpinBox *sb = new DoubleSpinBox();
     double min = -10;
     double max = 10;
     if (device->isConnected()) {
@@ -57,8 +56,6 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     sb->setRange(min, max);
     sb->setDecimals(3);
     grid->addWidget(sb, row, col++, 1, 1);
-    QPushButton *setPushButton = new QPushButton("Set");
-    grid->addWidget(setPushButton, row, col++, 1, 1);
 
     QFrame *line;
     line = new QFrame();
@@ -77,9 +74,10 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     QPushButton *minusPushButton = new QPushButton("-");
     grid->addWidget(minusPushButton, row, col++, 1, 1);
 
-    connect(setPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
         move(name, sb->value());
     });
+
     connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
         moveRelative(name, stepSpinBox->value());
     });
