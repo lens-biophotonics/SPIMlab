@@ -59,7 +59,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
         max = device->getTravelRangeHighEnd(name).at(0);
     }
     sb->setRange(min, max);
-    sb->setDecimals(3);
+    sb->setDecimals(4);
     grid->addWidget(sb, row, col++, 1, 1);
 
     QFrame *line;
@@ -71,6 +71,7 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
     stepSpinBox->setRange(0, max);
     stepSpinBox->setValue(0.1);
+    stepSpinBox->setDecimals(4);
     grid->addWidget(stepSpinBox, row, col++, 1, 1);
 
     QPushButton *plusPushButton = new QPushButton("+");
@@ -130,7 +131,7 @@ void PIPositionControlWidget::updateValues(
 {
     for (int i = 0; i < axes.length(); ++i) {
         currentPosLabelMap.value(axes.at(i))->setText(
-            QString("%1").arg(pos.at(i), 0, 'f', 3));
+            QString("%1").arg(pos.at(i), 0, 'f', 4));
     }
 }
 
