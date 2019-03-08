@@ -116,18 +116,18 @@ void PIPositionControlWidget::appendRow(
     });
 
     connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
-        double pos = stepSpinBox->value();
+        device->setStepSize(axis, stepSpinBox->value());
         try {
-            device->moveRelative(axis, &pos);
+            device->stepUp(axis);
         }
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
     });
     connect(minusPushButton, &QPushButton::clicked, this, [ = ](){
-        double pos = -stepSpinBox->value();
+        device->setStepSize(axis, stepSpinBox->value());
         try {
-            device->moveRelative(axis, &pos);
+            device->stepUp(axis);
         }
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());

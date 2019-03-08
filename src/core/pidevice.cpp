@@ -83,6 +83,11 @@ void PIDevice::connectDevice()
     else {
         connectSerial(getPortName(), getBaud());
     }
+
+    QString axes = getAxisIdentifiers();
+    for (int i = 0; i < axes.length(); ++i) {
+        stepSizeMap[axes.at(i)] = 0.1;
+    }
 }
 
 void PIDevice::close()
@@ -106,6 +111,26 @@ bool PIDevice::isConnected()
 void PIDevice::move(const QString &axes, const double pos[])
 {
     callFunctionWithVectorOfDoubles(&PI_MOV, axes, pos);
+}
+
+void PIDevice::stepUp(const QString &axes)
+{
+    QVector<double> stepSizes;
+    stepSizes.reserve(axes.length());
+    for (int i = 0; i < axes.length(); ++i) {
+        stepSizes.insert(i, stepSizeMap.value(axes.at(i)));
+    }
+    moveRelative(axes, stepSizes.data());
+}
+
+void PIDevice::stepDown(const QString &axes)
+{
+    QVector<double> stepSizes;
+    stepSizes.reserve(axes.length());
+    for (int i = 0; i < axes.length(); ++i) {
+        stepSizes.insert(i, -stepSizeMap.value(axes.at(i)));
+    }
+    moveRelative(axes, stepSizes.data());
 }
 
 void PIDevice::moveRelative(const QString &axes, const double pos[])
@@ -323,6 +348,19 @@ QString PIDevice::getVerboseName() const
 void PIDevice::setVerboseName(const QString &value)
 {
     verboseName = value;
+}
+
+double PIDevice::getStepSize(const QString &axis) const
+{
+    return stepSizeMap.value(axis);
+}
+
+void PIDevice::setStepSize(const QString &axis, const double value)
+{
+    if (!stepSizeMap.contains(axis)) {
+        return;
+    }
+    stepSizeMap[axis] = value;
 }
 
 QString PIDevice::getPortName() const

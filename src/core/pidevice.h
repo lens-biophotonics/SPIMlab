@@ -30,6 +30,8 @@ public:
     bool isConnected();
 
     void move(const QString &axes, const double pos[]);
+    void stepUp(const QString &axes);
+    void stepDown(const QString &axes);
     void moveRelative(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
     void setServoEnabled(bool enable);
@@ -69,6 +71,9 @@ public:
     QString getVerboseName() const;
     void setVerboseName(const QString &value);
 
+    double getStepSize(const QString &axis) const;
+    void setStepSize(const QString &axis, const double value);
+
 signals:
     void connected();
     void disconnected();
@@ -96,6 +101,8 @@ private:
 
     QString verboseName;
     QMutex mutex;
+
+    QMap<QString, double> stepSizeMap;
 };
 
 #endif // PIDEVICE_H
