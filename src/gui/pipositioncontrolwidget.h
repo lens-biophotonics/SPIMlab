@@ -2,7 +2,6 @@
 #define PIPOSITIONCONTROLWIDGET_H
 
 #include <QWidget>
-#include <QLabel>
 #include <QGridLayout>
 #include <QGroupBox>
 
@@ -27,7 +26,6 @@ private:
 
     QGridLayout *grid;
     QGroupBox *gb;
-    QMap<QChar, QLabel*> currentPosLabelMap;
 };
 
 #endif // PIPOSITIONCONTROLWIDGET_H

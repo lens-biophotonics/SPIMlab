@@ -1,5 +1,6 @@
 #include <QPushButton>
 #include <QMessageBox>
+#include <QLabel>
 
 #include "pipositioncontrolwidget.h"
 
@@ -45,7 +46,6 @@ void PIPositionControlWidget::appendRow(
     int col = 0;
     grid->addWidget(new QLabel(axisName), row, col++);
     QLabel *currentPos = new QLabel("0.000");
-    currentPosLabelMap[axis.at(0)] = currentPos;
     grid->addWidget(currentPos, row, col++);
     QString s = "QPushButton {color: red;}";
     QPushButton *haltPushButton = new QPushButton("HALT");

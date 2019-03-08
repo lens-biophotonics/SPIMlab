@@ -1,6 +1,7 @@
 #include <QHBoxLayout>
 #include <QList>
 #include <QPushButton>
+#include <QLabel>
 
 #include "core/spim.h"
 #include "core/statemachine.h"
