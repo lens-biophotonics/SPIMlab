@@ -58,6 +58,9 @@ void SPIM::initialize()
         }
 
         foreach (PIDevice * dev, piDevList) {
+            if (dev->getPortName().isEmpty()) {
+                continue;
+            }
             dev->connectDevice();
             dev->setServoEnabled(true);
         }

@@ -73,10 +73,14 @@ void PIDevice::connectDaisyChainSerial(
 
 void PIDevice::connectDevice()
 {
+    if (getPortName().isEmpty()) {
+        logger->warning("Cannot connect: port name not specified");
+        return;
+    }
     if (getDeviceNumber() > 0) {
         connectDaisyChainSerial(getPortName(), getDeviceNumber(), getBaud());
     }
-    else if (!getPortName().isEmpty()) {
+    else {
         connectSerial(getPortName(), getBaud());
     }
 }
