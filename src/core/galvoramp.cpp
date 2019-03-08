@@ -16,8 +16,11 @@ void GalvoRamp::setPhysicalChannel(const QString &channel)
     clear();
 }
 
-void GalvoRamp::setTriggerSource(QString source)
+void GalvoRamp::setTriggerSource(const QString &source)
 {
+    if (triggerSource == source) {
+        return;
+    }
     triggerSource = source;
     clear();
 }

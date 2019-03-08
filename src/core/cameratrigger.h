@@ -19,6 +19,7 @@ public:
     bool isFreeRunEnabled() const;
 
     QString getTerm(const int number);
+    QStringList getTerms();
     void setTerms(QStringList terms);
 
     void setTriggerTerm(const QString &term);

@@ -74,5 +74,7 @@ void NISettingsWidget::apply()
         ctrs << cameraTriggerCtrComboBoxList.at(i)->currentText();
         terms << cameraTriggerTermComboBoxList.at(i)->currentText();
     }
-    spim().setupCameraTrigger(ctrs, terms);
+    spim().getCameraTrigger()->setPhysicalChannels(ctrs);
+    spim().getCameraTrigger()->setTerms(terms);
+    spim().setupGalvoRampTriggerSource(terms);
 }

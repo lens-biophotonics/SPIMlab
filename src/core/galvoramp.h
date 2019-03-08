@@ -13,7 +13,7 @@ public:
     QString getPhysicalChannel() const;
     void setPhysicalChannel(const QString &channel);
 
-    void setTriggerSource(QString source);
+    void setTriggerSource(const QString &source);
 
     void setCameraParams(int nSamples, const int nRamp, const double rate);
 

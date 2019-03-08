@@ -69,6 +69,8 @@ void SPIM::initialize()
         return;
     }
 
+    setupGalvoRampTriggerSource(cameraTrigger->getTerms());
+
     emit initialized();
 }
 
@@ -109,13 +111,9 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
     return camList.at(camNumber);
 }
 
-void SPIM::setupCameraTrigger(
-    const QStringList &COPhysicalChans, const QStringList &terminals)
+void SPIM::setupGalvoRampTriggerSource(const QStringList &terminals)
 {
     try {
-        cameraTrigger->setPhysicalChannels(COPhysicalChans);
-        cameraTrigger->setTerms(terminals);
-
         for (int i = 0; i < NGALVORAMPS; ++i) {
             galvoList.at(i)->setTriggerSource(terminals.at(i));
         }

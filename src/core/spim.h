@@ -30,8 +30,7 @@ public:
     OrcaFlash *getCamera(int camNumber) const;
     void setCamera(OrcaFlash *getCamera);
 
-    void setupCameraTrigger(const QStringList &COPhysicalChans,
-                            const QStringList &terminals);
+    void setupGalvoRampTriggerSource(const QStringList &terminals);
 
     PIDevice *piDevice(const PI_DEVICES dev) const;
     QList<PIDevice *> piDevices() const;
