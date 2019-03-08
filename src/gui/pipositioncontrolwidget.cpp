@@ -46,6 +46,11 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
     QLabel *currentPos = new QLabel("0.000");
     currentPosLabelMap[name.at(0)] = currentPos;
     grid->addWidget(currentPos, row, col++, 1, 1);
+    QString s = "QPushButton {color: red;}";
+    QPushButton *haltPushButton = new QPushButton("HALT");
+    haltPushButton->setStyleSheet(s);
+    grid->addWidget(haltPushButton, row, col++, 1, 1);
+
     DoubleSpinBox *sb = new DoubleSpinBox();
     double min = -10;
     double max = 10;
@@ -73,6 +78,11 @@ void PIPositionControlWidget::appendRow(const int row, const QString &name)
 
     QPushButton *minusPushButton = new QPushButton("-");
     grid->addWidget(minusPushButton, row, col++, 1, 1);
+
+    connect(haltPushButton, &QPushButton::clicked, this, [ = ](){
+        device->halt(name);
+        device->getError();
+    });
 
     connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
         move(name, sb->value());

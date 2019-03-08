@@ -135,6 +135,11 @@ void PIDevice::setServoEnabled(bool enable)
     setServoEnabled(axes, QVector<int>(axes.length(), enable ? 1 : 0));
 }
 
+void PIDevice::halt(const QString &axes)
+{
+    CALL_THROW(PI_HLT(id, axes.toLatin1()));
+}
+
 QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
 {
     return *getVectorOfDoubles(&PI_qTMN, axes).get();
@@ -236,10 +241,15 @@ QVector<int> PIDevice::getReferencedState(QString axes)
     return vec;
 }
 
+int PIDevice::getError()
+{
+    return PI_GetError(id);
+}
+
 QString PIDevice::getErrorString()
 {
     std::unique_ptr<char[]> buf(new char[1024]);
-    PI_TranslateError(PI_GetError(id), buf.get(), 1024);
+    PI_TranslateError(getError(), buf.get(), 1024);
     return QString(buf.get());
 }
 

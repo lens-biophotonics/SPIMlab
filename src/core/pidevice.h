@@ -33,6 +33,7 @@ public:
     void moveRelative(const QString &axes, const double pos[]);
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
     void setServoEnabled(bool enable);
+    void halt(const QString &axes);
 
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
     QVector<double> getTravelRangeHighEnd(const QString &axes = "");
@@ -48,6 +49,7 @@ public:
     QString getAxisIdentifiers();
     QVector<int> getReferencedState(QString axes = "");
 
+    int getError();
     QString getErrorString();
 
     QState *connectedState() const;
