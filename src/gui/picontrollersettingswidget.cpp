@@ -8,6 +8,7 @@
 #include <QRadioButton>
 #include <QState>
 #include <QMessageBox>
+#include <QListView>
 
 #include <QtDebug>
 
@@ -141,16 +142,19 @@ void PIControllerSettingsWidget::setupUI()
     QGridLayout *grid = new QGridLayout();
 
     serialPortComboBox = new QComboBox();
-    QSize size = serialPortComboBox->size();
-    size.setWidth(150);
-    serialPortComboBox->setMaximumSize(size);
+    QListView *view = new QListView();
+    view->setFixedWidth(300);
+    serialPortComboBox->setView(view);
+    serialPortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
+    serialPortComboBox->setMinimumContentsLength(15);
+
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         if (info.manufacturer() != "PI") {
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
-                        .arg(info.description())
                         .arg(info.portName())
+                        .arg(info.description())
                         .arg(info.serialNumber());
         serialPortComboBox->addItem(descr, info.portName());
     }
