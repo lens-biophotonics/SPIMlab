@@ -1,4 +1,4 @@
-#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
@@ -13,8 +13,7 @@ GalvoWaveformWidget::GalvoWaveformWidget(GalvoRamp *galvoRamp, QWidget *parent)
 
 void GalvoWaveformWidget::setupUI()
 {
-    QGridLayout *grid = new QGridLayout();
-    int row = 0;
+    QHBoxLayout *hLayout = new QHBoxLayout();
 
     QList<QVariant> wp = galvoRamp->getWaveformParams();
 
@@ -22,28 +21,28 @@ void GalvoWaveformWidget::setupUI()
     offsetSpinBox->setRange(-10, 10);
     offsetSpinBox->setSuffix(" V");
     offsetSpinBox->setValue(wp.at(0).toDouble());
-    grid->addWidget(new QLabel("Offset"), row, 0, 1, 1);
-    grid->addWidget(offsetSpinBox, row++, 1, 1, 1);
+    hLayout->addWidget(new QLabel("Offset"));
+    hLayout->addWidget(offsetSpinBox);
 
     amplitudeSpinBox = new QDoubleSpinBox();
     amplitudeSpinBox->setRange(-10, 10);
     amplitudeSpinBox->setSuffix(" V");
     amplitudeSpinBox->setValue(wp.at(1).toDouble());
-    grid->addWidget(new QLabel("Amplitude"), row, 0, 1, 1);
-    grid->addWidget(amplitudeSpinBox, row++, 1, 1, 1);
+    hLayout->addWidget(new QLabel("Amplitude"));
+    hLayout->addWidget(amplitudeSpinBox);
 
     delaySpinBox = new QSpinBox();
     delaySpinBox->setRange(-1000, 1000);
     delaySpinBox->setSuffix(" samples");
     delaySpinBox->setValue(wp.at(2).toInt());
-    grid->addWidget(new QLabel("Delay"), row, 0, 1, 1);
-    grid->addWidget(delaySpinBox, row++, 1, 1, 1);
+    hLayout->addWidget(new QLabel("Delay"));
+    hLayout->addWidget(delaySpinBox);
 
     QPushButton *applyPushButton = new QPushButton("Apply");
-    grid->addWidget(applyPushButton, row++, 0, 1, 2);
+    hLayout->addWidget(applyPushButton);
 
     QGroupBox *gbox = new QGroupBox("Galvo Ramp");
-    gbox->setLayout(grid);
+    gbox->setLayout(hLayout);
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(gbox);
