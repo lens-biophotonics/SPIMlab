@@ -1,172 +1,171 @@
-#include <QGroupBox>
 #include <QPushButton>
 #include <QMessageBox>
 
 #include "pipositioncontrolwidget.h"
 
-PIPositionControlWidget::PIPositionControlWidget(
-    PIDevice *device, QWidget *parent) :
-    QWidget(parent), device(device)
+PIPositionControlWidget::PIPositionControlWidget(QWidget *parent) :
+    QWidget(parent)
 {
     setupUI();
-    appendDummyRows(1);
-}
-
-void PIPositionControlWidget::appendDummyRows(const int number)
-{
-    for (int i = 0; i < number; ++i) {
-        appendRow(i, "1");
-    }
 }
 
 void PIPositionControlWidget::setupUI()
 {
     grid = new QGridLayout();
 
-    QGroupBox *gb = new QGroupBox(device->getVerboseName());
+    gb = new QGroupBox();
     gb->setLayout(grid);
 
-    QVBoxLayout *vLayout = new QVBoxLayout();
-    vLayout->addWidget(gb);
-    setLayout(vLayout);
-
-    device->connectedState()->assignProperty(gb, "enabled", true);
-    device->disconnectedState()->assignProperty(gb, "enabled", false);
-
-    connect(device, &PIDevice::connected,
-            this, &PIPositionControlWidget::updateUIConnect);
-    connect(device, &PIDevice::newPositions,
-            this, &PIPositionControlWidget::updateValues);
-}
-
-void PIPositionControlWidget::appendRow(const int row, const QString &name)
-{
-    double min = -10;
-    double max = 10;
-    double velocity = 0;
-    if (device->isConnected()) {
-        min = device->getTravelRangeLowEnd(name).at(0);
-        max = device->getTravelRangeHighEnd(name).at(0);
-        velocity = device->getVelocities(name).at(0);
-    }
-
-    int col = 0;
-    grid->addWidget(new QLabel(QString("Axis %1").arg(name)), row, col++, 1, 1);
-    QLabel *currentPos = new QLabel("0.000");
-    currentPosLabelMap[name.at(0)] = currentPos;
-    grid->addWidget(currentPos, row, col++, 1, 1);
-    QString s = "QPushButton {color: red;}";
-    QPushButton *haltPushButton = new QPushButton("HALT");
-    haltPushButton->setStyleSheet(s);
-    grid->addWidget(haltPushButton, row, col++, 1, 1);
-
-    DoubleSpinBox *sb = new DoubleSpinBox();
-    sb->setRange(min, max);
-    sb->setDecimals(4);
-    grid->addWidget(sb, row, col++, 1, 1);
-
-    QPushButton *minusPushButton = new QPushButton("-");
-    grid->addWidget(minusPushButton, row, col++, 1, 1);
-
-    QPushButton *plusPushButton = new QPushButton("+");
-    grid->addWidget(plusPushButton, row, col++, 1, 1);
+    int col = 1;
+    grid->addWidget(new QLabel("Curr. Pos."), row, col);
+    col += 2;
+    grid->addWidget(new QLabel("Set Pos."), row, col++);
+    grid->addWidget(new QLabel("Step down"), row, col++);
+    grid->addWidget(new QLabel("Step up"), row, col++);
 
     QFrame *line;
     line = new QFrame();
     line->setFrameShape(QFrame::VLine);
     line->setFrameShadow(QFrame::Sunken);
-    grid->addWidget(line, row, col++, 1, 1);
+    grid->addWidget(line, row, col++);
+
+    grid->addWidget(new QLabel("Step size"), row, col++);
+    grid->addWidget(new QLabel("Velocity"), row, col++);
+
+    row++;
+
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addWidget(gb);
+    setLayout(vLayout);
+}
+
+void PIPositionControlWidget::appendRow(
+    PIDevice *device, const QString &axis, const QString &axisName)
+{
+    int col = 0;
+    grid->addWidget(new QLabel(axisName), row, col++);
+    QLabel *currentPos = new QLabel("0.000");
+    currentPosLabelMap[axis.at(0)] = currentPos;
+    grid->addWidget(currentPos, row, col++);
+    QString s = "QPushButton {color: red;}";
+    QPushButton *haltPushButton = new QPushButton("HALT");
+    haltPushButton->setStyleSheet(s);
+    grid->addWidget(haltPushButton, row, col++);
+
+    DoubleSpinBox *sb = new DoubleSpinBox();
+    sb->setDecimals(4);
+    grid->addWidget(sb, row, col++);
+
+    QPushButton *minusPushButton = new QPushButton("-");
+    grid->addWidget(minusPushButton, row, col++);
+
+    QPushButton *plusPushButton = new QPushButton("+");
+    grid->addWidget(plusPushButton, row, col++);
+
+    QFrame *line;
+    line = new QFrame();
+    line->setFrameShape(QFrame::VLine);
+    line->setFrameShadow(QFrame::Sunken);
+    grid->addWidget(line, row, col++);
 
     QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
-    stepSpinBox->setRange(0, max);
     stepSpinBox->setValue(0.1);
     stepSpinBox->setDecimals(4);
-    grid->addWidget(stepSpinBox, row, col++, 1, 1);
+    grid->addWidget(stepSpinBox, row, col++);
 
     DoubleSpinBox *velocitySpinBox = new DoubleSpinBox();
     velocitySpinBox->setValue(1);
     velocitySpinBox->setDecimals(4);
-    velocitySpinBox->setValue(velocity);
-    grid->addWidget(velocitySpinBox, row, col++, 1, 1);
+    grid->addWidget(velocitySpinBox, row, col++);
+
+    row++;
+
+    QState *cs = device->connectedState();
+    QState *ds = device->disconnectedState();
+
+    QList<QWidget *> wList;
+
+    // enabled when connected, disabled when disconnected
+    wList = {
+        haltPushButton,
+        sb,
+        minusPushButton,
+        plusPushButton,
+        stepSpinBox,
+        velocitySpinBox,
+    };
+
+    foreach (QWidget * w, wList) {
+        cs->assignProperty(w, "enabled", true);
+        ds->assignProperty(w, "enabled", false);
+    }
 
     connect(haltPushButton, &QPushButton::clicked, this, [ = ](){
-        device->halt(name);
+        device->halt(axis);
         device->getError();
     });
 
     connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
-        move(name, sb->value());
+        double pos = sb->value();
+        try {
+            device->move(axis, &pos);
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
+        }
     });
 
     connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
-        moveRelative(name, stepSpinBox->value());
+        double pos = stepSpinBox->value();
+        try {
+            device->moveRelative(axis, &pos);
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
+        }
     });
     connect(minusPushButton, &QPushButton::clicked, this, [ = ](){
-        moveRelative(name, -stepSpinBox->value());
+        double pos = -stepSpinBox->value();
+        try {
+            device->moveRelative(axis, &pos);
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
+        }
     });
 
     connect(velocitySpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
-        setVelocity(name, velocitySpinBox->value());
+        double vel = velocitySpinBox->value();
+        try {
+            device->setVelocities(axis, &vel);
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
+        }
+    });
+
+    connect(device, &PIDevice::newPositions, this, [ = ](
+                const QString &axes, const QVector<double> &pos) {
+        for (int i = 0; i < axes.length(); ++i) {
+            if (axes.at(i) == axis.at(0)) {
+                currentPos->setText(QString("%1").arg(pos.at(i), 0, 'f', 4));
+                break;
+            }
+        }
+    });
+
+    connect(device, &PIDevice::connected, this, [ = ](){
+        double min = device->getTravelRangeLowEnd(axis).at(0);
+        double max = device->getTravelRangeHighEnd(axis).at(0);
+        double velocity = device->getVelocities(axis).at(0);
+
+        sb->setRange(min, max);
+        stepSpinBox->setRange(0, max);
+        velocitySpinBox->setValue(velocity);
     });
 }
 
-void PIPositionControlWidget::move(const QString &name, const double pos)
+void PIPositionControlWidget::setTitle(const QString &title)
 {
-    try {
-        device->move(name, &pos);
-    }
-    catch (std::runtime_error e) {
-        QMessageBox::critical(nullptr, "Error", e.what());
-    }
-}
-void PIPositionControlWidget::moveRelative(const QString &name,
-                                           const double pos)
-{
-    try {
-        device->moveRelative(name, &pos);
-    }
-    catch (std::runtime_error e) {
-        QMessageBox::critical(nullptr, "Error", e.what());
-    }
-}
-
-void PIPositionControlWidget::setVelocity(const QString &name, const double pos)
-{
-    try {
-        device->setVelocities(name, &pos);
-    }
-    catch (std::runtime_error e) {
-        QMessageBox::critical(nullptr, "Error", e.what());
-    }
-}
-
-void PIPositionControlWidget::updateUIConnect()
-{
-    clear();
-    QString axes = device->getAxisIdentifiers();
-    for (int i = 0; i < axes.length(); ++i) {
-        appendRow(i, axes.at(i));
-    }
-}
-
-void PIPositionControlWidget::updateValues(
-    const QString &axes, const QVector<double> &pos)
-{
-    for (int i = 0; i < axes.length(); ++i) {
-        currentPosLabelMap.value(axes.at(i))->setText(
-            QString("%1").arg(pos.at(i), 0, 'f', 4));
-    }
-}
-
-void PIPositionControlWidget::clear()
-{
-    QLayoutItem *child;
-    while ((child = grid->takeAt(0))) {
-        QWidget *w = child->widget();
-        if (w) {
-            delete w;
-        }
-        delete child;
-    }
-    currentPosLabelMap.clear();
+    gb->setTitle(title);
 }

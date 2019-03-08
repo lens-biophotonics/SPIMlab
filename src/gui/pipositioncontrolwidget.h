@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QGridLayout>
+#include <QGroupBox>
 
 #include "core/pidevice.h"
 #include "customspinbox.h"
@@ -12,29 +13,20 @@ class PIPositionControlWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PIPositionControlWidget(PIDevice *device,
-                                     QWidget *parent = nullptr);
+    explicit PIPositionControlWidget(QWidget *parent = nullptr);
+    void appendRow(PIDevice *device, const QString &axis,
+                   const QString &axisName);
 
-    void appendDummyRows(const int number);
-
-public slots:
-
-private slots:
-    void updateUIConnect();
-    void updateValues(const QString &axes, const QVector<double> &pos);
+    void setTitle(const QString &title);
 
 private:
     void setupUI();
-    void clear();
-    void appendRow(const int row, const QString &name);
-    void move(const QString &name, const double pos);
-    void moveRelative(const QString &name, const double pos);
-    void setVelocity(const QString &name, const double pos);
 
-
+    int row = 0;
     PIDevice *device;
 
     QGridLayout *grid;
+    QGroupBox *gb;
     QMap<QChar, QLabel*> currentPosLabelMap;
 };
 
