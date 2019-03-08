@@ -225,8 +225,8 @@ void SPIM::_setExposureTime(double expTime)
             int tempInt = orca->nOfLines();
 
             if (i > 0) {
-                if (fabs(tempDouble - lineInterval) < 0.001 || tempInt != nOfLines) {
-                    QString m("Different values for line interval and number of"
+                if (fabs(tempDouble - lineInterval) > 0.001 || tempInt != nOfLines) {
+                    QString m("Different values for line interval and number of "
                               "lines: Cam 0: %1 %2; Cam %3: %4 %5");
                     m = m.arg(lineInterval).arg(nOfLines).arg(i).arg(tempDouble)
                         .arg(tempInt);
