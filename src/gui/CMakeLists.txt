@@ -15,6 +15,8 @@ set(SPIMlab_SRCS
     mainwindow.cpp
     version.cpp
 
+    customspinbox.cpp
+
     controlwidget.cpp
     picontrollersettingswidget.cpp
     nisettingswidget.cpp
