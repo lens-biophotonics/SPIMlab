@@ -28,28 +28,24 @@ void NISettingsWidget::setupUI()
         grid->addWidget(new QLabel("Counter"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getCOPhysicalChans());
+        comboBox->setCurrentText(
+            spim().getCameraTrigger()->getPhysicalChannel(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerCtrComboBoxList.insert(i, comboBox);
 
         grid->addWidget(new QLabel("Term"), row, 0);
         comboBox = new QComboBox();
-        comboBox->addItems(NI::getTerminals());
+        comboBox->insertItems(0, NI::getTerminals());
+        comboBox->setCurrentText(spim().getCameraTrigger()->getTerm(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerTermComboBoxList.insert(i, comboBox);
-
-        int idx;
-        idx = comboBox->findData(
-            spim().getCameraTrigger()->getPhysicalChannel(i));
-        comboBox->setCurrentIndex(idx);
-
-        idx = comboBox->findData(spim().getCameraTrigger()->getTerm(i));
-        comboBox->setCurrentIndex(idx);
 
         grid->addWidget(new QLabel(QString("Galvo ramp %1").arg(i)),
                         row++, i * 2 + 0, 1, 2);
         grid->addWidget(new QLabel("Channel"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
+        comboBox->setCurrentText(spim().getGalvoRamp(i)->getPhysicalChannel());
         grid->addWidget(comboBox, row++, i * 2 + 1);
         galvoRampComboBoxList.insert(i, comboBox);
     }
