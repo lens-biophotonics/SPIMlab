@@ -23,7 +23,12 @@ void CameraTrigger::setPhysicalChannels(const QStringList &channels)
 
 void CameraTrigger::initializeTask_impl()
 {
-    DAQmxErrChk(DAQmxCreateTask("cameraTriggerCOPulse", &task));
+#ifdef WITH_HARDWARE
+    if (DAQmxFailed(DAQmxCreateTask("cameraTriggerCOPulse", &task))) {
+        onError();
+        return;
+    }
+#endif
 
     for (int i = 0; i < physicalChannels.count(); ++i) {
         DAQmxErrChk(
@@ -143,6 +148,11 @@ QString CameraTrigger::getTerm(const int number)
     char buff[100];
     DAQmxErrChk(DAQmxGetCOPulseTerm(task, CHANNEL_NAME(number), buff, 100));
     return QString(buff);
+}
+
+QStringList CameraTrigger::getTerms()
+{
+    return terms;
 }
 
 void CameraTrigger::setTerms(QStringList terms)

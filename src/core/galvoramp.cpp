@@ -68,7 +68,12 @@ QList<QVariant> GalvoRamp::getWaveformParams() const
 
 void GalvoRamp::initializeTask_impl()
 {
-    DAQmxErrChk(DAQmxCreateTask("galvoRampAO", &task));
+#ifdef WITH_HARDWARE
+    if (DAQmxFailed(DAQmxCreateTask("galvoRampAO", &task))) {
+        onError();
+        return;
+    }
+#endif
 
     DAQmxErrChk(
         DAQmxCreateAOVoltageChan(
