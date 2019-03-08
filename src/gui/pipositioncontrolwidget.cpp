@@ -158,8 +158,10 @@ void PIPositionControlWidget::appendRow(
         double min = device->getTravelRangeLowEnd(axis).at(0);
         double max = device->getTravelRangeHighEnd(axis).at(0);
         double velocity = device->getVelocities(axis).at(0);
+        double pos = device->getCurrentPosition(axis).at(0);
 
         sb->setRange(min, max);
+        sb->setValue(pos);
         stepSpinBox->setRange(0, max);
         velocitySpinBox->setValue(velocity);
     });
