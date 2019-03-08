@@ -34,6 +34,8 @@ public:
     void setServoEnabled(const QString &axes, const QVector<int> &enable);
     void setServoEnabled(bool enable);
     void halt(const QString &axes);
+    void setVelocities(const QString &axes, const double vel[]);
+    QVector<double> getVelocities(const QString &axes = "");
 
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
     QVector<double> getTravelRangeHighEnd(const QString &axes = "");

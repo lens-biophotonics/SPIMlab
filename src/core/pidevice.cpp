@@ -140,6 +140,16 @@ void PIDevice::halt(const QString &axes)
     CALL_THROW(PI_HLT(id, axes.toLatin1()));
 }
 
+void PIDevice::setVelocities(const QString &axes, const double vel[])
+{
+    callFunctionWithVectorOfDoubles(&PI_VEL, axes, vel);
+}
+
+QVector<double> PIDevice::getVelocities(const QString &axes)
+{
+    return *getVectorOfDoubles(&PI_qVEL, axes).get();
+}
+
 QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
 {
     return *getVectorOfDoubles(&PI_qTMN, axes).get();

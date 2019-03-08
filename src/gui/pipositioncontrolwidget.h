@@ -29,6 +29,7 @@ private:
     void appendRow(const int row, const QString &name);
     void move(const QString &name, const double pos);
     void moveRelative(const QString &name, const double pos);
+    void setVelocity(const QString &name, const double pos);
 
 
     PIDevice *device;
