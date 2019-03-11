@@ -33,6 +33,12 @@ bool NIAbstractTask::isTaskDone()
 void NIAbstractTask::initializeTask()
 {
     clear();
+#ifdef WITH_HARDWARE
+    if (DAQmxFailed(DAQmxCreateTask(getTaskName().toLatin1(), &task))) {
+        onError();
+        return;
+    }
+#endif
     initializeTask_impl();
 }
 

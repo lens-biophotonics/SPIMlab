@@ -25,13 +25,6 @@ void CameraTrigger::setPhysicalChannels(const QStringList &channels)
 
 void CameraTrigger::initializeTask_impl()
 {
-#ifdef WITH_HARDWARE
-    if (DAQmxFailed(DAQmxCreateTask(getTaskName().toLatin1(), &task))) {
-        onError();
-        return;
-    }
-#endif
-
     for (int i = 0; i < physicalChannels.count(); ++i) {
         DAQmxErrChk(
             DAQmxCreateCOPulseChanFreq(
