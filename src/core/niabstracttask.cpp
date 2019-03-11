@@ -81,6 +81,26 @@ void NIAbstractTask::onError() const
     throw std::runtime_error(errBuff);
 }
 
+NI::uInt64 NIAbstractTask::getNSamples() const
+{
+    return nSamples;
+}
+
+void NIAbstractTask::setNSamples(const NI::uInt64 &value)
+{
+    nSamples = value;
+}
+
+double NIAbstractTask::getSampleRate() const
+{
+    return sampleRate;
+}
+
+void NIAbstractTask::setSampleRate(double value)
+{
+    sampleRate = value;
+}
+
 QString NIAbstractTask::getTaskName() const
 {
     return taskName;
@@ -94,4 +114,27 @@ void NIAbstractTask::setTaskName(const QString &value)
 void NIAbstractTask::appendToTaskName(const QString &suffix)
 {
     setTaskName(taskName + suffix);
+}
+
+void NIAbstractTask::configureSampleClockTiming(
+    const QString &source,
+    NI::int32 activeEdge,
+    NI::int32 sampleMode
+    )
+{
+#ifndef WITH_HARDWARE
+    Q_UNUSED(source)
+    Q_UNUSED(activeEdge)
+    Q_UNUSED(sampleMode)
+#endif
+    DAQmxErrChk(
+        DAQmxCfgSampClkTiming(
+            task,
+            source.isEmpty() ? nullptr : source.toLatin1(),  // clock source (onboard if NULL)
+            sampleRate,  // samples per second per channel
+            activeEdge,
+            sampleMode,
+            nSamples
+            )
+        );
 }

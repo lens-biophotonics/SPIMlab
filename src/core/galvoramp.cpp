@@ -97,28 +97,14 @@ void GalvoRamp::initializeTask_impl()
         );
     DAQmxErrChk(DAQmxSetStartTrigRetriggerable(task, true));
 
+    configureSampleClockTiming("", DAQmx_Val_Rising, DAQmx_Val_FiniteSamps);
     computeWaveform();
-    configureTiming();
     write();
 }
 
 QString GalvoRamp::getPhysicalChannels() const
 {
     return physicalChannels;
-}
-
-void GalvoRamp::configureTiming()
-{
-    DAQmxErrChk(
-        DAQmxCfgSampClkTiming(
-            task,
-            nullptr,  // clock source (onboard if NULL)
-            rate,  // samples per second per channel
-            DAQmx_Val_Rising,
-            DAQmx_Val_FiniteSamps,
-            static_cast<uInt64>(nSamples)
-            )
-        );
 }
 
 void GalvoRamp::write()

@@ -55,6 +55,15 @@ public:
     void setTaskName(const QString &value);
 
     void appendToTaskName(const QString &suffix);
+    void configureSampleClockTiming(const QString &source,
+                                    NI::int32 activeEdge,
+                                    NI::int32 sampleMode);
+
+    double getSampleRate() const;
+    void setSampleRate(double value);
+
+    NI::uInt64 getNSamples() const;
+    void setNSamples(const NI::uInt64 &value);
 
 signals:
     void error();
@@ -70,12 +79,14 @@ protected:
 #ifdef NIDAQMX_HEADERS
     NI::TaskHandle task = nullptr;
 #endif
+    NI::uInt64 nSamples;
 
 private:
     virtual void initializeTask_impl() = 0;
 
     char *errBuff;
     QString taskName;
+    double sampleRate;
 };
 
 #endif // NIABSTRACTTASK_H
