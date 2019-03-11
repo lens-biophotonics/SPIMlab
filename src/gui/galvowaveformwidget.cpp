@@ -3,10 +3,11 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include "core/spim.h"
 #include "galvowaveformwidget.h"
 
-GalvoWaveformWidget::GalvoWaveformWidget(GalvoRamp *galvoRamp, QWidget *parent)
-    : QWidget(parent), galvoRamp(galvoRamp)
+GalvoWaveformWidget::GalvoWaveformWidget(int channelNumber, QWidget *parent)
+    : QWidget(parent), chNumber(channelNumber)
 {
     setupUI();
 }
@@ -15,7 +16,7 @@ void GalvoWaveformWidget::setupUI()
 {
     QHBoxLayout *hLayout = new QHBoxLayout();
 
-    QList<QVariant> wp = galvoRamp->getWaveformParams();
+    QList<QVariant> wp = spim().getGalvoRamp()->getWaveformParams();
 
     offsetSpinBox = new QDoubleSpinBox();
     offsetSpinBox->setRange(-10, 10);
@@ -54,7 +55,7 @@ void GalvoWaveformWidget::setupUI()
 
 void GalvoWaveformWidget::apply()
 {
-    galvoRamp->setWaveformParams(
+    spim().getGalvoRamp()->setWaveformParams(
         offsetSpinBox->value(), amplitudeSpinBox->value(),
         delaySpinBox->value());
 }

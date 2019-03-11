@@ -10,8 +10,9 @@ class GalvoRamp : public NIAbstractTask
 public:
     GalvoRamp(QObject *parent = nullptr);
 
-    QString getPhysicalChannel() const;
-    void setPhysicalChannel(const QString &channel);
+    QString getPhysicalChannels() const;
+    void setPhysicalChannels(const QString &channels);
+    void setPhysicalChannels(const QStringList &channels);
 
     void setTriggerSource(const QString &source);
 
@@ -29,7 +30,7 @@ private:
     int nSamples;
     int nRamp;
 
-    QString physicalChannel;
+    QString physicalChannels;
     QString triggerTerm;
     QString triggerSource;
     QVector<double> waveform;

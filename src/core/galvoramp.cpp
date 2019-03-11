@@ -11,10 +11,15 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
     setTaskName("galvoRampAO");
 }
 
-void GalvoRamp::setPhysicalChannel(const QString &channel)
+void GalvoRamp::setPhysicalChannels(const QString &channels)
 {
-    physicalChannel = channel;
+    physicalChannels = channels;
     clear();
+}
+
+void GalvoRamp::setPhysicalChannels(const QStringList &channels)
+{
+    setPhysicalChannels(channels.join(":"));
 }
 
 void GalvoRamp::setTriggerSource(const QString &source)
@@ -82,7 +87,7 @@ void GalvoRamp::initializeTask_impl()
     DAQmxErrChk(
         DAQmxCreateAOVoltageChan(
             task,
-            physicalChannel.toLatin1(),
+            physicalChannels.toLatin1(),
             CHANNEL_NAME,
             -10.0,  // minVal
             10.0,  // maxVal
@@ -104,9 +109,9 @@ void GalvoRamp::initializeTask_impl()
     write();
 }
 
-QString GalvoRamp::getPhysicalChannel() const
+QString GalvoRamp::getPhysicalChannels() const
 {
-    return physicalChannel;
+    return physicalChannels;
 }
 
 void GalvoRamp::configureTiming()

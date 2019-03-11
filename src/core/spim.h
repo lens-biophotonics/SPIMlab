@@ -36,7 +36,7 @@ public:
     QList<PIDevice *> piDevices() const;
 
     CameraTrigger *getCameraTrigger() const;
-    GalvoRamp *getGalvoRamp(int number) const;
+    GalvoRamp *getGalvoRamp() const;
 
     double getExposureTime() const;
     void setExposureTime(double ms);
@@ -58,12 +58,12 @@ private:
     QThread *acqThread = nullptr;
     SaveStackWorker *worker = nullptr;
     CameraTrigger *cameraTrigger = nullptr;
+    GalvoRamp *galvoRamp = nullptr;
 
     double exposureTime;  // in ms
 
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
-    QList<GalvoRamp *>galvoList;
 
     void _setExposureTime(double expTime);
 

@@ -7,7 +7,6 @@
 #include "pidaisychain.h"
 
 #define NCAMS 2
-#define NGALVORAMPS 2
 
 static Logger *logger = getLogger("SPIM");
 
@@ -19,12 +18,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     cameraTrigger = new CameraTrigger(this);
-
-    for (int i = 0; i < NGALVORAMPS; ++i) {
-        GalvoRamp *gr = new GalvoRamp(this);
-        gr->appendToTaskName(QString("_%1").arg(i));
-        galvoList.insert(i, gr);
-    }
+    galvoRamp = new GalvoRamp(this);
 
     piDevList.reserve(5);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -98,9 +92,9 @@ void SPIM::setExposureTime(double ms)
     exposureTime = ms;
 }
 
-GalvoRamp *SPIM::getGalvoRamp(int number) const
+GalvoRamp *SPIM::getGalvoRamp() const
 {
-    return galvoList.at(number);
+    return galvoRamp;
 }
 
 CameraTrigger *SPIM::getCameraTrigger() const
@@ -116,9 +110,7 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 void SPIM::setupGalvoRampTriggerSource(const QStringList &terminals)
 {
     try {
-        for (int i = 0; i < NGALVORAMPS; ++i) {
-            galvoList.at(i)->setTriggerSource(terminals.at(i));
-        }
+        galvoRamp->setTriggerSource(terminals.at(0));
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -145,10 +137,7 @@ void SPIM::startFreeRun()
         }
 
         cameraTrigger->setFreeRunEnabled(true);
-
-        foreach(GalvoRamp * galvoRamp, galvoList) {
-            galvoRamp->start();
-        }
+        galvoRamp->start();
 
         cameraTrigger->start();
     } catch (std::runtime_error e) {
@@ -199,9 +188,7 @@ void SPIM::stop()
         foreach(OrcaFlash * orca, camList) {
             orca->stop();
         }
-        foreach(GalvoRamp * galvoRamp, galvoList) {
-            galvoRamp->stop();
-        }
+        galvoRamp->stop();
         cameraTrigger->stop();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -241,9 +228,7 @@ void SPIM::_setExposureTime(double expTime)
 
         int nSamples = static_cast<int>(round(expTime / lineInterval + nOfLines));
 
-        foreach(GalvoRamp * galvoRamp, galvoList) {
-            galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineInterval);
-        }
+        galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineInterval);
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double freq = 0.98 * frameRate;

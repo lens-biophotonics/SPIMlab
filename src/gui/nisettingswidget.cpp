@@ -19,6 +19,9 @@ void NISettingsWidget::setupUI()
 
     QComboBox *comboBox;
 
+    QStringList galvoPhysChan =
+        spim().getGalvoRamp()->getPhysicalChannels().split(":");
+
     int row = 0;
     for (int i = 0; i < 2; ++i) {
         row = 0;
@@ -45,7 +48,7 @@ void NISettingsWidget::setupUI()
         grid->addWidget(new QLabel("Channel"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
-        comboBox->setCurrentText(spim().getGalvoRamp(i)->getPhysicalChannel());
+        comboBox->setCurrentText(galvoPhysChan.at(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         galvoRampComboBoxList.insert(i, comboBox);
     }
@@ -68,12 +71,13 @@ void NISettingsWidget::apply()
 {
     QStringList ctrs;
     QStringList terms;
+    QStringList galvoPhysChan;
     for (int i = 0; i < 2; ++i) {
-        spim().getGalvoRamp(i)->setPhysicalChannel(
-            galvoRampComboBoxList.at(i)->currentText());
+        galvoPhysChan << galvoRampComboBoxList.at(i)->currentText();
         ctrs << cameraTriggerCtrComboBoxList.at(i)->currentText();
         terms << cameraTriggerTermComboBoxList.at(i)->currentText();
     }
+    spim().getGalvoRamp()->setPhysicalChannels(galvoPhysChan);
     spim().getCameraTrigger()->setPhysicalChannels(ctrs);
     spim().getCameraTrigger()->setTerms(terms);
     spim().setupGalvoRampTriggerSource(terms);

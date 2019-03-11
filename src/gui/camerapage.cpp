@@ -30,7 +30,7 @@ void CameraPage::setupUI()
         QVBoxLayout *vLayout = new QVBoxLayout();
         vLayout->addWidget(new CameraDisplay(spim().getCamera(i)));
         QHBoxLayout *hLayout = new QHBoxLayout();
-        hLayout->addWidget(new GalvoWaveformWidget(spim().getGalvoRamp(i)));
+        hLayout->addWidget(new GalvoWaveformWidget(i));
         hLayout->addStretch();
 
         auto *picw = new PIPositionControlWidget();

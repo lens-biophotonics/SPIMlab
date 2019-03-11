@@ -4,13 +4,11 @@
 #include <QWidget>
 #include <QDoubleSpinBox>
 
-#include "core/galvoramp.h"
-
 class GalvoWaveformWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GalvoWaveformWidget(GalvoRamp *galvoRamp,
+    explicit GalvoWaveformWidget(int channelNumber,
                                  QWidget *parent = nullptr);
 
 signals:
@@ -23,7 +21,7 @@ private slots:
 private:
     void setupUI();
 
-    GalvoRamp *galvoRamp = nullptr;
+    int chNumber = 0;
 
     QDoubleSpinBox *offsetSpinBox;
     QDoubleSpinBox *amplitudeSpinBox;

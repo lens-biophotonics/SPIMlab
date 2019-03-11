@@ -117,12 +117,12 @@ void MainWindow::saveSettings() const
         }
     }
 
-    for (int i = 0; i < 2; ++i) {
-        settings.setValue(QString("galvoRamp_%1.physicalChannel").arg(i),
-                          spim().getGalvoRamp(i)->getPhysicalChannel());
-        settings.setValue(QString("galvoRamp_%1.waveformParams").arg(i),
-                          spim().getGalvoRamp(i)->getWaveformParams());
+    settings.setValue("galvoRamp.physicalChannel",
+                      spim().getGalvoRamp()->getPhysicalChannels());
+    settings.setValue("galvoRamp.waveformParams",
+                      spim().getGalvoRamp()->getWaveformParams());
 
+    for (int i = 0; i < 2; ++i) {
         settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
                           spim().getCameraTrigger()->getPhysicalChannel(i));
         settings.setValue(QString("cameraTrigger.term_%1").arg(i),
@@ -169,15 +169,15 @@ void MainWindow::loadSettings()
     QStringList physicalChannels;
     QStringList terms;
 
-    for (int i = 0; i < 2; ++i) {
-        GalvoRamp *gr = spim().getGalvoRamp(i);
-        gr->setPhysicalChannel(
-            settings.value(QString("galvoRamp_%1.physicalChannel").arg(i),
-                           QString("Dev1/ao%1").arg(i)).toString());
-        gr->setWaveformParams(
-            settings.value(QString("galvoRamp_%1.waveformParams").arg(i),
-                           QList<QVariant>({0.2, 2, 0})).toList());
+    GalvoRamp *gr = spim().getGalvoRamp();
+    gr->setPhysicalChannels(
+        settings.value("galvoRamp.physicalChannel",
+                       "Dev1/ao0:Dev1/ao1").toString());
+    gr->setWaveformParams(
+        settings.value("galvoRamp.waveformParams",
+                       QList<QVariant>({0.2, 2, 0})).toList());
 
+    for (int i = 0; i < 2; ++i) {
         physicalChannels << settings.value(
             QString("cameraTrigger.physicalChannel_%1"),
             QString("Dev1/ctr%1").arg(i)).toString();
