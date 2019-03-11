@@ -226,9 +226,14 @@ void SPIM::_setExposureTime(double expTime)
             }
         }
 
-        int nSamples = static_cast<int>(round(expTime / lineInterval + nOfLines));
+        uint64_t nSamples = static_cast<uint64_t>(round(expTime / lineInterval + nOfLines));
+        double rate = 1 / lineInterval;
 
-        galvoRamp->setCameraParams(nSamples, nOfLines, 1 / lineInterval);
+        galvoRamp->setSampleRate(rate);
+        galvoRamp->setNSamples(nSamples);
+
+        galvoRamp->setNRamp(0, nOfLines);
+        galvoRamp->setNRamp(1, nOfLines);
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double freq = 0.98 * frameRate;

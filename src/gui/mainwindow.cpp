@@ -119,8 +119,11 @@ void MainWindow::saveSettings() const
 
     settings.setValue("galvoRamp.physicalChannel",
                       spim().getGalvoRamp()->getPhysicalChannels());
-    settings.setValue("galvoRamp.waveformParams",
-                      spim().getGalvoRamp()->getWaveformParams());
+    QList<QVariant> waveformParams;
+    foreach (QVariant variant, spim().getGalvoRamp()->getWaveformParams()) {
+        waveformParams.append(variant.toDouble());
+    }
+    settings.setValue("galvoRamp.waveformParams", waveformParams);
 
     for (int i = 0; i < 2; ++i) {
         settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
@@ -173,9 +176,17 @@ void MainWindow::loadSettings()
     gr->setPhysicalChannels(
         settings.value("galvoRamp.physicalChannel",
                        "Dev1/ao0:Dev1/ao1").toString());
-    gr->setWaveformParams(
+    QList<QVariant> wafeformParams =
         settings.value("galvoRamp.waveformParams",
-                       QList<QVariant>({0.2, 2, 0})).toList());
+                       QList<QVariant>({0.2, 2., 0., 100., 0.2, 2., 0.5, 100.})).toList();
+
+    QVector<double> wp;
+
+    for (int i = 0; i < wafeformParams.count(); i++) {
+        wp << wafeformParams.at(i).toDouble();
+    }
+
+    gr->setWaveformParams(wp);
 
     for (int i = 0; i < 2; ++i) {
         physicalChannels << settings.value(

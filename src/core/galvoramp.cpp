@@ -1,4 +1,4 @@
-#include <QVariant>
+#include <cmath>
 
 #include "galvoramp.h"
 
@@ -13,13 +13,17 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
 
 void GalvoRamp::setPhysicalChannels(const QString &channels)
 {
-    physicalChannels = channels;
-    clear();
+    setPhysicalChannels(channels.split(":"));
 }
 
 void GalvoRamp::setPhysicalChannels(const QStringList &channels)
 {
-    setPhysicalChannels(channels.join(":"));
+    physicalChannels = channels;
+    clear();
+    waveformParams.clear();
+    waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels());
+    nRamp.clear();
+    nRamp.fill(0, nOfChannels());
 }
 
 void GalvoRamp::setTriggerSource(const QString &source)
@@ -31,48 +35,63 @@ void GalvoRamp::setTriggerSource(const QString &source)
     clear();
 }
 
-void GalvoRamp::setCameraParams(
-    const int nSamples, const int nRamp, const double rate)
+void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
 {
-    this->nSamples = nSamples;
-    this->nRamp = nRamp;
-    this->rate = rate;
-
-    if (isInitialized()) {
-        computeWaveform();
-        configureTiming();
-        write();
-    }
+    setWaveformParam(channelNumber, GALVORAMP_AMPLITUDE_IDX, val);
 }
 
-void GalvoRamp::setWaveformParams(
-    const double offset, const double amplitude, const int delay)
+void GalvoRamp::setWaveformOffset(const int channelNumber, const double val)
 {
-    this->offset = offset;
-    this->amplitude = amplitude;
-    this->delay = delay;
-
-    if (isInitialized()) {
-        computeWaveform();
-        write();
-    }
+    setWaveformParam(channelNumber, GALVORAMP_OFFSET_IDX, val);
 }
 
-void GalvoRamp::setWaveformParams(const QList<QVariant> &list)
+void GalvoRamp::setWaveformPhase(const int channelNumber, const double val)
 {
-    setWaveformParams(list.at(0).toDouble(),
-                      list.at(1).toDouble(),
-                      list.at(2).toInt());
+    setWaveformParam(channelNumber, GALVORAMP_PHASE_IDX, val);
 }
 
-QList<QVariant> GalvoRamp::getWaveformParams() const
+void GalvoRamp::setWaveformRampFraction(const int channelNumber, const double val)
 {
-    QList<QVariant> list;
-    list.append(QVariant(offset));
-    list.append(QVariant(amplitude));
-    list.append(QVariant(delay));
+    setWaveformParam(channelNumber, GALVORAMP_RAMP_FRACTION_IDX, val);
+    nRamp[channelNumber] = round(nSamples * val);
+}
 
-    return list;
+double GalvoRamp::getWaveformAmplitude(const int channelNumber) const
+{
+    return waveformParams[
+        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_AMPLITUDE_IDX];
+}
+
+double GalvoRamp::getWaveformOffset(const int channelNumber) const
+{
+    return waveformParams[
+        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_OFFSET_IDX];
+}
+
+double GalvoRamp::getWaveformPhase(const int channelNumber) const
+{
+    return waveformParams[
+        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_PHASE_IDX];
+}
+
+double GalvoRamp::getWaveformRampFraction(const int channelNumber) const
+{
+    return 1. * nSamples / nRamp.at(channelNumber);
+}
+
+QVector<double> GalvoRamp::getWaveformParams() const
+{
+    return waveformParams;
+}
+
+void GalvoRamp::setWaveformParams(const QVector<double> &values)
+{
+    waveformParams = values;
+}
+
+int GalvoRamp::nOfChannels()
+{
+    return physicalChannels.count();
 }
 
 void GalvoRamp::initializeTask_impl()
@@ -80,7 +99,7 @@ void GalvoRamp::initializeTask_impl()
     DAQmxErrChk(
         DAQmxCreateAOVoltageChan(
             task,
-            physicalChannels.toLatin1(),
+            getPhysicalChannels().toLatin1(),
             CHANNEL_NAME,
             -10.0,  // minVal
             10.0,  // maxVal
@@ -102,9 +121,19 @@ void GalvoRamp::initializeTask_impl()
     write();
 }
 
+int GalvoRamp::getNRamp(const int channelNumber) const
+{
+    return nRamp.at(channelNumber);
+}
+
+void GalvoRamp::setNRamp(const int channelNumber, const int value)
+{
+    nRamp[channelNumber] = value;
+}
+
 QString GalvoRamp::getPhysicalChannels() const
 {
-    return physicalChannels;
+    return physicalChannels.join(":");
 }
 
 void GalvoRamp::write()
@@ -112,7 +141,7 @@ void GalvoRamp::write()
     DAQmxErrChk(
         DAQmxWriteAnalogF64(
             task,
-            waveform.size(),
+            waveform.size() / nOfChannels(),
             false,  // autostart
             10,  // timeout in seconds
             DAQmx_Val_GroupByChannel,
@@ -125,7 +154,26 @@ void GalvoRamp::write()
 
 void GalvoRamp::computeWaveform()
 {
-    QVector<double> temp(nSamples, 0);
+    waveform.clear();
+    waveform.reserve(static_cast<int>(nSamples) * nOfChannels());
+    for (int i = 0; i < nOfChannels(); ++i) {
+        int delay = static_cast<int>(
+            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_PHASE_IDX]
+            * nSamples);
+        ;
+        appendToWaveform(
+            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_OFFSET_IDX],
+            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_AMPLITUDE_IDX],
+            nRamp.at(i),
+            delay);
+    }
+}
+
+void GalvoRamp::appendToWaveform(
+    double offset, const double amplitude, const int nRamp, const int delay)
+{
+    int nSamples = static_cast<int>(this->nSamples);
+    QVector<double> temp(static_cast<int>(nSamples), 0);
     double halfAmplitude = 0.5 * amplitude;
     int i = 0;
     for (; i < nRamp; ++i)
@@ -134,14 +182,10 @@ void GalvoRamp::computeWaveform()
     for (; i < nSamples; ++i)
         temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
 
-    if (delay == 0) {
-        waveform = temp;
+    if (delay == 0 || delay == temp.size()) {
+        waveform << temp;
         return;
     }
-
-    i = 0;
-    waveform.clear();
-    waveform.reserve(nSamples);
 
     if (delay > 0) {
         waveform << temp.mid(nSamples - delay - 1, delay);
@@ -149,5 +193,17 @@ void GalvoRamp::computeWaveform()
     } else {
         waveform << temp.mid(delay, nSamples + delay);
         waveform << temp.mid(0, -delay);
+    }
+}
+
+void GalvoRamp::setWaveformParam(
+    const int channelNumber, const int paramID, const double val)
+{
+    int idx = GALVORAMP_N_OF_PARAMS * channelNumber + paramID;
+    waveformParams[idx] = val;
+
+    if (isInitialized()) {
+        computeWaveform();
+        write();
     }
 }
