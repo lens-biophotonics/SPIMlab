@@ -13,6 +13,8 @@ CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
     for (int i = 0; i < 2; ++i) {
         freqs.push_back(50);
     }
+
+    setTaskName("cameraTriggerCOPulse");
 }
 
 void CameraTrigger::setPhysicalChannels(const QStringList &channels)
@@ -24,7 +26,7 @@ void CameraTrigger::setPhysicalChannels(const QStringList &channels)
 void CameraTrigger::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
-    if (DAQmxFailed(DAQmxCreateTask("cameraTriggerCOPulse", &task))) {
+    if (DAQmxFailed(DAQmxCreateTask(getTaskName().toLatin1(), &task))) {
         onError();
         return;
     }

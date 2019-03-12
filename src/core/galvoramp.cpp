@@ -8,6 +8,7 @@ using namespace NI;
 
 GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
 {
+    setTaskName("galvoRampAO");
 }
 
 void GalvoRamp::setPhysicalChannel(const QString &channel)
@@ -72,7 +73,7 @@ QList<QVariant> GalvoRamp::getWaveformParams() const
 void GalvoRamp::initializeTask_impl()
 {
 #ifdef WITH_HARDWARE
-    if (DAQmxFailed(DAQmxCreateTask("galvoRampAO", &task))) {
+    if (DAQmxFailed(DAQmxCreateTask(getTaskName().toLatin1(), &task))) {
         onError();
         return;
     }

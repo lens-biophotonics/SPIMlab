@@ -74,3 +74,18 @@ void NIAbstractTask::onError() const
     logger->error(errBuff);
     throw std::runtime_error(errBuff);
 }
+
+QString NIAbstractTask::getTaskName() const
+{
+    return taskName;
+}
+
+void NIAbstractTask::setTaskName(const QString &value)
+{
+    taskName = value;
+}
+
+void NIAbstractTask::appendToTaskName(const QString &suffix)
+{
+    setTaskName(taskName + suffix);
+}

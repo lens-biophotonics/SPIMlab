@@ -51,6 +51,11 @@ public:
     bool isInitialized();
     bool isTaskDone();
 
+    QString getTaskName() const;
+    void setTaskName(const QString &value);
+
+    void appendToTaskName(const QString &suffix);
+
 signals:
     void error();
 
@@ -70,6 +75,7 @@ private:
     virtual void initializeTask_impl() = 0;
 
     char *errBuff;
+    QString taskName;
 };
 
 #endif // NIABSTRACTTASK_H

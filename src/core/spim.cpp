@@ -21,7 +21,9 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     cameraTrigger = new CameraTrigger(this);
 
     for (int i = 0; i < NGALVORAMPS; ++i) {
-        galvoList.insert(i, new GalvoRamp(this));
+        GalvoRamp *gr = new GalvoRamp(this);
+        gr->appendToTaskName(QString("_%1").arg(i));
+        galvoList.insert(i, gr);
     }
 
     piDevList.reserve(5);
