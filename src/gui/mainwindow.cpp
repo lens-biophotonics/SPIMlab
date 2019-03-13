@@ -190,7 +190,7 @@ void MainWindow::loadSettings()
 
     for (int i = 0; i < 2; ++i) {
         physicalChannels << settings.value(
-            QString("cameraTrigger.physicalChannel_%1"),
+            QString("cameraTrigger.physicalChannel_%1").arg(i),
             QString("Dev1/ctr%1").arg(i)).toString();
 
         terms << settings.value(QString("cameraTrigger.term_%1").arg(i),
