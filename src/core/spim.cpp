@@ -130,7 +130,7 @@ QList<PIDevice *> SPIM::piDevices() const
 void SPIM::startFreeRun()
 {
     try {
-        _setExposureTime(exposureTime * 1000);
+        _setExposureTime(exposureTime / 1000.);
         foreach(OrcaFlash * orca, camList) {
             orca->setNFramesInBuffer(10);
             orca->startCapture();
