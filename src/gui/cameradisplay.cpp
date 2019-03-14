@@ -57,18 +57,11 @@ DisplayWorker::~DisplayWorker() {}
 
 void DisplayWorker::updateImage()
 {
-#ifdef WITH_HARDWARE
-    void *top;
-    int32_t rowBytes;
-    orca->lockData(&top, &rowBytes, -1);
-    const uint16_t *p = static_cast<const uint16_t *>(top);
+    uint16_t *mybuf = new uint16_t[2048 * 2048];
+    orca->copyLastFrame(mybuf, 2048 * 2048 * sizeof(uint16_t));
     for (int i = 0; i < 2048 * 2048; ++i) {
-        buf[i] = p[i];
+        buf[i] = mybuf[i];
     }
-    orca->unlockData();
-#else
-    orca->copyLastFrame(buf, 2048 * 2048 * sizeof(double));
-#endif
-
+    delete[] mybuf;
     emit newImage();
 }

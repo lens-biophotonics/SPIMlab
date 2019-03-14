@@ -42,7 +42,19 @@ int init_dcam()
 {
     int nCamera;
 #ifdef WITH_HARDWARE
-    if (!dcam_init(nullptr, &nCamera)) {
+    bool ok = false;
+#if DCAM_VERSION == 400
+    DCAMAPI_INIT param;
+    memset (&param, 0, sizeof(param));
+
+    param.size = sizeof(param);
+    int32 ret = dcamapi_init (&param);
+    ok = ret == DCAMERR_SUCCESS;
+    nCamera = param.iDeviceCount;
+#else
+    ok = dcam_init(nullptr, &nCamera);
+#endif
+    if (!ok) {
         QString errMsg = "Cannot initialize dcam";
         logger->critical(errMsg);
         throw std::runtime_error(errMsg.toStdString());
@@ -79,7 +91,12 @@ int init_dcam()
 void uninit_dcam()
 {
 #ifdef WITH_HARDWARE
-    if (!dcam_uninit()) {
+#if DCAM_VERSION == 400
+    if (dcamapi_uninit() != DCAMERR_SUCCESS)
+#else
+    if (!dcam_uninit())
+#endif
+    {
         QString errMsg = "Cannot uninitialize dcam";
         logger->critical(errMsg);
         throw std::runtime_error(errMsg.toStdString());

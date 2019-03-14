@@ -22,6 +22,13 @@ public:
         TRIGMODE_SYNCREADOUT = DCAM::DCAM_TRIGMODE_SYNCREADOUT,
     };
 
+    enum ORCA_TRIGGERSOURCE {
+        TRIGGERSOURCE_INTERNAL = DCAM::DCAMPROP_TRIGGERSOURCE__INTERNAL,
+        TRIGGERSOURCE_EXTERNAL = DCAM::DCAMPROP_TRIGGERSOURCE__EXTERNAL,
+        TRIGGERSOURCE_SOFTWARE = DCAM::DCAMPROP_TRIGGERSOURCE__SOFTWARE,
+        TRIGGERSOURCE_MASTERPULSE = DCAM::DCAMPROP_TRIGGERSOURCE__MASTERPULSE,
+    };
+
     enum ORCA_OUTPUT_TRIGGER_SOURCE {
         OUTPUT_TRIGGER_SOURCE_EXPOSURE = DCAM::DCAMPROP_OUTPUTTRIGGER_SOURCE__EXPOSURE,
         OUTPUT_TRIGGER_SOURCE_READOUTEND = DCAM::DCAMPROP_OUTPUTTRIGGER_SOURCE__READOUTEND,
@@ -79,8 +86,8 @@ public:
     void startCapture();
     void stop();
 
-    void copyFrame(void *buf, const size_t n, const int32_t frame);
-    void copyLastFrame(void *buf, const size_t n);
+    void copyFrame(void * const buf, const size_t n, const int32_t frame);
+    void copyLastFrame(void * const buf, const size_t n);
     void wait(const DCAM::_DWORD timeout = 1000,
               const DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
     void lockData(void **pTop, int32_t *pRowbytes, const int32_t frame);
@@ -90,10 +97,11 @@ public:
     double setGetExposureTime(const double sec);
 
     ORCA_TRIGGER_MODE getTriggerMode();
-    ORCA_TRIGGER_MODE setGetTriggerMode(const ORCA_TRIGGER_MODE mode);
+    void setTriggerMode(const ORCA_TRIGGER_MODE mode);
+    void setTriggerSource(const ORCA_TRIGGERSOURCE source);
 
     ORCA_TRIGGER_POLARITY getTriggerPolarity();
-    ORCA_TRIGGER_POLARITY setGetTriggerPolarity(const ORCA_TRIGGER_POLARITY polarity);
+    void setTriggerPolarity(const ORCA_TRIGGER_POLARITY polarity);
 
     ORCA_STATUS getStatus();
     QString getStatusString();
@@ -107,9 +115,12 @@ public:
     void setPropertyValue(DCAM::_DCAMIDPROP property, const double value);
     double getLineInterval();
     void setOutputTrigger(const ORCA_OUTPUT_TRIGGER_KIND kind,
-                          const ORCA_OUTPUT_TRIGGER_SOURCE source);
+                          const ORCA_OUTPUT_TRIGGER_SOURCE source, const double period);
     void setSensorMode(const ORCA_SENSOR_MODE mode);
     int nOfLines() const;
+
+    int32_t getImageWidth();
+    int32_t getImageHeight();
 
 signals:
 
@@ -121,8 +132,6 @@ private:
 #endif
     int cameraIndex;
     double exposureTime;
-    ORCA_TRIGGER_MODE triggerMode;
-    ORCA_TRIGGER_POLARITY triggerPolarity;
 
     QMutex mutex;
     uint _nFramesInBuffer;

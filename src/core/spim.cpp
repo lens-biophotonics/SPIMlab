@@ -46,9 +46,12 @@ void SPIM::initialize()
             OrcaFlash *orca = camList.at(i);
             orca->open(i);
             orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
-            orca->setGetTriggerMode(OrcaFlash::TRIGMODE_EDGE);
+            orca->setTriggerSource(OrcaFlash::TRIGGERSOURCE_EXTERNAL);
             orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
-                                   OrcaFlash::OUTPUT_TRIGGER_SOURCE_VSYNC);
+                                   OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
+                                   2e-6);
+            orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                   DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
         }
 
         foreach (PIDevice * dev, piDevList) {
