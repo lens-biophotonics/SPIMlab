@@ -125,7 +125,7 @@ void MainWindow::saveSettings() const
     }
     settings.setValue("galvoRamp.waveformParams", waveformParams);
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
                           spim().getCameraTrigger()->getPhysicalChannel(i));
         settings.setValue(QString("cameraTrigger.term_%1").arg(i),
@@ -188,7 +188,7 @@ void MainWindow::loadSettings()
 
     gr->setWaveformParams(wp);
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         physicalChannels << settings.value(
             QString("cameraTrigger.physicalChannel_%1").arg(i),
             QString("Dev1/ctr%1").arg(i)).toString();

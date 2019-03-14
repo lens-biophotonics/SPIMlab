@@ -23,7 +23,7 @@ void NISettingsWidget::setupUI()
         spim().getGalvoRamp()->getPhysicalChannels().split(":");
 
     int row = 0;
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         row = 0;
         grid->addWidget(new QLabel(QString("Camera Trigger %1").arg(i)),
                         row++, i * 2 + 0, 1, 2);

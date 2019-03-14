@@ -6,14 +6,12 @@
 
 #include "pidaisychain.h"
 
-#define NCAMS 2
-
 static Logger *logger = getLogger("SPIM");
 
 
 SPIM::SPIM(QObject *parent) : QObject(parent)
 {
-    for (int i = 0; i < NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         camList.insert(i, new OrcaFlash());
     }
 
@@ -38,13 +36,13 @@ void SPIM::initialize()
 {
     try {
         int nOfCameras = DCAM::init_dcam();
-        if (nOfCameras < NCAMS) {
+        if (nOfCameras < SPIM_NCAMS) {
             throw std::runtime_error(
                       QString("Found %1 of %2 cameras").arg(
-                          nOfCameras).arg(NCAMS).toStdString());
+                          nOfCameras).arg(SPIM_NCAMS).toStdString());
         }
 
-        for (int i = 0; i < NCAMS; ++i) {
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
             OrcaFlash *orca = camList.at(i);
             orca->open(i);
             orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);

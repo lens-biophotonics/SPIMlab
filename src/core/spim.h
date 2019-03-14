@@ -11,6 +11,10 @@
 
 #include "pidevice.h"
 
+#ifndef SPIM_NCAMS
+#define SPIM_NCAMS 2
+#endif
+
 class SPIM : public QObject
 {
     Q_OBJECT

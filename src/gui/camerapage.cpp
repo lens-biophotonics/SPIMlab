@@ -26,7 +26,7 @@ void CameraPage::setupUI()
         SPIM::PI_DEVICE_RIGHT_OBJ_AXIS,
     };
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         QVBoxLayout *vLayout = new QVBoxLayout();
         vLayout->addWidget(new CameraDisplay(spim().getCamera(i)));
         QHBoxLayout *hLayout = new QHBoxLayout();
