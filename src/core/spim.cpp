@@ -40,8 +40,8 @@ void SPIM::initialize()
         int nOfCameras = DCAM::init_dcam();
         if (nOfCameras < NCAMS) {
             throw std::runtime_error(
-                      QString("Found %1/%2 cameras").arg(
-                          nOfCameras, NCAMS).toStdString());
+                      QString("Found %1 of %2 cameras").arg(
+                          nOfCameras).arg(NCAMS).toStdString());
         }
 
         for (int i = 0; i < NCAMS; ++i) {
