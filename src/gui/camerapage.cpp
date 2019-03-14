@@ -45,6 +45,7 @@ void CameraPage::setupUI()
         vLayout->addLayout(piHLayout);
         cameraHLayout->addLayout(vLayout);
     }
+    cameraHLayout->addStretch();
 
     QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
     expTimeSpinBox->setRange(0, 10000);
