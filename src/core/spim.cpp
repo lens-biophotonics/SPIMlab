@@ -15,8 +15,8 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         camList.insert(i, new OrcaFlash());
     }
 
-    cameraTrigger = new CameraTrigger(this);
-    galvoRamp = new GalvoRamp(this);
+    cameraTrigger = new CameraTrigger();
+    galvoRamp = new GalvoRamp();
 
     piDevList.reserve(5);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -76,6 +76,8 @@ void SPIM::uninitialize()
     try {
         closeAllDaisyChains();
         qDeleteAll(camList);
+        delete galvoRamp;
+        delete cameraTrigger;
         DCAM::uninit_dcam();
     } catch (std::runtime_error e) {
         onError(e.what());

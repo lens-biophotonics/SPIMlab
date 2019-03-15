@@ -63,6 +63,7 @@ void NIAbstractTask::clear()
     if (!task) {
         return;
     }
+    stop();
     DAQmxErrChk(DAQmxClearTask(task));
     task = nullptr;
 }
