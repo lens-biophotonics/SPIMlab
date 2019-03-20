@@ -14,9 +14,13 @@ public:
     bool hasHeightForWidth() const;
 
     void setData(const QVector<double> &vec);
+    void setInterval(const Qt::Axis axis, const double min, const double max);
+
+    void setZAutoscaleEnabled(bool enable);
 
 private:
     QwtMatrixRasterData *data;
+    bool autoscaleZ = true;
 };
 
 

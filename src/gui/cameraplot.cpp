@@ -23,10 +23,6 @@ CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
     data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
 
     QVector<double> vec = QVector<double>(NROWS * NCOLS, 0.);
-    for (int i = 0; i < vec.size(); ++i) {
-        double a = rand() / 1e6;
-        vec[i] = a;
-    }
 
     setData(vec);
     spectrogramPlot->setData(data);
@@ -46,8 +42,32 @@ bool CameraPlot::hasHeightForWidth() const
 
 void CameraPlot::setData(const QVector<double> &vec)
 {
-    data->setValueMatrix(vec, NCOLS);
+    if (autoscaleZ) {
+        double min = std::numeric_limits<double>::infinity();
+        double max = -min;
+        data->setValueMatrix(vec, NCOLS);
+        foreach(const double val, vec){
+            if (val > max) {
+                max = val;
+            }
+            if (val < min) {
+                min = val;
+            }
+        }
+        setInterval(Qt::ZAxis, min, max);
+    }
     replot();
+}
+
+void CameraPlot::setInterval(const Qt::Axis axis, const double min,
+                             const double max)
+{
+    data->setInterval(axis, QwtInterval(min, max));
+}
+
+void CameraPlot::setZAutoscaleEnabled(bool enable)
+{
+    autoscaleZ = enable;
 }
 
 ColorMap::ColorMap(QColor from, QColor to) : QwtLinearColorMap(from, to)
