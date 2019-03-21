@@ -1,14 +1,18 @@
 #include <QTimer>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QDirIterator>
+#include <QMenu>
+#include <QStack>
+#include <QRegularExpression>
 
 #include <qwt/qwt_slider.h>
-
-#include <sys/types.h>
 
 #include "core/spim.h"
 
 #include "cameradisplay.h"
+#include "colormaps.h"
+#include "settings.h"
 
 
 CameraDisplay::CameraDisplay(OrcaFlash *camera, QWidget *parent) :
@@ -43,8 +47,6 @@ void CameraDisplay::setupUi()
     QwtSlider *minSlider = new QwtSlider(Qt::Horizontal);
     QwtSlider *maxSlider = new QwtSlider(Qt::Horizontal);
 
-    QGridLayout *grid = new QGridLayout();
-
     minSlider->setScalePosition(QwtSlider::LeadingScale);
     minSlider->setLowerBound(0);
     minSlider->setUpperBound(65535);
@@ -57,18 +59,83 @@ void CameraDisplay::setupUi()
     maxSlider->setValue(65535);
     maxSlider->setEnabled(false);
 
+    QStack<QString> stack;
+    QString LUTPath = settings().value("LUTPath").toString();
+    if (!LUTPath.endsWith(QDir::separator())) {
+        LUTPath.append(QDir::separator());
+    }
+    stack.push(LUTPath);
+    QStringList sl;
+
+    QMenu *LUTMenu = new QMenu();
+    QAction *action;
+
+    action = new QAction("Grayscale");
+    LUTMenu->addAction(action);
+    connect(action, &QAction::triggered, this, [ = ](){
+        plot->setColorMap(new GrayScaleColorMap());
+    });
+
+    action = new QAction("Black Blue White");
+    LUTMenu->addAction(action);
+    connect(action, &QAction::triggered, this, [ = ](){
+        plot->setColorMap(new BlueWhiteColorMap());
+    });
+
+    action = new QAction("Hi Low");
+    LUTMenu->addAction(action);
+    connect(action, &QAction::triggered, this, [ = ](){
+        plot->setColorMap(new HiLowColorMap());
+    });
+
+    LUTMenu->addSeparator();
+
+    QDirIterator it(LUTPath,
+                    QStringList() << "*.lut",
+                    QDir::NoFilter, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        sl << it.next();
+    }
+    sl.sort();
+
+    QStringListIterator sli(sl);
+    while (sli.hasNext()) {
+        QString path = sli.next();
+        QString name = path;
+        QAction *action = new QAction(name.remove(LUTPath)
+                                      .remove(QRegularExpression("\\.lut$")));
+        LUTMenu->addAction(action);
+
+        connect(action, &QAction::triggered, this, [ = ](){
+            plot->setColorMap(new IJLUTColorMap(path));
+        });
+    }
+
     QPushButton *autoScalePushButton = new QPushButton("Autoscale");
     autoScalePushButton->setSizePolicy(QSizePolicy::Preferred,
                                        QSizePolicy::Expanding);
     autoScalePushButton->setCheckable(true);
     autoScalePushButton->setChecked(true);
 
-    grid->addWidget(minSlider, 0, 0);
-    grid->addWidget(maxSlider, 1, 0);
-    grid->addWidget(autoScalePushButton, 0, 1, 2, 1);
+    QPushButton *LUTPushButton = new QPushButton("LUT");
+    LUTPushButton->setMenu(LUTMenu);
+
+    QHBoxLayout *controlsLayout = new QHBoxLayout();
+
+    QVBoxLayout *vLayout;
+
+    vLayout = new QVBoxLayout();
+    vLayout->addWidget(minSlider);
+    vLayout->addWidget(maxSlider);
+    controlsLayout->addLayout(vLayout);
+
+    vLayout = new QVBoxLayout();
+    vLayout->addWidget(autoScalePushButton);
+    vLayout->addWidget(LUTPushButton);
+    controlsLayout->addLayout(vLayout);
 
     layout->addWidget(plot);
-    layout->addLayout(grid);
+    layout->addLayout(controlsLayout);
 
     setLayout(layout);
 

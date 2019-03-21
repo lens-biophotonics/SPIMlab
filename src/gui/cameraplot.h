@@ -4,6 +4,8 @@
 #include <qwt_plot.h>
 #include <qwt_matrix_raster_data.h>
 #include <qwt_color_map.h>
+#include <qwt_plot_spectrogram.h>
+
 
 class CameraPlot : public QwtPlot
 {
@@ -18,17 +20,16 @@ public:
 
     void setZAutoscaleEnabled(bool enable);
 
+    void setColorMap(QwtLinearColorMap *value);
+
 private:
     QwtMatrixRasterData *data;
+    QwtLinearColorMap *colorMap = nullptr;
+    QwtPlotSpectrogram *spectrogramPlot = nullptr;
     bool autoscaleZ = true;
-};
-
-
-
-class ColorMap : public QwtLinearColorMap
-{
-public:
-    ColorMap(QColor from = Qt::black, QColor to = Qt::white);
+    double min;
+    double max;
+    QwtInterval ZInterval;
 };
 
 #endif // CAMERPLOT_H
