@@ -103,7 +103,7 @@ bool PIDevice::isConnected()
 #ifdef WITH_HARDWARE
     return PI_IsConnected(id);
 #else
-    return id == -1;
+    return id != -1;
 #endif
 }
 
