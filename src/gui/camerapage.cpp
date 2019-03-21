@@ -35,7 +35,7 @@ void CameraPage::setupUI()
 
         auto *picw = new PIPositionControlWidget();
         picw->setTitle("Focus");
-        picw->appendRow(spim().piDevice(piList.at(i)), "1", "Objective");
+        picw->appendRow(spim().getPIDevice(piList.at(i)), "1", "Objective");
 
         QHBoxLayout *piHLayout = new QHBoxLayout();
         piHLayout->addWidget(picw);
@@ -63,9 +63,9 @@ void CameraPage::setupUI()
 
     PIPositionControlWidget *cw = new PIPositionControlWidget();
     cw->setTitle("Sample translation stages");
-    cw->appendRow(spim().piDevice(SPIM::PI_DEVICE_X_AXIS), "1", "X");
-    cw->appendRow(spim().piDevice(SPIM::PI_DEVICE_Y_AXIS), "1", "Y");
-    cw->appendRow(spim().piDevice(SPIM::PI_DEVICE_Z_AXIS), "1", "Z");
+    cw->appendRow(spim().getPIDevice(0), "1", "X");
+    cw->appendRow(spim().getPIDevice(1), "1", "Y");
+    cw->appendRow(spim().getPIDevice(2), "1", "Z");
 
     QHBoxLayout *controlsHLayout1 = new QHBoxLayout();
     controlsHLayout1->addWidget(cw);

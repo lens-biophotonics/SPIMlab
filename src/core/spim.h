@@ -36,9 +36,9 @@ public:
 
     void setupGalvoRampTriggerSource(const QStringList &terminals);
 
-    PIDevice *piDevice(const PI_DEVICES dev) const;
+    PIDevice *getPIDevice(const PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
-    QList<PIDevice *> piDevices() const;
+    QList<PIDevice *> getPIDevices() const;
 
     CameraTrigger *getCameraTrigger() const;
     GalvoRamp *getGalvoRamp() const;

@@ -226,7 +226,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::updatePIValues()
 {
-    for (PIDevice * dev : spim().piDevices()) {
+    for (PIDevice * dev : spim().getPIDevices()) {
         if (!dev->isConnected()) {
             continue;
         }
