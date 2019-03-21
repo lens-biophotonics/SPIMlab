@@ -95,7 +95,7 @@ void PIPositionControlWidget::appendRow(
         velocitySpinBox,
     };
 
-    foreach (QWidget * w, wList) {
+    for (QWidget * w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }

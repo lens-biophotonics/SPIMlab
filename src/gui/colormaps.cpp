@@ -12,7 +12,7 @@ QwtLinearColorMap *copyColorMap(const QwtLinearColorMap *colorMap)
     QwtInterval intv(0., 1.);
     QwtLinearColorMap *cm = new QwtLinearColorMap();
     cm->setColorInterval(colorMap->color1(), colorMap->color2());
-    foreach(const double stop, colorMap->colorStops()) {
+    for (const double stop : colorMap->colorStops()) {
         cm->addColorStop(stop, colorMap->color(intv, stop));
     }
     cm->setMode(colorMap->mode());
@@ -119,7 +119,7 @@ IJLUTColorMap::IJLUTColorMap(QString fname) :
     double stepSize = 1. / (colors.size() + 1);
     int i = 1;
 
-    foreach(const QColor color, colors) {
+    for (const QColor &color : colors) {
         addColorStop(stepSize * i++, color);
     }
 }

@@ -54,7 +54,7 @@ void SPIM::initialize()
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
         }
 
-        foreach (PIDevice * dev, piDevList) {
+        for (PIDevice * dev : piDevList) {
             if (dev->getPortName().isEmpty()) {
                 continue;
             }
@@ -134,7 +134,7 @@ void SPIM::startFreeRun()
 {
     try {
         _setExposureTime(exposureTime / 1000.);
-        foreach(OrcaFlash * orca, camList) {
+        for (OrcaFlash * orca : camList) {
             orca->setNFramesInBuffer(10);
             orca->startCapture();
         }
@@ -188,7 +188,7 @@ void SPIM::stop()
             acqThread->requestInterruption();
             acqThread = nullptr;
         }
-        foreach(OrcaFlash * orca, camList) {
+        for (OrcaFlash * orca : camList) {
             orca->stop();
         }
         galvoRamp->stop();

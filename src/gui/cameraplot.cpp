@@ -54,7 +54,7 @@ void CameraPlot::setData(const QVector<double> &vec)
     min = std::numeric_limits<double>::infinity();
     max = -min;
     data->setValueMatrix(vec, NCOLS);
-    foreach(const double val, vec){
+    for (const double val : vec) {
         if (val > max) {
             max = val;
         }

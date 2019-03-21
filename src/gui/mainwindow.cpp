@@ -120,7 +120,7 @@ void MainWindow::saveSettings() const
     settings.setValue("galvoRamp.physicalChannel",
                       spim().getGalvoRamp()->getPhysicalChannels());
     QList<QVariant> waveformParams;
-    foreach (QVariant variant, spim().getGalvoRamp()->getWaveformParams()) {
+    for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
     }
     settings.setValue("galvoRamp.waveformParams", waveformParams);
@@ -248,7 +248,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::updatePIValues()
 {
-    foreach (PIDevice * dev, spim().piDevices()) {
+    for (PIDevice * dev : spim().piDevices()) {
         if (!dev->isConnected()) {
             continue;
         }

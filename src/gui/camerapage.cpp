@@ -82,7 +82,7 @@ void CameraPage::setupUI()
     QState *readyState = stateMachine().getState(STATE_READY);
     QState *capturingState = stateMachine().getState(STATE_CAPTURING);
     QState *uninitState = stateMachine().getState(STATE_UNINITIALIZED);
-    foreach(auto w, wList) {
+    for (auto w : wList) {
         readyState->assignProperty(w, "enabled", true);
         capturingState->assignProperty(w, "enabled", false);
         uninitState->assignProperty(w, "enabled", false);

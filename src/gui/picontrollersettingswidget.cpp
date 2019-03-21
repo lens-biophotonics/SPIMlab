@@ -148,7 +148,7 @@ void PIControllerSettingsWidget::setupUI()
     serialPortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
     serialPortComboBox->setMinimumContentsLength(15);
 
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
         if (info.manufacturer() != "PI") {
             continue;
         }
@@ -249,7 +249,7 @@ void PIControllerSettingsWidget::setupUI()
         disconnectPushButton,
     };
 
-    foreach (QWidget * w, wList) {
+    for (QWidget * w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }
@@ -262,7 +262,7 @@ void PIControllerSettingsWidget::setupUI()
         baudComboBox,
     };
 
-    foreach (QWidget * w, wList) {
+    for (QWidget * w : wList) {
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
@@ -293,7 +293,7 @@ void PIControllerSettingsWidget::refreshValues()
     axisIdentifiersLabel->setText(axes);
 
     QString rsTxt;
-    foreach(const int state, rs) {
+    for (const int state : rs) {
         rsTxt += state ? "Y" : "N";
     }
     referencedStateLabel->setText(rsTxt);

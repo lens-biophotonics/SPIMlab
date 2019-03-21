@@ -112,7 +112,7 @@ void SerialPort::close()
 
 QSerialPortInfo SerialPort::findPortFromSerialNumber(const QString &sn)
 {
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
         if (info.serialNumber() == sn) {
             return info;
         }
