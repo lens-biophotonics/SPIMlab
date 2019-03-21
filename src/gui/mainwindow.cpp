@@ -15,19 +15,12 @@
 
 #include "mainwindow.h"
 #include "centralwidget.h"
+#include "settings.h"
 
 static Logger *logger = getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    piSettingsPrefixMap["X_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_X_AXIS);
-    piSettingsPrefixMap["Y_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Y_AXIS);
-    piSettingsPrefixMap["Z_AXIS."] = spim().piDevice(SPIM::PI_DEVICE_Z_AXIS);
-    piSettingsPrefixMap["LO_AXIS."] =
-        spim().piDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS);
-    piSettingsPrefixMap["RO_AXIS."] =
-        spim().piDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS);
-
     loadSettings();
 
     setupUi();
@@ -94,6 +87,8 @@ void MainWindow::setupUi()
 
 void MainWindow::saveSettings() const
 {
+    Settings mySettings = settings();
+
     QSettings settings;
 
     settings.beginGroup("MainWindow");
@@ -101,44 +96,46 @@ void MainWindow::saveSettings() const
     settings.setValue("mainWindowState", saveState());
     settings.endGroup();
 
-    settings.beginGroup("SPIM");
+    QString group;
 
-    QMapIterator<QString, PIDevice *> i(piSettingsPrefixMap);
-    while (i.hasNext()) {
-        i.next();
-        PIDevice *dev = i.value();
-        QString prefix = i.key();
-        settings.setValue(prefix + "portName", dev->getPortName());
-        settings.setValue(prefix + "baud", dev->getBaud());
-        settings.setValue(prefix + "deviceNumber", dev->getDeviceNumber());
+    for (int i = 0; i < 5; ++i) {
+        PIDevice *dev = spim().getPIDevice(i);
+        group = SETTINGSGROUP_AXIS(i);
+        mySettings.setValue(group, SETTING_BAUD, dev->getBaud());
+        mySettings.setValue(
+            group, SETTING_DEVICENUMBER, dev->getDeviceNumber());
+        mySettings.setValue(group, SETTING_PORTNAME, dev->getPortName());
         if (!dev->getPortName().isEmpty()) {
             QSerialPortInfo info(dev->getPortName());
-            settings.setValue(prefix + "serialNumber", info.serialNumber());
+            mySettings.setValue(
+                group, SETTING_SERIALNUMBER, info.serialNumber());
         }
     }
 
-    settings.setValue("galvoRamp.physicalChannel",
-                      spim().getGalvoRamp()->getPhysicalChannels());
+    GalvoRamp *gr = spim().getGalvoRamp();
+    group = SETTINGSGROUP_GRAMP;
+    mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
     QList<QVariant> waveformParams;
     for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
     }
-    settings.setValue("galvoRamp.waveformParams", waveformParams);
+    mySettings.setValue(group, SETTING_WFPARAMS, waveformParams);
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
-        settings.setValue(QString("cameraTrigger.physicalChannel_%1").arg(i),
-                          spim().getCameraTrigger()->getPhysicalChannel(i));
-        settings.setValue(QString("cameraTrigger.term_%1").arg(i),
-                          spim().getCameraTrigger()->getTerm(i));
-    }
+    CameraTrigger *ct = spim().getCameraTrigger();
+    group = SETTINGSGROUP_CAMTRIG;
+    mySettings.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
+    mySettings.setValue(group, SETTING_TERMS, ct->getTerms());
 
-    settings.setValue("exposureTime", spim().getExposureTime());
-
-    settings.endGroup();
+    group = SETTINGSGROUP_SPIM;
+    mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
 }
 
 void MainWindow::loadSettings()
 {
+    const Settings mySettings = settings();
+
+    QString group;
+
     QSettings settings;
 
     settings.beginGroup("MainWindow");
@@ -146,18 +143,13 @@ void MainWindow::loadSettings()
     restoreState(settings.value("mainWindowState").toByteArray());
     settings.endGroup();
 
-    settings.beginGroup("SPIM");
-
-    QMapIterator<QString, PIDevice *> i(piSettingsPrefixMap);
-    while (i.hasNext()) {
-        i.next();
-        PIDevice *dev = i.value();
-        QString prefix = i.key();
-        dev->setBaud(settings.value(prefix + "baud", "").toInt());
-        dev->setDeviceNumber(settings.value(prefix + "deviceNumber", "").toInt());
-
-        QString sn = settings.value(prefix + "serialNumber").toString();
-
+    for (int i = 0; i < 5; ++i) {
+        PIDevice *dev = spim().getPIDevice(i);
+        group = SETTINGSGROUP_AXIS(i);
+        dev->setBaud(mySettings.value(group, SETTING_BAUD).toInt());
+        dev->setDeviceNumber(
+            mySettings.value(group, SETTING_DEVICENUMBER).toInt());
+        QString sn = mySettings.value(group, SETTING_SERIALNUMBER).toString();
         if (!sn.isEmpty()) {
             QSerialPortInfo info = SerialPort::findPortFromSerialNumber(sn);
             if (!info.portName().isEmpty()) {
@@ -165,45 +157,31 @@ void MainWindow::loadSettings()
             }
         }
         else {
-            dev->setPortName(settings.value(prefix + "portName").toString());
+            dev->setPortName(
+                mySettings.value(group, SETTING_PORTNAME).toString());
         }
     }
 
-    QStringList physicalChannels;
-    QStringList terms;
-
     GalvoRamp *gr = spim().getGalvoRamp();
+    group = SETTINGSGROUP_GRAMP;
     gr->setPhysicalChannels(
-        settings.value("galvoRamp.physicalChannel",
-                       "Dev1/ao0:Dev1/ao1").toString());
-    QList<QVariant> wafeformParams =
-        settings.value("galvoRamp.waveformParams",
-                       QList<QVariant>({0.2, 2., 0., 100., 0.2, 2., 0.5, 100.})).toList();
-
+        mySettings.value(group, SETTING_PHYSCHANS).toStringList());
     QVector<double> wp;
-
+    const QList<QVariant> wafeformParams =
+        mySettings.value(group, SETTING_WFPARAMS).toList();
     for (int i = 0; i < wafeformParams.count(); i++) {
         wp << wafeformParams.at(i).toDouble();
     }
-
     gr->setWaveformParams(wp);
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
-        physicalChannels << settings.value(
-            QString("cameraTrigger.physicalChannel_%1").arg(i),
-            QString("Dev1/ctr%1").arg(i)).toString();
-
-        terms << settings.value(QString("cameraTrigger.term_%1").arg(i),
-                                QString("/Dev1/PFI%1").arg(i)).toString();
-    }
-
+    group = SETTINGSGROUP_CAMTRIG;
     CameraTrigger *ct = spim().getCameraTrigger();
-    ct->setPhysicalChannels(physicalChannels);
-    ct->setTerms(terms);
+    ct->setPhysicalChannels(
+        mySettings.value(group, SETTING_PHYSCHANS).toStringList());
+    ct->setTerms(mySettings.value(group, SETTING_TERMS).toStringList());
 
-    spim().setExposureTime(settings.value("exposureTime", 0.1).toDouble());
-
-    settings.endGroup();
+    group = SETTINGSGROUP_SPIM;
+    spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());
 }
 
 void MainWindow::on_aboutAction_triggered() const

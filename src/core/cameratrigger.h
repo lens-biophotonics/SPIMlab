@@ -10,6 +10,7 @@ public:
 
     void setPhysicalChannels(const QStringList &channels);
     QString getPhysicalChannel(const int number) const;
+    QStringList getPhysicalChannels() const;
 
     void setFrequencies(const QList<double> Hz);
     void setFrequency(const double Hz);
@@ -26,6 +27,7 @@ public:
 
     NI::float64 getInitialDelay(const int number) const;
     void setInitialDelays(const QList<NI::float64> &values);
+
 
 protected:
     void initializeTask_impl();

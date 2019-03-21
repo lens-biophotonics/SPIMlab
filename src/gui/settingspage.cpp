@@ -46,7 +46,9 @@ void SettingsPage::setupUI()
 
     QLineEdit *LUTPathLineEdit = new QLineEdit();
     LUTPathLineEdit->setReadOnly(true);
-    LUTPathLineEdit->setText(settings().value("LUTPath").toString());
+    LUTPathLineEdit->setText(
+        settings().value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH)
+        .toString());
 
     QPushButton * chooseLUTPathPushButton = new QPushButton("...");
 
@@ -75,7 +77,7 @@ void SettingsPage::setupUI()
         QString path = dialog.selectedFiles().at(0);
         LUTPathLineEdit->setText(path);
 
-        settings().setValue("LUTPath", path);
+        settings().setValue(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH, path);
 
         QMessageBox::information(
             this, "Info", QString("Please restart %1").arg(PROGRAM_NAME));

@@ -16,8 +16,7 @@ class GalvoRamp : public NIAbstractTask
 public:
     GalvoRamp(QObject *parent = nullptr);
 
-    QString getPhysicalChannels() const;
-    void setPhysicalChannels(const QString &channels);
+    QStringList getPhysicalChannels() const;
     void setPhysicalChannels(const QStringList &channels);
 
     void setTriggerSource(const QString &source);

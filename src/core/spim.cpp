@@ -125,6 +125,11 @@ PIDevice *SPIM::piDevice(const SPIM::PI_DEVICES dev) const
     return piDevList.value(dev);
 }
 
+PIDevice *SPIM::getPIDevice(const int dev) const
+{
+    return piDevice(static_cast<PI_DEVICES>(dev));
+}
+
 QList<PIDevice *> SPIM::piDevices() const
 {
     return piDevList;

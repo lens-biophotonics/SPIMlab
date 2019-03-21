@@ -60,7 +60,8 @@ void CameraDisplay::setupUi()
     maxSlider->setEnabled(false);
 
     QStack<QString> stack;
-    QString LUTPath = settings().value("LUTPath").toString();
+    QString LUTPath = settings().value(SETTINGSGROUP_OTHERSETTINGS,
+                                       SETTING_LUTPATH).toString();
     if (!LUTPath.endsWith(QDir::separator())) {
         LUTPath.append(QDir::separator());
     }

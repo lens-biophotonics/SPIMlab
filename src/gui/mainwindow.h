@@ -27,7 +27,6 @@ private:
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
 
-    QMap<QString, PIDevice *> piSettingsPrefixMap;
     QTimer updateTimer;
 };
 

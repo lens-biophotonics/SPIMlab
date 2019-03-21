@@ -19,8 +19,7 @@ void NISettingsWidget::setupUI()
 
     QComboBox *comboBox;
 
-    QStringList galvoPhysChan =
-        spim().getGalvoRamp()->getPhysicalChannels().split(":");
+    QStringList galvoPhysChan = spim().getGalvoRamp()->getPhysicalChannels();
 
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {

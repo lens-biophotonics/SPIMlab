@@ -52,6 +52,11 @@ void CameraTrigger::initializeTask_impl()
     }
 }
 
+QStringList CameraTrigger::getPhysicalChannels() const
+{
+    return physicalChannels;
+}
+
 NI::float64 CameraTrigger::getInitialDelay(const int number) const
 {
     return initialDelays.at(number);

@@ -11,11 +11,6 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
     setTaskName("galvoRampAO");
 }
 
-void GalvoRamp::setPhysicalChannels(const QString &channels)
-{
-    setPhysicalChannels(channels.split(":"));
-}
-
 void GalvoRamp::setPhysicalChannels(const QStringList &channels)
 {
     physicalChannels = channels;
@@ -99,7 +94,7 @@ void GalvoRamp::initializeTask_impl()
     DAQmxErrChk(
         DAQmxCreateAOVoltageChan(
             task,
-            getPhysicalChannels().toLatin1(),
+            getPhysicalChannels().join(":").toLatin1(),
             CHANNEL_NAME,
             -10.0,  // minVal
             10.0,  // maxVal
@@ -131,9 +126,9 @@ void GalvoRamp::setNRamp(const int channelNumber, const int value)
     nRamp[channelNumber] = value;
 }
 
-QString GalvoRamp::getPhysicalChannels() const
+QStringList GalvoRamp::getPhysicalChannels() const
 {
-    return physicalChannels.join(":");
+    return physicalChannels;
 }
 
 void GalvoRamp::write()
