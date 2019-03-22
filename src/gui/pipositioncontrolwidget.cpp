@@ -1,8 +1,13 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QLabel>
+#include <QState>
+
+#include "core/pidevice.h"
 
 #include "pipositioncontrolwidget.h"
+#include "customspinbox.h"
+
 
 PIPositionControlWidget::PIPositionControlWidget(QWidget *parent) :
     QWidget(parent)

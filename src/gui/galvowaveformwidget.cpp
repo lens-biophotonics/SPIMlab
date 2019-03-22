@@ -4,6 +4,7 @@
 #include <QPushButton>
 
 #include "core/spim.h"
+#include "core/galvoramp.h"
 #include "galvowaveformwidget.h"
 
 GalvoWaveformWidget::GalvoWaveformWidget(int channelNumber, QWidget *parent)

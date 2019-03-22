@@ -7,8 +7,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 
-
-#include "core/pidevice.h"
+class PIDevice;
 
 
 class PIControllerSettingsWidget : public QWidget

@@ -4,16 +4,15 @@
 #include <QObject>
 #include <QThread>
 
-#include "savestackworker.h"
-#include "orcaflash.h"
-#include "cameratrigger.h"
-#include "galvoramp.h"
-
-#include "pidevice.h"
-
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
 #endif
+
+class SaveStackWorker;
+class OrcaFlash;
+class CameraTrigger;
+class GalvoRamp;
+class PIDevice;
 
 class SPIM : public QObject
 {

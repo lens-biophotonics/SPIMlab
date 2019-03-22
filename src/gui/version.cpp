@@ -1,4 +1,3 @@
-#include <QString>
 #include "version.h"
 
 QString getProgramVersionString(bool includingProgramName)

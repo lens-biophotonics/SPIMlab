@@ -10,6 +10,7 @@
 #include "logger.h"
 #include "savestackworker.h"
 #include "spim.h"
+#include "orcaflash.h"
 
 static Logger *logger = getLogger("SaveStackWorker");
 

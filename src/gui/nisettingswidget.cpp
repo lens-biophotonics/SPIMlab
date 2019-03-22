@@ -4,6 +4,8 @@
 #include <QGridLayout>
 
 #include "core/spim.h"
+#include "core/galvoramp.h"
+#include "core/cameratrigger.h"
 
 #include "nisettingswidget.h"
 

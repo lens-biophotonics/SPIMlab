@@ -10,9 +10,11 @@
 #include <qwt/qwt_plot_zoomer.h>
 
 #include "core/spim.h"
+#include "core/orcaflash.h"
 
 #include "aspectratiowidget.h"
 #include "cameradisplay.h"
+#include "cameraplot.h"
 #include "colormaps.h"
 #include "settings.h"
 

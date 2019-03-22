@@ -5,8 +5,7 @@
 #include <QGridLayout>
 #include <QGroupBox>
 
-#include "core/pidevice.h"
-#include "customspinbox.h"
+class PIDevice;
 
 class PIPositionControlWidget : public QWidget
 {

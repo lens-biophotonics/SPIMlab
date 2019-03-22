@@ -4,8 +4,6 @@
 #include <QObject>
 #include <QList>
 
-#include "pidevice.h"
-
 class PIDaisyChain : public QObject
 {
     Q_OBJECT

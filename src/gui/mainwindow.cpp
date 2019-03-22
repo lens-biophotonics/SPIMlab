@@ -12,10 +12,14 @@
 #include "core/statemachine.h"
 #include "core/logmanager.h"
 #include "core/serialport.h"
+#include "core/galvoramp.h"
+#include "core/cameratrigger.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"
 #include "settings.h"
+#include "version.h"
+
 
 static Logger *logger = getLogger("MainWindow");
 

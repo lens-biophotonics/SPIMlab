@@ -2,7 +2,6 @@
 #include <QTime>
 
 #include "core/logmanager.h"
-
 #include "logwidget.h"
 
 LogWidget::LogWidget(QWidget *parent) : QWidget(parent)

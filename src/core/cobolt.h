@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "serialport.h"
+class SerialPort;
 
 class Cobolt : public QObject
 {

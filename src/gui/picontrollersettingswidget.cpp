@@ -10,9 +10,9 @@
 #include <QMessageBox>
 #include <QListView>
 
-#include <QtDebug>
-
 #include "picontrollersettingswidget.h"
+
+#include "core/pidevice.h"
 
 enum REFERENCE_ACTION {
     REFACTION_DONT_REFERENCE = 0,

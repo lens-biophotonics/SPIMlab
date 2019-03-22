@@ -1,4 +1,5 @@
 #include "cobolt.h"
+#include "serialport.h"
 
 Cobolt::Cobolt(QObject *parent) : QObject(parent)
 {

@@ -2,6 +2,11 @@
 #include <cmath>
 
 #include "spim.h"
+#include "orcaflash.h"
+#include "cameratrigger.h"
+#include "galvoramp.h"
+#include "pidevice.h"
+#include "savestackworker.h"
 #include "logger.h"
 
 #include "pidaisychain.h"

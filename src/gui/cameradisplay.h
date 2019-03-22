@@ -4,9 +4,8 @@
 #include <QWidget>
 #include <QThread>
 
-#include "core/orcaflash.h"
-
-#include "cameraplot.h"
+class OrcaFlash;
+class CameraPlot;
 
 
 class CameraDisplay : public QWidget

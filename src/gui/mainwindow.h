@@ -7,7 +7,6 @@
 #include <QTimer>
 
 #include <core/pidevice.h>
-#include "version.h"
 
 class MainWindow : public QMainWindow
 {
