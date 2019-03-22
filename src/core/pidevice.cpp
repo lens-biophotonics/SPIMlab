@@ -161,6 +161,9 @@ void PIDevice::setServoEnabled(bool enable)
 
 void PIDevice::halt(const QString &axes)
 {
+#ifndef WITH_HARDWARE
+    Q_UNUSED(axes)
+#endif
     CALL_THROW(PI_HLT(id, axes.toLatin1()));
 }
 
@@ -320,6 +323,9 @@ void PIDevice::setupStateMachine()
 std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
     const PI_qVectorOfDoubles fp, const QString &axes)
 {
+#ifndef WITH_HARDWARE
+    Q_UNUSED(fp)
+#endif
     auto vecup = std::make_unique<QVector<double>>();
     const QString *myAxes = &axes;
     QString temp;
@@ -336,6 +342,11 @@ std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
 void PIDevice::callFunctionWithVectorOfDoubles(
     PI_vectorOfDoubles fp, const QString &axes, const double values[])
 {
+#ifndef WITH_HARDWARE
+    Q_UNUSED(fp)
+    Q_UNUSED(axes)
+    Q_UNUSED(values)
+#endif
     CALL_THROW(fp(id, axes.toLatin1(), values));
 }
 
