@@ -130,10 +130,15 @@ void PIControllerSettingsWidget::configureStages()
 
     QString svoAxes = posAxes + negAxes + switchAxes;
 
-    device->setServoEnabled(svoAxes, QVector<int>(svoAxes.count(), 1));
-    device->fastMoveToPositiveLimit(posAxes);
-    device->fastMoveToNegativeLimit(negAxes);
-    device->fastMoveToReferenceSwitch(switchAxes);
+    try {
+        device->setServoEnabled(svoAxes, QVector<int>(svoAxes.count(), 1));
+        device->fastMoveToPositiveLimit(posAxes);
+        device->fastMoveToNegativeLimit(negAxes);
+        device->fastMoveToReferenceSwitch(switchAxes);
+    }
+    catch (std::runtime_error e) {
+        QMessageBox::critical(this, "Error", e.what());
+    }
     refreshValues();
 }
 
