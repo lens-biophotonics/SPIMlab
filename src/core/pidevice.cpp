@@ -12,7 +12,6 @@
 
 static Logger *logger = getLogger("PIDevice");
 
-
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
 #define CALL_THROW(functionCall) \
@@ -288,33 +287,33 @@ QString PIDevice::getErrorString()
     return QString(buf.get());
 }
 
-QState *PIDevice::connectedState() const
+QState *PIDevice::getConnectedState() const
 {
-    return _connectedState;
+    return connectedState;
 }
 
-QState *PIDevice::disconnectedState() const
+QState *PIDevice::getDisconnectedState() const
 {
-    return _disconnectedState;
+    return disconnectedState;
 }
 
 void PIDevice::setupStateMachine()
 {
-    _connectedState = new QState();
-    _disconnectedState = new QState();
+    connectedState = new QState();
+    disconnectedState = new QState();
 
-    _connectedState->addTransition(
-        this, &PIDevice::disconnected, _disconnectedState);
+    connectedState->addTransition(
+        this, &PIDevice::disconnected, disconnectedState);
 
-    _disconnectedState->addTransition(
-        this, &PIDevice::connected, _connectedState);
+    disconnectedState->addTransition(
+        this, &PIDevice::connected, connectedState);
 
     QStateMachine *sm = new QStateMachine();
 
-    sm->addState(_connectedState);
-    sm->addState(_disconnectedState);
+    sm->addState(connectedState);
+    sm->addState(disconnectedState);
 
-    sm->setInitialState(_disconnectedState);
+    sm->setInitialState(disconnectedState);
     sm->start();
 }
 

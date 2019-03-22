@@ -56,8 +56,8 @@ public:
     int getError();
     QString getErrorString();
 
-    QState *connectedState() const;
-    QState *disconnectedState() const;
+    QState *getConnectedState() const;
+    QState *getDisconnectedState() const;
 
     int getDeviceNumber() const;
     void setDeviceNumber(int value);
@@ -96,8 +96,8 @@ private:
     QString portName;
     QString axisIdentifiers;
 
-    QState *_connectedState = nullptr;
-    QState *_disconnectedState = nullptr;
+    QState *connectedState = nullptr;
+    QState *disconnectedState = nullptr;
 
     QString verboseName;
     QMutex mutex;

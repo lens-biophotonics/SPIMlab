@@ -237,8 +237,8 @@ void PIControllerSettingsWidget::setupUI()
     connect(device, &PIDevice::connected, this,
             &PIControllerSettingsWidget::refreshValues);
 
-    QState *cs = device->connectedState();
-    QState *ds = device->disconnectedState();
+    QState *cs = device->getConnectedState();
+    QState *ds = device->getDisconnectedState();
 
     QList<QWidget *> wList;
 

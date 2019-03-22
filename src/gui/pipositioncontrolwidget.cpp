@@ -80,8 +80,8 @@ void PIPositionControlWidget::appendRow(
 
     row++;
 
-    QState *cs = device->connectedState();
-    QState *ds = device->disconnectedState();
+    QState *cs = device->getConnectedState();
+    QState *ds = device->getDisconnectedState();
 
     QList<QWidget *> wList;
 
