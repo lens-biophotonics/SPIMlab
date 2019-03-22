@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QState>
 
 #include "dcamutils.h"
 
@@ -123,7 +124,12 @@ public:
     int32_t getImageWidth();
     int32_t getImageHeight();
 
+    QState *getOpenState() const;
+    QState *getClosedState() const;
+
 signals:
+    void opened();
+    void closed();
 
 public slots:
 
@@ -138,7 +144,11 @@ private:
     uint _nFramesInBuffer;
     bool _isOpen;
 
+    QState *openState;
+    QState *closedState;
+
     QString logLastError(const QString label = "");
+    void setupStateMachine();
 };
 
 #endif // ORCAFLASH_H

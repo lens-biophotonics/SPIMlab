@@ -1,3 +1,5 @@
+#include <QStateMachine>
+
 #ifndef WITH_HARDWARE
 #include <stdio.h>
 #endif
@@ -26,13 +28,42 @@ using namespace DCAM;
 
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
-    setNFramesInBuffer(10);
     _isOpen = false;
+    setNFramesInBuffer(10);
+    setupStateMachine();
 }
 
 OrcaFlash::~OrcaFlash()
 {
     close();
+}
+
+void OrcaFlash::setupStateMachine()
+{
+    openState = new QState();
+    closedState = new QState();
+
+    openState->addTransition(this, &OrcaFlash::closed, closedState);
+
+    closedState->addTransition(this, &OrcaFlash::opened, openState);
+
+    QStateMachine *sm = new QStateMachine();
+
+    sm->addState(openState);
+    sm->addState(closedState);
+
+    sm->setInitialState(closedState);
+    sm->start();
+}
+
+QState *OrcaFlash::getOpenState() const
+{
+    return openState;
+}
+
+QState *OrcaFlash::getClosedState() const
+{
+    return closedState;
 }
 
 void OrcaFlash::open(const int index)
@@ -54,6 +85,7 @@ void OrcaFlash::open(const int index)
     logger->info(QString("Camera %1 opened").arg(index));
     _isOpen = true;
     cameraIndex = index;
+    emit opened();
 }
 
 void OrcaFlash::open(const QString &idStr)
@@ -73,6 +105,7 @@ void OrcaFlash::close()
     }
     CALL_THROW(dcam_close(h))
     _isOpen = false;
+    emit closed();
 }
 
 const ModelInfo *OrcaFlash::modelInfo()
