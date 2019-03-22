@@ -18,6 +18,36 @@ class PIDevice : public QObject
     Q_OBJECT
 
 public:
+    enum TrigOutID {
+        OUTPUT_1 = 1,
+        OUTPUT_2 = 2,
+        OUTPUT_3 = 3,
+        OUTPUT_4 = 4,
+    };
+
+    enum CTOPam {
+        TriggerStep         = 1,
+        Axis                = 2,
+        TriggerMode         = 3,
+        Polarity            = 7,
+        StartThreshold      = 8,
+        StopThreshold       = 9,
+        TriggerPosition     = 10,
+    };
+
+    enum TriggerMode {
+        PositionDistance    = 0,
+        OnTarget            = 2,
+        MotionError         = 5,
+        InMotion            = 6,
+        PositionOffset      = 7,
+    };
+
+    enum Polarity {
+        ACTIVE_LOW = 0,
+        ACTIVE_HIGH = 1,
+    };
+
     explicit PIDevice(QObject *parent = nullptr);
     explicit PIDevice(const QString &verboseName, QObject *parent = nullptr);
     virtual ~PIDevice();
@@ -73,6 +103,12 @@ public:
 
     double getStepSize(const QString &axis) const;
     void setStepSize(const QString &axis, const double value);
+
+    void setTriggerOutput(const TrigOutID oid,
+                          const CTOPam pam,
+                          const double val);
+    void setTriggerOutputEnabled(const TrigOutID oid,
+                                 const BOOL enable);
 
 signals:
     void connected();

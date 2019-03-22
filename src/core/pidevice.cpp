@@ -373,6 +373,38 @@ void PIDevice::setStepSize(const QString &axis, const double value)
     stepSizeMap[axis] = value;
 }
 
+void PIDevice::setTriggerOutput(const TrigOutID oid,
+                                const CTOPam pam,
+                                const double val)
+{
+#ifndef WITH_HARDWARE
+    Q_UNUSED(oid)
+    Q_UNUSED(pam)
+    Q_UNUSED(val)
+#endif
+    int o = static_cast<int>(oid);
+    int p = static_cast<int>(pam);
+    CALL_THROW(PI_CTO(id, &o, &p, &val, 1));
+#ifndef WITH_HARDWARE
+    Q_UNUSED(o)
+    Q_UNUSED(p)
+#endif
+}
+
+void PIDevice::setTriggerOutputEnabled(
+    const TrigOutID oid, const BOOL enable)
+{
+#ifndef WITH_HARDWARE
+    Q_UNUSED(oid)
+    Q_UNUSED(enable)
+#endif
+    int o = static_cast<int>(oid);
+    CALL_THROW(PI_TRO(id, &o, &enable, 1));
+#ifndef WITH_HARDWARE
+    Q_UNUSED(o)
+#endif
+}
+
 QString PIDevice::getPortName() const
 {
     return portName;
