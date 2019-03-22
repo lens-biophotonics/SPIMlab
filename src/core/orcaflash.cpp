@@ -37,6 +37,9 @@ OrcaFlash::~OrcaFlash()
 
 void OrcaFlash::open(const int index)
 {
+    if (_isOpen) {
+        return;
+    }
 #if DCAM_VERSION == 400
     DCAMDEV_OPEN param;
     memset (&param, 0, sizeof(param));
@@ -56,6 +59,11 @@ void OrcaFlash::open(const int index)
 void OrcaFlash::open(const QString &idStr)
 {
     open(getCameraIndex(idStr));
+}
+
+bool OrcaFlash::isOpen() const
+{
+    return _isOpen;
 }
 
 void OrcaFlash::close()

@@ -77,6 +77,7 @@ public:
     virtual ~OrcaFlash();
     void open(const int index);
     void open(const QString &idStr);
+    bool isOpen() const;
     void close();
     const DCAM::ModelInfo *modelInfo();
 

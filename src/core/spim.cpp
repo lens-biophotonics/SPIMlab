@@ -44,6 +44,9 @@ void SPIM::initialize()
 
         for (int i = 0; i < SPIM_NCAMS; ++i) {
             OrcaFlash *orca = camList.at(i);
+            if (orca->isOpen()) {
+                continue;
+            }
             orca->open(i);
             orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
             orca->setTriggerSource(OrcaFlash::TRIGGERSOURCE_EXTERNAL);
@@ -55,6 +58,9 @@ void SPIM::initialize()
         }
 
         for (PIDevice * dev : piDevList) {
+            if (dev->isConnected()) {
+                continue;
+            }
             if (dev->getPortName().isEmpty()) {
                 continue;
             }
