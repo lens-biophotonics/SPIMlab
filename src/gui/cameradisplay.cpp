@@ -11,6 +11,7 @@
 
 #include "core/spim.h"
 
+#include "aspectratiowidget.h"
 #include "cameradisplay.h"
 #include "colormaps.h"
 #include "settings.h"
@@ -125,8 +126,11 @@ void CameraDisplay::setupUi()
     }
 
     QPushButton *autoScalePushButton = new QPushButton("Autoscale");
-    autoScalePushButton->setSizePolicy(QSizePolicy::Preferred,
-                                       QSizePolicy::Expanding);
+    QSizePolicy bsp(QSizePolicy::Preferred,
+                    QSizePolicy::Expanding);
+    bsp.setVerticalStretch(0);
+    autoScalePushButton->setSizePolicy(bsp);
+
     autoScalePushButton->setCheckable(true);
     autoScalePushButton->setChecked(true);
 
@@ -147,7 +151,9 @@ void CameraDisplay::setupUi()
     vLayout->addWidget(LUTPushButton);
     controlsLayout->addLayout(vLayout);
 
-    layout->addWidget(plot);
+    plot->setMinimumHeight(450);
+    QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1., 1., 0, 120);
+    layout->addWidget(aspectRatioWidget, 1);
     layout->addLayout(controlsLayout);
 
     setLayout(layout);

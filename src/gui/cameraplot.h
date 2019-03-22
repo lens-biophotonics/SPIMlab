@@ -12,9 +12,6 @@ class CameraPlot : public QwtPlot
 public:
     CameraPlot(QWidget *parent = nullptr);
 
-    int heightForWidth(int w) const;
-    bool hasHeightForWidth() const;
-
     void setData(const QVector<double> &vec);
     void setInterval(const Qt::Axis axis, const double min, const double max);
 

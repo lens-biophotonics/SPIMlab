@@ -1,8 +1,6 @@
 #include <qwt_scale_engine.h>
 #include <qwt_scale_widget.h>
 
-#include <QtDebug>
-
 #include "cameraplot.h"
 
 #include "colormaps.h"
@@ -37,16 +35,6 @@ CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
 
     setColorMap(new GrayScaleColorMap());
     setInterval(Qt::ZAxis, 0, 65535);
-}
-
-int CameraPlot::heightForWidth(int w) const
-{
-    return w;
-}
-
-bool CameraPlot::hasHeightForWidth() const
-{
-    return true;
 }
 
 void CameraPlot::setData(const QVector<double> &vec)

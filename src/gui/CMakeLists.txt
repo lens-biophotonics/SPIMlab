@@ -16,6 +16,7 @@ set(SPIMlab_SRCS
     version.cpp
     settings.cpp
 
+    aspectratiowidget.cpp
     customspinbox.cpp
 
     controlwidget.cpp

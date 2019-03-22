@@ -27,12 +27,6 @@ void CameraPage::setupUI()
     };
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        QVBoxLayout *vLayout = new QVBoxLayout();
-        vLayout->addWidget(new CameraDisplay(spim().getCamera(i)));
-        QHBoxLayout *hLayout = new QHBoxLayout();
-        hLayout->addWidget(new GalvoWaveformWidget(i));
-        hLayout->addStretch();
-
         auto *picw = new PIPositionControlWidget();
         picw->setTitle("Focus");
         picw->appendRow(spim().getPIDevice(piList.at(i)), "1", "Objective");
@@ -41,11 +35,13 @@ void CameraPage::setupUI()
         piHLayout->addWidget(picw);
         piHLayout->addStretch();
 
-        vLayout->addLayout(hLayout);
+        QVBoxLayout *vLayout = new QVBoxLayout();
+        vLayout->addWidget(new CameraDisplay(spim().getCamera(i)));
+        vLayout->addWidget(new GalvoWaveformWidget(i));
         vLayout->addLayout(piHLayout);
-        cameraHLayout->addLayout(vLayout);
+        cameraHLayout->addLayout(vLayout, 1);
     }
-    cameraHLayout->addStretch();
+    cameraHLayout->addStretch(0);
 
     QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
     expTimeSpinBox->setRange(0, 10000);
@@ -75,7 +71,6 @@ void CameraPage::setupUI()
     vLayout->addLayout(cameraHLayout);
     vLayout->addLayout(controlsHLayout0);
     vLayout->addLayout(controlsHLayout1);
-    vLayout->addStretch();
 
     setLayout(vLayout);
 
