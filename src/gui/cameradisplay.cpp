@@ -7,6 +7,7 @@
 #include <QRegularExpression>
 
 #include <qwt/qwt_slider.h>
+#include <qwt/qwt_plot_zoomer.h>
 
 #include "core/spim.h"
 
@@ -42,6 +43,17 @@ void CameraDisplay::replot()
 void CameraDisplay::setupUi()
 {
     plot = new CameraPlot();
+    QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
+    zoomer->setRubberBandPen(QColor(Qt::green));
+    zoomer->setTrackerPen(QColor(Qt::green));
+
+    // RightButton: zoom out by 1
+    // Ctrl+RightButton: zoom out to full size
+    zoomer->setMousePattern(QwtEventPattern::MouseSelect2,
+                            Qt::RightButton, Qt::ControlModifier);
+    zoomer->setMousePattern(QwtEventPattern::MouseSelect3,
+                            Qt::RightButton);
+
 
     QVBoxLayout *layout = new QVBoxLayout();
     QwtSlider *minSlider = new QwtSlider(Qt::Horizontal);
