@@ -52,6 +52,11 @@ void CameraTrigger::initializeTask_impl()
     }
 }
 
+QString CameraTrigger::getTriggerTerm() const
+{
+    return triggerTerm;
+}
+
 QStringList CameraTrigger::getPhysicalChannels() const
 {
     return physicalChannels;

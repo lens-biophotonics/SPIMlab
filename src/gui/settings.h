@@ -23,6 +23,7 @@
 #define SETTING_WFPARAMS "waveformParams"
 
 #define SETTING_TERMS "terms"
+#define SETTING_TRIGGER_TERM "triggerTerm"
 
 #define SETTING_EXPTIME "exposureTime"
 

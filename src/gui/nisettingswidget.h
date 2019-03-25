@@ -23,6 +23,7 @@ private:
     QList<QComboBox *> galvoRampComboBoxList;
     QList<QComboBox *> cameraTriggerCtrComboBoxList;
     QList<QComboBox *> cameraTriggerTermComboBoxList;
+    QComboBox *PITriggerOutput;
 };
 
 #endif // NISETTINGSWIDGET_H

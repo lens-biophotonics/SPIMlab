@@ -23,6 +23,7 @@ public:
     QStringList getTerms();
     void setTerms(QStringList terms);
 
+    QString getTriggerTerm() const;
     void setTriggerTerm(const QString &term);
 
     NI::float64 getInitialDelay(const int number) const;

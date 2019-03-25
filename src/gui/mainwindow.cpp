@@ -129,6 +129,7 @@ void MainWindow::saveSettings() const
     group = SETTINGSGROUP_CAMTRIG;
     mySettings.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
     mySettings.setValue(group, SETTING_TERMS, ct->getTerms());
+    mySettings.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
 
     group = SETTINGSGROUP_SPIM;
     mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
@@ -183,6 +184,7 @@ void MainWindow::loadSettings()
     ct->setPhysicalChannels(
         mySettings.value(group, SETTING_PHYSCHANS).toStringList());
     ct->setTerms(mySettings.value(group, SETTING_TERMS).toStringList());
+    ct->setTriggerTerm(mySettings.value(group, SETTING_TRIGGER_TERM).toString());
 
     group = SETTINGSGROUP_SPIM;
     spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());

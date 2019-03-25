@@ -54,6 +54,12 @@ void NISettingsWidget::setupUI()
         galvoRampComboBoxList.insert(i, comboBox);
     }
 
+    PITriggerOutput = new QComboBox();
+    PITriggerOutput->insertItems(0, NI::getTerminals());
+    PITriggerOutput->setCurrentText(spim().getCameraTrigger()->getTriggerTerm());
+    grid->addWidget(new QLabel("PI trigger output"), row, 0, 1, 2);
+    grid->addWidget(PITriggerOutput, row++, 2, 1, 2);
+
     QPushButton *NIApplyPushButton = new QPushButton("Apply");
     grid->addWidget(NIApplyPushButton, row++, 0, 1, 4);
 
@@ -81,5 +87,6 @@ void NISettingsWidget::apply()
     spim().getGalvoRamp()->setPhysicalChannels(galvoPhysChan);
     spim().getCameraTrigger()->setPhysicalChannels(ctrs);
     spim().getCameraTrigger()->setTerms(terms);
+    spim().getCameraTrigger()->setTriggerTerm(PITriggerOutput->currentText());
     spim().setupGalvoRampTriggerSource(terms);
 }

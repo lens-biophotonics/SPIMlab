@@ -88,6 +88,7 @@ void Settings::loadSettings()
               QStringList({"Dev1/ctr0", "Dev1/ctr1"}));
     SET_VALUE(groupName,
               SETTING_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
+    SET_VALUE(groupName, SETTING_TRIGGER_TERM, QVariant());
 
     settings.endGroup();
 
