@@ -14,7 +14,8 @@
 
 static Logger *logger = getLogger("SaveStackWorker");
 
-SaveStackWorker::SaveStackWorker(QObject *parent) : QObject(parent)
+SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
+    : QObject(parent), orca(orca)
 {
 }
 
@@ -29,38 +30,18 @@ void SaveStackWorker::saveToFile()
         return;
     }
     size_t n = 2 * 2048 * 2048;
-//    OrcaFlash *orca = spim().getCamera();  // FIXME
-    OrcaFlash *orca;
     const uint nFramesInBuffer = orca->nFramesInBuffer();
-#ifdef WITH_HARDWARE
-    void *buf;
-    int32_t rowBytes;
-#else
     void *buf = malloc(n);
-#endif
     uint i = 0;
     while (i < frameCount) {
         if (QThread::currentThread()->isInterruptionRequested()) {
             break;
         }
         int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
-#ifdef WITH_HARDWARE
-        orca->wait();
-        orca->lockData(&buf, &rowBytes, frame);
-#else
         orca->copyFrame(buf, n, frame);
-#endif
         write(fd, buf, n);
         i++;
-
-#ifdef WITH_HARDWARE
-        orca->unlockData();
-#endif
     }
-
-#ifndef WITH_HARDWARE
-    free(buf);
-#endif
 
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);

@@ -4,11 +4,13 @@
 #include <QObject>
 #include <QString>
 
+class OrcaFlash;
+
 class SaveStackWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit SaveStackWorker(QObject *parent = nullptr);
+    explicit SaveStackWorker(OrcaFlash *orca, QObject *parent = nullptr);
 
     void setFrameCount(uint count);
     void setOutputFileName(const QString &fname);
@@ -24,6 +26,7 @@ private:
     bool stopRequested;
     QString outputFileName;
     uint frameCount;
+    OrcaFlash *orca;
 };
 
 #endif // SAVESTACKWORKER_H

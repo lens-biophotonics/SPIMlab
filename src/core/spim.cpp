@@ -91,6 +91,12 @@ void SPIM::initialize()
 void SPIM::uninitialize()
 {
     try {
+        for (QThread *t: acqThreads) {
+            t->requestInterruption();
+        }
+        for (QThread *t: acqThreads) {
+            t->wait(1000);
+        }
         closeAllDaisyChains();
         qDeleteAll(camList);
         delete galvoRamp;
@@ -176,25 +182,35 @@ void SPIM::startAcquisition()
 {
     logger->info("Start acquisition");
 
+    qDeleteAll(acqThreads);
+
     try {
-        cameraTrigger->setFreeRunEnabled(false);
-        acqThread = new QThread();
-        worker = new SaveStackWorker();
-        worker->setOutputFileName("output.raw");
-        worker->setFrameCount(100);
-        worker->moveToThread(acqThread);
+        _setExposureTime(exposureTime / 1000.);
 
-        connect(acqThread, &QThread::started, worker, &SaveStackWorker::saveToFile);
-        connect(worker, &SaveStackWorker::finished, acqThread, &QThread::quit);
-        connect(worker, &SaveStackWorker::finished, worker, &SaveStackWorker::deleteLater);
-        connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
-        connect(worker, &SaveStackWorker::error, this, &SPIM::onError);
-        connect(acqThread, &QThread::finished, acqThread, &QThread::deleteLater);
+        cameraTrigger->setFreeRunEnabled(true); //FIXME
 
-//        orca->setNFramesInBuffer(100);  //FIXME
-//        orca->startCapture();
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            OrcaFlash *orca = getCamera(i);
+            QThread *acqThread = new QThread();
+            SaveStackWorker *worker = new SaveStackWorker(orca);
+            worker->setOutputFileName(QString("output%1.raw").arg(i));
+            worker->setFrameCount(100);
+            worker->moveToThread(acqThread);
 
-        acqThread->start();
+            connect(acqThread, &QThread::started, worker, &SaveStackWorker::saveToFile);
+            connect(worker, &SaveStackWorker::finished, acqThread, &QThread::quit);
+            connect(worker, &SaveStackWorker::finished, worker, &SaveStackWorker::deleteLater);
+            connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
+            connect(worker, &SaveStackWorker::error, this, &SPIM::onError);
+            connect(acqThread, &QThread::finished, acqThread, &QThread::deleteLater);
+
+            orca->setNFramesInBuffer(100);  //FIXME
+
+            acqThreads.append(acqThread);
+
+            orca->startCapture();
+            acqThread->start();
+        }
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -206,9 +222,10 @@ void SPIM::startAcquisition()
 void SPIM::stop()
 {
     try {
-        if (acqThread && acqThread->isRunning()) {
-            acqThread->requestInterruption();
-            acqThread = nullptr;
+        for (QThread *acqThread : acqThreads) {
+            if (acqThread->isRunning()) {
+                acqThread->requestInterruption();
+            }
         }
         for (OrcaFlash * orca : camList) {
             orca->stop();
