@@ -58,8 +58,9 @@ IJLUTColorMap::IJLUTColorMap(QString fname) :
 
     if (length > 768) {
         QDataStream in(&file);
-        QByteArray id = file.read(4);
-        if (id.compare("ICOL") == 0) {  // (NIH Image LUT Header)
+        int icol = 0;
+        file.read(reinterpret_cast<char*>(&icol), 4);
+        if (icol == 1280262985) {  // ICOL (NIH Image LUT Header)
             quint16 dummy;
             in >> dummy;
             in >> ncolors;

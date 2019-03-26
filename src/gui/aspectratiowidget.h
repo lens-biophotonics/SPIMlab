@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
-#include <qwt/qwt_plot.h>
+#include <qwt_plot.h>
 
 
 class AspectRatioWidget : public QWidget

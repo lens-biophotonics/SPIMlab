@@ -1,8 +1,6 @@
 #include <QResizeEvent>
 #include <QtDebug>
 
-#include <qwt/qwt_plot_layout.h>
-
 #include "aspectratiowidget.h"
 
 AspectRatioWidget::AspectRatioWidget(QWidget *widget, double width, double height,

@@ -6,8 +6,8 @@
 #include <QStack>
 #include <QRegularExpression>
 
-#include <qwt/qwt_slider.h>
-#include <qwt/qwt_plot_zoomer.h>
+#include <qwt_slider.h>
+#include <qwt_plot_zoomer.h>
 
 #include "core/spim.h"
 #include "core/orcaflash.h"
