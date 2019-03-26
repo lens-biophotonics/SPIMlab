@@ -31,6 +31,15 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
                      new PIDevice("Left objective", this));
     piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS,
                      new PIDevice("Right objective", this));
+
+    PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
+
+    connect(xaxis, &PIDevice::connected, this, [ = ](){
+        xaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
+        xaxis->setTriggerOutput(
+            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
+    });
 }
 
 SPIM::~SPIM()
@@ -72,12 +81,6 @@ void SPIM::initialize()
             dev->connectDevice();
             dev->setServoEnabled(true);
         }
-
-        PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
-        xaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
-        xaxis->setTriggerOutput(
-            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
-        xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
