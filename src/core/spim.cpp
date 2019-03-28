@@ -151,50 +151,50 @@ QList<PIDevice *> SPIM::getPIDevices() const
 
 void SPIM::startFreeRun()
 {
-    try {
-        _setExposureTime(exposureTime / 1000.);
-        for (OrcaFlash * orca : camList) {
-            orca->setNFramesInBuffer(10);
-            orca->startCapture();
-        }
-
-        cameraTrigger->setFreeRunEnabled(true);
-        galvoRamp->start();
-
-        cameraTrigger->start();
-    } catch (std::runtime_error e) {
-        onError(e.what());
-        return;
-    }
-    emit captureStarted();
+    startCapture(true);
 }
 
 void SPIM::startAcquisition()
+{
+    startCapture(false);
+}
+
+void SPIM::startCapture(bool freeRun)
 {
     logger->info("Start acquisition");
 
     try {
         _setExposureTime(exposureTime / 1000.);
 
-        cameraTrigger->setFreeRunEnabled(true); //FIXME
-
         int i = 0;
         for (OrcaFlash *orca : camList) {
-            SaveStackWorker *acqThread = new SaveStackWorker(orca);
-            acqThread->setOutputFileName(QString("output%1.raw").arg(i++));
-            acqThread->setFrameCount(100);
-            acqThreads.append(acqThread);
+            if (freeRun) {
+                orca->setNFramesInBuffer(10);
+            }
+            else {
+                SaveStackWorker *acqThread = new SaveStackWorker(orca);
+                acqThread->setOutputFileName(QString("output%1.raw").arg(i++));
+                acqThread->setFrameCount(100);
+                acqThreads.append(acqThread);
 
-            connect(acqThread, &SaveStackWorker::error, this, &SPIM::onError);
-            connect(acqThread, &QThread::finished,
-                    acqThread, &QThread::deleteLater);
-            connect(orca, &OrcaFlash::captureStarted, acqThread, [ = ](){
-                acqThread->start();
-            });
+                connect(acqThread, &SaveStackWorker::error,
+                        this, &SPIM::onError);
+                connect(acqThread, &QThread::finished,
+                        acqThread, &QThread::deleteLater);
+                connect(orca, &OrcaFlash::captureStarted, acqThread, [ = ](){
+                    acqThread->start();
+                });
 
-            orca->setNFramesInBuffer(100);  //FIXME
+                orca->setNFramesInBuffer(100);  //FIXME
+            }
+
             orca->startCapture();
         }
+
+        cameraTrigger->setFreeRunEnabled(true); //FIXME
+        galvoRamp->start();
+
+        cameraTrigger->start();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

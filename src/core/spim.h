@@ -48,6 +48,7 @@ public:
 public slots:
     void startFreeRun();
     void startAcquisition();
+    void startCapture(bool freeRun = true);
     void stop();
     void initialize();
     void uninitialize();
