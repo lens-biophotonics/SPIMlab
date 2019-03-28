@@ -1,12 +1,12 @@
 #ifndef SAVESTACKWORKER_H
 #define SAVESTACKWORKER_H
 
-#include <QObject>
+#include <QThread>
 #include <QString>
 
 class OrcaFlash;
 
-class SaveStackWorker : public QObject
+class SaveStackWorker : public QThread
 {
     Q_OBJECT
 public:
@@ -15,12 +15,11 @@ public:
     void setFrameCount(uint count);
     void setOutputFileName(const QString &fname);
 
-public slots:
-    void saveToFile();
-
 signals:
-    void finished();
     void error(QString msg = "");
+
+protected:
+    virtual void run();
 
 private:
     bool stopRequested;

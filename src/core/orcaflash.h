@@ -130,6 +130,8 @@ public:
 signals:
     void opened();
     void closed();
+    void captureStarted();
+    void stopped();
 
 public slots:
 

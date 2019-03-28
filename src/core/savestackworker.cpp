@@ -15,11 +15,11 @@
 static Logger *logger = getLogger("SaveStackWorker");
 
 SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
-    : QObject(parent), orca(orca)
+    : QThread(parent), orca(orca)
 {
 }
 
-void SaveStackWorker::saveToFile()
+void SaveStackWorker::run()
 {
     QFileInfo fi = QFileInfo(outputFileName);
     stopRequested = false;
@@ -59,8 +59,6 @@ void SaveStackWorker::saveToFile()
     out << "ElementType = MET_USHORT\n";
     out << "ElementDataFile = " << fi.fileName() << "\n";
     outFile.close();
-
-    emit finished();
 }
 
 void SaveStackWorker::setFrameCount(uint count)

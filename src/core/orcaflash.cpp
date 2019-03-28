@@ -250,6 +250,7 @@ void OrcaFlash::startCapture()
     CALL_THROW(dcam_allocframe(h, _nFramesInBuffer))
     CALL_THROW(dcam_capture(h))
 #endif
+    emit captureStarted();
 }
 
 void OrcaFlash::stop()
@@ -264,6 +265,7 @@ void OrcaFlash::stop()
     CALL_THROW(dcam_idle(h))
     CALL_THROW(dcam_freeframe(h))
 #endif
+    emit stopped();
 }
 
 void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)

@@ -173,34 +173,27 @@ void SPIM::startAcquisition()
 {
     logger->info("Start acquisition");
 
-    qDeleteAll(acqThreads);
-
     try {
         _setExposureTime(exposureTime / 1000.);
 
         cameraTrigger->setFreeRunEnabled(true); //FIXME
 
-        for (int i = 0; i < SPIM_NCAMS; ++i) {
-            OrcaFlash *orca = getCamera(i);
-            QThread *acqThread = new QThread();
-            SaveStackWorker *worker = new SaveStackWorker(orca);
-            worker->setOutputFileName(QString("output%1.raw").arg(i));
-            worker->setFrameCount(100);
-            worker->moveToThread(acqThread);
-
-            connect(acqThread, &QThread::started, worker, &SaveStackWorker::saveToFile);
-            connect(worker, &SaveStackWorker::finished, acqThread, &QThread::quit);
-            connect(worker, &SaveStackWorker::finished, worker, &SaveStackWorker::deleteLater);
-            connect(worker, &SaveStackWorker::finished, this, &SPIM::stop);
-            connect(worker, &SaveStackWorker::error, this, &SPIM::onError);
-            connect(acqThread, &QThread::finished, acqThread, &QThread::deleteLater);
-
-            orca->setNFramesInBuffer(100);  //FIXME
-
+        int i = 0;
+        for (OrcaFlash *orca : camList) {
+            SaveStackWorker *acqThread = new SaveStackWorker(orca);
+            acqThread->setOutputFileName(QString("output%1.raw").arg(i++));
+            acqThread->setFrameCount(100);
             acqThreads.append(acqThread);
 
+            connect(acqThread, &SaveStackWorker::error, this, &SPIM::onError);
+            connect(acqThread, &QThread::finished,
+                    acqThread, &QThread::deleteLater);
+            connect(orca, &OrcaFlash::captureStarted, acqThread, [ = ](){
+                acqThread->start();
+            });
+
+            orca->setNFramesInBuffer(100);  //FIXME
             orca->startCapture();
-            acqThread->start();
         }
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -218,6 +211,7 @@ void SPIM::stop()
                 acqThread->requestInterruption();
             }
         }
+        acqThreads.clear();
         for (OrcaFlash * orca : camList) {
             orca->stop();
         }
