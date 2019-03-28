@@ -47,6 +47,9 @@ void PIControllerSettingsWidget::configureStages()
 
     for (int i = 0; i < axes.count(); ++i) {
         QComboBox *cb = new QComboBox();
+        if (!stages.contains(stages.at(i))) {
+            cb->addItem(stages.at(i));
+        }
         cb->addItems(availStages);
         cb->setCurrentText(stages.at(i));
         cbList.append(cb);
