@@ -156,11 +156,11 @@ QSerialPortInfo SerialPort::findPortFromSerialNumber(const QString &sn)
  * @return The retrieved float.
  */
 
-float SerialPort::getFloat(const QString &cmd)
+double SerialPort::getDouble(const QString &cmd)
 {
     QString str = transceive(cmd);
     bool ok;
-    float f = str.toFloat(&ok);
+    double f = str.toDouble(&ok);
     if (!ok) {
         throw std::runtime_error("Cannot convert string to float");
     }

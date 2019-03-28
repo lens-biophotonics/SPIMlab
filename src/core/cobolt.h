@@ -24,21 +24,63 @@ class Cobolt : public QObject
         MODE_ABORTED = 6,
     };
 
+    enum OPERATING_FAULT {
+        FAULT_NOERRORS = 0,
+        FAULT_TEMPERATUR_EERROR = 1,
+        FAULT_INTERLOCK_ERROR = 3,
+        FAULT_CONSTANT_POWER_TIMEOUT= 4,
+    };
+
 public:
     Cobolt(QObject *parent = nullptr);
     virtual ~Cobolt();
 
-    SerialPort *serialPort() const;
+    SerialPort *getSerialPort() const;
 
     QString getSerialNumber();
-    float getOutputPower();
-    float getDriveCurrent();
+    QString getLaserModel();
+    QString getFullName();
+    int getWavelength();
+    double getOutputPower();
+    double getOutputPowerSetPoint();
+    double getDriveCurrent();
+    double getHours();
+    double getModulationHighCurrent();
+    double getModulationLowCurrent();
+    double getTECLDSetTemperature();
+    double readTECLDTemperature();
+    OPERATING_FAULT getOperatingFault();
+    bool isInterlockOpen();
+    bool isAnalogModulationEnabled();
+    bool isDigitalModulationEnabled();
+    bool isAnalogLowImpedanceEnabled();
     ON_OFF_STATE getOnOffState();
     OPERATING_MODE getOperatingMode();
+
+    QString getVerboseName() const;
+    void setVerboseName(const QString &value);
 
 public slots:
     void open();
     void close();
+
+    void setOutputPower(double W);
+    void setDriveCurrent(double mA);
+    void setModulationHighCurrent(double mA);
+    void setModulationLowCurrent(double mA);
+    void setTECLDTemperature(double celsius);
+    void setDigitalModulationEnabled(bool enable);
+    void setAnalogModulationEnabled(bool enable);
+    void setAnalogLowImpedanceEnabled(bool enable);
+
+    void restart();
+    void setLaserOn();
+    void setLaserOff();
+    void enterConstantPowerMode();
+    void enterConstantCurrentMode();
+    void enterModulationMode();
+    void clearFault();
+    void ping();
 
 signals:
     void connected();
@@ -46,6 +88,10 @@ signals:
 
 private:
     SerialPort *serial = nullptr;
+    QString verboseName;
+
+    QString transceiveChkOK(QString cmd);
+    QString transceiveChkSyntaxError(QString cmd);
 };
 
 #endif // COBOLT_H

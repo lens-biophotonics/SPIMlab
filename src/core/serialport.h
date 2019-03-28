@@ -17,7 +17,7 @@ public:
     QString transceive(QString command);
     bool open(OpenMode mode = QIODevice::ReadWrite);
 
-    float getFloat(const QString &cmd);
+    double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
 
     void setSerialNumber(const QString &serialNumber);
