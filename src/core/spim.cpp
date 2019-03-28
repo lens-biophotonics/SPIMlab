@@ -6,6 +6,8 @@
 #include "cameratrigger.h"
 #include "galvoramp.h"
 #include "pidevice.h"
+#include "cobolt.h"
+#include "serialport.h"
 #include "savestackworker.h"
 #include "logger.h"
 
@@ -40,6 +42,11 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
             PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
         xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     });
+
+    laserList.reserve(SPIM_NCOBOLT);
+    for (int i = 0; i < SPIM_NCOBOLT; ++i) {
+        laserList.insert(i, new Cobolt());
+    }
 }
 
 SPIM::~SPIM()
@@ -107,6 +114,16 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+QList<Cobolt *> SPIM::getLaserDevices() const
+{
+    return laserList;
+}
+
+Cobolt *SPIM::getLaser(const int n) const
+{
+    return laserList.at(n);
 }
 
 double SPIM::getExposureTime() const

@@ -7,12 +7,16 @@
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
 #endif
+#ifndef SPIM_NCOBOLT
+#define SPIM_NCOBOLT 4
+#endif
 
 class SaveStackWorker;
 class OrcaFlash;
 class CameraTrigger;
 class GalvoRamp;
 class PIDevice;
+class Cobolt;
 
 class SPIM : public QObject
 {
@@ -45,6 +49,9 @@ public:
     double getExposureTime() const;
     void setExposureTime(double ms);
 
+    QList<Cobolt *> getLaserDevices() const;
+    Cobolt *getLaser(const int n) const;
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -68,6 +75,7 @@ private:
 
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
+    QList<Cobolt *>laserList;
 
     void _setExposureTime(double expTime);
 

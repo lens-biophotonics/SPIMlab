@@ -14,6 +14,7 @@
 #include "core/serialport.h"
 #include "core/galvoramp.h"
 #include "core/cameratrigger.h"
+#include "core/cobolt.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"
@@ -116,6 +117,12 @@ void MainWindow::saveSettings() const
         }
     }
 
+    for (int i = 0; i < SPIM_NCOBOLT; ++i) {
+        SerialPort *sp = spim().getLaser(i)->getSerialPort();
+        group = SETTINGSGROUP_COBOLT(i);
+        mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
+    }
+
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
@@ -165,6 +172,13 @@ void MainWindow::loadSettings()
             dev->setPortName(
                 mySettings.value(group, SETTING_PORTNAME).toString());
         }
+    }
+
+    for (int i = 0; i < SPIM_NCOBOLT; ++i) {
+        Cobolt *dev = spim().getLaser(i);
+        group = SETTINGSGROUP_COBOLT(i);
+        dev->getSerialPort()->setPortName(
+            mySettings.value(group, SETTING_PORTNAME).toString());
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();

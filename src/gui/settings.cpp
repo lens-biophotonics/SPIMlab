@@ -2,7 +2,7 @@
 
 #include <QSettings>
 
-#include "core/serialport.h"
+#include "core/spim.h"
 
 #include "settings.h"
 
@@ -98,6 +98,19 @@ void Settings::loadSettings()
     SET_VALUE(groupName, SETTING_EXPTIME, 0.1);
 
     settings.endGroup();
+
+    groups.clear();
+    for (int i = 0; i < SPIM_NCOBOLT; ++i) {
+        groups << SETTINGSGROUP_COBOLT(i);
+    }
+
+    for (const QString &group : groups) {
+        settings.beginGroup(group);
+
+        SET_VALUE(group, SETTING_PORTNAME, QVariant());
+
+        settings.endGroup();
+    }
 }
 
 void Settings::saveSettings() const

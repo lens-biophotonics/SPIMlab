@@ -7,6 +7,7 @@
 #include "settingspage.h"
 #include "logwidget.h"
 #include "controlwidget.h"
+#include "coboltpage.h"
 
 #include "centralwidget.h"
 
@@ -26,6 +27,7 @@ void CentralWidget::setupUi()
     tabWidget = new QTabWidget();
 
     tabWidget->addTab(new CameraPage(), "Cameras");
+    tabWidget->addTab(new CoboltPage(), "Lasers");
     tabWidget->addTab(new SettingsPage(), "Settings");
     tabWidget->addTab(new LogWidget(), "Messages");
 

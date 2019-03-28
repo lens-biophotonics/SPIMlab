@@ -8,6 +8,7 @@
 #define SETTINGSGROUP_SPIM "SPIM"
 
 #define SETTINGSGROUP_AXIS(n) QString("AXIS_%1").arg(n)
+#define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
 
 #define SETTINGSGROUP_CAMTRIG "CameraTrigger"
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
