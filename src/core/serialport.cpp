@@ -1,6 +1,6 @@
 #include <QSerialPortInfo>
 #include <QTimer>
-#include <QtDebug>
+#include <QStateMachine>
 
 #include "logger.h"
 
@@ -16,6 +16,8 @@ static Logger *logger = getLogger("SerialPort");
 SerialPort::SerialPort(QObject *parent)
     : QSerialPort(parent)
 {
+    setupStateMachine();
+
     setBaudRate(Baud115200);
     setFlowControl(NoFlowControl);
     setParity(NoParity);
@@ -50,6 +52,34 @@ bool SerialPort::open(OpenMode mode)
 bool SerialPort::open_impl()
 {
     return true;
+}
+
+QState *SerialPort::getDisconnectedState() const
+{
+    return disconnectedState;
+}
+
+QState *SerialPort::getConnectedState() const
+{
+    return connectedState;
+}
+
+void SerialPort::setupStateMachine()
+{
+    connectedState = new QState();
+    disconnectedState = new QState();
+
+    connectedState->addTransition(this, &SerialPort::closed, disconnectedState);
+
+    disconnectedState->addTransition(this, &SerialPort::opened, connectedState);
+
+    QStateMachine *sm = new QStateMachine();
+
+    sm->addState(connectedState);
+    sm->addState(disconnectedState);
+
+    sm->setInitialState(disconnectedState);
+    sm->start();
 }
 
 QString SerialPort::receiveMsg()

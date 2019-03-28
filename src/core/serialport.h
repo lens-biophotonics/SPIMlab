@@ -2,6 +2,7 @@
 #define SERIALPORT_H
 
 #include <QSerialPort>
+#include <QState>
 
 class SerialPort : public QSerialPort
 {
@@ -24,6 +25,8 @@ public:
     void setLineEndTermination(const QString &termination);
     void setLoggingEnabled(bool enable);
 
+    QState *getConnectedState() const;
+    QState *getDisconnectedState() const;
 
 private slots:
     QString receiveMsg();
@@ -40,6 +43,11 @@ private:
     QString lineEndTermination;
     bool loggingEnabled = false;
     int _transceiveTimeout;
+
+    QState *connectedState;
+    QState *disconnectedState;
+
+    void setupStateMachine();
 };
 
 #endif // SERIALPORT_H
