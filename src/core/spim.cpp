@@ -86,8 +86,6 @@ void SPIM::initialize()
         return;
     }
 
-    setupGalvoRampTriggerSource(cameraTrigger->getTerms());
-
     emit initialized();
 }
 
@@ -134,16 +132,6 @@ CameraTrigger *SPIM::getCameraTrigger() const
 OrcaFlash *SPIM::getCamera(int camNumber) const
 {
     return camList.at(camNumber);
-}
-
-void SPIM::setupGalvoRampTriggerSource(const QStringList &terminals)
-{
-    try {
-        galvoRamp->setTriggerSource(terminals.at(0));
-    } catch (std::runtime_error e) {
-        onError(e.what());
-        return;
-    }
 }
 
 PIDevice *SPIM::getPIDevice(const SPIM::PI_DEVICES dev) const
@@ -271,19 +259,20 @@ void SPIM::_setExposureTime(double expTime)
             }
         }
 
-        uint64_t nSamples = static_cast<uint64_t>(round(expTime / lineInterval + nOfLines));
-        double rate = 1 / lineInterval;
-
-        galvoRamp->setSampleRate(rate);
-        galvoRamp->setNSamples(nSamples);
-
-        galvoRamp->setNRamp(0, nOfLines);
-        galvoRamp->setNRamp(1, nOfLines);
+        double sampRate = 1 / lineInterval;
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double freq = 0.98 * frameRate;
-        cameraTrigger->setFrequency(freq);
-        cameraTrigger->setInitialDelays({0, 0.5 / freq});
+
+        galvoRamp->setSampleRate(sampRate);
+        cameraTrigger->setSampleRate(sampRate);
+
+        uint64_t nSamples = static_cast<uint64_t>(sampRate / freq);
+        galvoRamp->setNSamples(nSamples);
+        cameraTrigger->setNSamples(nSamples);
+
+        galvoRamp->setNRamp(0, nOfLines);
+        galvoRamp->setNRamp(1, nOfLines);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

@@ -11,25 +11,6 @@ GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
     setTaskName("galvoRampAO");
 }
 
-void GalvoRamp::setPhysicalChannels(const QStringList &channels)
-{
-    physicalChannels = channels;
-    clear();
-    waveformParams.clear();
-    waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels());
-    nRamp.clear();
-    nRamp.fill(0, nOfChannels());
-}
-
-void GalvoRamp::setTriggerSource(const QString &source)
-{
-    if (triggerSource == source) {
-        return;
-    }
-    triggerSource = source;
-    clear();
-}
-
 void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
 {
     setWaveformParam(channelNumber, GALVORAMP_AMPLITUDE_IDX, val);
@@ -40,14 +21,13 @@ void GalvoRamp::setWaveformOffset(const int channelNumber, const double val)
     setWaveformParam(channelNumber, GALVORAMP_OFFSET_IDX, val);
 }
 
-void GalvoRamp::setWaveformPhase(const int channelNumber, const double val)
+void GalvoRamp::setWaveformDelay(const int channelNumber, const double s)
 {
-    setWaveformParam(channelNumber, GALVORAMP_PHASE_IDX, val);
+    setWaveformParam(channelNumber, GALVORAMP_DELAY_IDX, s);
 }
 
 void GalvoRamp::setWaveformRampFraction(const int channelNumber, const double val)
 {
-    setWaveformParam(channelNumber, GALVORAMP_RAMP_FRACTION_IDX, val);
     nRamp[channelNumber] = round(nSamples * val);
 }
 
@@ -63,10 +43,10 @@ double GalvoRamp::getWaveformOffset(const int channelNumber) const
         channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_OFFSET_IDX];
 }
 
-double GalvoRamp::getWaveformPhase(const int channelNumber) const
+double GalvoRamp::getWaveformDelay(const int channelNumber) const
 {
     return waveformParams[
-        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_PHASE_IDX];
+        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_DELAY_IDX];
 }
 
 double GalvoRamp::getWaveformRampFraction(const int channelNumber) const
@@ -102,18 +82,20 @@ void GalvoRamp::initializeTask_impl()
             nullptr // customScaleName
             )
         );
-    DAQmxErrChk(
-        DAQmxCfgDigEdgeStartTrig(
-            task,
-            triggerSource.toLatin1(),
-            DAQmx_Val_Rising
-            )
-        );
-    DAQmxErrChk(DAQmxSetStartTrigRetriggerable(task, true));
 
-    configureSampleClockTiming("", DAQmx_Val_Rising, DAQmx_Val_FiniteSamps);
+    configureTriggering();
+    configureSampleClockTiming("", DAQmx_Val_Rising, DAQmx_Val_ContSamps);
     computeWaveform();
     write();
+}
+
+void GalvoRamp::setPhysicalChannels_impl()
+{
+    nRamp.clear();
+    nRamp.fill(0, nOfChannels());
+
+    waveformParams.clear();
+    waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels());
 }
 
 int GalvoRamp::getNRamp(const int channelNumber) const
@@ -125,12 +107,6 @@ void GalvoRamp::setNRamp(const int channelNumber, const int value)
 {
     nRamp[channelNumber] = value;
 }
-
-QStringList GalvoRamp::getPhysicalChannels() const
-{
-    return physicalChannels;
-}
-
 void GalvoRamp::write()
 {
     DAQmxErrChk(
@@ -151,16 +127,16 @@ void GalvoRamp::computeWaveform()
 {
     waveform.clear();
     waveform.reserve(static_cast<int>(nSamples) * nOfChannels());
+    int delay = static_cast<int>(nSamples) / nOfChannels();
     for (int i = 0; i < nOfChannels(); ++i) {
-        int delay = static_cast<int>(
-            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_PHASE_IDX]
-            * nSamples);
-        ;
+        int d = delay * i;
+        d += waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_DELAY_IDX]
+             * getSampleRate();
         appendToWaveform(
             waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_OFFSET_IDX],
             waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_AMPLITUDE_IDX],
             nRamp.at(i),
-            delay);
+            d);
     }
 }
 
@@ -179,14 +155,12 @@ void GalvoRamp::appendToWaveform(
 
     if (delay == 0 || delay == temp.size()) {
         waveform << temp;
-        return;
     }
-
-    if (delay > 0) {
-        waveform << temp.mid(nSamples - delay - 1, delay);
+    else if (delay > 0) {
+        waveform << temp.mid(nSamples - delay);
         waveform << temp.mid(0, nSamples - delay);
     } else {
-        waveform << temp.mid(delay, nSamples + delay);
+        waveform << temp.mid(-delay);
         waveform << temp.mid(0, -delay);
     }
 }

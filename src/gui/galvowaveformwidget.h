@@ -25,7 +25,7 @@ private:
 
     QDoubleSpinBox *offsetSpinBox;
     QDoubleSpinBox *amplitudeSpinBox;
-    QDoubleSpinBox *phaseSpinBox;
+    QDoubleSpinBox *delaySpinBox;
 };
 
 #endif // GALVOWAVEFORMWIDGET_H

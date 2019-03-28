@@ -5,30 +5,24 @@
 
 #include "niabstracttask.h"
 
-#define GALVORAMP_N_OF_PARAMS 4
+#define GALVORAMP_N_OF_PARAMS 3
 #define GALVORAMP_OFFSET_IDX 0
 #define GALVORAMP_AMPLITUDE_IDX 1
-#define GALVORAMP_PHASE_IDX 2
-#define GALVORAMP_RAMP_FRACTION_IDX 3
+#define GALVORAMP_DELAY_IDX 2
 
 class GalvoRamp : public NIAbstractTask
 {
 public:
     GalvoRamp(QObject *parent = nullptr);
 
-    QStringList getPhysicalChannels() const;
-    void setPhysicalChannels(const QStringList &channels);
-
-    void setTriggerSource(const QString &source);
-
     void setWaveformAmplitude(const int channelNumber, const double val);
     void setWaveformOffset(const int channelNumber, const double val);
-    void setWaveformPhase(const int channelNumber, const double val);
+    void setWaveformDelay(const int channelNumber, const double s);
     void setWaveformRampFraction(const int channelNumber, const double val);
 
     double getWaveformAmplitude(const int channelNumber) const;
     double getWaveformOffset(const int channelNumber) const;
-    double getWaveformPhase(const int channelNumber) const;
+    double getWaveformDelay(const int channelNumber) const;
     double getWaveformRampFraction(const int channelNumber) const;
 
     QVector<double> getWaveformParams() const;
@@ -41,13 +35,10 @@ public:
 
 protected:
     virtual void initializeTask_impl();
+    virtual void setPhysicalChannels_impl();
 
 private:
     QVector<double> waveformParams;
-
-    QStringList physicalChannels;
-    QString triggerTerm;
-    QString triggerSource;
     QVector<double> waveform;
 
     QVector<int> nRamp;

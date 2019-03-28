@@ -119,6 +119,7 @@ void MainWindow::saveSettings() const
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
+    mySettings.setValue(group, SETTING_TRIGGER_TERM, gr->getTriggerTerm());
     QList<QVariant> waveformParams;
     for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
@@ -128,7 +129,6 @@ void MainWindow::saveSettings() const
     CameraTrigger *ct = spim().getCameraTrigger();
     group = SETTINGSGROUP_CAMTRIG;
     mySettings.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
-    mySettings.setValue(group, SETTING_TERMS, ct->getTerms());
     mySettings.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
 
     group = SETTINGSGROUP_SPIM;
@@ -171,6 +171,8 @@ void MainWindow::loadSettings()
     group = SETTINGSGROUP_GRAMP;
     gr->setPhysicalChannels(
         mySettings.value(group, SETTING_PHYSCHANS).toStringList());
+    gr->setTriggerTerm(
+        mySettings.value(group, SETTING_TRIGGER_TERM).toString());
     QVector<double> wp;
     const QList<QVariant> wafeformParams =
         mySettings.value(group, SETTING_WFPARAMS).toList();
@@ -183,7 +185,6 @@ void MainWindow::loadSettings()
     CameraTrigger *ct = spim().getCameraTrigger();
     ct->setPhysicalChannels(
         mySettings.value(group, SETTING_PHYSCHANS).toStringList());
-    ct->setTerms(mySettings.value(group, SETTING_TERMS).toStringList());
     ct->setTriggerTerm(mySettings.value(group, SETTING_TRIGGER_TERM).toString());
 
     group = SETTINGSGROUP_SPIM;

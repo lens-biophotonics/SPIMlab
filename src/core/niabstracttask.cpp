@@ -82,6 +82,40 @@ void NIAbstractTask::onError() const
     throw std::runtime_error(errBuff);
 }
 
+NI::int32 NIAbstractTask::getTriggerEdge() const
+{
+    return triggerEdge;
+}
+
+void NIAbstractTask::setTriggerEdge(const NI::int32 &value)
+{
+    triggerEdge = value;
+}
+
+QString NIAbstractTask::getTriggerTerm() const
+{
+    return triggerTerm;
+}
+
+void NIAbstractTask::setTriggerTerm(const QString &value)
+{
+    triggerTerm = value;
+}
+
+void NIAbstractTask::configureTriggering()
+{
+    if (triggerTerm.isEmpty()) {
+        return;
+    }
+    DAQmxErrChk(
+        DAQmxCfgDigEdgeStartTrig(
+            task,
+            triggerTerm.toLatin1(),
+            triggerEdge
+            )
+        );
+}
+
 NI::uInt64 NIAbstractTask::getNSamples() const
 {
     return nSamples;
@@ -138,4 +172,21 @@ void NIAbstractTask::configureSampleClockTiming(
             nSamples
             )
         );
+}
+
+QStringList NIAbstractTask::getPhysicalChannels() const
+{
+    return physicalChannels;
+}
+
+void NIAbstractTask::setPhysicalChannels(const QStringList &channels)
+{
+    physicalChannels = channels;
+    clear();
+    setPhysicalChannels_impl();
+}
+
+QString NIAbstractTask::getPhysicalChannel(const int number) const
+{
+    return physicalChannels.at(number);
 }
