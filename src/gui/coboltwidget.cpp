@@ -12,6 +12,7 @@
 
 #include "coboltwidget.h"
 #include "customspinbox.h"
+#include "utils.h"
 
 CoboltWidget::CoboltWidget(Cobolt *cobolt, QWidget *parent) :
     QWidget(parent), cobolt(cobolt)
@@ -68,8 +69,9 @@ void CoboltWidget::setupUI()
 
     QFrame *line;
     line = new QFrame();
-    line->setFrameShape(QFrame::HLine);
+    line->setFrameShape(QFrame::StyledPanel);
     line->setFrameShadow(QFrame::Sunken);
+    line->setMinimumHeight(7);
     grid->addWidget(line, row++, 0, 1, 2);
 
     QPushButton *onPushButton = new QPushButton("On");
@@ -125,7 +127,10 @@ void CoboltWidget::setupUI()
             on = cobolt->getOnOffState();
             powerDoubleSpinBox->setValue(
                 cobolt->getOutputPowerSetPoint() * 1000);
-            gb->setTitle(QString("%1 nm").arg(cobolt->getWavelength()));
+            int wl = cobolt->getWavelength();
+            gb->setTitle(QString("%1 nm").arg(wl));
+            line->setStyleSheet(
+                "background-color: " + wavelengthToColor(wl).name());
         }
         catch (std::runtime_error) {
         }
@@ -145,6 +150,8 @@ void CoboltWidget::setupUI()
 
     QState *cs = cobolt->getSerialPort()->getConnectedState();
     QState *ds = cobolt->getSerialPort()->getDisconnectedState();
+
+    ds->assignProperty(line, "styleSheet", "background-color: gray");
 
     QList<QWidget *> wList;
 

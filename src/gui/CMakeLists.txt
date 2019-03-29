@@ -35,6 +35,8 @@ set(SPIMlab_SRCS
 
     cameraplot.cpp
     colormaps.cpp
+
+    utils.cpp
 )
 
 add_executable(SPIMlab ${SPIMlab_SRCS})
