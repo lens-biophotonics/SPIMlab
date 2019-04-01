@@ -77,6 +77,9 @@ public:
     NI::int32 getTriggerEdge() const;
     void setTriggerEdge(const NI::int32 &value);
 
+    void exportSignal(const NI::int32 signalID, const QString &terminals);
+    void exportSignal(const NI::int32 signalID, const QStringList &terminals);
+
 signals:
     void error();
 

@@ -92,6 +92,24 @@ void NIAbstractTask::setTriggerEdge(const NI::int32 &value)
     triggerEdge = value;
 }
 
+void NIAbstractTask::exportSignal(
+    const int32 signalID, const QString &terminals)
+{
+#ifndef WITH_HARDWARE
+    Q_UNUSED(signalID)
+    Q_UNUSED(terminals)
+#endif
+    DAQmxErrChk(
+        DAQmxExportSignal(task, signalID, terminals.toLatin1())
+        );
+}
+
+void NIAbstractTask::exportSignal(
+    const int32 signalID, const QStringList &terminals)
+{
+    exportSignal(signalID, terminals.join(","));
+}
+
 QString NIAbstractTask::getTriggerTerm() const
 {
     return triggerTerm;
