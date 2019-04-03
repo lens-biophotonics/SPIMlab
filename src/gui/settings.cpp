@@ -77,7 +77,7 @@ void Settings::loadSettings()
               SETTING_PHYSCHANS, QStringList({"Dev1/ao0", "Dev1/ao1"}));
     SET_VALUE(groupName, SETTING_WFPARAMS, QList<QVariant>(
                   {0.2, 2., 0, 0.2, 2., 0}));
-    SET_VALUE(groupName, SETTING_TRIGGER_TERM, QVariant());
+    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI0");
 
     settings.endGroup();
 
@@ -87,7 +87,7 @@ void Settings::loadSettings()
 
     SET_VALUE(groupName, SETTING_PHYSCHANS,
               QStringList({"/Dev1/port0/line0", "/Dev1/port0/line1"}));
-    SET_VALUE(groupName, SETTING_TRIGGER_TERM, QVariant());
+    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI1");
 
     settings.endGroup();
 

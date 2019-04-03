@@ -76,15 +76,15 @@ void NISettingsWidget::setupUI()
 void NISettingsWidget::apply()
 {
     QStringList ctrs;
-    QStringList terms;
     QStringList galvoPhysChan;
     for (int i = 0; i < 2; ++i) {
         galvoPhysChan << galvoRampComboBoxList.at(i)->currentText();
         ctrs << cameraTriggerCtrComboBoxList.at(i)->currentText();
     }
-    spim().getGalvoRamp()->setPhysicalChannels(galvoPhysChan);
+    GalvoRamp *gr = spim().getGalvoRamp();
+    gr->setPhysicalChannels(galvoPhysChan);
+    gr->setTriggerTerm(galvoRampTrigger->currentText());
     CameraTrigger *ct = spim().getCameraTrigger();
     ct->setPhysicalChannels(ctrs);
     ct->setTriggerTerm(PITriggerOutput->currentText());
-    ct->setTriggerTerm(galvoRampTrigger->currentText());
 }
