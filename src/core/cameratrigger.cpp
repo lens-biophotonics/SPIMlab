@@ -19,7 +19,7 @@ void CameraTrigger::initializeTask_impl()
     DAQmxErrChk(
         DAQmxCreateDOChan(
             task,
-            physicalChannels.join(":").toLatin1(),
+            physicalChannels.join(",").toLatin1(),
             nullptr,
             DAQmx_Val_ChanPerLine
             )
