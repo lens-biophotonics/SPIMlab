@@ -1,6 +1,9 @@
 #include <cmath>
 
 #include "galvoramp.h"
+#include "logger.h"
+
+static Logger *logger = getLogger("CameraTrigger");
 
 using namespace NI;
 
