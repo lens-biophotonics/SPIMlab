@@ -37,7 +37,21 @@ void SaveStackWorker::run()
             break;
         }
         int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
-        void *buf = orca->lockFrame(frame);
+        int32_t frameStamp;
+        void *buf;
+        while (true) {
+            try {
+                orca->lockFrame(frame, &buf, &frameStamp);
+                break;
+            }
+            catch (OrcaFlash::OrcaBusyException) {
+                continue;
+            }
+        }
+        if (i != frameStamp) {
+            logger->warning("Missed frame");
+            continue;
+        }
         write(fd, buf, n);
         i++;
     }

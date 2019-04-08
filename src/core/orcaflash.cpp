@@ -323,7 +323,7 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
 #endif
 }
 
-void *OrcaFlash::lockFrame(const int32_t frame)
+void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp)
 {
 #if DCAM_VERSION == 400
     DCAMBUF_FRAME dcamframe;
@@ -339,10 +339,18 @@ void *OrcaFlash::lockFrame(const int32_t frame)
     dcamframe.left = 0;
     dcamframe.top = 0;
 
-    throw400(dcambuf_lockframe(h, &dcamframe));
+    lockFrame(&dcamframe);
 
-    return dcamframe.buf;
+    *buf = dcamframe.buf;
+    if (frameStamp != nullptr) {
+        *frameStamp = dcamframe.framestamp;
+    }
 #endif
+}
+
+void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
+{
+    throw400(dcambuf_lockframe(h, dcambufFrame));
 }
 
 void OrcaFlash::copyLastFrame(void * const buf, const size_t n)
