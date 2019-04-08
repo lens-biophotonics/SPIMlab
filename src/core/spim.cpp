@@ -78,15 +78,31 @@ void SPIM::initialize()
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
         }
 
-        for (PIDevice * dev : piDevList) {
-            if (dev->isConnected()) {
-                continue;
+        for (int devnumber = 1; devnumber <= 16; ++devnumber) {
+            for (PIDevice * dev : piDevList) {
+                if (dev->getDeviceNumber() > devnumber) {
+                    continue;
+                }
+                if (dev->isConnected()) {
+                    continue;
+                }
+                if (dev->getPortName().isEmpty()) {
+                    continue;
+                }
+                for (int i = 0; i < 5; ++i) {
+                    try {
+                        dev->connectDevice();
+                        break;
+                    }
+                    catch (std::runtime_error) {
+                        QString msg = "Cannot open device. Attempt %1 of 5";
+                        msg = msg.arg(i + 1);
+                        logger->warning(msg);
+                        continue;
+                    }
+                }
+                dev->setServoEnabled(true);
             }
-            if (dev->getPortName().isEmpty()) {
-                continue;
-            }
-            dev->connectDevice();
-            dev->setServoEnabled(true);
         }
     } catch (std::runtime_error e) {
         onError(e.what());
