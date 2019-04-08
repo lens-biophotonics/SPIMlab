@@ -12,6 +12,12 @@ class OrcaFlash : public QObject
 {
     Q_OBJECT
 public:
+    struct OrcaBusyException : public std::exception {};
+    struct OrcaNotReadyException : public std::exception {};
+    struct OrcaNotStableException : public std::exception {};
+    struct OrcaUnstableException : public std::exception {};
+    struct OrcaNotBusyException : public std::exception {};
+
     enum ORCA_TRIGGER_MODE {
         TRIGMODE_INTERNAL = DCAM::DCAM_TRIGMODE_INTERNAL,
         TRIGMODE_EDGE = DCAM::DCAM_TRIGMODE_EDGE,
@@ -153,6 +159,8 @@ private:
 
     QString logLastError(const QString label = "");
     void setupStateMachine();
+
+    void throw400(const DCAM::DCAMERR err);
 };
 
 #endif // ORCAFLASH_H
