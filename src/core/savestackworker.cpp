@@ -31,14 +31,13 @@ void SaveStackWorker::run()
     }
     size_t n = 2 * 2048 * 2048;
     const uint nFramesInBuffer = orca->nFramesInBuffer();
-    void *buf = malloc(n);
     uint i = 0;
     while (i < frameCount) {
         if (QThread::currentThread()->isInterruptionRequested()) {
             break;
         }
         int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
-        orca->copyFrame(buf, n, frame);
+        void *buf = orca->lockFrame(frame);
         write(fd, buf, n);
         i++;
     }

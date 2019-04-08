@@ -279,13 +279,11 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
 #else
 
 #if DCAM_VERSION == 400
-    DCAM_FRAME dcamframe;
+    DCAMBUF_FRAME dcamframe;
 
     memset(&dcamframe, 0, sizeof(dcamframe));
     dcamframe.size = sizeof(dcamframe);
-    dcamframe.iFrame    = frame;
-
-    CALL_THROW_400(dcambuf_lockframe(h, &dcamframe))
+    dcamframe.iFrame = frame;
 
     dcamframe.buf = buf;
     dcamframe.width = getImageWidth();
@@ -308,6 +306,28 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
 #endif
 }
 
+void *OrcaFlash::lockFrame(const int32_t frame)
+{
+#if DCAM_VERSION == 400
+    DCAMBUF_FRAME dcamframe;
+
+    memset(&dcamframe, 0, sizeof(dcamframe));
+    dcamframe.size = sizeof(dcamframe);
+    dcamframe.iFrame = frame;
+
+    dcamframe.width = getImageWidth();
+    dcamframe.height = getImageHeight();
+    dcamframe.rowbytes = static_cast<int32_t>(
+        getPropertyValue(DCAM_IDPROP_IMAGE_ROWBYTES));
+    dcamframe.left = 0;
+    dcamframe.top = 0;
+
+    CALL_THROW_400(dcambuf_lockframe(h, &dcamframe));
+
+    return dcamframe.buf;
+#endif
+}
+
 void OrcaFlash::copyLastFrame(void * const buf, const size_t n)
 {
     copyFrame(buf, n, -1);
@@ -322,6 +342,26 @@ void OrcaFlash::wait(const _DWORD timeout, const DCAMWAIT_EVENT event)
     Q_UNUSED(timeout)
     Q_UNUSED(event)
 #endif
+}
+
+int32 OrcaFlash::wait(const int32 timeout_ms, const int32 eventMask)
+{
+    DCAMWAIT_OPEN dwOpen;
+    dwOpen.size = sizeof(DCAMWAIT_OPEN);
+    dwOpen.hdcam = h;
+
+    CALL_THROW_400(dcamwait_open(&dwOpen));
+
+    DCAMWAIT_START dwStart;
+    dwStart.size = sizeof(DCAMWAIT_START);
+    dwStart.eventmask = eventMask;
+    dwStart.timeout = timeout_ms;
+
+    CALL_THROW_400(dcamwait_start(dwOpen.hwait, &dwStart));
+
+    CALL_THROW_400(dcamwait_close(dwOpen.hwait));
+
+    return dwStart.eventhappened;
 }
 
 void OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, const int32_t frame)

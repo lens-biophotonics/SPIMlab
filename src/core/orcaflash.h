@@ -89,9 +89,11 @@ public:
     void stop();
 
     void copyFrame(void * const buf, const size_t n, const int32_t frame);
+    void *lockFrame(const int32_t frame);
     void copyLastFrame(void * const buf, const size_t n);
     void wait(const DCAM::_DWORD timeout = 1000,
               const DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
+    DCAM::int32 wait(const DCAM::int32 timeout_ms, const DCAM::int32 eventMask);
     void lockData(void **pTop, int32_t *pRowbytes, const int32_t frame);
     void unlockData();
 
