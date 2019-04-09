@@ -38,12 +38,13 @@ void SaveStackWorker::run()
     buf = malloc(n);
 #endif
     while (i < frameCount) {
-        if (QThread::currentThread()->isInterruptionRequested()) {
-            break;
-        }
         int32_t frame = i % nFramesInBuffer;
         int32_t frameStamp = -1;
         while (true) {
+            if (QThread::currentThread()->isInterruptionRequested()
+                | !orca->getCapturingState()->active()) {
+                break;
+            }
             try {
 #ifdef WITH_HARDWARE
                 orca->lockFrame(frame, &buf, &frameStamp);
@@ -54,21 +55,32 @@ void SaveStackWorker::run()
                 break;
             }
             catch (OrcaFlash::OrcaBusyException) {
+                usleep(5000);
                 continue;
             }
         }
-        if (i != frameStamp) {
-            logger->warning("Missed frame");
-            continue;
+        if (QThread::currentThread()->isInterruptionRequested()
+            | !orca->getCapturingState()->active()) {
+            break;
         }
-        write(fd, buf, n);
-        i++;
+        if (i == frameStamp) {
+            write(fd, buf, n);
+            i++;
+        }
+        else if (i > frameStamp) {  // try again
+            usleep(5000);
+        }
+        else {  // lost frame
+            logger->error("Lost frame");
+            break;
+        }
     }
 #ifdef WITH_HARDWARE
 #else
     free(buf);
 #endif
 
+    orca->stop();
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);
 

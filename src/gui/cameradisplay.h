@@ -47,6 +47,7 @@ private:
     QTimer *timer;
     OrcaFlash *orca;
     double *buf;
+    uint16_t *mybuf;
 };
 
 #endif // CAMERADISPLAY_H

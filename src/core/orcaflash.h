@@ -133,8 +133,9 @@ public:
     int32_t getImageWidth();
     int32_t getImageHeight();
 
-    QState *getOpenState() const;
+    QState *getIdleState() const;
     QState *getClosedState() const;
+    QState *getCapturingState() const;
 
 signals:
     void opened();
@@ -155,8 +156,9 @@ private:
     int32_t _nFramesInBuffer;
     bool _isOpen;
 
-    QState *openState;
+    QState *idleState;
     QState *closedState;
+    QState *capturingState;
 
     QString logLastError(const QString label = "");
     void setupStateMachine();

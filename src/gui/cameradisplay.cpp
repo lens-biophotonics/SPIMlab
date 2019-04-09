@@ -184,6 +184,8 @@ void CameraDisplay::setupUi()
 
 DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) : QThread(parent)
 {
+    mybuf = new uint16_t[2048 * 2048];
+
     orca = camera;
     buf = data;
     timer = new QTimer(this);
@@ -195,15 +197,21 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) :
     connect(timer, &QTimer::timeout, this, &DisplayWorker::updateImage);
 }
 
-DisplayWorker::~DisplayWorker() {}
+DisplayWorker::~DisplayWorker()
+{
+    delete[] mybuf;
+}
 
 void DisplayWorker::updateImage()
 {
-    uint16_t *mybuf = new uint16_t[2048 * 2048];
-    orca->copyLastFrame(mybuf, 2048 * 2048 * sizeof(uint16_t));
+    try {
+        orca->copyLastFrame(mybuf, 2048 * 2048 * sizeof(uint16_t));
+    }
+    catch (std::exception) {
+        return;
+    }
     for (int i = 0; i < 2048 * 2048; ++i) {
         buf[i] = mybuf[i];
     }
-    delete[] mybuf;
     emit newImage();
 }

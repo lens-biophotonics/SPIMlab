@@ -53,17 +53,22 @@ OrcaFlash::~OrcaFlash()
 
 void OrcaFlash::setupStateMachine()
 {
-    openState = new QState();
+    idleState = new QState();
     closedState = new QState();
+    capturingState = new QState();
 
-    openState->addTransition(this, &OrcaFlash::closed, closedState);
+    idleState->addTransition(this, &OrcaFlash::closed, closedState);
+    idleState->addTransition(this, &OrcaFlash::captureStarted, capturingState);
 
-    closedState->addTransition(this, &OrcaFlash::opened, openState);
+    capturingState->addTransition(this, &OrcaFlash::stopped, idleState);
+
+    closedState->addTransition(this, &OrcaFlash::opened, idleState);
 
     QStateMachine *sm = new QStateMachine();
 
-    sm->addState(openState);
+    sm->addState(idleState);
     sm->addState(closedState);
+    sm->addState(capturingState);
 
     sm->setInitialState(closedState);
     sm->start();
@@ -89,14 +94,19 @@ void OrcaFlash::throw400(const DCAMERR err)
     }
 }
 
-QState *OrcaFlash::getOpenState() const
+QState *OrcaFlash::getIdleState() const
 {
-    return openState;
+    return idleState;
 }
 
 QState *OrcaFlash::getClosedState() const
 {
     return closedState;
+}
+
+QState *OrcaFlash::getCapturingState() const
+{
+    return capturingState;
 }
 
 void OrcaFlash::open(const int index)

@@ -35,6 +35,7 @@ public:
     virtual ~SPIM();
 
     OrcaFlash *getCamera(int camNumber) const;
+    QList<OrcaFlash *> getCameras();
     void setCamera(OrcaFlash *getCamera);
 
     void setupGalvoRampTriggerSource(const QStringList &terminals);
@@ -55,7 +56,6 @@ public:
 public slots:
     void startFreeRun();
     void startAcquisition();
-    void startCapture(bool freeRun = true);
     void stop();
     void initialize();
     void uninitialize();
