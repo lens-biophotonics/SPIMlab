@@ -32,16 +32,25 @@ void SaveStackWorker::run()
     size_t n = 2 * 2048 * 2048;
     const uint nFramesInBuffer = orca->nFramesInBuffer();
     uint i = 0;
+    void *buf;
+#ifdef WITH_HARDWARE
+#else
+    buf = malloc(n);
+#endif
     while (i < frameCount) {
         if (QThread::currentThread()->isInterruptionRequested()) {
             break;
         }
         int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
         int32_t frameStamp;
-        void *buf;
         while (true) {
             try {
+#ifdef WITH_HARDWARE
                 orca->lockFrame(frame, &buf, &frameStamp);
+#else
+                orca->copyFrame(buf, n, frame);
+                frameStamp = frame;
+#endif
                 break;
             }
             catch (OrcaFlash::OrcaBusyException) {
@@ -55,6 +64,10 @@ void SaveStackWorker::run()
         write(fd, buf, n);
         i++;
     }
+#ifdef WITH_HARDWARE
+#else
+    free(buf);
+#endif
 
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);

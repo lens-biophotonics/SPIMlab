@@ -23,6 +23,22 @@ static Logger *logger = getLogger("OrcaFlash");
 using namespace DCAM;
 
 
+#ifdef WITH_HARDWARE
+#else
+#define dcambuf_lockframe(...) DCAMERR_SUCCESS
+#define dcambuf_alloc(...) DCAMERR_SUCCESS
+#define dcambuf_release(...) DCAMERR_SUCCESS
+#define dcamwait_start(...) DCAMERR_SUCCESS
+#define dcamwait_open(...) DCAMERR_SUCCESS
+#define dcamwait_close(...) DCAMERR_SUCCESS
+#define dcamcap_start(...) DCAMERR_SUCCESS
+#define dcamcap_stop(...) DCAMERR_SUCCESS
+#define dcamdev_open(...) DCAMERR_SUCCESS
+#define dcamprop_setvalue(...) DCAMERR_SUCCESS
+#define dcamprop_getvalue(...) DCAMERR_SUCCESS
+#define dcamprop_setgetvalue(...) DCAMERR_SUCCESS
+#endif
+
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
     _isOpen = false;
@@ -343,13 +359,20 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp)
 
     *buf = dcamframe.buf;
     if (frameStamp != nullptr) {
+#ifdef WITH_HARDWARE
         *frameStamp = dcamframe.framestamp;
+#else
+        *frameStamp = frame;
+#endif
     }
 #endif
 }
 
 void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
 {
+#ifndef WITH_HARDWARE
+    Q_UNUSED(dcambufFrame)
+#endif
     throw400(dcambuf_lockframe(h, dcambufFrame));
 }
 
