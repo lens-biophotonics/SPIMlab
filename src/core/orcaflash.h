@@ -88,8 +88,8 @@ public:
     void close();
     const DCAM::ModelInfo *modelInfo();
 
-    void setNFramesInBuffer(const uint count);
-    uint nFramesInBuffer() const;
+    void setNFramesInBuffer(const int32_t count);
+    int32_t nFramesInBuffer() const;
 
     void startCapture();
     void stop();
@@ -152,7 +152,7 @@ private:
     double exposureTime;
 
     QMutex mutex;
-    uint _nFramesInBuffer;
+    int32_t _nFramesInBuffer;
     bool _isOpen;
 
     QState *openState;

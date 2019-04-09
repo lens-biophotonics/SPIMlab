@@ -30,8 +30,8 @@ void SaveStackWorker::run()
         return;
     }
     size_t n = 2 * 2048 * 2048;
-    const uint nFramesInBuffer = orca->nFramesInBuffer();
-    uint i = 0;
+    const int32_t nFramesInBuffer = orca->nFramesInBuffer();
+    int i = 0;
     void *buf;
 #ifdef WITH_HARDWARE
 #else
@@ -41,8 +41,8 @@ void SaveStackWorker::run()
         if (QThread::currentThread()->isInterruptionRequested()) {
             break;
         }
-        int32_t frame = static_cast<int32_t>(i % nFramesInBuffer);
-        int32_t frameStamp;
+        int32_t frame = i % nFramesInBuffer;
+        int32_t frameStamp = -1;
         while (true) {
             try {
 #ifdef WITH_HARDWARE
@@ -87,7 +87,7 @@ void SaveStackWorker::run()
     outFile.close();
 }
 
-void SaveStackWorker::setFrameCount(uint count)
+void SaveStackWorker::setFrameCount(int32_t count)
 {
     frameCount = count;
 }

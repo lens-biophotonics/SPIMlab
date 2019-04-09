@@ -12,7 +12,7 @@ class SaveStackWorker : public QThread
 public:
     explicit SaveStackWorker(OrcaFlash *orca, QObject *parent = nullptr);
 
-    void setFrameCount(uint count);
+    void setFrameCount(int32_t count);
     void setOutputFileName(const QString &fname);
 
 signals:
@@ -24,7 +24,7 @@ protected:
 private:
     bool stopRequested;
     QString outputFileName;
-    uint frameCount;
+    int32_t frameCount;
     OrcaFlash *orca;
 };
 

@@ -146,12 +146,12 @@ const ModelInfo *OrcaFlash::modelInfo()
     return getModelInfo(cameraIndex);
 }
 
-void OrcaFlash::setNFramesInBuffer(const uint count)
+void OrcaFlash::setNFramesInBuffer(const int32_t count)
 {
     _nFramesInBuffer = count;
 }
 
-uint OrcaFlash::nFramesInBuffer() const
+int32_t OrcaFlash::nFramesInBuffer() const
 {
     return _nFramesInBuffer;
 }
