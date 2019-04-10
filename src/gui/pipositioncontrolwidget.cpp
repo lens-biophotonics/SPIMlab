@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QState>
+#include <QTimer>
+
 
 #include "core/pidevice.h"
 
@@ -106,8 +108,13 @@ void PIPositionControlWidget::appendRow(
     }
 
     connect(haltPushButton, &QPushButton::clicked, this, [ = ](){
-        device->halt(axis);
-        device->getError();
+        try {
+            device->halt(axis);
+            device->getError();
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
+        }
     });
 
     connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
@@ -149,13 +156,16 @@ void PIPositionControlWidget::appendRow(
         }
     });
 
-    connect(device, &PIDevice::newPositions, this, [ = ](
-                const QString &axes, const QVector<double> &pos) {
-        for (int i = 0; i < axes.length(); ++i) {
-            if (axes.at(i) == axis.at(0)) {
-                currentPos->setText(QString("%1").arg(pos.at(i), 0, 'f', 4));
-                break;
-            }
+    QTimer *updateTimer = new QTimer(this);
+    updateTimer->setInterval(500);
+
+    connect(updateTimer, &QTimer::timeout, this, [ = ]() {
+        try {
+            double pos = device->getCurrentPosition(axis).at(0);
+            currentPos->setText(QString("%1").arg(pos, 0, 'f', 4));
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(nullptr, "Error", e.what());
         }
     });
 
@@ -169,7 +179,11 @@ void PIPositionControlWidget::appendRow(
         sb->setValue(pos);
         stepSpinBox->setRange(0, max);
         velocitySpinBox->setValue(velocity);
+
+        updateTimer->start();
     });
+
+    connect(device, &PIDevice::disconnected, updateTimer, &QTimer::stop);
 }
 
 void PIPositionControlWidget::setTitle(const QString &title)

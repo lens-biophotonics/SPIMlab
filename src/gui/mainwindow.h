@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMap>
-#include <QTimer>
 
 #include <core/pidevice.h>
 
@@ -18,15 +17,12 @@ public:
 
 private slots:
     void on_aboutAction_triggered() const;
-    void updatePIValues();
 
 private:
     void setupUi();
     void saveSettings() const;
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
-
-    QTimer updateTimer;
 };
 
 #endif // MAINWINDOW_H
