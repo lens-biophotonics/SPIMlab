@@ -277,6 +277,11 @@ void SPIM::startAcquisition()
 void SPIM::stop()
 {
     try {
+        for (PIDevice * dev : piDevList) {
+            if (dev->isConnected()) {
+                dev->halt();
+            }
+        }
         for (QThread *acqThread : acqThreads) {
             acqThread->requestInterruption();
         }
