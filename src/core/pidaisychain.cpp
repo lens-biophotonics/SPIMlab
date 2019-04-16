@@ -85,4 +85,5 @@ void closeDaisyChain(const QString &portName)
 void closeAllDaisyChains()
 {
     qDeleteAll(dcMap);
+    dcMap.clear();
 }
