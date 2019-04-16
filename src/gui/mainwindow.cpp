@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setupUi();
 
     QThread *thread = new QThread();
+    thread->setObjectName("SPIM_thread");
     spim().moveToThread(thread);
     thread->start();
 
