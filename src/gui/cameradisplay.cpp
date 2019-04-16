@@ -26,14 +26,12 @@ CameraDisplay::CameraDisplay(OrcaFlash *camera, QWidget *parent) :
 
     vec.resize(2048 * 2048);
 
-    thread = new QThread();
     DisplayWorker *worker = new DisplayWorker(orca, vec.data());
     connect(worker, &DisplayWorker::newImage, this, &CameraDisplay::replot);
-    worker->moveToThread(thread);
     connect(orca, &OrcaFlash::captureStarted, this, [ = ](){
-        thread->start();
+        worker->start();
     });
-    connect(orca, &OrcaFlash::stopped, thread, &QThread::quit);
+    connect(orca, &OrcaFlash::stopped, worker, &QThread::quit);
 }
 
 CameraDisplay::~CameraDisplay()

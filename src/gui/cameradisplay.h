@@ -22,7 +22,6 @@ public slots:
 
 private:
     CameraPlot *plot;
-    QThread *thread;
     QVector<double> vec;
     OrcaFlash *orca;
 
