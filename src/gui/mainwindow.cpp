@@ -99,7 +99,7 @@ void MainWindow::saveSettings() const
 
     QString group;
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
         group = SETTINGSGROUP_AXIS(i);
         mySettings.setValue(group, SETTING_BAUD, dev->getBaud());
@@ -134,8 +134,9 @@ void MainWindow::saveSettings() const
     mySettings.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
     mySettings.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
 
-    group = SETTINGSGROUP_SPIM;
+    group = SETTINGSGROUP_ACQUISITION;
     mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
+    mySettings.setValue(group, SETTING_OUTPUTPATH, spim().getOutputPath());
 }
 
 void MainWindow::loadSettings()
@@ -151,7 +152,7 @@ void MainWindow::loadSettings()
     restoreState(settings.value("mainWindowState").toByteArray());
     settings.endGroup();
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
         group = SETTINGSGROUP_AXIS(i);
         dev->setBaud(mySettings.value(group, SETTING_BAUD).toInt());
@@ -197,8 +198,9 @@ void MainWindow::loadSettings()
         mySettings.value(group, SETTING_PHYSCHANS).toStringList());
     ct->setTriggerTerm(mySettings.value(group, SETTING_TRIGGER_TERM).toString());
 
-    group = SETTINGSGROUP_SPIM;
+    group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());
+    spim().setOutputPath(mySettings.value(group, SETTING_OUTPUTPATH).toString());
 }
 
 void MainWindow::on_aboutAction_triggered() const

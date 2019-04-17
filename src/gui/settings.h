@@ -5,7 +5,7 @@
 #include <QVariant>
 
 #define SETTINGSGROUP_OTHERSETTINGS "OtherSettings"
-#define SETTINGSGROUP_SPIM "SPIM"
+#define SETTINGSGROUP_ACQUISITION "Acquisition"
 
 #define SETTINGSGROUP_AXIS(n) QString("AXIS_%1").arg(n)
 #define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
@@ -26,6 +26,9 @@
 #define SETTING_TRIGGER_TERM "triggerTerm"
 
 #define SETTING_EXPTIME "exposureTime"
+
+#define SETTING_OUTPUTPATH "outputPath"
+
 
 typedef QMap<QString, QVariant> SettingsMap;
 

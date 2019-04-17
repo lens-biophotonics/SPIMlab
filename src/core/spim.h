@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QThread>
+#include <QStateMachine>
 
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
@@ -10,6 +11,13 @@
 #ifndef SPIM_NCOBOLT
 #define SPIM_NCOBOLT 4
 #endif
+#ifndef SPIM_NPIDEVICES
+#define SPIM_NPIDEVICES 5
+#endif
+
+#define SPIM_RANGE_FROM_IDX 0
+#define SPIM_RANGE_TO_IDX 1
+#define SPIM_RANGE_STEP_IDX 2
 
 class SaveStackWorker;
 class OrcaFlash;
@@ -53,6 +61,15 @@ public:
     QList<Cobolt *> getLaserDevices() const;
     Cobolt *getLaser(const int n) const;
 
+    PI_DEVICES getStackStage() const;
+
+    QList<PI_DEVICES> getMosaicStages() const;
+
+    QList<double> *getScanRange(const PI_DEVICES dev) const;
+
+    QString getOutputPath() const;
+    void setOutputPath(const QString &value);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -67,17 +84,27 @@ signals:
     void error(const QString) const;
 
 private:
-    QList<QThread *> acqThreads;
     CameraTrigger *cameraTrigger = nullptr;
     GalvoRamp *galvoRamp = nullptr;
 
     double exposureTime;  // in ms
+    double triggerRate;
 
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
     QList<Cobolt *>laserList;
 
+    int currentStep = 0;
+    QStateMachine *sm = nullptr;
+
     void _setExposureTime(double expTime);
+
+    PI_DEVICES stackStage;
+    QList<PI_DEVICES> mosaicStages;
+
+    QMap<PI_DEVICES, QList<double>*> scanRangeMap;
+
+    QString outputPath;
 
 private slots:
     void onError(const QString &errMsg);

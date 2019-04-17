@@ -1,6 +1,7 @@
 #include <memory>
 
 #include <QSettings>
+#include <QDir>
 
 #include "core/spim.h"
 
@@ -49,7 +50,7 @@ void Settings::loadSettings()
     settings.endGroup();
 
     QStringList groups;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         groups << SETTINGSGROUP_AXIS(i);
     }
 
@@ -92,10 +93,12 @@ void Settings::loadSettings()
     settings.endGroup();
 
 
-    groupName = SETTINGSGROUP_SPIM;
+    groupName = SETTINGSGROUP_ACQUISITION;
     settings.beginGroup(groupName);
 
     SET_VALUE(groupName, SETTING_EXPTIME, 0.1);
+    SET_VALUE(groupName, SETTING_OUTPUTPATH,
+              QDir::toNativeSeparators(QDir::homePath()));
 
     settings.endGroup();
 

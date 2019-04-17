@@ -8,6 +8,7 @@
 
 #include "galvowaveformwidget.h"
 #include "pipositioncontrolwidget.h"
+#include "acquisitionwidget.h"
 #include "cameradisplay.h"
 #include "camerapage.h"
 
@@ -65,6 +66,7 @@ void CameraPage::setupUI()
 
     QHBoxLayout *controlsHLayout1 = new QHBoxLayout();
     controlsHLayout1->addWidget(cw);
+    controlsHLayout1->addWidget(new AcquisitionWidget());
     controlsHLayout1->addStretch();
 
     QVBoxLayout *vLayout = new QVBoxLayout();

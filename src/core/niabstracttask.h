@@ -84,6 +84,8 @@ public:
 
 signals:
     void error();
+    void started();
+    void stopped();
 
 public slots:
     void initializeTask();

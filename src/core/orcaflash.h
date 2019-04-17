@@ -104,6 +104,11 @@ public:
     void lockData(void **pTop, int32_t *pRowbytes, const int32_t frame);
     void unlockData();
 
+    void buf_release();
+    void buf_alloc(const int32_t nFrames);
+    void cap_start();
+    void cap_stop();
+
     double getExposureTime();
     double setGetExposureTime(const double sec);
 
@@ -136,6 +141,8 @@ public:
     QState *getIdleState() const;
     QState *getClosedState() const;
     QState *getCapturingState() const;
+
+    int getCameraIndex() const;
 
 signals:
     void opened();

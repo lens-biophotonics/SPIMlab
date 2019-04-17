@@ -72,6 +72,7 @@ public:
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
     QVector<double> getTravelRangeHighEnd(const QString &axes = "");
     QVector<double> getCurrentPosition(const QString &axes = "");
+    QVector<double> getCommandedPosition(const QString &axes = "");
 
     void fastMoveToPositiveLimit(const QString &axes = "");
     void fastMoveToNegativeLimit(const QString &axes = "");
@@ -110,10 +111,13 @@ public:
     void setTriggerOutputEnabled(const TrigOutID oid,
                                  const BOOL enable);
 
+    bool isOnTarget(const QString &axis);
+
 signals:
     void connected();
     void disconnected();
     void newPositions(const QString &axes, const QVector<double> &pos);
+    void onTarget(const QString &axis);
 
 public slots:
     void close();

@@ -48,6 +48,7 @@ void NIAbstractTask::start()
         initializeTask();
     }
     DAQmxErrChk(DAQmxStartTask(task));
+    emit started();
 }
 
 void NIAbstractTask::stop()
@@ -56,6 +57,7 @@ void NIAbstractTask::stop()
         return;
     }
     DAQmxErrChk(DAQmxStopTask(task));
+    emit stopped();
 }
 
 void NIAbstractTask::clear()

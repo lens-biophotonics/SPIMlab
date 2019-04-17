@@ -109,6 +109,11 @@ QState *OrcaFlash::getCapturingState() const
     return capturingState;
 }
 
+int OrcaFlash::getCameraIndex() const
+{
+    return cameraIndex;
+}
+
 void OrcaFlash::open(const int index)
 {
     if (_isOpen) {
@@ -133,7 +138,7 @@ void OrcaFlash::open(const int index)
 
 void OrcaFlash::open(const QString &idStr)
 {
-    open(getCameraIndex(idStr));
+    open(DCAM::getCameraIndex(idStr));
 }
 
 bool OrcaFlash::isOpen() const
@@ -284,9 +289,9 @@ QString OrcaFlash::logLastError(const QString label)
 void OrcaFlash::startCapture()
 {
 #if DCAM_VERSION == 400
-    throw400(dcambuf_release(h));
-    throw400(dcambuf_alloc(h, _nFramesInBuffer));
-    throw400(dcamcap_start(h, DCAMCAP_START_SEQUENCE));
+    buf_release();
+    buf_alloc(_nFramesInBuffer);
+    cap_start();
 #else
     CALL_THROW(dcam_freeframe(h))
     CALL_THROW(dcam_precapture(h, DCAM_CAPTUREMODE_SEQUENCE))
@@ -302,13 +307,13 @@ void OrcaFlash::stop()
         return;
     }
 #if DCAM_VERSION == 400
-    throw400(dcamcap_stop(h));
-    throw400(dcambuf_release(h));
+    cap_stop();
+    buf_release();
 #else
     CALL_THROW(dcam_idle(h))
     CALL_THROW(dcam_freeframe(h))
-#endif
     emit stopped();
+#endif
 }
 
 void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
@@ -437,6 +442,29 @@ void OrcaFlash::unlockData()
 {
     mutex.unlock();
     CALL_THROW(dcam_unlockdata(h))
+}
+
+void OrcaFlash::buf_release()
+{
+    throw400(dcambuf_release(h));
+}
+
+void OrcaFlash::buf_alloc(const int32_t nFrames)
+{
+    setNFramesInBuffer(nFrames);
+    throw400(dcambuf_alloc(h, nFrames));
+}
+
+void OrcaFlash::cap_start()
+{
+    throw400(dcamcap_start(h, DCAMCAP_START_SEQUENCE));
+    emit captureStarted();
+}
+
+void OrcaFlash::cap_stop()
+{
+    throw400(dcamcap_stop(h));
+    emit stopped();
 }
 
 double OrcaFlash::getExposureTime()

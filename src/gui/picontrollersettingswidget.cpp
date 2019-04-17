@@ -13,6 +13,8 @@
 #include "picontrollersettingswidget.h"
 
 #include "core/pidevice.h"
+#include "core/logger.h"
+
 
 enum REFERENCE_ACTION {
     REFACTION_DONT_REFERENCE = 0,
@@ -37,7 +39,12 @@ void PIControllerSettingsWidget::configureStages()
 
     QString axes = device->getAxisIdentifiers();
 
-    QStringList availStages = device->getAvailableStageTypes();
+    QStringList availStages;
+    try {
+        availStages = device->getAvailableStageTypes();
+    }
+    catch (std::runtime_error) {
+    }
     QStringList stages = device->getStages("", true);
 
     QFormLayout *formLayout = new QFormLayout();
@@ -47,7 +54,7 @@ void PIControllerSettingsWidget::configureStages()
 
     for (int i = 0; i < axes.count(); ++i) {
         QComboBox *cb = new QComboBox();
-        if (!stages.contains(stages.at(i))) {
+        if (!availStages.contains(stages.at(i))) {
             cb->addItem(stages.at(i));
         }
         cb->addItems(availStages);

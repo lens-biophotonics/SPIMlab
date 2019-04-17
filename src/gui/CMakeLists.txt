@@ -25,6 +25,7 @@ set(SPIMlab_SRCS
     galvowaveformwidget.cpp
     pipositioncontrolwidget.cpp
     coboltwidget.cpp
+    acquisitionwidget.cpp
 
     centralwidget.cpp
     camerapage.cpp

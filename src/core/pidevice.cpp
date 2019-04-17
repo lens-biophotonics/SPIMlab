@@ -194,6 +194,12 @@ QVector<double> PIDevice::getCurrentPosition(const QString &axes)
     return *ret.get();
 }
 
+QVector<double> PIDevice::getCommandedPosition(const QString &axes)
+{
+    auto ret = getVectorOfDoubles(&PI_qMOV, axes);
+    return *ret.get();
+}
+
 void PIDevice::fastMoveToPositiveLimit(const QString &axes)
 {
     if (axes.isEmpty()) {
@@ -403,6 +409,17 @@ void PIDevice::setTriggerOutputEnabled(
 #ifndef WITH_HARDWARE
     Q_UNUSED(o)
 #endif
+}
+
+bool PIDevice::isOnTarget(const QString &axis)
+{
+    QString temp = axis.at(0);
+    int ont = 0;
+    CALL_THROW(PI_qONT(id, temp.toLatin1(), &ont));
+    if (ont) {
+        emit onTarget(axis);
+    }
+    return ont;
 }
 
 QString PIDevice::getPortName() const
