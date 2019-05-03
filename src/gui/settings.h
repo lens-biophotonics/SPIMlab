@@ -29,6 +29,10 @@
 
 #define SETTING_OUTPUTPATH "outputPath"
 
+#define SETTING_FROM "from"
+#define SETTING_TO "to"
+#define SETTING_STEP "step"
+
 
 typedef QMap<QString, QVariant> SettingsMap;
 

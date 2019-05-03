@@ -62,6 +62,9 @@ void Settings::loadSettings()
            << SETTING_DEVICENUMBER
            << SETTING_SERIALNUMBER
            << SETTING_PORTNAME
+           << SETTING_FROM
+           << SETTING_TO
+           << SETTING_STEP
         ;
 
         for (const QString &s : sl) {
