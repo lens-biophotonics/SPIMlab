@@ -119,7 +119,9 @@ void PIPositionControlWidget::appendRow(
 
     connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
         double pos = sb->value();
+        double vel = velocitySpinBox->value();
         try {
+            device->setVelocities(axis, &vel);
             device->move(axis, &pos);
         }
         catch (std::runtime_error e) {
