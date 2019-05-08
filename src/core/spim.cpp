@@ -529,6 +529,6 @@ void SPIM::onError(const QString &errMsg)
 
 SPIM &spim()
 {
-    static auto instance = std::make_unique<SPIM>(nullptr);
+    static auto instance = std::make_unique<SPIM>();
     return *instance;
 }
