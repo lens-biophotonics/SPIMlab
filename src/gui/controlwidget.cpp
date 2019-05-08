@@ -16,7 +16,10 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 void ControlWidget::setupUi()
 {
     QPushButton *initPushButton = new QPushButton("Initialize");
-    connect(initPushButton, &QPushButton::clicked, &spim(), &SPIM::initialize);
+    connect(initPushButton, &QPushButton::clicked, &spim(), [ = ](){
+        initPushButton->setEnabled(false);
+        spim().initialize();
+    });
 
     QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
     connect(startFreeRunPushButton, &QPushButton::clicked,

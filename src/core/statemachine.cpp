@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <QHistoryState>
+
 #include "statemachine.h"
 #include "spim.h"
 
@@ -9,19 +11,25 @@ State::State(MACHINE_STATE type, QState *parent) : QState(parent), type(type)
 
 StateMachine::StateMachine() : QStateMachine()
 {
-    uninitState = newState(STATE_UNINITIALIZED);
-    setInitialState(uninitState);
+    QState *parentState = new QState(this);
 
-    errorState = newState(STATE_ERROR);
-    setErrorState(errorState);
+    uninitState = newState(STATE_UNINITIALIZED, parentState);
+    parentState->setInitialState(uninitState);
 
-    readyState = newState(STATE_READY);
-    capturingState = newState(STATE_CAPTURING);
+    readyState = newState(STATE_READY, parentState);
+    capturingState = newState(STATE_CAPTURING, parentState);
 
     uninitState->addTransition(&spim(), &SPIM::initialized, readyState);
     readyState->addTransition(&spim(), &SPIM::captureStarted, capturingState);
     capturingState->addTransition(&spim(), &SPIM::stopped, readyState);
 
+    QHistoryState *historyState = new QHistoryState(parentState);
+
+    errorState = newState(STATE_ERROR, this);
+    errorState->addTransition(historyState);
+
+    parentState->addTransition(&spim(), &SPIM::error, errorState);
+    setInitialState(parentState);
     start();
 }
 
@@ -34,7 +42,6 @@ QState *StateMachine::newState(const MACHINE_STATE type, QState *parent)
 {
     QState *state = new QState(parent);
     map[type] = state;
-    addState(state);
     return state;
 }
 

@@ -122,12 +122,12 @@ void SPIM::initialize()
                 }
             }
         }
+
+        emit initialized();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
     }
-
-    emit initialized();
 }
 
 void SPIM::uninitialize()
