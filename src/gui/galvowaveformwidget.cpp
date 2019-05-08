@@ -7,65 +7,62 @@
 #include "core/galvoramp.h"
 #include "galvowaveformwidget.h"
 
-GalvoWaveformWidget::GalvoWaveformWidget(int channelNumber, QWidget *parent)
-    : QWidget(parent), chNumber(channelNumber)
+GalvoWaveformWidget::GalvoWaveformWidget(QWidget *parent) : QWidget(parent)
 {
     setupUI();
 }
 
 void GalvoWaveformWidget::setupUI()
 {
-    QHBoxLayout *hLayout = new QHBoxLayout();
+    int row = 0;
+    int col = 0;
 
-    QVector<double> wp = spim().getGalvoRamp()->getWaveformParams();
-    wp = wp.mid(chNumber * GALVORAMP_N_OF_PARAMS, GALVORAMP_N_OF_PARAMS);
-    QLabel *label;
+    GalvoRamp *gr = spim().getGalvoRamp();
 
-    offsetSpinBox = new QDoubleSpinBox();
-    offsetSpinBox->setRange(-10, 10);
-    offsetSpinBox->setSuffix(" V");
-    offsetSpinBox->setValue(wp.at(GALVORAMP_OFFSET_IDX));
-    label = new QLabel("Offset");
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    hLayout->addWidget(label);
-    hLayout->addWidget(offsetSpinBox);
+    QGridLayout *grid = new QGridLayout();
+    col = 0;
+    grid->addWidget(new QLabel("Offset"), row, col++);
+    grid->addWidget(new QLabel("Amplitude"), row, col++);
+    grid->addWidget(new QLabel("Delay"), row++, col++);
 
-    amplitudeSpinBox = new QDoubleSpinBox();
-    amplitudeSpinBox->setRange(-10, 10);
-    amplitudeSpinBox->setSuffix(" V");
-    amplitudeSpinBox->setValue(wp.at(GALVORAMP_AMPLITUDE_IDX));
-    label = new QLabel("Amplitude");
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    hLayout->addWidget(label);
-    hLayout->addWidget(amplitudeSpinBox);
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        col = 0;
+        QVector<double> wp = spim().getGalvoRamp()->getWaveformParams();
+        wp = wp.mid(i * GALVORAMP_N_OF_PARAMS, GALVORAMP_N_OF_PARAMS);
 
-    delaySpinBox = new QDoubleSpinBox();
-    delaySpinBox->setSuffix(" ms");
-    delaySpinBox->setRange(-1000, 1000);
-    delaySpinBox->setValue(wp.at(GALVORAMP_DELAY_IDX) * 1000);
-    label = new QLabel("Delay");
-    label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    hLayout->addWidget(label);
-    hLayout->addWidget(delaySpinBox);
+        QDoubleSpinBox *offsetSpinBox = new QDoubleSpinBox();
+        offsetSpinBox->setRange(-10, 10);
+        offsetSpinBox->setSuffix(" V");
+        offsetSpinBox->setValue(wp.at(GALVORAMP_OFFSET_IDX));
+        grid->addWidget(offsetSpinBox, row, col++);
 
-    QPushButton *applyPushButton = new QPushButton("Apply");
-    hLayout->addWidget(applyPushButton);
+        QDoubleSpinBox *amplitudeSpinBox = new QDoubleSpinBox();
+        amplitudeSpinBox->setRange(-10, 10);
+        amplitudeSpinBox->setSuffix(" V");
+        amplitudeSpinBox->setValue(wp.at(GALVORAMP_AMPLITUDE_IDX));
+        grid->addWidget(amplitudeSpinBox, row, col++);
+
+        QDoubleSpinBox *delaySpinBox = new QDoubleSpinBox();
+        delaySpinBox->setSuffix(" ms");
+        delaySpinBox->setRange(-1000, 1000);
+        delaySpinBox->setValue(wp.at(GALVORAMP_DELAY_IDX) * 1000);
+        grid->addWidget(delaySpinBox, row, col++);
+
+        QPushButton *applyPushButton = new QPushButton("Apply");
+        grid->addWidget(applyPushButton, row++, col++);
+
+        connect(applyPushButton, &QPushButton::clicked, [ = ](){
+            gr->setWaveformAmplitude(i, amplitudeSpinBox->value());
+            gr->setWaveformOffset(i, offsetSpinBox->value());
+            gr->setWaveformDelay(i, delaySpinBox->value() / 1000.);
+        });
+    }
+
 
     QGroupBox *gbox = new QGroupBox("Galvo Ramp");
-    gbox->setLayout(hLayout);
+    gbox->setLayout(grid);
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    QBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(gbox);
     setLayout(layout);
-
-    connect(applyPushButton, &QPushButton::clicked,
-            this, &GalvoWaveformWidget::apply);
-}
-
-void GalvoWaveformWidget::apply()
-{
-    GalvoRamp *gr = spim().getGalvoRamp();
-    gr->setWaveformAmplitude(chNumber, amplitudeSpinBox->value());
-    gr->setWaveformOffset(chNumber, offsetSpinBox->value());
-    gr->setWaveformDelay(chNumber, delaySpinBox->value() / 1000.);
 }

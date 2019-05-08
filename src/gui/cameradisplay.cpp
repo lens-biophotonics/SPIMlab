@@ -58,9 +58,8 @@ void CameraDisplay::setupUi()
                             Qt::RightButton);
 
 
-    QVBoxLayout *layout = new QVBoxLayout();
-    QwtSlider *minSlider = new QwtSlider(Qt::Horizontal);
-    QwtSlider *maxSlider = new QwtSlider(Qt::Horizontal);
+    QwtSlider *minSlider = new QwtSlider(Qt::Vertical);
+    QwtSlider *maxSlider = new QwtSlider(Qt::Vertical);
 
     minSlider->setScalePosition(QwtSlider::LeadingScale);
     minSlider->setLowerBound(0);
@@ -128,10 +127,6 @@ void CameraDisplay::setupUi()
     }
 
     QPushButton *autoScalePushButton = new QPushButton("Autoscale");
-    QSizePolicy bsp(QSizePolicy::Preferred,
-                    QSizePolicy::Expanding);
-    bsp.setVerticalStretch(0);
-    autoScalePushButton->setSizePolicy(bsp);
 
     autoScalePushButton->setCheckable(true);
     autoScalePushButton->setChecked(true);
@@ -139,22 +134,22 @@ void CameraDisplay::setupUi()
     QPushButton *LUTPushButton = new QPushButton("LUT");
     LUTPushButton->setMenu(LUTMenu);
 
-    QHBoxLayout *controlsLayout = new QHBoxLayout();
+    QBoxLayout *sliderLayout;
+    sliderLayout = new QHBoxLayout();
+    sliderLayout->addWidget(minSlider);
+    sliderLayout->addWidget(maxSlider);
 
-    QVBoxLayout *vLayout;
+    QBoxLayout *hLayout = new QHBoxLayout();
+    hLayout->addWidget(autoScalePushButton);
+    hLayout->addWidget(LUTPushButton);
 
-    vLayout = new QVBoxLayout();
-    vLayout->addWidget(minSlider);
-    vLayout->addWidget(maxSlider);
-    controlsLayout->addLayout(vLayout);
+    QBoxLayout *controlsLayout = new QVBoxLayout();
+    controlsLayout->addLayout(sliderLayout);
+    controlsLayout->addLayout(hLayout);
 
-    vLayout = new QVBoxLayout();
-    vLayout->addWidget(autoScalePushButton);
-    vLayout->addWidget(LUTPushButton);
-    controlsLayout->addLayout(vLayout);
+    QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1.1, 1., -80, -50);
 
-    plot->setMinimumHeight(450);
-    QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1., 1., 0, 120);
+    QBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(aspectRatioWidget, 1);
     layout->addLayout(controlsLayout);
 

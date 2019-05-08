@@ -70,17 +70,38 @@ void AcquisitionWidget::setupUI()
         row++;
     }
 
+    QFrame *line;
+    line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    grid->addWidget(line, row++, 0, 1, 4);
+
     col = 0;
     grid->addWidget(new QLabel("Path"), row, col++);
     QLineEdit *lineEdit = new QLineEdit();
     lineEdit->setText(spim().getOutputPath());
     grid->addWidget(lineEdit, row, col, 1, 2); col += 2;
     QPushButton *pushButton = new QPushButton("...");
-    grid->addWidget(pushButton, row, col++);
+    grid->addWidget(pushButton, row++, col++);
+
+    QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
+    expTimeSpinBox->setRange(0, 10000);
+    expTimeSpinBox->setDecimals(3);
+    expTimeSpinBox->setSuffix(" ms");
+    expTimeSpinBox->setValue(spim().getExposureTime());
+    QPushButton *setExpTimePushButton = new QPushButton("Set");
+    col = 0;
+    grid->addWidget(new QLabel("Exposure Time"), row, col++);
+    grid->addWidget(expTimeSpinBox, row, col++);
+    grid->addWidget(setExpTimePushButton, row, col++);
 
     QBoxLayout *boxLayout;
 
-    boxLayout = new QVBoxLayout();
+    line = new QFrame();
+    line->setFrameShape(QFrame::VLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    boxLayout = new QHBoxLayout();
     QGroupBox *gb = new QGroupBox("Acquisition");
     boxLayout->addLayout(grid);
     gb->setLayout(boxLayout);
@@ -102,5 +123,9 @@ void AcquisitionWidget::setupUI()
 
         QString path = dialog.selectedFiles().at(0);
         lineEdit->setText(path);
+    });
+
+    connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
+        spim().setExposureTime(expTimeSpinBox->value());
     });
 }

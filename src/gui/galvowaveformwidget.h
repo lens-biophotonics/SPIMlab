@@ -8,24 +8,10 @@ class GalvoWaveformWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GalvoWaveformWidget(int channelNumber,
-                                 QWidget *parent = nullptr);
-
-signals:
-
-public slots:
-
-private slots:
-    void apply();
+    explicit GalvoWaveformWidget(QWidget *parent = nullptr);
 
 private:
     void setupUI();
-
-    int chNumber = 0;
-
-    QDoubleSpinBox *offsetSpinBox;
-    QDoubleSpinBox *amplitudeSpinBox;
-    QDoubleSpinBox *delaySpinBox;
 };
 
 #endif // GALVOWAVEFORMWIDGET_H

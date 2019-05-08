@@ -6,7 +6,6 @@
 #include "camerapage.h"
 #include "settingspage.h"
 #include "logwidget.h"
-#include "controlwidget.h"
 #include "coboltpage.h"
 
 #include "centralwidget.h"
@@ -31,11 +30,8 @@ void CentralWidget::setupUi()
     tabWidget->addTab(new SettingsPage(), "Settings");
     tabWidget->addTab(new LogWidget(), "Messages");
 
-    ControlWidget *controlWidget = new ControlWidget();
-
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(tabWidget);
-    layout->addWidget(controlWidget);
     setLayout(layout);
 }
 

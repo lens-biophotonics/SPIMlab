@@ -3,13 +3,10 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QToolBar>
-#include <QLabel>
-#include <QStatusBar>
 #include <QSettings>
 #include <QSerialPortInfo>
 
 #include "core/spim.h"
-#include "core/statemachine.h"
 #include "core/logmanager.h"
 #include "core/serialport.h"
 #include "core/galvoramp.h"
@@ -69,21 +66,6 @@ void MainWindow::setupUi()
 
     CentralWidget *centralWidget = new CentralWidget(this);
     setCentralWidget(centralWidget);
-
-    QLabel *statusLabel = new QLabel();
-    statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    statusBar()->addWidget(statusLabel);
-
-    QState *s;
-
-    s = stateMachine().getState(STATE_UNINITIALIZED);
-    s->assignProperty(statusLabel, "text", "Uninitialized");
-
-    s = stateMachine().getState(STATE_READY);
-    s->assignProperty(statusLabel, "text", "Ready");
-
-    s = stateMachine().getState(STATE_CAPTURING);
-    s->assignProperty(statusLabel, "text", "Capturing");
 }
 
 void MainWindow::saveSettings() const
