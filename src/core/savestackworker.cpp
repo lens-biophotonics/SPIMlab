@@ -19,11 +19,6 @@ SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
 {
 }
 
-SaveStackWorker::~SaveStackWorker()
-{
-    logger->info("Deleting SaveStackWorker");
-}
-
 void SaveStackWorker::run()
 {
     QFileInfo fi = QFileInfo(outputFileName + ".raw");
@@ -35,8 +30,8 @@ void SaveStackWorker::run()
         return;
     }
     size_t n = 2 * 2048 * 2048;
-    int ret = posix_fallocate(fd, 0, n * frameCount);
-    logger->info(QString("fallocate: %1").arg(ret));
+    int ret = posix_fallocate(
+        fd, 0, static_cast<off_t>(n) * static_cast<off_t>(frameCount));
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     int i = 0;
     void *buf;
@@ -71,16 +66,13 @@ void SaveStackWorker::run()
             break;
         }
         if (i == frameStamp) {
-//            logger->info(QString("OK i=%1 frame=%2 framestamp=%3").arg(i).arg(frame).arg(frameStamp));
             write(fd, buf, n);
             i++;
         }
         else if (i > frameStamp) {  // try again
-//            logger->warning(QString("OK i=%1 frame=%2 framestamp=%3").arg(i).arg(frame).arg(frameStamp));
             usleep(5000);
         }
         else {  // lost frame
-//            logger->error(QString("KO i=%1 frame=%2 framestamp=%3").arg(i).arg(frame).arg(frameStamp));
             logger->error("Lost frame");
             break;
         }

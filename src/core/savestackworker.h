@@ -11,7 +11,6 @@ class SaveStackWorker : public QThread
     Q_OBJECT
 public:
     explicit SaveStackWorker(OrcaFlash *orca, QObject *parent = nullptr);
-    virtual ~SaveStackWorker();
 
     void setFrameCount(int32_t count);
     void setOutputFileName(const QString &fname);

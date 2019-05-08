@@ -185,8 +185,8 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) :
     timer->setInterval(500);
 
     void (QTimer::* mySlot)() = &QTimer::start;
-    connect(&spim(), &SPIM::captureStarted, timer, mySlot);
-    connect(&spim(), &SPIM::stopped, timer, &QTimer::stop);
+    connect(orca, &OrcaFlash::captureStarted, timer, mySlot);
+    connect(orca, &OrcaFlash::stopped, timer, &QTimer::stop);
     connect(timer, &QTimer::timeout, this, &DisplayWorker::updateImage);
 }
 

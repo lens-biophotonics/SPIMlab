@@ -6,7 +6,6 @@
 
 #include "controlwidget.h"
 #include "core/spim.h"
-#include "core/statemachine.h"
 
 ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 {
@@ -38,25 +37,32 @@ void ControlWidget::setupUi()
 
     QState *s;
 
-    s = stateMachine().getState(STATE_UNINITIALIZED);
+    s = spim().getState(SPIM::STATE_UNINITIALIZED);
     s->assignProperty(initPushButton, "enabled", true);
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", false);
     s->assignProperty(statusLabel, "text", "Uninitialized");
 
-    s = stateMachine().getState(STATE_READY);
+    s = spim().getState(SPIM::STATE_READY);
     s->assignProperty(initPushButton, "enabled", false);
     s->assignProperty(startFreeRunPushButton, "enabled", true);
     s->assignProperty(startAcqPushButton, "enabled", true);
     s->assignProperty(stopCapturePushButton, "enabled", false);
     s->assignProperty(statusLabel, "text", "Ready");
 
-    s = stateMachine().getState(STATE_CAPTURING);
+    s = spim().getState(SPIM::STATE_CAPTURING);
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", true);
     s->assignProperty(statusLabel, "text", "Capturing");
+
+    spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(
+        statusLabel, "text", "Precapture");
+    spim().getState(SPIM::STATE_CAPTURE)->assignProperty(
+        statusLabel, "text", "Capture");
+    spim().getState(SPIM::STATE_FREERUN)->assignProperty(
+        statusLabel, "text", "Free run");
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(initPushButton);

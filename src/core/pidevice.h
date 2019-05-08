@@ -60,6 +60,8 @@ public:
     bool isConnected();
 
     void move(const QString &axes, const double pos[]);
+    void move(const double pos[]);
+    void move(const double pos);
     void stepUp(const QString &axes);
     void stepDown(const QString &axes);
     void moveRelative(const QString &axes, const double pos[]);
@@ -67,6 +69,8 @@ public:
     void setServoEnabled(bool enable);
     void halt(const QString &axes = "");
     void setVelocities(const QString &axes, const double vel[]);
+    void setVelocities(const double vel[]);
+    void setVelocity(const double vel);
     QVector<double> getVelocities(const QString &axes = "");
 
     QVector<double> getTravelRangeLowEnd(const QString &axes = "");
@@ -111,7 +115,7 @@ public:
     void setTriggerOutputEnabled(const TrigOutID oid,
                                  const BOOL enable);
 
-    bool isOnTarget(const QString &axis);
+    bool isOnTarget(const QString &axis = "");
 
 signals:
     void connected();

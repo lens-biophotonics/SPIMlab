@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QFinalState>
 #include <QDir>
+#include <QHistoryState>
 
 #include "spim.h"
 #include "orcaflash.h"
@@ -62,10 +63,9 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     stackStage = PI_DEVICE_X_AXIS;
-    mosaicStages << PI_DEVICE_Z_AXIS << PI_DEVICE_Y_AXIS;
+    mosaicStages << PI_DEVICE_Y_AXIS;
 
-    QList<PI_DEVICES> allStages;
-    allStages << mosaicStages << stackStage;
+    setupStateMachine();
 }
 
 SPIM::~SPIM()
@@ -201,25 +201,17 @@ QList<PIDevice *> SPIM::getPIDevices() const
 
 void SPIM::startFreeRun()
 {
-    try{
-        _setExposureTime(exposureTime / 1000.);
-        for (OrcaFlash *orca : camList) {
-            orca->setNFramesInBuffer(10);
-            orca->startCapture();
-        }
-        galvoRamp->start();
-
-        cameraTrigger->setFreeRunEnabled(true);
-        cameraTrigger->start();
-    } catch (std::runtime_error e) {
-        onError(e.what());
-        return;
-    }
-
-    emit captureStarted();
+    freeRun = true;
+    _startAcquisition();
 }
 
 void SPIM::startAcquisition()
+{
+    freeRun = false;
+    _startAcquisition();
+}
+
+void SPIM::_startAcquisition()
 {
     logger->info("Start acquisition");
 
@@ -231,51 +223,114 @@ void SPIM::startAcquisition()
         return;
     }
 
-    QList<PI_DEVICES> stageEnumList;
-    stageEnumList << mosaicStages << stackStage;
+    cameraTrigger->setFreeRunEnabled(freeRun);
 
-    QMap<PI_DEVICES, int> nSteps;
+    if (freeRun) {
+        stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_FREERUN]);
+    }
+    else {
+        stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_ACQUISITION]);
+
+        QList<PI_DEVICES> stageEnumList;
+        stageEnumList << mosaicStages << stackStage;
+
+        QList<PIDevice *> stageList;
+        for (const PI_DEVICES d_enum : stageEnumList) {
+            stageList << getPIDevice(d_enum);
+
+            double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
+            double to = scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX);
+            double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
+
+            if (step == 0.) {
+                nSteps[d_enum] = 1;
+            }
+            else {
+                nSteps[d_enum] = static_cast<int>(ceil((to - from) / step));
+            }
+        }
+
+        totalSteps = 1;
+        for (const PI_DEVICES d_enum : mosaicStages) {
+            nSteps[d_enum] += 1;
+            totalSteps *= nSteps[d_enum];
+        }
+
+        currentStep = 0;
+        QDir(outputPath).mkpath(".");
+    }
+    emit captureStarted();
+}
+
+void SPIM::setupStateMachine()
+{
+    std::function<QState*(const MACHINE_STATE, QState *parent)> newState
+        = [this](const MACHINE_STATE type, QState *parent = nullptr) {
+        QState *state = new QState(parent);
+        this->stateMap[type] = state;
+        return state;
+    };
+
+    sm = new QStateMachine();
+
+    QState *uninitState = newState(STATE_UNINITIALIZED, sm);
+    sm->setInitialState(uninitState);
+
+    QState *readyState = newState(STATE_READY, sm);
+    QState *capturingState = newState(STATE_CAPTURING, sm);
+
+    uninitState->addTransition(this, &SPIM::initialized, readyState);
+    readyState->addTransition(this, &SPIM::captureStarted, capturingState);
+    capturingState->addTransition(this, &SPIM::stopped, readyState);
+
+    QHistoryState *historyState = new QHistoryState(sm);
+
+    QState *errorState = newState(STATE_ERROR, sm);
+    errorState->addTransition(historyState);
+
+    sm->addTransition(this, &SPIM::error, errorState);
+
+    /* free run */
+
+    QState *freeRunState = newState(STATE_FREERUN, capturingState);
+    connect(freeRunState, &QState::entered, this, [ = ](){
+        try {
+            for (OrcaFlash *orca : camList) {
+                orca->setNFramesInBuffer(10);
+                orca->startCapture();
+            }
+            galvoRamp->start();
+            cameraTrigger->start();
+        }
+        catch (std::runtime_error e) {
+            onError(e.what());
+        }
+    });
+
+    /* acquisition to file */
+
+    QList<PI_DEVICES> stageEnumList;
+    stageEnumList << stackStage << mosaicStages;
 
     QList<PIDevice *> stageList;
     for (const PI_DEVICES d_enum : stageEnumList) {
         stageList << getPIDevice(d_enum);
-
-        double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
-        double to = scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX);
-        double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
-
-        if (step == 0.) {
-            nSteps[d_enum] = 1;
-        }
-        else {
-            nSteps[d_enum] = static_cast<int>(ceil((to - from) / step)) + 1;
-        }
     }
 
-    QStringList axes;
-    try {
-        for (PIDevice *dev : stageList) {
-            QString axis = dev->getAxisIdentifiers().at(0);
-            axes << axis;
-        }
-    }
-    catch (std::runtime_error e) {
-        onError(e.what());
-        return;
-    }
+    QState *acquisitionState = newState(STATE_ACQUISITION, capturingState);
 
-    if (sm != nullptr) {
-        delete sm;
-    }
-    sm = new QStateMachine(this);
-    QState *precaptureState = new QState(QState::ParallelStates, sm);
-    sm->setInitialState(precaptureState);
+    QState *precaptureState = newState(STATE_PRECAPTURE, acquisitionState);
+    QState *captureState = newState(STATE_CAPTURE, acquisitionState);
 
-    QState *captureState = new QState(QState::ParallelStates, sm);
-    precaptureState->addTransition(cameraTrigger,
-                                   &CameraTrigger::started, captureState);
-    captureState->addTransition(captureState,
-                                &QState::finished, precaptureState);
+    acquisitionState->setInitialState(precaptureState);
+
+    precaptureState->setChildMode(QState::ParallelStates);
+    captureState->setChildMode(QState::ParallelStates);
+
+    precaptureState->addTransition(precaptureState, &QState::finished,
+                                   captureState);
+    captureState->addTransition(captureState, &QState::finished,
+                                precaptureState);
 
     // setup parallel states in precaptureState
     for (PIDevice *dev : stageList) {
@@ -296,26 +351,31 @@ void SPIM::startAcquisition()
 
         camState->setInitialState(camBusyState);
         camBusyState->addTransition(orca, &OrcaFlash::stopped, finalState);
-
-        orca->buf_release();
-        orca->buf_alloc(100);      //FIXME
     }
 
     // polling timer used to check when stages have reached targed
-    QTimer *pollTimer = new QTimer(sm);
-    connect(pollTimer, &QTimer::timeout, [ = ](){
-        int i = 0;
-        for (PIDevice *dev : stageList) {
-            dev->isOnTarget(axes.at(i++)); // will emit PIDevice::onTarget
+    QTimer *pollTimer = new QTimer(this);
+    connect(pollTimer, &QTimer::timeout, this, [ = ](){
+        try {
+            for (PIDevice *dev : stageList) {
+                dev->isOnTarget(); // will emit PIDevice::onTarget
+            }
+        }
+        catch (std::runtime_error e) {
+            onError(e.what());
         }
     });
 
-    int totalSteps = 1;
-    for (const PI_DEVICES d_enum : mosaicStages) {
-        totalSteps *= nSteps[d_enum];
-    }
-    double stackFrom = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
-    double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
+    connect(acquisitionState, &QState::entered, this, [ = ](){
+        for (OrcaFlash *orca : camList) {
+            orca->buf_release();
+            orca->buf_alloc(100);      //FIXME
+        }
+    });
+
+    connect(acquisitionState, &QState::exited, this, [ = ](){
+        pollTimer->stop();
+    });
 
     connect(precaptureState, &QState::entered, this, [ = ](){
         galvoRamp->stop();
@@ -327,25 +387,26 @@ void SPIM::startAcquisition()
             return;
         }
 
+        // go to target position
+        QMap<PI_DEVICES, double> targetPositions;
+        targetPositions[stackStage]
+            = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
+        for (const PI_DEVICES d_enum : mosaicStages) {
+            double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
+            double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
+            targetPositions[d_enum] = from + currentStep * step;
+        }
+
         try {
-            const double vel = 1;
-            getPIDevice(stackStage)->setVelocities(axes.at(0), &vel);
+            for (PI_DEVICES d_enum : stageEnumList) {
+                PIDevice *dev = getPIDevice(d_enum);
+                dev->setVelocity(1.);
 
-            QList<double> targetPositions;
-            for (const PI_DEVICES d_enum : mosaicStages) {
-                double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
-                double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
-                targetPositions << from + currentStep * step;
-            }
-            targetPositions << stackFrom;
-
-            int i = 0;
-            for (PIDevice *dev : stageList) {
-                double pos = targetPositions.at(i);
+                double pos = targetPositions[d_enum];
                 logger->info(QString("Moving %1 to %2")
                              .arg(dev->getVerboseName())
                              .arg(pos));
-                dev->move(axes.at(i++), &pos);
+                dev->move(pos);
             }
         }
         catch (std::runtime_error e) {
@@ -357,7 +418,8 @@ void SPIM::startAcquisition()
     });
 
     // when stage is on target: start cameras, galvos and trigger
-    connect(precaptureState, &QState::finished, this, [ = ] {
+    // then start moving the stack stage
+    connect(captureState, &QState::entered, this, [ = ] {
         pollTimer->stop();
 
         try {
@@ -366,7 +428,12 @@ void SPIM::startAcquisition()
 
                 SaveStackWorker *acqThread = new SaveStackWorker(orca);
                 QString fname;
-                for (PIDevice *dev: stageList) {
+                QList<PIDevice *> tempStageList;
+                tempStageList << getPIDevice(stackStage);
+                for (const PI_DEVICES d_enum : mosaicStages) {
+                    tempStageList << getPIDevice(d_enum);
+                }
+                for (PIDevice *dev: tempStageList) {
                     double pos = dev->getCommandedPosition().at(0);
                     fname += QString("%1_").arg(pos);
                 }
@@ -386,13 +453,18 @@ void SPIM::startAcquisition()
             }
 
             galvoRamp->start();
-
-            cameraTrigger->setFreeRunEnabled(false);
             cameraTrigger->start();
 
-            const double vel = triggerRate * stackStep;
-            getPIDevice(stackStage)->setVelocities(axes.at(0), &vel);
-            getPIDevice(stackStage)->move(axes.last(), &stackFrom);
+            // move stack axis to end position
+            double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
+            double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
+
+            PIDevice *dev = getPIDevice(stackStage);
+            dev->setVelocity(triggerRate * stackStep);
+            logger->info(QString("Moving %1 to %2")
+                         .arg(dev->getVerboseName())
+                         .arg(stackTo));
+            dev->move(stackTo);
         } catch (std::runtime_error e) {
             onError(e.what());
             return;
@@ -403,33 +475,13 @@ void SPIM::startAcquisition()
         currentStep++;
     });
 
-    currentStep = 0;
-    QDir(outputPath).mkpath(".");
     sm->start();
-
-    try {
-        for (int i = 0; i < stageList.size(); i++) {
-            QString axis = axes.at(i);
-            double vel = 1.;
-            stageList.at(i)->setVelocities(axis, &vel);
-        }
-    } catch (std::runtime_error e) {
-        onError(e.what());
-        return;
-    }
-
-    emit captureStarted();
 }
 
 void SPIM::stop()
 {
     logger->info("stop");
     try {
-        if (sm != nullptr) {
-            sm->stop();
-            sm->deleteLater();
-            sm = nullptr;
-        }
         for (PIDevice * dev : piDevList) {
             if (dev->isConnected()) {
                 dev->halt();
@@ -504,6 +556,11 @@ QString SPIM::getOutputPath() const
 void SPIM::setOutputPath(const QString &value)
 {
     outputPath = value;
+}
+
+QState *SPIM::getState(const SPIM::MACHINE_STATE stateEnum)
+{
+    return stateMap[stateEnum];
 }
 
 QList<SPIM::PI_DEVICES> SPIM::getMosaicStages() const

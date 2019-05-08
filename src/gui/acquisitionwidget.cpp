@@ -6,7 +6,6 @@
 #include <QPushButton>
 #include <QFileDialog>
 
-#include "core/statemachine.h"
 #include "core/spim.h"
 #include "core/pidevice.h"
 #include "acquisitionwidget.h"
@@ -19,9 +18,9 @@ AcquisitionWidget::AcquisitionWidget(QWidget *parent) : QWidget(parent)
 void AcquisitionWidget::setupUI()
 {
     setEnabled(false);
-    stateMachine().getState(STATE_CAPTURING)->assignProperty(
+    spim().getState(SPIM::STATE_CAPTURING)->assignProperty(
         this, "enabled", false);
-    stateMachine().getState(STATE_READY)->assignProperty(
+    spim().getState(SPIM::STATE_READY)->assignProperty(
         this, "enabled", true);
 
     QList<SPIM::PI_DEVICES> devs;
@@ -97,13 +96,11 @@ void AcquisitionWidget::setupUI()
 
     QBoxLayout *boxLayout;
 
-    line = new QFrame();
-    line->setFrameShape(QFrame::VLine);
-    line->setFrameShadow(QFrame::Sunken);
-
-    boxLayout = new QHBoxLayout();
-    QGroupBox *gb = new QGroupBox("Acquisition");
+    boxLayout = new QVBoxLayout();
     boxLayout->addLayout(grid);
+    boxLayout->addStretch();
+
+    QGroupBox *gb = new QGroupBox("Acquisition");
     gb->setLayout(boxLayout);
 
     boxLayout = new QVBoxLayout(this);

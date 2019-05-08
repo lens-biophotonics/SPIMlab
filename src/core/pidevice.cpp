@@ -112,6 +112,16 @@ void PIDevice::move(const QString &axes, const double pos[])
     callFunctionWithVectorOfDoubles(&PI_MOV, axes, pos);
 }
 
+void PIDevice::move(const double pos[])
+{
+    move(getAxisIdentifiers(), pos);
+}
+
+void PIDevice::move(const double pos)
+{
+    move(getAxisIdentifiers().at(0), &pos);
+}
+
 void PIDevice::stepUp(const QString &axes)
 {
     QVector<double> stepSizes;
@@ -170,6 +180,16 @@ void PIDevice::halt(const QString &axes)
 void PIDevice::setVelocities(const QString &axes, const double vel[])
 {
     callFunctionWithVectorOfDoubles(&PI_VEL, axes, vel);
+}
+
+void PIDevice::setVelocities(const double vel[])
+{
+    setVelocities(getAxisIdentifiers(), vel);
+}
+
+void PIDevice::setVelocity(const double vel)
+{
+    setVelocities(getAxisIdentifiers().at(0), &vel);
 }
 
 QVector<double> PIDevice::getVelocities(const QString &axes)
@@ -413,7 +433,13 @@ void PIDevice::setTriggerOutputEnabled(
 
 bool PIDevice::isOnTarget(const QString &axis)
 {
-    QString temp = axis.at(0);
+    QString temp;
+    if (axis.isEmpty()) {
+        temp = getAxisIdentifiers().at(0);
+    }
+    else {
+        temp = axis.at(0);
+    }
     int ont = 0;
     CALL_THROW(PI_qONT(id, temp.toLatin1(), &ont));
     if (ont) {

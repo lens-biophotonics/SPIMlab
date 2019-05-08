@@ -30,6 +30,19 @@ class SPIM : public QObject
 {
     Q_OBJECT
 public:
+    enum MACHINE_STATE {
+        STATE_UNINITIALIZED,
+        STATE_READY,
+        STATE_CAPTURING,
+        STATE_ERROR,
+
+        STATE_ACQUISITION,
+        STATE_CAPTURE,
+        STATE_PRECAPTURE,
+
+        STATE_FREERUN,
+    };
+
     enum PI_DEVICES : int {
         PI_DEVICE_X_AXIS,
         PI_DEVICE_Y_AXIS,
@@ -70,6 +83,8 @@ public:
     QString getOutputPath() const;
     void setOutputPath(const QString &value);
 
+    QState *getState(const MACHINE_STATE stateEnum);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -94,17 +109,25 @@ private:
     QList<OrcaFlash *>camList;
     QList<Cobolt *>laserList;
 
-    int currentStep = 0;
     QStateMachine *sm = nullptr;
-
-    void _setExposureTime(double expTime);
 
     PI_DEVICES stackStage;
     QList<PI_DEVICES> mosaicStages;
 
+    int currentStep = 0;
+    int totalSteps = 0;
+    QMap<PI_DEVICES, int> nSteps;
     QMap<PI_DEVICES, QList<double>*> scanRangeMap;
 
     QString outputPath;
+
+    bool freeRun = true;
+
+    QMap<MACHINE_STATE, QState *> stateMap;
+
+    void _setExposureTime(double expTime);
+    void _startAcquisition();
+    void setupStateMachine();
 
 private slots:
     void onError(const QString &errMsg);

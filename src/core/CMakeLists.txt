@@ -36,7 +36,6 @@ set(SRC
     logmanager.cpp
     savestackworker.cpp
     spim.cpp
-    statemachine.cpp
 )
 
 add_library(SPIMlabCore SHARED ${SRC})
