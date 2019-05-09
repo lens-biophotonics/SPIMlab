@@ -39,6 +39,16 @@ using namespace DCAM;
 #define dcamprop_setgetvalue(...) DCAMERR_SUCCESS
 #endif
 
+#define EXCEPTION_CONSTRUCTOR(name) \
+    OrcaFlash::name::name() : std::runtime_error(FUNCNAME(name)) {}
+
+EXCEPTION_CONSTRUCTOR(OrcaBusyException)
+EXCEPTION_CONSTRUCTOR(OrcaNotReadyException)
+EXCEPTION_CONSTRUCTOR(OrcaNotStableException)
+EXCEPTION_CONSTRUCTOR(OrcaUnstableException)
+EXCEPTION_CONSTRUCTOR(OrcaNotBusyException)
+
+
 OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
 {
     _isOpen = false;

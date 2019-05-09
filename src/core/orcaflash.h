@@ -7,16 +7,24 @@
 
 #include "dcamutils.h"
 
+#define CLASSNAME(x) # x
+
+#define EXCEPTION_CLASS(name) \
+    class name : public std::runtime_error { \
+public: \
+        name(); \
+    };
 
 class OrcaFlash : public QObject
 {
     Q_OBJECT
+
 public:
-    struct OrcaBusyException : public std::exception {};
-    struct OrcaNotReadyException : public std::exception {};
-    struct OrcaNotStableException : public std::exception {};
-    struct OrcaUnstableException : public std::exception {};
-    struct OrcaNotBusyException : public std::exception {};
+    EXCEPTION_CLASS(OrcaBusyException)
+    EXCEPTION_CLASS(OrcaNotReadyException)
+    EXCEPTION_CLASS(OrcaNotStableException)
+    EXCEPTION_CLASS(OrcaUnstableException)
+    EXCEPTION_CLASS(OrcaNotBusyException)
 
     enum ORCA_TRIGGER_MODE {
         TRIGMODE_INTERNAL = DCAM::DCAM_TRIGMODE_INTERNAL,
