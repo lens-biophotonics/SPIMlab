@@ -45,11 +45,11 @@ public:
     QVariant value(const QString &group, const QString &key) const;
     void setValue(const QString &group, const QString &key, const QVariant val);
 
-private:
-    QMap<QString, SettingsMap*> map;
-
     void loadSettings();
     void saveSettings() const;
+
+private:
+    QMap<QString, SettingsMap*> map;
 };
 
 Settings& settings();

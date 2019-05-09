@@ -125,6 +125,8 @@ void MainWindow::saveSettings() const
     group = SETTINGSGROUP_ACQUISITION;
     mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
     mySettings.setValue(group, SETTING_OUTPUTPATH, spim().getOutputPath());
+
+    mySettings.saveSettings();
 }
 
 void MainWindow::loadSettings()

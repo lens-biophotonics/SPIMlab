@@ -17,7 +17,6 @@ Settings::Settings()
 
 Settings::~Settings()
 {
-    saveSettings();
 }
 
 QVariant Settings::value(const QString &group, const QString &key) const
@@ -39,6 +38,8 @@ void Settings::setValue(const QString &group, const QString &key,
 
 void Settings::loadSettings()
 {
+    map.clear();
+
     QSettings settings;
     QString groupName;
 
