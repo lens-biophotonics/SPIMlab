@@ -11,6 +11,7 @@
 #include "camerapage.h"
 #include "controlwidget.h"
 #include "galvowaveformwidget.h"
+#include "progresswidget.h"
 
 CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
 {
@@ -35,13 +36,19 @@ void CameraPage::setupUI()
     cw->appendRow(spim().getPIDevice(SPIM::PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
     cw->appendRow(spim().getPIDevice(SPIM::PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
 
+    QBoxLayout *stageLayout = new QVBoxLayout();
+    stageLayout->addWidget(cw);
+
+    QBoxLayout *acquisitionLayout = new QVBoxLayout();
+    acquisitionLayout->addWidget(new AcquisitionWidget());
+
     QBoxLayout *galvoProgressLayout = new QVBoxLayout();
     galvoProgressLayout->addWidget(new GalvoWaveformWidget());
-    galvoProgressLayout->addStretch();
+    galvoProgressLayout->addWidget(new ProgressWidget());
 
     QHBoxLayout *controlsHLayout = new QHBoxLayout();
-    controlsHLayout->addWidget(cw);
-    controlsHLayout->addWidget(new AcquisitionWidget());
+    controlsHLayout->addLayout(stageLayout);
+    controlsHLayout->addLayout(acquisitionLayout);
     controlsHLayout->addLayout(galvoProgressLayout);
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(new ControlWidget());

@@ -1,4 +1,4 @@
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Widgets 5.8 REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
@@ -26,6 +26,7 @@ set(SPIMlab_SRCS
     pipositioncontrolwidget.cpp
     coboltwidget.cpp
     acquisitionwidget.cpp
+    progresswidget.cpp
 
     centralwidget.cpp
     camerapage.cpp

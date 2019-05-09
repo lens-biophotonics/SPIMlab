@@ -85,6 +85,12 @@ public:
 
     QState *getState(const MACHINE_STATE stateEnum);
 
+    int getCurrentStep() const;
+    int getTotalSteps() const;
+    double getTriggerRate() const;
+
+    int getNSteps(const PI_DEVICES devEnum) const;
+
 public slots:
     void startFreeRun();
     void startAcquisition();

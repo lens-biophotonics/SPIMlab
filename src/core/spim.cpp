@@ -144,6 +144,26 @@ void SPIM::uninitialize()
     }
 }
 
+double SPIM::getTriggerRate() const
+{
+    return triggerRate;
+}
+
+int SPIM::getNSteps(const SPIM::PI_DEVICES devEnum) const
+{
+    return nSteps[devEnum];
+}
+
+int SPIM::getTotalSteps() const
+{
+    return totalSteps;
+}
+
+int SPIM::getCurrentStep() const
+{
+    return currentStep;
+}
+
 QList<Cobolt *> SPIM::getLaserDevices() const
 {
     return laserList;
