@@ -43,17 +43,29 @@ void SettingsPage::setupUI()
         settings().value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH)
         .toString());
 
+    QDoubleSpinBox *scanVelocitySpinBox = new QDoubleSpinBox();
+    scanVelocitySpinBox->setDecimals(4);
+    scanVelocitySpinBox->setValue(spim().getScanVelocity());
+
     QPushButton * chooseLUTPathPushButton = new QPushButton("...");
 
     QGroupBox *otherSettingsGB = new QGroupBox("Other settings");
     {
-        QHBoxLayout *hLayout = new QHBoxLayout();
-        hLayout->addWidget(new QLabel("LUT path"));
-        hLayout->addWidget(LUTPathLineEdit);
-        hLayout->addWidget(chooseLUTPathPushButton);
+        QGridLayout *grid = new QGridLayout();
+
+        int row = 0;
+        int col = 0;
+
+        grid->addWidget(new QLabel("LUT path"), row, col++);
+        grid->addWidget(LUTPathLineEdit, row, col++);
+        grid->addWidget(chooseLUTPathPushButton, row++, col++);
+
+        col = 0;
+        grid->addWidget(new QLabel("Scan velocity"), row, col++);
+        grid->addWidget(scanVelocitySpinBox, row++, col++);
 
         QVBoxLayout *vLayout = new QVBoxLayout();
-        vLayout->addLayout(hLayout);
+        vLayout->addLayout(grid);
         vLayout->addStretch();
 
         otherSettingsGB->setLayout(vLayout);
@@ -76,6 +88,9 @@ void SettingsPage::setupUI()
             this, "Info", QString("Please restart %1").arg(PROGRAM_NAME));
     });
 
+
+    void (QDoubleSpinBox::* mySignal)(double) = &QDoubleSpinBox::valueChanged;
+    connect(scanVelocitySpinBox, mySignal, &spim(), &SPIM::setScanVelocity);
 
     QHBoxLayout *hLayout = new QHBoxLayout();
     hLayout->addWidget(nisw);

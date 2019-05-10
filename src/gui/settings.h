@@ -14,6 +14,7 @@
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
 
 #define SETTING_LUTPATH "LUTPath"
+#define SETTING_SCANVELOCITY "scanVelocity"
 
 #define SETTING_BAUD "baud"
 #define SETTING_DEVICENUMBER "deviceNumber"

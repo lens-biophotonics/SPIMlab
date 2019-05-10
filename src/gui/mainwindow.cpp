@@ -126,6 +126,9 @@ void MainWindow::saveSettings() const
     mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
     mySettings.setValue(group, SETTING_OUTPUTPATH, spim().getOutputPath());
 
+    group = SETTINGSGROUP_OTHERSETTINGS;
+    mySettings.setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
+
     mySettings.saveSettings();
 }
 
@@ -197,6 +200,10 @@ void MainWindow::loadSettings()
     group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());
     spim().setOutputPath(mySettings.value(group, SETTING_OUTPUTPATH).toString());
+
+    group = SETTINGSGROUP_OTHERSETTINGS;
+    spim().setScanVelocity(
+        mySettings.value(group, SETTING_SCANVELOCITY).toDouble());
 }
 
 void MainWindow::on_aboutAction_triggered() const

@@ -47,6 +47,7 @@ void Settings::loadSettings()
     settings.beginGroup(groupName);
 
     SET_VALUE(groupName, SETTING_LUTPATH, "/opt/Fiji.app/luts/");
+    SET_VALUE(groupName, SETTING_SCANVELOCITY, 2.0);
 
     settings.endGroup();
 

@@ -144,6 +144,16 @@ void SPIM::uninitialize()
     }
 }
 
+double SPIM::getScanVelocity() const
+{
+    return scanVelocity;
+}
+
+void SPIM::setScanVelocity(double value)
+{
+    scanVelocity = value;
+}
+
 double SPIM::getTriggerRate() const
 {
     return triggerRate;
@@ -420,7 +430,7 @@ void SPIM::setupStateMachine()
         try {
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
-                dev->setVelocity(1.);
+                dev->setVelocity(scanVelocity);
 
                 double pos = targetPositions[d_enum];
                 logger->info(QString("Moving %1 to %2")

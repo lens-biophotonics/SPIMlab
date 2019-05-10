@@ -90,6 +90,9 @@ public:
 
     int getNSteps(const SPIM_PI_DEVICES devEnum) const;
 
+    double getScanVelocity() const;
+    void setScanVelocity(double value);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -123,6 +126,7 @@ private:
     int totalSteps = 0;
     QMap<SPIM_PI_DEVICES, int> nSteps;
     QMap<SPIM_PI_DEVICES, QList<double>*> scanRangeMap;
+    double scanVelocity = 1;
 
     QString outputPath;
 
