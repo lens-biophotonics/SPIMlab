@@ -4,8 +4,8 @@
 #include <QState>
 #include <QTimer>
 
-
 #include "core/pidevice.h"
+#include "core/spim.h"
 
 #include "pipositioncontrolwidget.h"
 #include "customspinbox.h"
@@ -48,8 +48,9 @@ void PIPositionControlWidget::setupUI()
 }
 
 void PIPositionControlWidget::appendRow(
-    PIDevice *device, const QString &axis, const QString &axisName)
+    SPIM_PI_DEVICES d_enum, const QString &axis, const QString &axisName)
 {
+    PIDevice *device = spim().getPIDevice(d_enum);
     int col = 0;
     grid->addWidget(new QLabel(axisName), row, col++);
     QLabel *currentPos = new QLabel("0.000");

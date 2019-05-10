@@ -26,6 +26,14 @@ class GalvoRamp;
 class PIDevice;
 class Cobolt;
 
+enum SPIM_PI_DEVICES : int {
+    PI_DEVICE_X_AXIS,
+    PI_DEVICE_Y_AXIS,
+    PI_DEVICE_Z_AXIS,
+    PI_DEVICE_LEFT_OBJ_AXIS,
+    PI_DEVICE_RIGHT_OBJ_AXIS,
+};
+
 class SPIM : public QObject
 {
     Q_OBJECT
@@ -43,15 +51,6 @@ public:
         STATE_FREERUN,
     };
 
-    enum PI_DEVICES : int {
-        PI_DEVICE_X_AXIS,
-        PI_DEVICE_Y_AXIS,
-        PI_DEVICE_Z_AXIS,
-        PI_DEVICE_LEFT_OBJ_AXIS,
-        PI_DEVICE_RIGHT_OBJ_AXIS,
-    };
-
-
     SPIM(QObject *parent = nullptr);
     virtual ~SPIM();
 
@@ -61,7 +60,7 @@ public:
 
     void setupGalvoRampTriggerSource(const QStringList &terminals);
 
-    PIDevice *getPIDevice(const PI_DEVICES dev) const;
+    PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
     QList<PIDevice *> getPIDevices() const;
 
@@ -74,11 +73,11 @@ public:
     QList<Cobolt *> getLaserDevices() const;
     Cobolt *getLaser(const int n) const;
 
-    PI_DEVICES getStackStage() const;
+    SPIM_PI_DEVICES getStackStage() const;
 
-    QList<PI_DEVICES> getMosaicStages() const;
+    QList<SPIM_PI_DEVICES> getMosaicStages() const;
 
-    QList<double> *getScanRange(const PI_DEVICES dev) const;
+    QList<double> *getScanRange(const SPIM_PI_DEVICES dev) const;
 
     QString getOutputPath() const;
     void setOutputPath(const QString &value);
@@ -89,7 +88,7 @@ public:
     int getTotalSteps() const;
     double getTriggerRate() const;
 
-    int getNSteps(const PI_DEVICES devEnum) const;
+    int getNSteps(const SPIM_PI_DEVICES devEnum) const;
 
 public slots:
     void startFreeRun();
@@ -117,13 +116,13 @@ private:
 
     QStateMachine *sm = nullptr;
 
-    PI_DEVICES stackStage;
-    QList<PI_DEVICES> mosaicStages;
+    SPIM_PI_DEVICES stackStage;
+    QList<SPIM_PI_DEVICES> mosaicStages;
 
     int currentStep = 0;
     int totalSteps = 0;
-    QMap<PI_DEVICES, int> nSteps;
-    QMap<PI_DEVICES, QList<double>*> scanRangeMap;
+    QMap<SPIM_PI_DEVICES, int> nSteps;
+    QMap<SPIM_PI_DEVICES, QList<double>*> scanRangeMap;
 
     QString outputPath;
 

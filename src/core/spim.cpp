@@ -45,7 +45,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
-        scanRangeMap.insert(static_cast<PI_DEVICES>(i),
+        scanRangeMap.insert(static_cast<SPIM_PI_DEVICES>(i),
                             new QList<double>({0, 0, 0}));
     }
 
@@ -149,7 +149,7 @@ double SPIM::getTriggerRate() const
     return triggerRate;
 }
 
-int SPIM::getNSteps(const SPIM::PI_DEVICES devEnum) const
+int SPIM::getNSteps(const SPIM_PI_DEVICES devEnum) const
 {
     return nSteps[devEnum];
 }
@@ -204,14 +204,14 @@ QList<OrcaFlash *> SPIM::getCameras()
     return camList;
 }
 
-PIDevice *SPIM::getPIDevice(const SPIM::PI_DEVICES dev) const
+PIDevice *SPIM::getPIDevice(const SPIM_PI_DEVICES dev) const
 {
     return piDevList.value(dev);
 }
 
 PIDevice *SPIM::getPIDevice(const int dev) const
 {
-    return getPIDevice(static_cast<PI_DEVICES>(dev));
+    return getPIDevice(static_cast<SPIM_PI_DEVICES>(dev));
 }
 
 QList<PIDevice *> SPIM::getPIDevices() const
@@ -251,11 +251,11 @@ void SPIM::_startAcquisition()
     else {
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_ACQUISITION]);
 
-        QList<PI_DEVICES> stageEnumList;
+        QList<SPIM_PI_DEVICES> stageEnumList;
         stageEnumList << mosaicStages << stackStage;
 
         QList<PIDevice *> stageList;
-        for (const PI_DEVICES d_enum : stageEnumList) {
+        for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
             stageList << getPIDevice(d_enum);
 
             double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
@@ -271,7 +271,7 @@ void SPIM::_startAcquisition()
         }
 
         totalSteps = 1;
-        for (const PI_DEVICES d_enum : mosaicStages) {
+        for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
             nSteps[d_enum] += 1;
             totalSteps *= nSteps[d_enum];
         }
@@ -329,11 +329,11 @@ void SPIM::setupStateMachine()
 
     /* acquisition to file */
 
-    QList<PI_DEVICES> stageEnumList;
+    QList<SPIM_PI_DEVICES> stageEnumList;
     stageEnumList << stackStage << mosaicStages;
 
     QList<PIDevice *> stageList;
-    for (const PI_DEVICES d_enum : stageEnumList) {
+    for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
         stageList << getPIDevice(d_enum);
     }
 
@@ -408,17 +408,17 @@ void SPIM::setupStateMachine()
         }
 
         // go to target position
-        QMap<PI_DEVICES, double> targetPositions;
+        QMap<SPIM_PI_DEVICES, double> targetPositions;
         targetPositions[stackStage]
             = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
-        for (const PI_DEVICES d_enum : mosaicStages) {
+        for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
             double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
             double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
             targetPositions[d_enum] = from + currentStep * step;
         }
 
         try {
-            for (PI_DEVICES d_enum : stageEnumList) {
+            for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
                 dev->setVelocity(1.);
 
@@ -450,7 +450,7 @@ void SPIM::setupStateMachine()
                 QString fname;
                 QList<PIDevice *> tempStageList;
                 tempStageList << getPIDevice(stackStage);
-                for (const PI_DEVICES d_enum : mosaicStages) {
+                for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
                     tempStageList << getPIDevice(d_enum);
                 }
                 for (PIDevice *dev: tempStageList) {
@@ -583,17 +583,17 @@ QState *SPIM::getState(const SPIM::MACHINE_STATE stateEnum)
     return stateMap[stateEnum];
 }
 
-QList<SPIM::PI_DEVICES> SPIM::getMosaicStages() const
+QList<SPIM_PI_DEVICES> SPIM::getMosaicStages() const
 {
     return mosaicStages;
 }
 
-QList<double> *SPIM::getScanRange(const SPIM::PI_DEVICES dev) const
+QList<double> *SPIM::getScanRange(const SPIM_PI_DEVICES dev) const
 {
     return scanRangeMap[dev];
 }
 
-SPIM::PI_DEVICES SPIM::getStackStage() const
+SPIM_PI_DEVICES SPIM::getStackStage() const
 {
     return stackStage;
 }

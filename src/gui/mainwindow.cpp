@@ -95,7 +95,7 @@ void MainWindow::saveSettings() const
         }
 
         QList<double> *scanRange =
-            spim().getScanRange(static_cast<SPIM::PI_DEVICES>(i));
+            spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
         mySettings.setValue(group, SETTING_FROM, scanRange->at(0));
         mySettings.setValue(group, SETTING_TO, scanRange->at(1));
         mySettings.setValue(group, SETTING_STEP, scanRange->at(2));
@@ -161,7 +161,7 @@ void MainWindow::loadSettings()
         }
 
         QList<double> *scanRange =
-            spim().getScanRange(static_cast<SPIM::PI_DEVICES>(i));
+            spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
         scanRange->replace(0, mySettings.value(group, SETTING_FROM).toDouble());
         scanRange->replace(1, mySettings.value(group, SETTING_TO).toDouble());
         scanRange->replace(2, mySettings.value(group, SETTING_STEP).toDouble());

@@ -23,7 +23,7 @@ void AcquisitionWidget::setupUI()
     spim().getState(SPIM::STATE_READY)->assignProperty(
         this, "enabled", true);
 
-    QList<SPIM::PI_DEVICES> devs;
+    QList<SPIM_PI_DEVICES> devs;
     devs << spim().getMosaicStages();
     devs << spim().getStackStage();
     std::sort(devs.begin(), devs.end());
@@ -39,7 +39,7 @@ void AcquisitionWidget::setupUI()
 
     void (QDoubleSpinBox::* mySignal)(double d) = &QDoubleSpinBox::valueChanged;
 
-    for (const SPIM::PI_DEVICES d_enum : devs) {
+    for (const SPIM_PI_DEVICES d_enum : devs) {
         PIDevice *dev = spim().getPIDevice(d_enum);
         QList<double> *scanRange = spim().getScanRange(d_enum);
         col = 0;
