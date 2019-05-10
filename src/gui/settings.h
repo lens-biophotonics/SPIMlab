@@ -33,6 +33,10 @@
 #define SETTING_TO "to"
 #define SETTING_STEP "step"
 
+#define SETTING_POS "pos"
+#define SETTING_VELOCITY "velocity"
+#define SETTING_STEPSIZE "stepsize"
+
 
 typedef QMap<QString, QVariant> SettingsMap;
 

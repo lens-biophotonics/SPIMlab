@@ -9,7 +9,7 @@
 
 #include "pipositioncontrolwidget.h"
 #include "customspinbox.h"
-
+#include "settings.h"
 
 PIPositionControlWidget::PIPositionControlWidget(QWidget *parent) :
     QWidget(parent)
@@ -60,9 +60,9 @@ void PIPositionControlWidget::appendRow(
     haltPushButton->setStyleSheet(s);
     grid->addWidget(haltPushButton, row, col++);
 
-    DoubleSpinBox *sb = new DoubleSpinBox();
-    sb->setDecimals(4);
-    grid->addWidget(sb, row, col++);
+    DoubleSpinBox *positionSpinbox = new DoubleSpinBox();
+    positionSpinbox->setDecimals(4);
+    grid->addWidget(positionSpinbox, row, col++);
 
     QPushButton *minusPushButton = new QPushButton("-");
     grid->addWidget(minusPushButton, row, col++);
@@ -88,6 +88,8 @@ void PIPositionControlWidget::appendRow(
 
     row++;
 
+    QString settingGroup = SETTINGSGROUP_AXIS(d_enum);
+
     QState *cs = device->getConnectedState();
     QState *ds = device->getDisconnectedState();
 
@@ -96,7 +98,7 @@ void PIPositionControlWidget::appendRow(
     // enabled when connected, disabled when disconnected
     wList = {
         haltPushButton,
-        sb,
+        positionSpinbox,
         minusPushButton,
         plusPushButton,
         stepSpinBox,
@@ -118,45 +120,64 @@ void PIPositionControlWidget::appendRow(
         }
     });
 
-    connect(sb, &DoubleSpinBox::returnPressed, this, [ = ](){
-        double pos = sb->value();
+    enum ACTION {
+        MOVE,
+        STEPUP,
+        STEPDOWN,
+        SETVELOCITY,
+    };
+
+    std::function<void(const enum ACTION)> performAction
+        = [ = ](const enum ACTION a){
+        double pos = positionSpinbox->value();
         double vel = velocitySpinBox->value();
+        double stepSize = stepSpinBox->value();
+
         try {
             device->setVelocities(axis, &vel);
-            device->move(axis, &pos);
+            settings().setValue(settingGroup, SETTING_VELOCITY, vel);
+
+            switch (a) {
+            case MOVE:
+                device->move(axis, &pos);
+                settings().setValue(settingGroup, SETTING_POS, pos);
+                break;
+
+            case STEPUP:
+                device->setStepSize(axis, stepSize);
+                device->stepUp(axis);
+                settings().setValue(settingGroup, SETTING_STEPSIZE, stepSize);
+                break;
+
+            case STEPDOWN:
+                device->setStepSize(axis, stepSize);
+                device->stepDown(axis);
+                settings().setValue(settingGroup, SETTING_STEPSIZE, stepSize);
+                break;
+
+            case SETVELOCITY:
+                break;
+            }
         }
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
+    };
+
+    connect(positionSpinbox, &DoubleSpinBox::returnPressed, this, [ = ](){
+        performAction(MOVE);
     });
 
     connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
-        device->setStepSize(axis, stepSpinBox->value());
-        try {
-            device->stepUp(axis);
-        }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(nullptr, "Error", e.what());
-        }
+        performAction(STEPUP);
     });
+
     connect(minusPushButton, &QPushButton::clicked, this, [ = ](){
-        device->setStepSize(axis, stepSpinBox->value());
-        try {
-            device->stepUp(axis);
-        }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(nullptr, "Error", e.what());
-        }
+        performAction(STEPDOWN);
     });
 
     connect(velocitySpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
-        double vel = velocitySpinBox->value();
-        try {
-            device->setVelocities(axis, &vel);
-        }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(nullptr, "Error", e.what());
-        }
+        performAction(SETVELOCITY);
     });
 
     QTimer *updateTimer = new QTimer(this);
@@ -175,13 +196,17 @@ void PIPositionControlWidget::appendRow(
     connect(device, &PIDevice::connected, this, [ = ](){
         double min = device->getTravelRangeLowEnd(axis).at(0);
         double max = device->getTravelRangeHighEnd(axis).at(0);
-        double velocity = device->getVelocities(axis).at(0);
-        double pos = device->getCurrentPosition(axis).at(0);
+        double velocity = settings().value(settingGroup, SETTING_VELOCITY)
+                          .toDouble();
+        double pos = settings().value(settingGroup, SETTING_POS).toDouble();
+        double stepSize = settings().value(settingGroup, SETTING_STEPSIZE)
+                          .toDouble();
 
-        sb->setRange(min, max);
-        sb->setValue(pos);
+        positionSpinbox->setRange(min, max);
+        positionSpinbox->setValue(pos);
         stepSpinBox->setRange(0, max);
         velocitySpinBox->setValue(velocity);
+        stepSpinBox->setValue(stepSize);
 
         updateTimer->start();
     });

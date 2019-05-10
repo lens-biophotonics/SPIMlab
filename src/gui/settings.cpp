@@ -63,6 +63,7 @@ void Settings::loadSettings()
            << SETTING_DEVICENUMBER
            << SETTING_SERIALNUMBER
            << SETTING_PORTNAME
+           << SETTING_POS
            << SETTING_FROM
            << SETTING_TO
            << SETTING_STEP
@@ -72,8 +73,12 @@ void Settings::loadSettings()
             SET_VALUE(group, s, QVariant());
         }
 
+        SET_VALUE(group, SETTING_STEPSIZE, 0.1);
+        SET_VALUE(group, SETTING_VELOCITY, 1.);
+
         settings.endGroup();
     }
+
 
     groupName = SETTINGSGROUP_GRAMP;
     settings.beginGroup(groupName);
