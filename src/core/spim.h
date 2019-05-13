@@ -125,12 +125,14 @@ private:
     int currentStep = 0;
     int totalSteps = 0;
     QMap<SPIM_PI_DEVICES, int> nSteps;
+    QMap<SPIM_PI_DEVICES, int> currentSteps;
     QMap<SPIM_PI_DEVICES, QList<double>*> scanRangeMap;
     double scanVelocity = 1;
 
     QString outputPath;
 
     bool freeRun = true;
+    bool capturing = false;
 
     QMap<MACHINE_STATE, QState *> stateMap;
 

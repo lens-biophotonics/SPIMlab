@@ -27,8 +27,8 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         camList.insert(i, new OrcaFlash());
     }
 
-    cameraTrigger = new CameraTrigger();
-    galvoRamp = new GalvoRamp();
+    cameraTrigger = new CameraTrigger(this);
+    galvoRamp = new GalvoRamp(this);
 
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -135,8 +135,8 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
-        delete galvoRamp;
-        delete cameraTrigger;
+        cameraTrigger->clear();
+        galvoRamp->clear();
         DCAM::uninit_dcam();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -244,6 +244,7 @@ void SPIM::startAcquisition()
 void SPIM::_startAcquisition()
 {
     logger->info("Start acquisition");
+    capturing = true;
 
     try {
         _setExposureTime(exposureTime / 1000.);
@@ -282,8 +283,8 @@ void SPIM::_startAcquisition()
 
         totalSteps = 1;
         for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
-            nSteps[d_enum] += 1;
             totalSteps *= nSteps[d_enum];
+            currentSteps[d_enum] = 0;
         }
 
         currentStep = 0;
@@ -408,14 +409,11 @@ void SPIM::setupStateMachine()
     });
 
     connect(precaptureState, &QState::entered, this, [ = ](){
-        galvoRamp->stop();
-        cameraTrigger->stop();
-
-        // check exit condition
-        if (currentStep >= totalSteps) {
-            stop();
+        if (!capturing) {
             return;
         }
+        galvoRamp->stop();
+        cameraTrigger->stop();
 
         // go to target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
@@ -424,7 +422,7 @@ void SPIM::setupStateMachine()
         for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
             double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
             double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
-            targetPositions[d_enum] = from + currentStep * step;
+            targetPositions[d_enum] = from + currentSteps[d_enum] * step;
         }
 
         try {
@@ -503,6 +501,24 @@ void SPIM::setupStateMachine()
 
     connect(captureState, &QState::finished, this, [ = ] {
         currentStep++;
+
+        // check exit condition
+        if (currentStep >= totalSteps) {
+            stop();
+            return;
+        }
+
+        SPIM_PI_DEVICES xAxis = mosaicStages.at(0);
+
+        int newX = currentSteps[xAxis] + 1;
+        if (newX >= nSteps[xAxis]) {
+            newX = 0;
+            if (mosaicStages.size() > 1) {
+                SPIM_PI_DEVICES yAxis = mosaicStages.at(1);
+                currentSteps[yAxis]++;
+            }
+        }
+        currentSteps[xAxis] = newX;
     });
 
     sm->start();
@@ -511,6 +527,7 @@ void SPIM::setupStateMachine()
 void SPIM::stop()
 {
     logger->info("stop");
+    capturing = false;
     try {
         for (PIDevice * dev : piDevList) {
             if (dev->isConnected()) {
@@ -523,7 +540,7 @@ void SPIM::stop()
         galvoRamp->stop();
         cameraTrigger->stop();
     } catch (std::runtime_error e) {
-        onError(e.what());
+        emit error(e.what());
         return;
     }
 
