@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QThread>
+#include <QMenu>
 
 class OrcaFlash;
 class CameraPlot;
@@ -20,10 +21,14 @@ signals:
 public slots:
     void replot();
 
+protected:
+    virtual void contextMenuEvent(QContextMenuEvent *event);
+
 private:
     CameraPlot *plot;
     QVector<double> vec;
     OrcaFlash *orca;
+    QMenu *menu;
 
     void setupUi();
 };

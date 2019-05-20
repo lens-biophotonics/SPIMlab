@@ -12,7 +12,7 @@ public:
     explicit SpinBox(QWidget *parent = nullptr);
 
 signals:
-    void returnPressed();
+    void returnPressed(int value);
 };
 
 class DoubleSpinBox : public QDoubleSpinBox
@@ -22,7 +22,7 @@ public:
     explicit DoubleSpinBox(QWidget *parent = nullptr);
 
 signals:
-    void returnPressed();
+    void returnPressed(double value);
 };
 
 

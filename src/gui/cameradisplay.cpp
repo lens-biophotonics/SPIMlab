@@ -1,10 +1,12 @@
 #include <QTimer>
 #include <QHBoxLayout>
-#include <QPushButton>
+#include <QCheckBox>
 #include <QDirIterator>
-#include <QMenu>
 #include <QStack>
 #include <QRegularExpression>
+#include <QDialog>
+#include <QContextMenuEvent>
+#include <QPair>
 
 #include <qwt_slider.h>
 #include <qwt_plot_zoomer.h>
@@ -17,6 +19,8 @@
 #include "cameraplot.h"
 #include "colormaps.h"
 #include "settings.h"
+
+#include "customspinbox.h"
 
 
 CameraDisplay::CameraDisplay(OrcaFlash *camera, QWidget *parent) :
@@ -43,35 +47,145 @@ void CameraDisplay::replot()
     plot->setData(vec);
 }
 
+void CameraDisplay::contextMenuEvent(QContextMenuEvent *event)
+{
+    event->accept();
+    menu->exec(QCursor::pos());
+}
+
 void CameraDisplay::setupUi()
 {
+    QPair<double, double> *currentRange = new QPair<double, double>(0, 65535);
+
+    menu = new QMenu();
+    setContextMenuPolicy(Qt::DefaultContextMenu);
+
     plot = new CameraPlot();
     QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
     zoomer->setRubberBandPen(QColor(Qt::green));
     zoomer->setTrackerPen(QColor(Qt::green));
 
-    // RightButton: zoom out by 1
-    // Ctrl+RightButton: zoom out to full size
-    zoomer->setMousePattern(QwtEventPattern::MouseSelect2,
-                            Qt::RightButton, Qt::ControlModifier);
-    zoomer->setMousePattern(QwtEventPattern::MouseSelect3,
-                            Qt::RightButton);
+    QAction *autoscaleAction = new QAction("Autoscale");
+    autoscaleAction->setCheckable(true);
+    autoscaleAction->setChecked(true);
 
+    QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle(
+        QString("Cam %1").arg(orca->getCameraIndex()));
 
-    QwtSlider *minSlider = new QwtSlider(Qt::Vertical);
-    QwtSlider *maxSlider = new QwtSlider(Qt::Vertical);
+    QwtSlider *minSlider = new QwtSlider(Qt::Horizontal, dialog);
+    QwtSlider *maxSlider = new QwtSlider(Qt::Horizontal, dialog);
 
-    minSlider->setScalePosition(QwtSlider::LeadingScale);
+    minSlider->setScalePosition(QwtSlider::NoScale);
     minSlider->setLowerBound(0);
     minSlider->setUpperBound(65535);
-    minSlider->setValue(0);
+    minSlider->setValue(currentRange->first);
     minSlider->setEnabled(false);
+    minSlider->setMinimumWidth(300);
 
-    maxSlider->setScalePosition(QwtSlider::LeadingScale);
+    maxSlider->setScalePosition(QwtSlider::NoScale);
     maxSlider->setLowerBound(0);
     maxSlider->setUpperBound(65535);
-    maxSlider->setValue(65535);
+    maxSlider->setValue(currentRange->second);
     maxSlider->setEnabled(false);
+
+    DoubleSpinBox *minSpinBox = new DoubleSpinBox();
+    minSpinBox->setRange(minSlider->minimum(), minSlider->maximum());
+    minSpinBox->setDecimals(0);
+    minSpinBox->setEnabled(false);
+
+    DoubleSpinBox *maxSpinBox = new DoubleSpinBox();
+    maxSpinBox->setRange(maxSlider->minimum(), maxSlider->maximum());
+    maxSpinBox->setDecimals(0);
+    maxSpinBox->setValue(maxSlider->maximum());
+    maxSpinBox->setEnabled(false);
+
+    QGridLayout *grid = new QGridLayout();
+    int row = 0;
+    int col = 0;
+    grid->addWidget(minSlider, row, col++);
+    grid->addWidget(minSpinBox, row++, col++);
+    col = 0;
+    grid->addWidget(maxSlider, row, col++);
+    grid->addWidget(maxSpinBox, row++, col++);
+
+    QCheckBox *autoscaleCheckBox = new QCheckBox("Autoscale");
+    autoscaleCheckBox->setChecked(autoscaleAction->isChecked());
+    connect(autoscaleCheckBox, &QCheckBox::clicked,
+            autoscaleAction, &QAction::trigger);
+
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addLayout(grid);
+    vLayout->addWidget(autoscaleCheckBox);
+    dialog->setLayout(vLayout);
+
+    std::function<void(void)> updatePlotRange = [ = ](){
+        plot->setInterval(Qt::ZAxis, currentRange->first, currentRange->second);
+    };
+
+    connect(minSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+        currentRange->first = value;
+        minSpinBox->setValue(value);
+        updatePlotRange();
+    });
+
+    connect(maxSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+        currentRange->second = value;
+        maxSpinBox->setValue(value);
+        updatePlotRange();
+    });
+
+    connect(minSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+        currentRange->first = value;
+        minSlider->setValue(value);
+        updatePlotRange();
+    });
+
+    connect(maxSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+        currentRange->second = value;
+        maxSlider->setValue(value);
+        updatePlotRange();
+    });
+
+    QAction *action;
+
+    connect(autoscaleAction, &QAction::triggered, this, [ = ](bool checked){
+        plot->setZAutoscaleEnabled(checked);
+        if (!checked) {
+            updatePlotRange();
+        }
+        autoscaleCheckBox->setChecked(checked);
+
+        minSlider->setEnabled(!checked);
+        maxSlider->setEnabled(!checked);
+        minSpinBox->setEnabled(!checked);
+        maxSpinBox->setEnabled(!checked);
+    });
+    menu->addAction(autoscaleAction);
+
+    action = new QAction("Set Z range...");
+    connect(action, &QAction::triggered, dialog, &QDialog::show);
+    menu->addAction(action);
+
+    menu->addSeparator();
+
+    action = new QAction("Zoom out", this);
+    connect(action, &QAction::triggered, this, [ = ](){
+        zoomer->zoom(-1);
+    });
+    menu->addAction(action);
+
+    action = new QAction("Zoom in", this);
+    connect(action, &QAction::triggered, this, [ = ](){
+        zoomer->zoom(1);
+    });
+    menu->addAction(action);
+
+    action = new QAction("Reset zoom", this);
+    connect(action, &QAction::triggered, this, [ = ](){
+        zoomer->zoom(0);
+    });
+    menu->addAction(action);
 
     QStack<QString> stack;
     QString LUTPath = settings().value(SETTINGSGROUP_OTHERSETTINGS,
@@ -82,8 +196,7 @@ void CameraDisplay::setupUi()
     stack.push(LUTPath);
     QStringList sl;
 
-    QMenu *LUTMenu = new QMenu();
-    QAction *action;
+    QMenu *LUTMenu = new QMenu("LUT");
 
     action = new QAction("Grayscale");
     LUTMenu->addAction(action);
@@ -126,53 +239,15 @@ void CameraDisplay::setupUi()
         });
     }
 
-    QPushButton *autoScalePushButton = new QPushButton("Autoscale");
-
-    autoScalePushButton->setCheckable(true);
-    autoScalePushButton->setChecked(true);
-
-    QPushButton *LUTPushButton = new QPushButton("LUT");
-    LUTPushButton->setMenu(LUTMenu);
-
-    QBoxLayout *sliderLayout;
-    sliderLayout = new QHBoxLayout();
-    sliderLayout->addWidget(minSlider);
-    sliderLayout->addWidget(maxSlider);
-
-    QBoxLayout *hLayout = new QHBoxLayout();
-    hLayout->addWidget(autoScalePushButton);
-    hLayout->addWidget(LUTPushButton);
-
-    QBoxLayout *controlsLayout = new QVBoxLayout();
-    controlsLayout->addLayout(sliderLayout);
-    controlsLayout->addLayout(hLayout);
+    menu->addSeparator();
+    menu->addMenu(LUTMenu);
 
     QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1.1, 1., -80, -50);
 
     QBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(aspectRatioWidget, 1);
-    layout->addLayout(controlsLayout);
 
     setLayout(layout);
-
-    connect(minSlider, &QwtSlider::valueChanged, this, [ = ](){
-        plot->setInterval(Qt::ZAxis, minSlider->value(), maxSlider->value());
-    });
-
-    connect(maxSlider, &QwtSlider::valueChanged, this, [ = ](){
-        plot->setInterval(Qt::ZAxis, minSlider->value(), maxSlider->value());
-    });
-
-    connect(autoScalePushButton, &QPushButton::clicked, this,
-            [ = ](bool checked) {
-        minSlider->setEnabled(!checked);
-        maxSlider->setEnabled(!checked);
-        plot->setZAutoscaleEnabled(checked);
-        if (!checked) {
-            plot->setInterval(Qt::ZAxis,
-                              minSlider->value(), maxSlider->value());
-        }
-    });
 }
 
 DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) : QThread(parent)
