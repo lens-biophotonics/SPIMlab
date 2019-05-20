@@ -9,6 +9,13 @@ include_directories(
     ..
 )
 
+option(FORCE_FUSION_STYLE "Force fusion style" OFF)
+
+if (FORCE_FUSION_STYLE)
+    add_definitions(-DFORCE_FUSION_STYLE)
+    message(AUTHOR_WARNING "Forcing fusion style")
+endif ()
+
 set(SPIMlab_SRCS
     resources.qrc
     main.cpp
