@@ -162,7 +162,7 @@ double SerialPort::getDouble(const QString &cmd)
     bool ok;
     double f = str.toDouble(&ok);
     if (!ok) {
-        throw std::runtime_error("Cannot convert string to float");
+        throw std::runtime_error("Cannot convert string to double");
     }
     return f;
 }
