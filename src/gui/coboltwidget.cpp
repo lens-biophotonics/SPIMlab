@@ -9,10 +9,13 @@
 
 #include "core/cobolt.h"
 #include "core/serialport.h"
+#include "core/logger.h"
 
 #include "coboltwidget.h"
 #include "customspinbox.h"
 #include "utils.h"
+
+static Logger *logger = getLogger("SerialPort");
 
 CoboltWidget::CoboltWidget(Cobolt *cobolt, QWidget *parent) :
     QWidget(parent), cobolt(cobolt)
@@ -195,6 +198,11 @@ void CoboltWidget::connectDevice()
 
 void CoboltWidget::refreshValues()
 {
-    powerLabel->setText(
-        QString("Power: %1 mW").arg(cobolt->getOutputPower() * 1000));
+    try{
+        powerLabel->setText(
+            QString("Power: %1 mW").arg(cobolt->getOutputPower() * 1000));
+    }
+    catch (std::runtime_error e) {
+        logger->error(e.what());
+    }
 }
