@@ -33,6 +33,7 @@ void GalvoWaveformWidget::setupUI()
         DoubleSpinBox *offsetSpinBox = new DoubleSpinBox();
         offsetSpinBox->setRange(-10, 10);
         offsetSpinBox->setDecimals(3);
+        offsetSpinBox->setSingleStep(0.1);
         offsetSpinBox->setSuffix(" V");
         offsetSpinBox->setValue(wp.at(GALVORAMP_OFFSET_IDX));
         grid->addWidget(offsetSpinBox, row, col++);
@@ -40,6 +41,7 @@ void GalvoWaveformWidget::setupUI()
         DoubleSpinBox *amplitudeSpinBox = new DoubleSpinBox();
         amplitudeSpinBox->setRange(-10, 10);
         amplitudeSpinBox->setDecimals(3);
+        amplitudeSpinBox->setSingleStep(0.1);
         amplitudeSpinBox->setSuffix(" V");
         amplitudeSpinBox->setValue(wp.at(GALVORAMP_AMPLITUDE_IDX));
         grid->addWidget(amplitudeSpinBox, row, col++);
@@ -47,6 +49,7 @@ void GalvoWaveformWidget::setupUI()
         DoubleSpinBox *delaySpinBox = new DoubleSpinBox();
         delaySpinBox->setRange(-1000, 1000);
         delaySpinBox->setDecimals(3);
+        delaySpinBox->setSingleStep(0.1);
         delaySpinBox->setSuffix(" ms");
         delaySpinBox->setValue(wp.at(GALVORAMP_DELAY_IDX) * 1000);
         grid->addWidget(delaySpinBox, row, col++);
