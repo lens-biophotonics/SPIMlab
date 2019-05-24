@@ -50,6 +50,11 @@ void MainWindow::setupUi()
     quitAction->setShortcut(QKeySequence("Ctrl+Q"));
     connect(quitAction, &QAction::triggered, this, &MainWindow::close);
 
+    QAction *saveSettingsAction = new QAction(this);
+    saveSettingsAction->setText("Save settings");
+    saveSettingsAction->setShortcut(QKeySequence("Ctrl+S"));
+    connect(quitAction, &QAction::triggered, this, &MainWindow::saveSettings);
+
     QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
     aboutAction->setObjectName("aboutAction");
@@ -59,6 +64,7 @@ void MainWindow::setupUi()
     setMenuBar(menuBar);
 
     QMenu *fileMenu = menuBar->addMenu("&File");
+    fileMenu->addAction(saveSettingsAction);
     fileMenu->addAction(quitAction);
 
     QMenu *helpMenu = menuBar->addMenu("?");
