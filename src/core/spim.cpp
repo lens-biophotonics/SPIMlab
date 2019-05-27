@@ -582,7 +582,11 @@ void SPIM::_setExposureTime(double expTime)
         double sampRate = 1 / lineInterval;
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
-        triggerRate = 0.98 * frameRate;
+        double fraction = 0.95;
+        triggerRate = fraction * frameRate;
+
+        logger->info(QString("Line interval: %1").arg(lineInterval));
+        logger->info(QString("Frame rate: %1").arg(frameRate));
 
         galvoRamp->setSampleRate(sampRate);
         cameraTrigger->setSampleRate(sampRate);
@@ -591,8 +595,10 @@ void SPIM::_setExposureTime(double expTime)
         galvoRamp->setNSamples(nSamples);
         cameraTrigger->setNSamples(nSamples);
 
-        galvoRamp->setNRamp(0, nOfLines);
-        galvoRamp->setNRamp(1, nOfLines);
+        // n of samples of illumination ramp
+        int nRamp = static_cast<int>(nSamples * fraction);
+        galvoRamp->setNRamp(0, nRamp);
+        galvoRamp->setNRamp(1, nRamp);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
