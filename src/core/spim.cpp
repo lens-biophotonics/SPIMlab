@@ -90,6 +90,7 @@ void SPIM::initialize()
             orca->open(i);
             orca->setSensorMode(OrcaFlash::SENSOR_MODE_PROGRESSIVE);
             orca->setTriggerSource(OrcaFlash::TRIGGERSOURCE_EXTERNAL);
+            orca->setTriggerPolarity(OrcaFlash::POL_POSITIVE);
             orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
                                    2e-6);

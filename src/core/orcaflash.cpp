@@ -528,7 +528,11 @@ OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
 void OrcaFlash::setTriggerPolarity(
     const OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 {
+#if DCAM_VERSION == 400
+    setPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY, polarity);
+#else
     CALL_THROW(dcam_settriggerpolarity(h, polarity))
+#endif
 #ifndef WITH_HARDWARE
     Q_UNUSED(polarity)
 #endif
