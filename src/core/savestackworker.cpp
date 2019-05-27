@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include <QFile>
+#include <QDir>
 #include <QTextStream>
 #include <QFileInfo>
 
@@ -19,22 +20,26 @@ SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
 {
 }
 
-void SaveStackWorker::run()
+void SaveStackWorker::layOutFileOnDisk()
 {
-    QFileInfo fi = QFileInfo(outputFileName + ".raw");
-    stopRequested = false;
-    int fd = open(fi.filePath().toStdString().c_str(),
-                  O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd < 0) {
-        emit error(QString("Cannot open output file %1").arg(outputFileName));
+        emit error(QString("Cannot create output file %1").arg(rawFileName()));
         return;
     }
-    size_t n = 2 * 2048 * 2048;
-    int ret = posix_fallocate(
-        fd, 0, static_cast<off_t>(n) * static_cast<off_t>(frameCount));
+    off_t n = 2 * 2048 * 2048 * static_cast<off_t>(frameCount);
+    int ret = posix_fallocate(fd, 0, n);
+    close(fd);
+}
+
+void SaveStackWorker::run()
+{
+    stopRequested = false;
+
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     int i = 0;
     void *buf;
+    int n = 2 * 2048 * 2048;
 #ifdef WITH_HARDWARE
 #else
     buf = malloc(n);
@@ -43,6 +48,8 @@ void SaveStackWorker::run()
     connect(orca, &OrcaFlash::stopped, this, [ = ] () {
         stopRequested = true;
     });
+
+    int fd = open(rawFileName().toLatin1(), O_WRONLY);
 
     while (i < frameCount) {
         int32_t frame = i % nFramesInBuffer;
@@ -86,12 +93,14 @@ void SaveStackWorker::run()
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);
 
-    const QString mhdFileName = outputFileName + ".mhd";
-    QFile outFile(mhdFileName);
+    QFile outFile(mhdFileName());
     if (!outFile.open(QIODevice::WriteOnly)) {
-        emit error(QString("Cannot open output file %1").arg(mhdFileName));
+        emit error(QString("Cannot open output file %1")
+                   .arg(outFile.fileName()));
         return;
     };
+    QFileInfo fi = QFileInfo(rawFileName());
+
     QTextStream out(&outFile);
     out << "ObjectType = Image\n";
     out << "NDims = 3\n";
@@ -99,6 +108,11 @@ void SaveStackWorker::run()
     out << "ElementType = MET_USHORT\n";
     out << "ElementDataFile = " << fi.fileName() << "\n";
     outFile.close();
+}
+
+void SaveStackWorker::setOutputPath(const QString &value)
+{
+    outputPath = value;
 }
 
 void SaveStackWorker::setFrameCount(int32_t count)
@@ -109,4 +123,14 @@ void SaveStackWorker::setFrameCount(int32_t count)
 void SaveStackWorker::setOutputFileName(const QString &fname)
 {
     outputFileName = fname;
+}
+
+QString SaveStackWorker::rawFileName()
+{
+    return QString("%1.raw").arg(QDir(outputPath).filePath(outputFileName));
+}
+
+QString SaveStackWorker::mhdFileName()
+{
+    return QString("%1.mhd").arg(QDir(outputPath).filePath(outputFileName));
 }

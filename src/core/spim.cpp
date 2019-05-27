@@ -346,6 +346,7 @@ void SPIM::setupStateMachine()
 
     QList<SPIM_PI_DEVICES> stageEnumList;
     stageEnumList << stackStage << mosaicStages;
+    std::sort(stageEnumList.begin(), stageEnumList.end());
 
     QList<PIDevice *> stageList;
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
@@ -419,7 +420,7 @@ void SPIM::setupStateMachine()
         galvoRamp->stop();
         cameraTrigger->stop();
 
-        // go to target position
+        // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
         targetPositions[stackStage]
             = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
@@ -430,6 +431,7 @@ void SPIM::setupStateMachine()
         }
 
         try {
+            // move stages to target position
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
                 dev->setVelocity(scanVelocity);
@@ -440,8 +442,35 @@ void SPIM::setupStateMachine()
                              .arg(pos));
                 dev->move(pos);
             }
-        }
-        catch (std::runtime_error e) {
+
+            // prepare and start acquisition thread
+            for (OrcaFlash *orca : camList) {
+                QString fname;
+                for (SPIM_PI_DEVICES d_enum : stageEnumList) {
+                    double pos = targetPositions[d_enum];
+                    fname += QString("%1_").arg(pos);
+                }
+                fname += QString("cam_%1").arg(orca->getCameraIndex());
+
+                // setup thread
+                SaveStackWorker *acqWorker = new SaveStackWorker(orca);
+
+                acqWorker->setOutputPath(outputPath);
+                acqWorker->setOutputFileName(fname);
+                acqWorker->setFrameCount(nSteps[stackStage]);
+
+                connect(acqWorker, &QThread::finished,
+                        acqWorker, &QThread::deleteLater);
+
+                connect(acqWorker, &SaveStackWorker::error,
+                        this, &SPIM::onError);
+
+                acqWorker->layOutFileOnDisk();
+                connect(orca, &OrcaFlash::captureStarted, acqWorker, [ = ](){
+                    acqWorker->start();
+                });
+            }
+        } catch (std::runtime_error e) {
             onError(e.what());
             return;
         }
@@ -457,31 +486,6 @@ void SPIM::setupStateMachine()
         try {
             for (OrcaFlash *orca : camList) {
                 orca->cap_start();
-
-                SaveStackWorker *acqThread = new SaveStackWorker(orca);
-                QString fname;
-                QList<PIDevice *> tempStageList;
-                tempStageList << getPIDevice(stackStage);
-                for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
-                    tempStageList << getPIDevice(d_enum);
-                }
-                for (PIDevice *dev: tempStageList) {
-                    double pos = dev->getCommandedPosition().at(0);
-                    fname += QString("%1_").arg(pos);
-                }
-                fname += QString("cam_%1").arg(orca->getCameraIndex());
-
-                acqThread->setOutputFileName(QDir(outputPath).filePath(fname));
-
-                acqThread->setFrameCount(nSteps[stackStage]);
-
-                connect(acqThread, &QThread::finished,
-                        acqThread, &QThread::deleteLater);
-
-                connect(acqThread, &SaveStackWorker::error,
-                        this, &SPIM::onError);
-
-                acqThread->start();
             }
 
             galvoRamp->start();
