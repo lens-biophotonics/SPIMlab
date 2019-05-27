@@ -144,7 +144,8 @@ public:
     void setPropertyValue(DCAM::_DCAMIDPROP property, const double value);
     double getLineInterval();
     void setOutputTrigger(const ORCA_OUTPUT_TRIGGER_KIND kind,
-                          const ORCA_OUTPUT_TRIGGER_SOURCE source, const double period);
+                          const ORCA_OUTPUT_TRIGGER_SOURCE source,
+                          const double polarity, const double period);
     void setSensorMode(const ORCA_SENSOR_MODE mode);
     int nOfLines() const;
 

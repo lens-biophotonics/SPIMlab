@@ -93,9 +93,12 @@ void SPIM::initialize()
             orca->setTriggerPolarity(OrcaFlash::POL_POSITIVE);
             orca->setOutputTrigger(OrcaFlash::OUTPUT_TRIGGER_KIND_PROGRAMMABLE,
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
+                                   OrcaFlash::POL_POSITIVE,
                                    2e-6);
             orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            orca->setPropertyValue(
+                DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
         }
 
         for (int devnumber = 1; devnumber <= 16; ++devnumber) {

@@ -246,10 +246,11 @@ double OrcaFlash::getLineInterval()
 void OrcaFlash::setOutputTrigger(
     const OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
     const OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source,
-    const double period)
+    const double polarity, const double period)
 {
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_KIND, kind);
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_SOURCE, source);
+    setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_POLARITY, polarity);
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_PERIOD, period);
 }
 
