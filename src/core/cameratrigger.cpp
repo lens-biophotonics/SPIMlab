@@ -74,6 +74,9 @@ void CameraTrigger::configureTriggering()
 void CameraTrigger::setFreeRunEnabled(const bool enable)
 {
     isFreeRun = enable;
+    if (task) {
+        configureTriggering();
+    }
 }
 
 bool CameraTrigger::isFreeRunEnabled() const
