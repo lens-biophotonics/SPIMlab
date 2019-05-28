@@ -107,8 +107,11 @@ public:
     void startCapture();
     void stop();
 
-    void copyFrame(void * const buf, const size_t n, const int32_t frame);
-    void lockFrame(const int32_t frame, void **buf, int32_t *frameStamp = nullptr);
+    void copyFrame(void * const buf, const size_t n, const int32_t frame,
+                   int32_t *frameStamp, DCAM::DCAM_TIMESTAMP *timestamp);
+    void lockFrame(const int32_t frame, void **buf,
+                   int32_t *frameStamp = nullptr,
+                   DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
     void lockFrame(DCAM::DCAMBUF_FRAME *dcambufFrame);
     void copyLastFrame(void * const buf, const size_t n);
     void wait(const DCAM::_DWORD timeout = 1000,

@@ -329,7 +329,9 @@ void OrcaFlash::stop()
 #endif
 }
 
-void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
+void OrcaFlash::copyFrame(void * const buf, const size_t n,
+                          const int32_t frame, int32_t *frameStamp,
+                          DCAM_TIMESTAMP *timestamp)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(frame)
@@ -355,6 +357,14 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
     dcamframe.top = 0;
 
     throw400(dcambuf_copyframe(h, &dcamframe));
+
+    if (frameStamp != nullptr) {
+        *frameStamp = dcamframe.framestamp;
+    }
+
+    if (timestamp != nullptr) {
+        *timestamp = dcamframe.timestamp;
+    }
 #else
     void *top;
     int32 rowbytes;
@@ -367,7 +377,8 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n, const int32_t frame)
 #endif
 }
 
-void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp)
+void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
+                          DCAM_TIMESTAMP *timestamp)
 {
 #if DCAM_VERSION == 400
     DCAMBUF_FRAME dcamframe;
@@ -393,6 +404,9 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp)
         *frameStamp = frame;
 #endif
     }
+    if (timestamp != nullptr) {
+        *timestamp = dcamframe.timestamp;
+    }
 #endif
 }
 
@@ -406,7 +420,7 @@ void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
 
 void OrcaFlash::copyLastFrame(void * const buf, const size_t n)
 {
-    copyFrame(buf, n, -1);
+    copyFrame(buf, n, -1, nullptr, nullptr);
 }
 
 void OrcaFlash::wait(const _DWORD timeout, const DCAMWAIT_EVENT event)
