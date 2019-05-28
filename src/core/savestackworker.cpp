@@ -102,11 +102,13 @@ void SaveStackWorker::run()
     QFileInfo fi = QFileInfo(rawFileName());
 
     QTextStream out(&outFile);
-    out << "ObjectType = Image\n";
-    out << "NDims = 3\n";
-    out << "DimSize = 2048 2048 " << i << "\n";
-    out << "ElementType = MET_USHORT\n";
-    out << "ElementDataFile = " << fi.fileName() << "\n";
+    out << "ObjectType = Image" << endl;
+    out << "NDims = 3" << endl;
+    out << "BinaryData = True" << endl;
+    out << "BinaryDataByteOrderMSB = False" << endl;
+    out << "DimSize = 2048 2048 " << i << endl;
+    out << "ElementType = MET_USHORT" << endl;
+    out << "ElementDataFile = " << fi.fileName() << endl;
     outFile.close();
 }
 
