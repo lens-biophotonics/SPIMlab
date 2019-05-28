@@ -67,8 +67,8 @@ void ProgressWidget::setupUI()
             / spim().getTriggerRate());
 
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
-        progressBar->reset();
-        progressBar->setRange(0, spim().getTotalSteps());
+        progressBar->setRange(1, spim().getTotalSteps() + 1);
+        progressBar->setValue(1);
 
         // times 1000 to reduce round error in progress (when multiplying by
         // the trigger rate)
@@ -85,7 +85,7 @@ void ProgressWidget::setupUI()
 
     s = spim().getState(SPIM::STATE_CAPTURE);
     connect(s, &QState::entered, this, [ = ](){
-        stackProgressBar->reset();
+        stackProgressBar->setValue(0);
         stackProgressTimer->start(1000);
     });
 
