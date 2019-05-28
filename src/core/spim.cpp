@@ -273,11 +273,11 @@ void SPIM::_startAcquisition()
         for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
             stageList << getPIDevice(d_enum);
 
-            double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
-            double to = scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX);
-            double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
+            int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+            int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+            int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX) * pow(10, SPIM_SCAN_DECIMALS));
 
-            if (step == 0.) {
+            if (step == 0) {
                 nSteps[d_enum] = 1;
             }
             else {
@@ -287,6 +287,9 @@ void SPIM::_startAcquisition()
 
         totalSteps = 1;
         for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
+            if (nSteps[d_enum] > 1) {
+                nSteps[d_enum] += 1;
+            }
             totalSteps *= nSteps[d_enum];
             currentSteps[d_enum] = 0;
         }

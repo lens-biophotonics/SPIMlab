@@ -47,7 +47,7 @@ void AcquisitionWidget::setupUI()
 
         for (int i = 0; i < 3; ++i) {
             QDoubleSpinBox *sb = new QDoubleSpinBox();
-            sb->setDecimals(4);
+            sb->setDecimals(SPIM_SCAN_DECIMALS);
             sb->setSuffix(" mm");
             sb->setRange(-999, 999);
             sb->setValue(scanRange->at(i));
