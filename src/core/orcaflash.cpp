@@ -185,7 +185,9 @@ QString OrcaFlash::getLastError()
 {
 #ifdef WITH_HARDWARE
     char buf[2048];
-    CALL_THROW(dcam_getlasterror(h, buf, 2048))
+    if (!dcam_getlasterror(h, buf, 2048)) {
+        return QString("OrcaFlash: cannot get last error");
+    }
     return QString(buf);
 #else
     return QString("Cannot get last error. Compiled in DEMO mode.");
