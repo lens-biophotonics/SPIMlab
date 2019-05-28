@@ -63,7 +63,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     stackStage = PI_DEVICE_X_AXIS;
-    mosaicStages << PI_DEVICE_Y_AXIS;
+    mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_Z_AXIS;
 
     setupStateMachine();
 }
