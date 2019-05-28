@@ -15,6 +15,8 @@
 
 static Logger *logger = getLogger("SaveStackWorker");
 
+using namespace DCAM;
+
 SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
     : QThread(parent), orca(orca)
 {
@@ -34,8 +36,6 @@ void SaveStackWorker::layOutFileOnDisk()
 
 void SaveStackWorker::run()
 {
-    stopRequested = false;
-
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     int i = 0;
     void *buf;
@@ -45,16 +45,31 @@ void SaveStackWorker::run()
     buf = malloc(n);
 #endif
 
+    stopped = false;
+
     connect(orca, &OrcaFlash::stopped, this, [ = ] () {
-        stopRequested = true;
+        stopped = true;
     });
 
     int fd = open(rawFileName().toLatin1(), O_WRONLY);
 
-    while (i < frameCount) {
+    while (!stopped && i < frameCount) {
+        int32 mask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED;
+        int32 event;
+
+#ifdef WITH_HARDWARE
+        try {
+            event = orca->wait(1000, mask);
+        }
+        catch (std::runtime_error) {
+        }
+#endif
+
         int32_t frame = i % nFramesInBuffer;
         int32_t frameStamp = -1;
-        while (!stopRequested) {
+
+        switch (event) {
+        case DCAMWAIT_CAPEVENT_FRAMEREADY:
             try {
 #ifdef WITH_HARDWARE
                 orca->lockFrame(frame, &buf, &frameStamp);
@@ -62,28 +77,20 @@ void SaveStackWorker::run()
                 orca->copyFrame(buf, n, frame);
                 frameStamp = frame;
 #endif
-                break;
             }
-            catch (OrcaFlash::OrcaBusyException) {
-                usleep(5000);
+            catch (std::runtime_error) {
                 continue;
             }
-        }
-        if (stopRequested) {
-            break;
-        }
-        if (i == frameStamp) {
             write(fd, buf, n);
             i++;
-        }
-        else if (i > frameStamp) {  // try again
-            usleep(5000);
-        }
-        else {  // lost frame
-            logger->error("Lost frame");
+            break;
+        case DCAMERR_TIMEOUT:
+            break;
+        default:
             break;
         }
     }
+
 #ifdef WITH_HARDWARE
 #else
     free(buf);

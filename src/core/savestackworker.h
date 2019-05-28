@@ -27,7 +27,7 @@ protected:
     virtual void run();
 
 private:
-    bool stopRequested;
+    bool stopped;
     QString outputFileName;
     QString outputPath;
     int32_t frameCount;
