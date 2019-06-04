@@ -32,6 +32,7 @@ void ProgressWidget::setupUI()
         QSizePolicy::Expanding, progressBar->sizePolicy().verticalPolicy());
 
     stackProgressBar->setFormat("%p% (stack)");
+    progressBar->setFormat("%p% (%v/%m)");
 
     grid->addWidget(stackProgressBar, row, col++, 1, 1);
     grid->addWidget(progressBar, row++, col, 1, -1);
@@ -67,8 +68,8 @@ void ProgressWidget::setupUI()
             / spim().getTriggerRate());
 
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
-        progressBar->setRange(1, spim().getTotalSteps() + 1);
-        progressBar->setValue(1);
+        progressBar->setRange(0, spim().getTotalSteps());
+        progressBar->setValue(0);
 
         // times 1000 to reduce round error in progress (when multiplying by
         // the trigger rate)
@@ -93,10 +94,10 @@ void ProgressWidget::setupUI()
         stackProgressTimer->stop();
         stackProgressBar->reset();
         qint64 seconds = startDateTime->secsTo(QDateTime::currentDateTime());
-        int currentStep = spim().getCurrentStep() + 1;
+        int currentStep = spim().getCurrentStep();
 
         qint64 remainingSeconds = static_cast<qint64>(
-            round(seconds / currentStep * progressBar->maximum()));
+            round(seconds / (currentStep + 1) * progressBar->maximum()));
 
         int h = static_cast<int>(seconds / 3600);
         int m = (seconds % 3600) / 60;
