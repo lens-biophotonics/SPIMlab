@@ -75,6 +75,7 @@ SPIM::~SPIM()
 void SPIM::initialize()
 {
     try {
+        logger->info("Initializing microscope");
         int nOfCameras = DCAM::init_dcam();
         if (nOfCameras < SPIM_NCAMS) {
             throw std::runtime_error(
@@ -128,6 +129,7 @@ void SPIM::initialize()
         }
 
         emit initialized();
+        logger->info("Initialization completed");
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -247,7 +249,12 @@ void SPIM::startAcquisition()
 
 void SPIM::_startAcquisition()
 {
-    logger->info("Start acquisition");
+    if (freeRun) {
+        logger->info("Start free run");
+    }
+    else {
+        logger->info("Start acquisition");
+    }
     capturing = true;
 
     try {
@@ -293,6 +300,8 @@ void SPIM::_startAcquisition()
             totalSteps *= nSteps[d_enum];
             currentSteps[d_enum] = 0;
         }
+        logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
+                     .arg(totalSteps).arg(nSteps[stackStage]));
 
         currentStep = 0;
         QDir(outputPath).mkpath(".");
@@ -500,6 +509,7 @@ void SPIM::setupStateMachine()
 
             PIDevice *dev = getPIDevice(stackStage);
             dev->setVelocity(triggerRate * stackStep);
+            logger->info(QString("Start acquiring stack: %1/%2").arg(currentStep + 1).arg(totalSteps));
             logger->info(QString("Moving %1 to %2")
                          .arg(dev->getVerboseName())
                          .arg(stackTo));
@@ -515,6 +525,7 @@ void SPIM::setupStateMachine()
 
         // check exit condition
         if (currentStep >= totalSteps) {
+            logger->info("Acquisition completed");
             stop();
             return;
         }
@@ -537,7 +548,7 @@ void SPIM::setupStateMachine()
 
 void SPIM::stop()
 {
-    logger->info("stop");
+    logger->info("Stop");
     capturing = false;
     try {
         for (PIDevice * dev : piDevList) {
@@ -592,8 +603,9 @@ void SPIM::_setExposureTime(double expTime)
         double fraction = 0.95;
         triggerRate = fraction * frameRate;
 
-        logger->info(QString("Line interval: %1").arg(lineInterval));
-        logger->info(QString("Frame rate: %1").arg(frameRate));
+        logger->info(QString("Line interval: %1 us").arg(lineInterval));
+        logger->info(QString("Achievable frame rate: %1 Hz").arg(frameRate));
+        logger->info(QString("Acquisition rate: %1 Hz").arg(triggerRate));
 
         galvoRamp->setSampleRate(sampRate);
         cameraTrigger->setSampleRate(sampRate);

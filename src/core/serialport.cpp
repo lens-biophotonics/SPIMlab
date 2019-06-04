@@ -42,7 +42,7 @@ bool SerialPort::open(OpenMode mode)
         return false;
     }
 
-    logger->info(QString("Connected on ").append(portName()));
+    logger->info(QString("Connected on port ").append(portName()));
     ret = open_impl();
     if (ret)
         emit opened();
@@ -136,7 +136,7 @@ void SerialPort::close()
     QSerialPort::close();
     if (!isOpen()) {
         emit closed();
-        logger->info("Disconnected");
+        logger->info(QString("Disconnected port ").append(portName()));
     }
 }
 
@@ -162,7 +162,7 @@ double SerialPort::getDouble(const QString &cmd)
     bool ok;
     double f = str.toDouble(&ok);
     if (!ok) {
-        throw std::runtime_error("Cannot convert string to double");
+        throw std::runtime_error(QString("Cannot convert string to double: " + str).toLatin1());
     }
     return f;
 }
@@ -179,7 +179,7 @@ int SerialPort::getInt(const QString &cmd)
     bool ok;
     int integer = str.toInt(&ok);
     if (!ok) {
-        throw std::runtime_error("Cannot convert string to int");
+        throw std::runtime_error(QString("Cannot convert string to int: " + str).toLatin1());
     }
     return integer;
 }
