@@ -224,6 +224,7 @@ void MainWindow::on_aboutAction_triggered() const
     ts << "<i>Authors</i>:<br>";
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giacomo Mazzamuto<br>";
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ludovico Silvestri<br>";
+    ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vladislav Gavryusev<br>";
     ts << "<i>Date</i>:&nbsp; November 2018<br>";
     ts << "Qt version: " << qVersion();
 
