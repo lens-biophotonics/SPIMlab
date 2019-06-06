@@ -108,7 +108,8 @@ public:
     void stop();
 
     void copyFrame(void * const buf, const size_t n, const int32_t frame,
-                   int32_t *frameStamp, DCAM::DCAM_TIMESTAMP *timestamp);
+                   int32_t *frameStamp = nullptr,
+                   DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
     void lockFrame(const int32_t frame, void **buf,
                    int32_t *frameStamp = nullptr,
                    DCAM::DCAM_TIMESTAMP *timestamp = nullptr);

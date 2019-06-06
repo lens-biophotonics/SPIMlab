@@ -54,16 +54,14 @@ void SaveStackWorker::run()
     int fd = open(rawFileName().toLatin1(), O_WRONLY);
 
     while (!stopped && i < frameCount) {
+#ifdef WITH_HARDWARE
         int32 mask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED;
         int32 event;
-
-#ifdef WITH_HARDWARE
         try {
             event = orca->wait(1000, mask);
         }
         catch (std::runtime_error) {
         }
-#endif
 
         int32_t frame = i % nFramesInBuffer;
         int32_t frameStamp = -1;
@@ -71,12 +69,7 @@ void SaveStackWorker::run()
         switch (event) {
         case DCAMWAIT_CAPEVENT_FRAMEREADY:
             try {
-#ifdef WITH_HARDWARE
                 orca->lockFrame(frame, &buf, &frameStamp);
-#else
-                orca->copyFrame(buf, n, frame);
-                frameStamp = frame;
-#endif
             }
             catch (std::runtime_error) {
                 continue;
@@ -89,6 +82,11 @@ void SaveStackWorker::run()
         default:
             break;
         }
+#else
+        orca->copyLastFrame(buf, n);
+        write(fd, buf, n);
+        i++;
+#endif
     }
 
 #ifdef WITH_HARDWARE
