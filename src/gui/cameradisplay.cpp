@@ -9,6 +9,7 @@
 
 #include <qwt_slider.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_plot_marker.h>
 
 #include "core/spim.h"
 #include "core/orcaflash.h"
@@ -59,6 +60,13 @@ void CameraDisplay::setupUi()
     QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
     zoomer->setRubberBandPen(QColor(Qt::green));
     zoomer->setTrackerPen(QColor(Qt::green));
+
+    QwtPlotMarker *cursorMarker = new QwtPlotMarker();
+    cursorMarker->setLineStyle(static_cast<QwtPlotMarker::LineStyle>(QwtPlotMarker::VLine | QwtPlotMarker::HLine));
+    cursorMarker->setLinePen(Qt::green);
+    cursorMarker->setValue(1024, 1024);
+    cursorMarker->attach(plot);
+    cursorMarker->setVisible(false);
 
     QAction *autoscaleAction = new QAction("Autoscale");
     autoscaleAction->setCheckable(true);
@@ -142,8 +150,6 @@ void CameraDisplay::setupUi()
         updatePlotRange();
     });
 
-    QAction *action;
-
     connect(autoscaleAction, &QAction::triggered, this, [ = ](bool checked){
         plot->setZAutoscaleEnabled(checked);
         if (!checked) {
@@ -158,6 +164,7 @@ void CameraDisplay::setupUi()
     });
     menu->addAction(autoscaleAction);
 
+    QAction *action;
     action = new QAction("Set Z range...");
     connect(action, &QAction::triggered, dialog, &QDialog::show);
     menu->addAction(action);
@@ -179,6 +186,17 @@ void CameraDisplay::setupUi()
     action = new QAction("Reset zoom", this);
     connect(action, &QAction::triggered, this, [ = ](){
         zoomer->zoom(0);
+    });
+    menu->addAction(action);
+
+    menu->addSeparator();
+
+    action = new QAction("Show cross", this);
+    action->setCheckable(true);
+    action->setChecked(false);
+    connect(action, &QAction::triggered, this, [ = ](bool checked){
+        cursorMarker->setVisible(checked);
+        plot->replot();
     });
     menu->addAction(action);
 
