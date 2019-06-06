@@ -321,10 +321,8 @@ void OrcaFlash::stop()
     }
 #if DCAM_VERSION == 400
     cap_stop();
-    buf_release();
 #else
     CALL_THROW(dcam_idle(h))
-    CALL_THROW(dcam_freeframe(h))
     emit stopped();
 #endif
 }

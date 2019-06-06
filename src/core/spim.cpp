@@ -24,7 +24,7 @@ static Logger *logger = getLogger("SPIM");
 SPIM::SPIM(QObject *parent) : QObject(parent)
 {
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        camList.insert(i, new OrcaFlash());
+        camList.insert(i, new OrcaFlash(this));
     }
 
     cameraTrigger = new CameraTrigger(this);
@@ -100,6 +100,7 @@ void SPIM::initialize()
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
             orca->setPropertyValue(
                 DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
+            orca->buf_alloc(100);
         }
 
         for (int devnumber = 1; devnumber <= 16; ++devnumber) {
@@ -143,6 +144,12 @@ void SPIM::uninitialize()
         closeAllDaisyChains();
         cameraTrigger->clear();
         galvoRamp->clear();
+        foreach (OrcaFlash * orca, camList) {
+            if (orca->isOpen()) {
+                orca->buf_release();
+                orca->close();
+            }
+        }
         DCAM::uninit_dcam();
     } catch (std::runtime_error e) {
         onError(e.what());
@@ -343,8 +350,7 @@ void SPIM::setupStateMachine()
     connect(freeRunState, &QState::entered, this, [ = ](){
         try {
             for (OrcaFlash *orca : camList) {
-                orca->setNFramesInBuffer(10);
-                orca->startCapture();
+                orca->cap_start();
             }
             galvoRamp->start();
             cameraTrigger->start();
@@ -411,13 +417,6 @@ void SPIM::setupStateMachine()
         }
         catch (std::runtime_error e) {
             onError(e.what());
-        }
-    });
-
-    connect(acquisitionState, &QState::entered, this, [ = ](){
-        for (OrcaFlash *orca : camList) {
-            orca->buf_release();
-            orca->buf_alloc(100);      //FIXME
         }
     });
 

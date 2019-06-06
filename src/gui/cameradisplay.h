@@ -44,14 +44,14 @@ public:
 signals:
     void newImage();
 
-private slots:
-    void updateImage();
+protected:
+    virtual void run();
 
 private:
-    QTimer *timer;
     OrcaFlash *orca;
     double *buf;
     uint16_t *mybuf;
+    bool running;
 };
 
 #endif // CAMERADISPLAY_H

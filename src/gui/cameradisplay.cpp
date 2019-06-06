@@ -1,4 +1,3 @@
-#include <QTimer>
 #include <QHBoxLayout>
 #include <QCheckBox>
 #include <QDirIterator>
@@ -32,10 +31,6 @@ CameraDisplay::CameraDisplay(OrcaFlash *camera, QWidget *parent) :
 
     DisplayWorker *worker = new DisplayWorker(orca, vec.data());
     connect(worker, &DisplayWorker::newImage, this, &CameraDisplay::replot);
-    connect(orca, &OrcaFlash::captureStarted, this, [ = ](){
-        worker->start();
-    });
-    connect(orca, &OrcaFlash::stopped, worker, &QThread::quit);
 }
 
 CameraDisplay::~CameraDisplay()
@@ -256,13 +251,13 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, double *data, QObject *parent) :
 
     orca = camera;
     buf = data;
-    timer = new QTimer(this);
-    timer->setInterval(500);
 
-    void (QTimer::* mySlot)() = &QTimer::start;
-    connect(orca, &OrcaFlash::captureStarted, timer, mySlot);
-    connect(orca, &OrcaFlash::stopped, timer, &QTimer::stop);
-    connect(timer, &QTimer::timeout, this, &DisplayWorker::updateImage);
+    connect(orca, &OrcaFlash::captureStarted, this, [ = ](){
+        start();
+    });
+    connect(orca, &OrcaFlash::stopped, this, [ = ](){
+        running = false;
+    });
 }
 
 DisplayWorker::~DisplayWorker()
@@ -270,16 +265,23 @@ DisplayWorker::~DisplayWorker()
     delete[] mybuf;
 }
 
-void DisplayWorker::updateImage()
+void DisplayWorker::run()
 {
-    try {
-        orca->copyLastFrame(mybuf, 2048 * 2048 * sizeof(uint16_t));
+    running = true;
+    while (true) {
+        msleep(250);
+        if (!running) {
+            break;
+        }
+        try {
+            orca->copyLastFrame(mybuf, 2048 * 2048 * sizeof(uint16_t));
+        }
+        catch (std::exception) {
+            continue;
+        }
+        for (int i = 0; i < 2048 * 2048; ++i) {
+            buf[i] = mybuf[i];
+        }
+        emit newImage();
     }
-    catch (std::exception) {
-        return;
-    }
-    for (int i = 0; i < 2048 * 2048; ++i) {
-        buf[i] = mybuf[i];
-    }
-    emit newImage();
 }
