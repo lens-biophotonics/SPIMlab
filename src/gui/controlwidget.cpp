@@ -32,6 +32,11 @@ void ControlWidget::setupUi()
     connect(stopCapturePushButton, &QPushButton::clicked,
             &spim(), &SPIM::stop);
 
+    QPushButton *emergencyStopPushButton = new QPushButton("EMERGENCY STOP");
+    emergencyStopPushButton->setStyleSheet("QPushButton {color: red;}");
+    connect(emergencyStopPushButton, &QPushButton::clicked,
+            &spim(), &SPIM::emergencyStop);
+
     QLabel *statusLabel = new QLabel();
     statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 
@@ -42,6 +47,7 @@ void ControlWidget::setupUi()
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", false);
+    s->assignProperty(emergencyStopPushButton, "enabled", false);
     s->assignProperty(statusLabel, "text", "Uninitialized");
 
     s = spim().getState(SPIM::STATE_READY);
@@ -49,12 +55,14 @@ void ControlWidget::setupUi()
     s->assignProperty(startFreeRunPushButton, "enabled", true);
     s->assignProperty(startAcqPushButton, "enabled", true);
     s->assignProperty(stopCapturePushButton, "enabled", false);
+    s->assignProperty(emergencyStopPushButton, "enabled", true);
     s->assignProperty(statusLabel, "text", "Ready");
 
     s = spim().getState(SPIM::STATE_CAPTURING);
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", true);
+    s->assignProperty(emergencyStopPushButton, "enabled", true);
     s->assignProperty(statusLabel, "text", "Capturing");
 
     spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(
@@ -70,6 +78,7 @@ void ControlWidget::setupUi()
     layout->addWidget(startAcqPushButton);
     layout->addWidget(stopCapturePushButton);
     layout->addStretch();
+    layout->addWidget(emergencyStopPushButton);
     layout->addWidget(statusLabel);
 
     QGroupBox *gb = new QGroupBox("Controls");

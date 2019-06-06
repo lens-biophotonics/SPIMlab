@@ -99,6 +99,8 @@ public slots:
     void startFreeRun();
     void startAcquisition();
     void stop();
+    void haltStages();
+    void emergencyStop();
     void initialize();
     void uninitialize();
 

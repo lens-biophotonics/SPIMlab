@@ -167,6 +167,21 @@ void SPIM::setScanVelocity(double value)
     scanVelocity = value;
 }
 
+void SPIM::haltStages()
+{
+    for (PIDevice * dev : piDevList) {
+        if (dev->isConnected()) {
+            dev->halt();
+        }
+    }
+}
+
+void SPIM::emergencyStop()
+{
+    haltStages();
+    stop();
+}
+
 double SPIM::getTriggerRate() const
 {
     return triggerRate;
@@ -422,6 +437,7 @@ void SPIM::setupStateMachine()
 
     connect(acquisitionState, &QState::exited, this, [ = ](){
         pollTimer->stop();
+        haltStages();
     });
 
     connect(precaptureState, &QState::entered, this, [ = ](){
@@ -550,11 +566,6 @@ void SPIM::stop()
     logger->info("Stop");
     capturing = false;
     try {
-        for (PIDevice * dev : piDevList) {
-            if (dev->isConnected()) {
-                dev->halt();
-            }
-        }
         for (OrcaFlash * orca : camList) {
             orca->stop();
         }
