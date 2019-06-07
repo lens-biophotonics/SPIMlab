@@ -475,7 +475,7 @@ void SPIM::setupStateMachine()
                 QString fname;
                 for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                     double pos = targetPositions[d_enum];
-                    fname += QString("%1_").arg(pos);
+                    fname += QString("%1_").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
                 }
                 fname += QString("cam_%1").arg(orca->getCameraIndex());
 
