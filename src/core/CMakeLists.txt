@@ -30,6 +30,7 @@ set(SRC
 
     # Cobolt
     cobolt.cpp
+    filterwheel.cpp
     serialport.cpp
 
     logger.cpp
