@@ -12,6 +12,7 @@
 #include "core/galvoramp.h"
 #include "core/cameratrigger.h"
 #include "core/cobolt.h"
+#include "core/filterwheel.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"
@@ -113,6 +114,12 @@ void MainWindow::saveSettings() const
         mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
     }
 
+    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+        SerialPort *sp = spim().getFilterWheel(i)->getSerialPort();
+        group = SETTINGSGROUP_FILTERWHEEL(i);
+        mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
+    }
+
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
@@ -179,6 +186,13 @@ void MainWindow::loadSettings()
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         Cobolt *dev = spim().getLaser(i);
         group = SETTINGSGROUP_COBOLT(i);
+        dev->getSerialPort()->setPortName(
+            mySettings.value(group, SETTING_PORTNAME).toString());
+    }
+
+    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+        FilterWheel *dev = spim().getFilterWheel(i);
+        group = SETTINGSGROUP_FILTERWHEEL(i);
         dev->getSerialPort()->setPortName(
             mySettings.value(group, SETTING_PORTNAME).toString());
     }

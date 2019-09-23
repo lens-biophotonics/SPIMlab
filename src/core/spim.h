@@ -11,6 +11,9 @@
 #ifndef SPIM_NCOBOLT
 #define SPIM_NCOBOLT 4
 #endif
+#ifndef SPIM_NFILTERWHEEL
+#define SPIM_NFILTERWHEEL 2
+#endif
 #ifndef SPIM_NPIDEVICES
 #define SPIM_NPIDEVICES 5
 #endif
@@ -27,6 +30,7 @@ class CameraTrigger;
 class GalvoRamp;
 class PIDevice;
 class Cobolt;
+class FilterWheel;
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -75,6 +79,9 @@ public:
     QList<Cobolt *> getLaserDevices() const;
     Cobolt *getLaser(const int n) const;
 
+    QList<FilterWheel *> getFilterWheelDevices() const;
+    FilterWheel *getFilterWheel(const int n) const;
+
     SPIM_PI_DEVICES getStackStage() const;
 
     QList<SPIM_PI_DEVICES> getMosaicStages() const;
@@ -120,6 +127,7 @@ private:
     QList<PIDevice *>piDevList;
     QList<OrcaFlash *>camList;
     QList<Cobolt *>laserList;
+    QList<FilterWheel *>filterWheelList;
 
     QStateMachine *sm = nullptr;
 

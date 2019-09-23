@@ -116,6 +116,9 @@ void Settings::loadSettings()
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         groups << SETTINGSGROUP_COBOLT(i);
     }
+    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+        groups << SETTINGSGROUP_FILTERWHEEL(i);
+    }
 
     for (const QString &group : groups) {
         settings.beginGroup(group);

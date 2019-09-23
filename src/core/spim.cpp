@@ -12,6 +12,7 @@
 #include "galvoramp.h"
 #include "pidevice.h"
 #include "cobolt.h"
+#include "filterwheel.h"
 #include "serialport.h"
 #include "savestackworker.h"
 #include "logger.h"
@@ -60,6 +61,11 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         laserList.insert(i, new Cobolt());
+    }
+
+    filterWheelList.reserve(SPIM_NFILTERWHEEL);
+    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+        filterWheelList.insert(i, new FilterWheel());
     }
 
     stackStage = PI_DEVICE_X_AXIS;
@@ -210,6 +216,16 @@ QList<Cobolt *> SPIM::getLaserDevices() const
 Cobolt *SPIM::getLaser(const int n) const
 {
     return laserList.at(n);
+}
+
+QList<FilterWheel *> SPIM::getFilterWheelDevices() const
+{
+    return filterWheelList;
+}
+
+FilterWheel *SPIM::getFilterWheel(const int n) const
+{
+    return filterWheelList.at(n);
 }
 
 double SPIM::getExposureTime() const
