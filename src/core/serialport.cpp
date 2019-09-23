@@ -93,7 +93,7 @@ QString SerialPort::receiveMsg()
     QString msg = readAll();
 
     if (loggingEnabled) {
-        logger->info(">>> " + msg);
+        logger->info("<<< " + msg);
     }
     return msg.replace(lineEndTermination, "");
 }
@@ -109,17 +109,16 @@ void SerialPort::sendMsg(QString msg)
         RUNTIME_ERROR("QSerialPort::write");
     }
     if (loggingEnabled) {
-        logger->info("<<< " + msg);
+        logger->info(">>> " + msg);
     }
 }
 
-QString SerialPort::transceive(QString command)
+QString SerialPort::receive()
 {
     QString receivedLines;
-    sendMsg(command);
     do {
         if (bytesAvailable() <= 0) {
-            if (!waitForReadyRead(_transceiveTimeout)) {
+            if (!waitForReadyRead(_serialTimeout)) {
                 break;
             }
         }
@@ -129,6 +128,12 @@ QString SerialPort::transceive(QString command)
     while (bytesAvailable());
 
     return receivedLines;
+}
+
+QString SerialPort::transceive(QString command)
+{
+    sendMsg(command);
+    return receive();
 }
 
 void SerialPort::close()
@@ -186,12 +191,22 @@ int SerialPort::getInt(const QString &cmd)
 
 void SerialPort::setTimeout(int ms)
 {
-    _transceiveTimeout = ms;
+    _serialTimeout = ms;
+}
+
+QString SerialPort::getSerialNumber()
+{
+    return _serialNumber;
 }
 
 void SerialPort::setSerialNumber(const QString &serialNumber)
 {
     _serialNumber = serialNumber;
+}
+
+QString SerialPort::getLineEndTermination()
+{
+    return lineEndTermination;
 }
 
 void SerialPort::setLineEndTermination(const QString &termination)

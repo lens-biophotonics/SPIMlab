@@ -9,19 +9,21 @@ class SerialPort : public QSerialPort
     Q_OBJECT
 public:
     SerialPort(QObject *parent = nullptr);
-    void sendMsg(QString msg);
+    bool open(OpenMode mode = QIODevice::ReadWrite);
     void close();
+
+    void sendMsg(QString msg);
+    QString receive();
+    QString transceive(QString command);
+    double getDouble(const QString &cmd);
+    int getInt(const QString &cmd);
+    QString getSerialNumber();
 
     static QSerialPortInfo findPortFromSerialNumber(const QString &sn);
 
-    QString transceive(QString command);
-    bool open(OpenMode mode = QIODevice::ReadWrite);
-
-    double getDouble(const QString &cmd);
-    int getInt(const QString &cmd);
-
     void setSerialNumber(const QString &serialNumber);
     void setTimeout(int ms);
+    QString getLineEndTermination();
     void setLineEndTermination(const QString &termination);
     void setLoggingEnabled(bool enable);
 
@@ -42,7 +44,7 @@ private:
     QString _serialNumber;
     QString lineEndTermination;
     bool loggingEnabled = false;
-    int _transceiveTimeout;
+    int _serialTimeout;
 
     QState *connectedState;
     QState *disconnectedState;
