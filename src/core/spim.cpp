@@ -438,7 +438,7 @@ void SPIM::setupStateMachine()
         camBusyState->addTransition(orca, &OrcaFlash::stopped, finalState);
     }
 
-    // polling timer used to check when stages have reached targed
+    // polling timer used to check when stages have reached target
     QTimer *pollTimer = new QTimer(this);
     connect(pollTimer, &QTimer::timeout, this, [ = ](){
         try {
