@@ -326,15 +326,12 @@ void SPIM::_startAcquisition()
                 nSteps[d_enum] = 1;
             }
             else {
-                nSteps[d_enum] = static_cast<int>(ceil((to - from) / step));
+                nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
             }
         }
 
         totalSteps = 1;
         for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
-            if (nSteps[d_enum] > 1) {
-                nSteps[d_enum] += 1;
-            }
             totalSteps *= nSteps[d_enum];
             currentSteps[d_enum] = 0;
         }
