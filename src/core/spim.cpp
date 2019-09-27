@@ -11,13 +11,12 @@
 #include "cameratrigger.h"
 #include "galvoramp.h"
 #include "pidevice.h"
+#include "pidaisychain.h"
 #include "cobolt.h"
 #include "filterwheel.h"
 #include "serialport.h"
 #include "savestackworker.h"
 #include "logger.h"
-
-#include "pidaisychain.h"
 
 static Logger *logger = getLogger("SPIM");
 
@@ -248,14 +247,14 @@ CameraTrigger *SPIM::getCameraTrigger() const
     return cameraTrigger;
 }
 
+QList<OrcaFlash *> SPIM::getCameraDevices()
+{
+    return camList;
+}
+
 OrcaFlash *SPIM::getCamera(int camNumber) const
 {
     return camList.at(camNumber);
-}
-
-QList<OrcaFlash *> SPIM::getCameras()
-{
-    return camList;
 }
 
 PIDevice *SPIM::getPIDevice(const SPIM_PI_DEVICES dev) const
@@ -276,23 +275,19 @@ QList<PIDevice *> SPIM::getPIDevices() const
 void SPIM::startFreeRun()
 {
     freeRun = true;
+    logger->info("Start free run");
     _startAcquisition();
 }
 
 void SPIM::startAcquisition()
 {
     freeRun = false;
+    logger->info("Start acquisition");
     _startAcquisition();
 }
 
 void SPIM::_startAcquisition()
 {
-    if (freeRun) {
-        logger->info("Start free run");
-    }
-    else {
-        logger->info("Start acquisition");
-    }
     capturing = true;
 
     try {
@@ -537,7 +532,8 @@ void SPIM::setupStateMachine()
 
             PIDevice *dev = getPIDevice(stackStage);
             dev->setVelocity(triggerRate * stackStep);
-            logger->info(QString("Start acquiring stack: %1/%2").arg(currentStep + 1).arg(totalSteps));
+            logger->info(QString("Start acquiring stack: %1/%2")
+                         .arg(currentStep + 1).arg(totalSteps));
             logger->info(QString("Moving %1 to %2")
                          .arg(dev->getVerboseName())
                          .arg(stackTo));
@@ -626,6 +622,7 @@ void SPIM::_setExposureTime(double expTime)
         double fraction = 0.95;
         triggerRate = fraction * frameRate;
 
+        logger->info(QString("Exposure time: %1 ms").arg(expTime * 1000));
         logger->info(QString("Line interval: %1 us").arg(lineInterval));
         logger->info(QString("Achievable frame rate: %1 Hz").arg(frameRate));
         logger->info(QString("Acquisition rate: %1 Hz").arg(triggerRate));

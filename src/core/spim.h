@@ -61,7 +61,7 @@ public:
     virtual ~SPIM();
 
     OrcaFlash *getCamera(int camNumber) const;
-    QList<OrcaFlash *> getCameras();
+    QList<OrcaFlash *> getCameraDevices();
     void setCamera(OrcaFlash *getCamera);
 
     void setupGalvoRampTriggerSource(const QStringList &terminals);
