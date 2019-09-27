@@ -28,6 +28,7 @@ public:
     QVector<double> getWaveformParams() const;
     void setWaveformParams(const QVector<double> &values);
 
+    void updateWaveform();
     int nOfChannels();
 
     int getNRamp(const int channelNumber) const;

@@ -58,6 +58,7 @@ void GalvoWaveformWidget::setupUI()
             gr->setWaveformAmplitude(i, amplitudeSpinBox->value());
             gr->setWaveformOffset(i, offsetSpinBox->value());
             gr->setWaveformDelay(i, delaySpinBox->value() / 1000.);
+            gr->updateWaveform();
         };
 
         connect(offsetSpinBox, &DoubleSpinBox::returnPressed, this, apply);

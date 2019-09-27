@@ -67,6 +67,14 @@ void GalvoRamp::setWaveformParams(const QVector<double> &values)
     waveformParams = values;
 }
 
+void GalvoRamp::updateWaveform()
+{
+    if (isInitialized() && !isTaskDone()) {
+        computeWaveform();
+        write();
+    }
+}
+
 int GalvoRamp::nOfChannels()
 {
     return physicalChannels.count();
@@ -173,9 +181,4 @@ void GalvoRamp::setWaveformParam(
 {
     int idx = GALVORAMP_N_OF_PARAMS * channelNumber + paramID;
     waveformParams[idx] = val;
-
-    if (isInitialized()) {
-        computeWaveform();
-        write();
-    }
 }
