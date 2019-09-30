@@ -24,15 +24,14 @@ void GalvoRamp::setWaveformOffset(const int channelNumber, const double val)
     setWaveformParam(channelNumber, GALVORAMP_OFFSET_IDX, val);
 }
 
-void GalvoRamp::setWaveformDelay(const int channelNumber, const double s)
+void GalvoRamp::setWaveformDelay(const int channelNumber, const double val)
 {
-    setWaveformParam(channelNumber, GALVORAMP_DELAY_IDX, s);
+    setWaveformParam(channelNumber, GALVORAMP_DELAY_IDX, val);
 }
 
 void GalvoRamp::setWaveformRampFraction(const int channelNumber, const double val)
 {
     setWaveformParam(channelNumber, GALVORAMP_FRACTION_IDX, val);
-    nRamp[channelNumber] = round(nSamples * val);
 }
 
 double GalvoRamp::getWaveformAmplitude(const int channelNumber) const
@@ -104,22 +103,10 @@ void GalvoRamp::initializeTask_impl()
 
 void GalvoRamp::setPhysicalChannels_impl()
 {
-    nRamp.clear();
-    nRamp.fill(0, nOfChannels());
-
     waveformParams.clear();
     waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels());
 }
 
-int GalvoRamp::getNRamp(const int channelNumber) const
-{
-    return nRamp.at(channelNumber);
-}
-
-void GalvoRamp::setNRamp(const int channelNumber, const int value)
-{
-    nRamp[channelNumber] = value;
-}
 void GalvoRamp::write()
 {
     DAQmxErrChk(
@@ -140,25 +127,25 @@ void GalvoRamp::computeWaveform()
 {
     waveform.clear();
     waveform.reserve(static_cast<int>(nSamples) * nOfChannels());
-    int delay = static_cast<int>(nSamples) / nOfChannels();
+    double delay = static_cast<double>(nSamples) / nOfChannels() / getSampleRate(); // hardcoded delay between waveforms
     for (int i = 0; i < nOfChannels(); ++i) {
-        int d = delay * i;
-        d += waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_DELAY_IDX]
-             * getSampleRate();
         appendToWaveform(
             waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_OFFSET_IDX],
             waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_AMPLITUDE_IDX],
-            nRamp.at(i),
-            d);
+            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_FRACTION_IDX],
+            waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_DELAY_IDX] + delay * i);
     }
 }
 
 void GalvoRamp::appendToWaveform(
-    double offset, const double amplitude, const int nRamp, const int delay)
+    double offset, const double amplitude, const double fraction, const double delay)
 {
     int nSamples = static_cast<int>(this->nSamples);
-    QVector<double> temp(static_cast<int>(nSamples), 0);
+    int nRamp = static_cast<int>(floor(nSamples * fraction));
+    int nDelay = static_cast<int>(round(delay * getSampleRate()));
     double halfAmplitude = 0.5 * amplitude;
+    QVector<double> temp(static_cast<int>(nSamples), 0);
+
     int i = 0;
     for (; i < nRamp; ++i)
         temp[i] = offset - halfAmplitude + amplitude * i / nRamp;
@@ -166,15 +153,15 @@ void GalvoRamp::appendToWaveform(
     for (; i < nSamples; ++i)
         temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
 
-    if (delay == 0 || delay == temp.size()) {
+    if (nDelay == 0 || nDelay == temp.size()) {
         waveform << temp;
     }
-    else if (delay > 0) {
-        waveform << temp.mid(nSamples - delay);
-        waveform << temp.mid(0, nSamples - delay);
+    else if (nDelay > 0) {
+        waveform << temp.mid(nSamples - nDelay);
+        waveform << temp.mid(0, nSamples - nDelay);
     } else {
-        waveform << temp.mid(-delay);
-        waveform << temp.mid(0, -delay);
+        waveform << temp.mid(-nDelay);
+        waveform << temp.mid(0, -nDelay);
     }
 }
 

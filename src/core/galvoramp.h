@@ -18,7 +18,7 @@ public:
 
     void setWaveformAmplitude(const int channelNumber, const double val);
     void setWaveformOffset(const int channelNumber, const double val);
-    void setWaveformDelay(const int channelNumber, const double s);
+    void setWaveformDelay(const int channelNumber, const double val);
     void setWaveformRampFraction(const int channelNumber, const double val);
 
     double getWaveformAmplitude(const int channelNumber) const;
@@ -30,10 +30,8 @@ public:
     void setWaveformParams(const QVector<double> &values);
 
     void updateWaveform();
-    int nOfChannels();
 
-    int getNRamp(const int channelNumber) const;
-    void setNRamp(const int channelNumber, const int value);
+    int nOfChannels();
 
 protected:
     virtual void initializeTask_impl();
@@ -43,13 +41,11 @@ private:
     QVector<double> waveformParams;
     QVector<double> waveform;
 
-    QVector<int> nRamp;
-
     void write();
     void computeWaveform();
     void appendToWaveform(double offset,
-                          const double amplitude, const int nRamp,
-                          const int delay);
+                          const double amplitude, const double fraction,
+                          const double delay);
     void setWaveformParam(const int channelNumber,
                           const int paramID, const double val);
 };

@@ -637,10 +637,6 @@ void SPIM::_setExposureTime(double expTime)
         // to reinitialize NI output tasks with updated waveforms
         galvoRamp->clear();
         cameraTrigger->clear();
-        // n of samples of illumination ramp
-        int nRamp = static_cast<int>(nSamples * fraction);
-        galvoRamp->setNRamp(0, nRamp);
-        galvoRamp->setNRamp(1, nRamp);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
