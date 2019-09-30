@@ -33,9 +33,17 @@ void NISettingsWidget::setupUI()
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getDOLines());
         comboBox->setCurrentText(
-            spim().getCameraTrigger()->getPhysicalChannel(i));
+            spim().getCameraTrigger()->getPhysicalChannel(i * 2));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerCtrComboBoxList.insert(i, comboBox);
+
+        grid->addWidget(new QLabel("Blanking"), row, i * 2 + 0);
+        comboBox = new QComboBox();
+        comboBox->insertItems(0, NI::getDOLines());
+        comboBox->setCurrentText(
+            spim().getCameraTrigger()->getPhysicalChannel(i * 2 + 1));
+        grid->addWidget(comboBox, row++, i * 2 + 1);
+        aotfBlankingComboBoxList.insert(i, comboBox);
 
         grid->addWidget(new QLabel(QString("Galvo ramp %1").arg(i)),
                         row++, i * 2 + 0, 1, 2);
@@ -80,6 +88,7 @@ void NISettingsWidget::apply()
     for (int i = 0; i < 2; ++i) {
         galvoPhysChan << galvoRampComboBoxList.at(i)->currentText();
         ctrs << cameraTriggerCtrComboBoxList.at(i)->currentText();
+        ctrs << aotfBlankingComboBoxList.at(i)->currentText();
     }
     GalvoRamp *gr = spim().getGalvoRamp();
     gr->setPhysicalChannels(galvoPhysChan);

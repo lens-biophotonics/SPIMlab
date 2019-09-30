@@ -21,6 +21,7 @@ private:
     void setupUI();
 
     QList<QComboBox *> galvoRampComboBoxList;
+    QList<QComboBox *> aotfBlankingComboBoxList;
     QList<QComboBox *> cameraTriggerCtrComboBoxList;
     QComboBox *PITriggerOutput;
     QComboBox *galvoRampTrigger;
