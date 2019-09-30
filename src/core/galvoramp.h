@@ -5,10 +5,11 @@
 
 #include "niabstracttask.h"
 
-#define GALVORAMP_N_OF_PARAMS 3
+#define GALVORAMP_N_OF_PARAMS 4
 #define GALVORAMP_OFFSET_IDX 0
 #define GALVORAMP_AMPLITUDE_IDX 1
 #define GALVORAMP_DELAY_IDX 2
+#define GALVORAMP_FRACTION_IDX 3
 
 class GalvoRamp : public NIAbstractTask
 {

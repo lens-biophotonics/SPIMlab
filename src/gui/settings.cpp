@@ -85,9 +85,9 @@ void Settings::loadSettings()
     settings.beginGroup(groupName);
 
     SET_VALUE(groupName,
-              SETTING_PHYSCHANS, QStringList({"Dev1/ao0", "Dev1/ao1"}));
+              SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
     SET_VALUE(groupName, SETTING_WFPARAMS, QList<QVariant>(
-                  {0.2, 2., 0, 0.2, 2., 0}));
+                  {0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
     SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI0");
 
     settings.endGroup();
@@ -106,7 +106,7 @@ void Settings::loadSettings()
     groupName = SETTINGSGROUP_ACQUISITION;
     settings.beginGroup(groupName);
 
-    SET_VALUE(groupName, SETTING_EXPTIME, 0.1);
+    SET_VALUE(groupName, SETTING_EXPTIME, 0.15);
     SET_VALUE(groupName, SETTING_OUTPUTPATH,
               QDir::toNativeSeparators(QDir::homePath()));
 

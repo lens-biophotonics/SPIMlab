@@ -3,7 +3,7 @@
 #include "galvoramp.h"
 #include "logger.h"
 
-static Logger *logger = getLogger("CameraTrigger");
+static Logger *logger = getLogger("GalvorampTrigger");
 
 using namespace NI;
 
@@ -31,6 +31,7 @@ void GalvoRamp::setWaveformDelay(const int channelNumber, const double s)
 
 void GalvoRamp::setWaveformRampFraction(const int channelNumber, const double val)
 {
+    setWaveformParam(channelNumber, GALVORAMP_FRACTION_IDX, val);
     nRamp[channelNumber] = round(nSamples * val);
 }
 
@@ -54,7 +55,8 @@ double GalvoRamp::getWaveformDelay(const int channelNumber) const
 
 double GalvoRamp::getWaveformRampFraction(const int channelNumber) const
 {
-    return 1. * nSamples / nRamp.at(channelNumber);
+    return waveformParams[
+        channelNumber * GALVORAMP_N_OF_PARAMS + GALVORAMP_FRACTION_IDX];
 }
 
 QVector<double> GalvoRamp::getWaveformParams() const
