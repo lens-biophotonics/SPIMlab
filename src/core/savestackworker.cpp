@@ -40,6 +40,8 @@ void SaveStackWorker::run()
     int i = 0;
     void *buf;
     int n = 2 * 2048 * 2048;
+    uint64_t timeStamps[frameCount] = {0};
+
 #ifdef WITH_HARDWARE
 #else
     buf = malloc(n);
@@ -55,6 +57,11 @@ void SaveStackWorker::run()
 
     while (!stopped && i < frameCount) {
 #ifdef WITH_HARDWARE
+        int32_t frame = i % nFramesInBuffer;
+        int32_t frameStamp = -1;
+
+        DCAM_TIMESTAMP timeStamp;
+
         int32 mask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED;
         int32 event;
         try {
@@ -63,13 +70,22 @@ void SaveStackWorker::run()
         catch (std::runtime_error) {
         }
 
-        int32_t frame = i % nFramesInBuffer;
-        int32_t frameStamp = -1;
-
         switch (event) {
         case DCAMWAIT_CAPEVENT_FRAMEREADY:
             try {
-                orca->lockFrame(frame, &buf, &frameStamp);
+                orca->lockFrame(frame, &buf, &frameStamp, &timeStamp);
+                timeStamps[i] = timeStamp.sec * 1e6 + timeStamp.microsec;
+                if (i != 0) {
+                    double delta = double(timeStamps[i]) - double(timeStamps[i - 1]);
+                    if (abs(delta) > timeout) {
+                        logger->error(QString("Camera %1 timeout by %2 ms at frame %3")
+                                      .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
+                    }
+                    else if (abs(delta) > timeout * 0.75 || abs(delta) < timeout * 0.25) {
+                        logger->warning(QString("Camera %1 timeout by %2 ms at frame %3")
+                                        .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
+                    }
+                }
             }
             catch (std::runtime_error) {
                 continue;
@@ -78,6 +94,7 @@ void SaveStackWorker::run()
             i++;
             break;
         case DCAMERR_TIMEOUT:
+            logger->warning(QString("Camera %1 timeout").arg(orca->getCameraIndex()));
             break;
         default:
             break;
@@ -140,4 +157,14 @@ QString SaveStackWorker::rawFileName()
 QString SaveStackWorker::mhdFileName()
 {
     return QString("%1.mhd").arg(QDir(outputPath).filePath(outputFileName));
+}
+
+double SaveStackWorker::getTimeout() const
+{
+    return timeout;
+}
+
+void SaveStackWorker::setTimeout(double value)
+{
+    timeout = value;
 }

@@ -490,6 +490,7 @@ void SPIM::setupStateMachine()
                 // setup thread
                 SaveStackWorker *acqWorker = new SaveStackWorker(orca);
 
+                acqWorker->setTimeout(2 * 1e6 / getTriggerRate());
                 acqWorker->setOutputPath(outputPath);
                 acqWorker->setOutputFileName(fname);
                 acqWorker->setFrameCount(nSteps[stackStage]);
