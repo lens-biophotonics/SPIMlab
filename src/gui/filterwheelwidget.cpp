@@ -159,7 +159,6 @@ void FilterWheelWidget::connectDevice()
         fw->getSerialPort()->setPortName(
             serialPortComboBox->currentData().toString());
         fw->open();
-        fw->setPositionNumber(fw->getPositionCount());
     }
     catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());

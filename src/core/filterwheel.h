@@ -45,17 +45,12 @@ public:
     FilterWheel::SERIAL_BAUD_RATE getBaudRate();
     int getPosition();
     int getPositionCount();
-    int getPositionNumber() const;
     int getMotionTime() const;
     QStringList getFilterListName() const;
     QString getFilterName(int pos);
-    void setPositionNumber(const int value);
     FilterWheel::IDLE_STATE_SENSOR_STATE getSensorMode();
     FilterWheel::SPEED_MODE getSpeedMode();
     FilterWheel::TRIGGER_MODE getTriggerMode();
-
-    QString getVerboseName() const;
-    void setVerboseName(const QString &value);
 
 public slots:
     void open();
@@ -77,7 +72,7 @@ signals:
 private:
     SerialPort *serial = nullptr;
     QString verboseName;
-    int positionNumber;
+    int positionCount;
     int motionTime; // ms
 
     void ping();

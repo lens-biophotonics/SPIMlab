@@ -10,6 +10,7 @@ FilterWheel::FilterWheel(QObject *parent) : QObject(parent)
 {
     serial = new SerialPort(this);
     serial->setLineEndTermination("\r");
+    positionCount = -1;
     setMotionTime(FILTERWHEEL_MOTION_TIME); // wait in ms between reaching any position
 }
 
@@ -25,7 +26,7 @@ void FilterWheel::open()
         throw std::runtime_error(QString("Cannot connect to Filter Wheel with serial number " + serial->getSerialNumber()).toLatin1());
     else {
         serial->readAll();  // empty input buffer
-        setPositionNumber(getPositionCount());
+        getPositionCount();
         emit connected();
     }
 }
@@ -60,23 +61,16 @@ int FilterWheel::getPosition()
 
 /**
  * @brief FilterWheel::getPositionCount
- * @return wheel type, has either 6 or 12 filter slots
+ * @return number of filter slots (either 6 or 12)
  */
 
 int FilterWheel::getPositionCount()
 {
-    QString str = transceiveChkSyntaxError("pcount?");
-    return castStringToIntChkError(str);
-}
-
-int FilterWheel::getPositionNumber() const
-{
-    return positionNumber;
-}
-
-void FilterWheel::setPositionNumber(const int value)
-{
-    positionNumber = value;
+    if (positionCount < 0) {
+        QString str = transceiveChkSyntaxError("pcount?");
+        positionCount = castStringToIntChkError(str);
+    }
+    return positionCount;
 }
 
 int FilterWheel::getMotionTime() const
@@ -137,8 +131,8 @@ void FilterWheel::setBaudRate(FilterWheel::SERIAL_BAUD_RATE rate)
 
 QString FilterWheel::setPosition(int n)
 {
-    if (n < 1 || n > positionNumber)
-        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(n).arg(positionNumber);
+    if (n < 1 || n > positionCount)
+        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(n).arg(positionCount);
     else
         return transceiveChkSyntaxError(QString("pos=%1").arg(n));
 }
@@ -168,16 +162,6 @@ void FilterWheel::ping()
     transceiveChkSyntaxError("?");
 }
 
-QString FilterWheel::getVerboseName() const
-{
-    return verboseName;
-}
-
-void FilterWheel::setVerboseName(const QString &value)
-{
-    verboseName = value;
-}
-
 QStringList FilterWheel::getFilterListName() const // TODO Dynamically load from text file?
 {
     QStringList list;
@@ -188,8 +172,8 @@ QStringList FilterWheel::getFilterListName() const // TODO Dynamically load from
 
 QString FilterWheel::getFilterName(int pos)
 {
-    if (pos < 1 || pos > positionNumber) {
-        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(pos).arg(positionNumber);
+    if (pos < 1 || pos > positionCount) {
+        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(pos).arg(positionCount);
     }
     else {
         QStringList list = getFilterListName();
