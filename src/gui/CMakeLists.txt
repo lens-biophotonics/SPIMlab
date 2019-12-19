@@ -38,7 +38,7 @@ set(SPIMlab_SRCS
 
     centralwidget.cpp
     camerapage.cpp
-    coboltpage.cpp
+    laserpage.cpp
     settingspage.cpp
     logwidget.cpp
     cameradisplay.cpp
