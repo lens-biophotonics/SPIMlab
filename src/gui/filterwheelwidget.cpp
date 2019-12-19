@@ -85,13 +85,10 @@ void FilterWheelWidget::setupUI()
     grid->addWidget(filterComboBox, row++, 1, 1, 1);
 
     QGroupBox *gb = new QGroupBox("Filter wheel");
-    //QGroupBox *gb = new QGroupBox(device->getVerboseName()); // to have assigned device name
-    //gb->setStyleSheet("QGroupBox{padding-top:1em; margin-top:-1em}"); // to make title disappear
     gb->setLayout(grid);
 
     QVBoxLayout *vlayout = new QVBoxLayout();
     vlayout->addWidget(gb);
-    //vlayout->setMargin(0);
 
     setLayout(vlayout);
 
@@ -118,7 +115,6 @@ void FilterWheelWidget::setupUI()
 
     connect(filterComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [ = ](){
         try {
-            //logger->info(QString("current index %1").arg(filterComboBox->currentIndex()));
             if (filterComboBox->currentIndex() >= 0 && motionEnabled) {
                 int posnew = filterComboBox->currentIndex() + 1;
                 fw->setPosition(posnew);
