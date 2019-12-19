@@ -22,9 +22,11 @@ FilterWheel::~FilterWheel()
 void FilterWheel::open()
 {
     bool ret = serial->open();
-    if (!ret)
-        throw std::runtime_error(QString("Cannot connect to Filter Wheel with serial number " + serial->getSerialNumber()).toLatin1());
-    else {
+    if (!ret) {
+        QString msg("Cannot connect to Filter Wheel on serial port %1");
+        msg = msg.arg(serial->portName());
+        throw std::runtime_error(msg.toLatin1());
+    } else {
         serial->readAll();  // empty input buffer
         getPositionCount();
         emit connected();
