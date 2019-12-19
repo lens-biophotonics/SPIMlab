@@ -9,6 +9,7 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     QVBoxLayout *layout = new QVBoxLayout();
 
     textEdit = new QTextEdit();
+    textEdit->setReadOnly(true);
     layout->addWidget(textEdit);
     setLayout(layout);
 
