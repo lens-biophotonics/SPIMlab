@@ -12,7 +12,8 @@ class FilterWheelWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FilterWheelWidget(FilterWheel *fw, QWidget *parent = nullptr);
+    explicit FilterWheelWidget(
+        FilterWheel *fw, int idx, QWidget *parent = nullptr);
 
 signals:
 
@@ -25,9 +26,11 @@ private:
     void setupUI();
 
     FilterWheel *fw;
+    int idx;
     QComboBox *serialPortComboBox;
     QComboBox *filterComboBox;
     QLabel *filterLabel;
+    QStringList filterList;
     bool motionEnabled = false;
 };
 

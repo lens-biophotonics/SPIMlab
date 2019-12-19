@@ -21,7 +21,7 @@ void CoboltPage::setupUI()
     }
 
     for (int i = 0; i < SPIM_NFILTERWHEEL; i++) {
-        hf->addWidget(new FilterWheelWidget(spim().getFilterWheel(i)));
+        hf->addWidget(new FilterWheelWidget(spim().getFilterWheel(i), i));
     }
     hf->addStretch();
 

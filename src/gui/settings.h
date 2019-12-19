@@ -39,6 +39,8 @@
 #define SETTING_VELOCITY "velocity"
 #define SETTING_STEPSIZE "stepsize"
 
+#define SETTING_FILTER_LIST "filterList"
+
 
 typedef QMap<QString, QVariant> SettingsMap;
 
