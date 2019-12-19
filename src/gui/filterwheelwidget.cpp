@@ -98,11 +98,14 @@ void FilterWheelWidget::setupUI()
             this, &FilterWheelWidget::disconnectDevice);
 
     connect(fw, &FilterWheel::connected, this, [ = ](){
+        // TODO: remove hardcoded filter names
+        QString str = "NF03-405/488/561/635E,FF02-447/60,FF03-525/50,FF01-600/52,FF01-697/70,empty";
+        QStringList filterList = str.split(",");
+        filterComboBox->addItems(filterList);
+
         try {
-            QString currfilter = fw->getFilterName(fw->getPosition());
-            logger->info(QString("Current filter: %1").arg(currfilter));
-            filterComboBox->addItems(fw->getFilterListName());
-            filterComboBox->setCurrentIndex(filterComboBox->findText(currfilter));
+            filterComboBox->setCurrentIndex(fw->getPosition() - 1);
+            logger->info(QString("Current filter: %1").arg(filterComboBox->currentText()));
             motionEnabled = true;
         }
         catch (std::runtime_error) {

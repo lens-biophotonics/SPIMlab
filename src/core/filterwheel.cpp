@@ -162,25 +162,6 @@ void FilterWheel::ping()
     transceiveChkSyntaxError("?");
 }
 
-QStringList FilterWheel::getFilterListName() const // TODO Dynamically load from text file?
-{
-    QStringList list;
-    QString str = "NF03-405/488/561/635E,FF02-447/60,FF03-525/50,FF01-600/52,FF01-697/70,empty";
-    list = str.split(",");
-    return list;
-}
-
-QString FilterWheel::getFilterName(int pos)
-{
-    if (pos < 1 || pos > positionCount) {
-        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(pos).arg(positionCount);
-    }
-    else {
-        QStringList list = getFilterListName();
-        return list.at(pos - 1);
-    }
-}
-
 QString FilterWheel::transceiveChkSyntaxError(QString cmd)
 {
     serial->sendMsg(cmd);

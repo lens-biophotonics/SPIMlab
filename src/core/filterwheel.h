@@ -46,8 +46,6 @@ public:
     int getPosition();
     int getPositionCount();
     int getMotionTime() const;
-    QStringList getFilterListName() const;
-    QString getFilterName(int pos);
     FilterWheel::IDLE_STATE_SENSOR_STATE getSensorMode();
     FilterWheel::SPEED_MODE getSpeedMode();
     FilterWheel::TRIGGER_MODE getTriggerMode();
