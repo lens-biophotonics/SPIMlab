@@ -6,6 +6,9 @@
 #include <QState>
 #include <QMessageBox>
 #include <QTimer>
+#include <QListWidget>
+#include <QStringListModel>
+#include <QDialogButtonBox>
 
 #include "core/filterwheel.h"
 #include "core/serialport.h"
@@ -14,11 +17,12 @@
 #include "filterwheelwidget.h"
 #include "customspinbox.h"
 #include "utils.h"
+#include "settings.h"
 
 static Logger *logger = getLogger("SerialPort");
 
-FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, QWidget *parent) :
-    QWidget(parent), fw(fw)
+FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent) :
+    QWidget(parent), fw(fw), idx(idx)
 {
     setupUI();
 
@@ -81,8 +85,13 @@ void FilterWheelWidget::setupUI()
     filterComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
     filterComboBox->setMinimumContentsLength(15);
 
+    QPushButton *setFilterNamesPushButton = new QPushButton("Set Filter Names...");
+    connect(setFilterNamesPushButton, &QPushButton::clicked,
+            this, &FilterWheelWidget::execFilterNamesDialog);
+
     grid->addWidget(filterLabel, row, 0, 1, 1);
     grid->addWidget(filterComboBox, row++, 1, 1, 1);
+    grid->addWidget(setFilterNamesPushButton, row++, 1, 1, 1);
 
     QGroupBox *gb = new QGroupBox("Filter wheel");
     gb->setLayout(grid);
@@ -153,6 +162,53 @@ void FilterWheelWidget::setupUI()
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
+}
+
+void FilterWheelWidget::execFilterNamesDialog()
+{
+    QDialog *dialog = new QDialog();
+    dialog->setModal(true);
+    dialog->setWindowTitle("Set filter names");
+    dialog->deleteLater();
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(
+        QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+
+    QListWidget *listWidget = new QListWidget();
+    listWidget->setDragDropMode(QAbstractItemView::DragDrop);
+    listWidget->setDefaultDropAction(Qt::MoveAction);
+    QString group = SETTINGSGROUP_FILTERWHEEL(idx);
+    QStringList sl =
+        settings().value(group, SETTING_FILTER_LIST).toStringList();
+    listWidget->insertItems(0, sl);
+
+    for (int i = 0; i < listWidget->count(); ++i)
+    {
+        QListWidgetItem *item = listWidget->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+    }
+
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addWidget(listWidget);
+    vLayout->addWidget(buttonBox);
+
+    dialog->setLayout(vLayout);
+
+    dialog->setFixedSize(dialog->size());
+
+    if (dialog->exec() != QDialog::Accepted) {
+        return;
+    }
+
+    sl.clear();
+    for (int i = 0; i < listWidget->count(); ++i)
+    {
+        sl << listWidget->item(i)->text();
+    }
+    settings().setValue(group, SETTING_FILTER_LIST, sl);
 }
 
 void FilterWheelWidget::connectDevice()

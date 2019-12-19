@@ -116,14 +116,27 @@ void Settings::loadSettings()
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         groups << SETTINGSGROUP_COBOLT(i);
     }
+    for (const QString &group : groups) {
+        settings.beginGroup(group);
+
+        SET_VALUE(group, SETTING_PORTNAME, QString());
+
+        settings.endGroup();
+    }
+
+    groups.clear();
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
         groups << SETTINGSGROUP_FILTERWHEEL(i);
     }
 
+    QStringList filterNames;
+    std::fill_n(std::back_inserter(filterNames), 6, "empty");
+
     for (const QString &group : groups) {
         settings.beginGroup(group);
 
-        SET_VALUE(group, SETTING_PORTNAME, QVariant());
+        SET_VALUE(group, SETTING_PORTNAME, QString());
+        SET_VALUE(group, SETTING_FILTER_LIST, filterNames);
 
         settings.endGroup();
     }
