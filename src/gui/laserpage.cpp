@@ -2,16 +2,16 @@
 
 #include "core/spim.h"
 
-#include "coboltpage.h"
+#include "laserpage.h"
 #include "coboltwidget.h"
 #include "filterwheelwidget.h"
 
-CoboltPage::CoboltPage(QWidget *parent) : QWidget(parent)
+LaserPage::LaserPage(QWidget *parent) : QWidget(parent)
 {
     setupUI();
 }
 
-void CoboltPage::setupUI()
+void LaserPage::setupUI()
 {
     QBoxLayout *hl = new QHBoxLayout();
     QBoxLayout *hf = new QHBoxLayout();
