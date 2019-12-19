@@ -65,10 +65,13 @@ void FilterWheelWidget::setupUI()
     grid->addWidget(new QLabel("Serial port"), row, 0, 1, 1);
     grid->addWidget(serialPortComboBox, row++, 1, 1, 1);
 
+    QHBoxLayout *hLayout = new QHBoxLayout();
+
     QPushButton *connectPushButton = new QPushButton("Connect");
     QPushButton *disconnectPushButton = new QPushButton("Disconnect");
-    grid->addWidget(connectPushButton, row, 0, 1, 1);
-    grid->addWidget(disconnectPushButton, row++, 1, 1, 1);
+    hLayout->addWidget(connectPushButton);
+    hLayout->addWidget(disconnectPushButton);
+    grid->addLayout(hLayout, row++, 1, 1, 1);
 
     filterLabel = new QLabel("Filter:");
     filterComboBox = new QComboBox();
