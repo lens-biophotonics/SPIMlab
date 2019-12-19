@@ -40,6 +40,9 @@ FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent) 
 
 void FilterWheelWidget::setupUI()
 {
+    QString group = SETTINGSGROUP_FILTERWHEEL(idx);
+    filterList =  settings().value(group, SETTING_FILTER_LIST).toStringList();
+
     QGridLayout *grid = new QGridLayout();
 
     serialPortComboBox = new QComboBox();
@@ -86,8 +89,6 @@ void FilterWheelWidget::setupUI()
     filterComboBox->setMinimumContentsLength(15);
 
     QPushButton *setFilterNamesPushButton = new QPushButton("Set Filter Names...");
-    connect(setFilterNamesPushButton, &QPushButton::clicked,
-            this, &FilterWheelWidget::execFilterNamesDialog);
 
     grid->addWidget(filterLabel, row, 0, 1, 1);
     grid->addWidget(filterComboBox, row++, 1, 1, 1);
@@ -107,11 +108,7 @@ void FilterWheelWidget::setupUI()
             this, &FilterWheelWidget::disconnectDevice);
 
     connect(fw, &FilterWheel::connected, this, [ = ](){
-        // TODO: remove hardcoded filter names
-        QString str = "NF03-405/488/561/635E,FF02-447/60,FF03-525/50,FF01-600/52,FF01-697/70,empty";
-        QStringList filterList = str.split(",");
         filterComboBox->addItems(filterList);
-
         try {
             filterComboBox->setCurrentIndex(fw->getPosition() - 1);
             logger->info(QString("Current filter: %1").arg(filterComboBox->currentText()));
@@ -162,53 +159,54 @@ void FilterWheelWidget::setupUI()
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
-}
 
-void FilterWheelWidget::execFilterNamesDialog()
-{
-    QDialog *dialog = new QDialog();
-    dialog->setModal(true);
-    dialog->setWindowTitle("Set filter names");
-    dialog->deleteLater();
+    connect(setFilterNamesPushButton, &QPushButton::clicked, [ = ](){
+        QDialog *dialog = new QDialog();
+        dialog->setModal(true);
+        dialog->setWindowTitle("Set filter names");
+        dialog->deleteLater();
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(
-        QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
-    connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+        connect(buttonBox, &QDialogButtonBox::accepted,
+                dialog, &QDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected,
+                dialog, &QDialog::reject);
 
-    QListWidget *listWidget = new QListWidget();
-    listWidget->setDragDropMode(QAbstractItemView::DragDrop);
-    listWidget->setDefaultDropAction(Qt::MoveAction);
-    QString group = SETTINGSGROUP_FILTERWHEEL(idx);
-    QStringList sl =
-        settings().value(group, SETTING_FILTER_LIST).toStringList();
-    listWidget->insertItems(0, sl);
+        QListWidget *listWidget = new QListWidget();
+        listWidget->setDragDropMode(QAbstractItemView::DragDrop);
+        listWidget->setDefaultDropAction(Qt::MoveAction);
+        listWidget->insertItems(0, filterList);
 
-    for (int i = 0; i < listWidget->count(); ++i)
-    {
-        QListWidgetItem *item = listWidget->item(i);
-        item->setFlags(item->flags() | Qt::ItemIsEditable);
-    }
+        for (int i = 0; i < listWidget->count(); ++i)
+        {
+            QListWidgetItem *item = listWidget->item(i);
+            item->setFlags(item->flags() | Qt::ItemIsEditable);
+        }
 
-    QVBoxLayout *vLayout = new QVBoxLayout();
-    vLayout->addWidget(listWidget);
-    vLayout->addWidget(buttonBox);
+        QVBoxLayout *vLayout = new QVBoxLayout();
+        vLayout->addWidget(listWidget);
+        vLayout->addWidget(buttonBox);
 
-    dialog->setLayout(vLayout);
+        dialog->setLayout(vLayout);
 
-    dialog->setFixedSize(dialog->size());
+        dialog->setFixedSize(dialog->size());
 
-    if (dialog->exec() != QDialog::Accepted) {
-        return;
-    }
+        if (dialog->exec() != QDialog::Accepted) {
+            return;
+        }
 
-    sl.clear();
-    for (int i = 0; i < listWidget->count(); ++i)
-    {
-        sl << listWidget->item(i)->text();
-    }
-    settings().setValue(group, SETTING_FILTER_LIST, sl);
+        filterList.clear();
+        for (int i = 0; i < listWidget->count(); ++i)
+        {
+            filterList << listWidget->item(i)->text();
+        }
+
+        filterComboBox->clear();
+        filterComboBox->addItems(filterList);
+        settings().setValue(group, SETTING_FILTER_LIST, filterList);
+    });
 }
 
 void FilterWheelWidget::connectDevice()

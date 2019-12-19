@@ -24,13 +24,13 @@ private slots:
 
 private:
     void setupUI();
-    void execFilterNamesDialog();
 
     FilterWheel *fw;
     int idx;
     QComboBox *serialPortComboBox;
     QComboBox *filterComboBox;
     QLabel *filterLabel;
+    QStringList filterList;
     bool motionEnabled = false;
 };
 
