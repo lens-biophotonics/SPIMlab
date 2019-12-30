@@ -10,6 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 set(OTHER_FILES
     .gitignore
     uncrustify.cfg
+    LICENSE.txt
 )
 
 add_custom_target(

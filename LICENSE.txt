@@ -1,0 +1,11 @@
+SPIMlab Copyright 2019-2020 Giacomo Mazzamuto.
+
+
+
+SPIMlab is a data acquisition and control software originally developed to
+control a new dual-view inverted Ligh Sheet Microscope designed and built by
+LENS and INO-CNR. At the time of writing (December 2019), a software license
+has yet to be chosen. Please note that different licenses may be chosen for
+different portions of the code. Before an appropriate licensing model is
+adopted, all uses of this code are prohibited without explicit permission.
+For further inquiries please contact mazzamuto AT lens.unifi.it.
