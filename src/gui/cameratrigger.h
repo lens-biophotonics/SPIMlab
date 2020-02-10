@@ -1,7 +1,7 @@
 #ifndef CAMERATRIGGER_H
 #define CAMERATRIGGER_H
 
-#include "niabstracttask.h"
+#include "core/niabstracttask.h"
 
 class CameraTrigger : public NIAbstractTask
 {

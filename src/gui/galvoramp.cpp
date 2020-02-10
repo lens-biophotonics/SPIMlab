@@ -1,7 +1,7 @@
 #include <cmath>
 
 #include "galvoramp.h"
-#include "logger.h"
+#include "core/logger.h"
 
 static Logger *logger = getLogger("GalvorampTrigger");
 

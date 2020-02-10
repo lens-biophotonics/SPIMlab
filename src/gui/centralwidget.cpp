@@ -1,7 +1,7 @@
 #include <QHBoxLayout>
 #include <QSettings>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "camerapage.h"
 #include "settingspage.h"

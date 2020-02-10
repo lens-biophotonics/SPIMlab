@@ -7,7 +7,7 @@
 #include <QDateTime>
 #include <QTimer>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "progresswidget.h"
 

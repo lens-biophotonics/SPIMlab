@@ -1,5 +1,5 @@
 #include "cameratrigger.h"
-#include "logmanager.h"
+#include "core/logmanager.h"
 
 #include <QVector>
 

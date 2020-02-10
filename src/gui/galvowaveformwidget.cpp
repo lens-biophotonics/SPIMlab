@@ -2,8 +2,8 @@
 #include <QGroupBox>
 #include <QLabel>
 
-#include "core/spim.h"
-#include "core/galvoramp.h"
+#include "spim.h"
+#include "galvoramp.h"
 #include "galvowaveformwidget.h"
 #include "customspinbox.h"
 

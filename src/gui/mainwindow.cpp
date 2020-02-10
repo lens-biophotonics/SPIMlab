@@ -6,11 +6,11 @@
 #include <QSettings>
 #include <QSerialPortInfo>
 
-#include "core/spim.h"
+#include "spim.h"
 #include "core/logmanager.h"
 #include "core/serialport.h"
-#include "core/galvoramp.h"
-#include "core/cameratrigger.h"
+#include "galvoramp.h"
+#include "cameratrigger.h"
 #include "core/cobolt.h"
 #include "core/filterwheel.h"
 

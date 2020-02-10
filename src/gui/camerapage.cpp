@@ -3,7 +3,7 @@
 #include <QPushButton>
 #include <QLabel>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "pipositioncontrolwidget.h"
 #include "acquisitionwidget.h"

@@ -5,7 +5,7 @@
 #include <QGroupBox>
 
 #include "controlwidget.h"
-#include "core/spim.h"
+#include "spim.h"
 
 ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 {

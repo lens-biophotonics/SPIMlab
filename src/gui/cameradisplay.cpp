@@ -11,7 +11,7 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_marker.h>
 
-#include "core/spim.h"
+#include "spim.h"
 #include "core/orcaflash.h"
 
 #include "aspectratiowidget.h"

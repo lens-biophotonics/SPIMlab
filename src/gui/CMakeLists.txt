@@ -47,6 +47,12 @@ set(SPIMlab_SRCS
     colormaps.cpp
 
     utils.cpp
+    
+    cameratrigger.cpp
+    galvoramp.cpp
+    
+    savestackworker.cpp
+    spim.cpp
 )
 
 add_executable(SPIMlab ${SPIMlab_SRCS})

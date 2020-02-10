@@ -17,8 +17,6 @@ set(SRC
     # National Instruments
     natinst.cpp
     niabstracttask.cpp
-    cameratrigger.cpp
-    galvoramp.cpp
 
     # Hamamatsu
     dcamutils.cpp
@@ -35,8 +33,6 @@ set(SRC
 
     logger.cpp
     logmanager.cpp
-    savestackworker.cpp
-    spim.cpp
 )
 
 add_library(SPIMlabCore SHARED ${SRC})

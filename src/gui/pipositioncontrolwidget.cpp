@@ -5,7 +5,7 @@
 #include <QTimer>
 
 #include "core/pidevice.h"
-#include "core/spim.h"
+#include "spim.h"
 
 #include "pipositioncontrolwidget.h"
 #include "customspinbox.h"

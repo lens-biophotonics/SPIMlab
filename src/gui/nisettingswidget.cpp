@@ -3,9 +3,9 @@
 #include <QPushButton>
 #include <QGridLayout>
 
-#include "core/spim.h"
-#include "core/galvoramp.h"
-#include "core/cameratrigger.h"
+#include "spim.h"
+#include "galvoramp.h"
+#include "cameratrigger.h"
 
 #include "nisettingswidget.h"
 

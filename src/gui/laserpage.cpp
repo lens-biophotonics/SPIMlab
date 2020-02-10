@@ -1,6 +1,6 @@
 #include <QBoxLayout>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "laserpage.h"
 #include "coboltwidget.h"

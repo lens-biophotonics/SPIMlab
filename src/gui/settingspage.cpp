@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "settingspage.h"
 #include "nisettingswidget.h"

@@ -7,16 +7,16 @@
 #include <QHistoryState>
 
 #include "spim.h"
-#include "orcaflash.h"
+#include "core/orcaflash.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
-#include "pidevice.h"
-#include "pidaisychain.h"
-#include "cobolt.h"
-#include "filterwheel.h"
-#include "serialport.h"
+#include "core/pidevice.h"
+#include "core/pidaisychain.h"
+#include "core/cobolt.h"
+#include "core/filterwheel.h"
+#include "core/serialport.h"
 #include "savestackworker.h"
-#include "logger.h"
+#include "core/logger.h"
 
 static Logger *logger = getLogger("SPIM");
 

@@ -3,7 +3,7 @@
 #include <QSettings>
 #include <QDir>
 
-#include "core/spim.h"
+#include "spim.h"
 
 #include "settings.h"
 

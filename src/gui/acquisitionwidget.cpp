@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 
-#include "core/spim.h"
+#include "spim.h"
 #include "core/pidevice.h"
 #include "acquisitionwidget.h"
 
