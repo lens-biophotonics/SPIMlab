@@ -5,7 +5,7 @@
 #include <QMenuBar>
 #include <QMap>
 
-#include <core/pidevice.h>
+#include <qtlab/hw/pi/pidevice.h>
 
 class MainWindow : public QMainWindow
 {

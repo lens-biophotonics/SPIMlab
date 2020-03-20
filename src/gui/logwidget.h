@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTextEdit>
 
-#include "core/logger.h"
+#include <qtlab/core/logger.h>
 
 class LogWidget : public QWidget
 {

@@ -4,7 +4,7 @@
 #include <QState>
 #include <QTimer>
 
-#include "core/pidevice.h"
+#include <qtlab/hw/pi/pidevice.h>
 #include "spim.h"
 
 #include "pipositioncontrolwidget.h"

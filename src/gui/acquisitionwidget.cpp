@@ -7,7 +7,7 @@
 #include <QFileDialog>
 
 #include "spim.h"
-#include "core/pidevice.h"
+#include <qtlab/hw/pi/pidevice.h>
 #include "acquisitionwidget.h"
 
 AcquisitionWidget::AcquisitionWidget(QWidget *parent) : QWidget(parent)

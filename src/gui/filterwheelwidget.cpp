@@ -10,9 +10,9 @@
 #include <QStringListModel>
 #include <QDialogButtonBox>
 
-#include "core/filterwheel.h"
-#include "core/serialport.h"
-#include "core/logger.h"
+#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/filterwheel.h>
+#include <qtlab/core/logger.h>
 
 #include "filterwheelwidget.h"
 #include "customspinbox.h"

@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include "core/niabstracttask.h"
+#include <qtlab/hw/ni/niabstracttask.h>
 
 #define GALVORAMP_N_OF_PARAMS 4
 #define GALVORAMP_OFFSET_IDX 0

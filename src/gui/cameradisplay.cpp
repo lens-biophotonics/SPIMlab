@@ -12,7 +12,7 @@
 #include <qwt_plot_marker.h>
 
 #include "spim.h"
-#include "core/orcaflash.h"
+#include <qtlab/hw/hamamatsu/orcaflash.h>
 
 #include "aspectratiowidget.h"
 #include "cameradisplay.h"

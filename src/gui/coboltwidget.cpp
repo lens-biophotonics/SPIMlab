@@ -7,9 +7,9 @@
 #include <QMessageBox>
 #include <QTimer>
 
-#include "core/cobolt.h"
-#include "core/serialport.h"
-#include "core/logger.h"
+#include <qtlab/hw/serial/cobolt.h>
+#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/core/logger.h>
 
 #include "coboltwidget.h"
 #include "customspinbox.h"

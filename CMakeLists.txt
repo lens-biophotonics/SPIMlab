@@ -23,4 +23,4 @@ add_custom_target(
 
 add_custom_target(project-related-files SOURCES ${OTHER_FILES})
 
-add_subdirectory(src)
+add_subdirectory(src/gui)

@@ -6,17 +6,18 @@
 #include <QDir>
 #include <QHistoryState>
 
+#include <qtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/orcaflash.h>
+#include <qtlab/hw/pi/pidevice.h>
+#include <qtlab/hw/pi/pidaisychain.h>
+#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/cobolt.h>
+#include <qtlab/hw/serial/filterwheel.h>
+
 #include "spim.h"
-#include "core/orcaflash.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
-#include "core/pidevice.h"
-#include "core/pidaisychain.h"
-#include "core/cobolt.h"
-#include "core/filterwheel.h"
-#include "core/serialport.h"
 #include "savestackworker.h"
-#include "core/logger.h"
 
 static Logger *logger = getLogger("SPIM");
 

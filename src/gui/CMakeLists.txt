@@ -1,12 +1,18 @@
-find_package(Qt5Widgets 5.8 REQUIRED)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 14)
+
+find_package(Qt5 5.8 REQUIRED COMPONENTS
+    Widgets
+    SerialPort
+)
 find_package(Qwt REQUIRED)
-find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
-find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
+find_package(QtLab REQUIRED Core NI PI Serial Hamamatsu)
 
 include_directories(
     ${Qwt_INCLUDE_DIR}
-    ${DCAMAPI_INCLUDE_DIR}
-    ..
 )
 
 option(FORCE_FUSION_STYLE "Force fusion style" OFF)
@@ -59,6 +65,11 @@ add_executable(SPIMlab ${SPIMlab_SRCS})
 target_link_libraries(SPIMlab
     stdc++
     Qt5::Widgets
+    Qt5::SerialPort
     ${Qwt_LIBRARY}
-    SPIMlabCore
+    QtLab::Core
+    QtLab::NI
+    QtLab::PI
+    QtLab::Hamamatsu
+    QtLab::Serial
 )

@@ -6,13 +6,14 @@
 #include <QSettings>
 #include <QSerialPortInfo>
 
+#include <qtlab/core/logmanager.h>
+#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/cobolt.h>
+#include <qtlab/hw/serial/filterwheel.h>
+
 #include "spim.h"
-#include "core/logmanager.h"
-#include "core/serialport.h"
 #include "galvoramp.h"
 #include "cameratrigger.h"
-#include "core/cobolt.h"
-#include "core/filterwheel.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"

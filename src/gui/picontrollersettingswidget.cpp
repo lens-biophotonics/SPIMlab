@@ -12,8 +12,8 @@
 
 #include "picontrollersettingswidget.h"
 
-#include "core/pidevice.h"
-#include "core/logger.h"
+#include <qtlab/hw/pi/pidevice.h>
+#include <qtlab/core/logger.h>
 
 
 enum REFERENCE_ACTION {

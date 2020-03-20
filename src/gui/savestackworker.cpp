@@ -8,10 +8,11 @@
 #include <QTextStream>
 #include <QFileInfo>
 
-#include "core/logger.h"
+#include <qtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/orcaflash.h>
+
 #include "savestackworker.h"
 #include "spim.h"
-#include "core/orcaflash.h"
 
 static Logger *logger = getLogger("SaveStackWorker");
 

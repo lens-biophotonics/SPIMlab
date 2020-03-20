@@ -1,7 +1,7 @@
 #ifndef CAMERATRIGGER_H
 #define CAMERATRIGGER_H
 
-#include "core/niabstracttask.h"
+#include <qtlab/hw/ni/niabstracttask.h>
 
 class CameraTrigger : public NIAbstractTask
 {

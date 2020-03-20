@@ -1,5 +1,6 @@
+#include <qtlab/core/logmanager.h>
+
 #include "cameratrigger.h"
-#include "core/logmanager.h"
 
 #include <QVector>
 
