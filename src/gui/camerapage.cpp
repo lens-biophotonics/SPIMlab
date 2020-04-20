@@ -3,15 +3,18 @@
 #include <QPushButton>
 #include <QLabel>
 
+#include <qtlab/widgets/cameradisplay.h>
+
 #include "spim.h"
+#include "settings.h"
 
 #include "pipositioncontrolwidget.h"
 #include "acquisitionwidget.h"
-#include "cameradisplay.h"
 #include "camerapage.h"
 #include "controlwidget.h"
 #include "galvowaveformwidget.h"
 #include "progresswidget.h"
+#include "displayworker.h"
 
 CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
 {
@@ -20,10 +23,18 @@ CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
 
 void CameraPage::setupUI()
 {
+    QString LUTPath = settings().value(SETTINGSGROUP_OTHERSETTINGS,
+                                       SETTING_LUTPATH).toString();
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         QVBoxLayout *vLayout = new QVBoxLayout();
-        vLayout->addWidget(new CameraDisplay(spim().getCamera(i)));
+        CameraDisplay *cd = new CameraDisplay();
+        cd->setTitle(QString("Cam %1").arg(i));
+        DisplayWorker *worker = new DisplayWorker(spim().getCamera(i),
+                                                  cd->getBuffer());
+        connect(worker, &DisplayWorker::newImage, cd, &CameraDisplay::replot);
+        cd->setLUTPath(LUTPath);
+        vLayout->addWidget(cd);
         cameraHLayout->addLayout(vLayout, 1);
     }
     cameraHLayout->addStretch(0);

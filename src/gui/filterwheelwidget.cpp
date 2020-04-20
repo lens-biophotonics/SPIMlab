@@ -13,9 +13,9 @@
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/widgets/customspinbox.h>
 
 #include "filterwheelwidget.h"
-#include "customspinbox.h"
 #include "utils.h"
 #include "settings.h"
 

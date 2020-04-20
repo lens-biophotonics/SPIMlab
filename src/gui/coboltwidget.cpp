@@ -11,8 +11,9 @@
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/core/logger.h>
 
+#include <qtlab/widgets/customspinbox.h>
+
 #include "coboltwidget.h"
-#include "customspinbox.h"
 #include "utils.h"
 
 static Logger *logger = getLogger("SerialPort");

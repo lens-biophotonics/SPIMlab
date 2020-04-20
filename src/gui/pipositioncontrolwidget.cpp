@@ -7,8 +7,9 @@
 #include <qtlab/hw/pi/pidevice.h>
 #include "spim.h"
 
+#include <qtlab/widgets/customspinbox.h>
+
 #include "pipositioncontrolwidget.h"
-#include "customspinbox.h"
 #include "settings.h"
 
 PIPositionControlWidget::PIPositionControlWidget(QWidget *parent) :

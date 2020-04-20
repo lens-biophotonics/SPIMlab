@@ -2,10 +2,11 @@
 #include <QGroupBox>
 #include <QLabel>
 
+#include <qtlab/widgets/customspinbox.h>
+
 #include "spim.h"
 #include "galvoramp.h"
 #include "galvowaveformwidget.h"
-#include "customspinbox.h"
 
 GalvoWaveformWidget::GalvoWaveformWidget(QWidget *parent) : QWidget(parent)
 {

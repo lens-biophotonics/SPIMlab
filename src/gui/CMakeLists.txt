@@ -8,12 +8,7 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
     Widgets
     SerialPort
 )
-find_package(Qwt REQUIRED)
-find_package(QtLab REQUIRED Core NI PI Serial Hamamatsu)
-
-include_directories(
-    ${Qwt_INCLUDE_DIR}
-)
+find_package(QtLab REQUIRED Core Widgets NI PI Serial Hamamatsu)
 
 option(FORCE_FUSION_STYLE "Force fusion style" OFF)
 
@@ -29,9 +24,6 @@ set(SPIMlab_SRCS
     version.cpp
     settings.cpp
 
-    aspectratiowidget.cpp
-    customspinbox.cpp
-
     controlwidget.cpp
     picontrollersettingswidget.cpp
     nisettingswidget.cpp
@@ -44,13 +36,10 @@ set(SPIMlab_SRCS
 
     centralwidget.cpp
     camerapage.cpp
+    displayworker.cpp
     laserpage.cpp
     settingspage.cpp
     logwidget.cpp
-    cameradisplay.cpp
-
-    cameraplot.cpp
-    colormaps.cpp
 
     utils.cpp
     
@@ -66,8 +55,8 @@ target_link_libraries(SPIMlab
     stdc++
     Qt5::Widgets
     Qt5::SerialPort
-    ${Qwt_LIBRARY}
     QtLab::Core
+    QtLab::Widgets
     QtLab::NI
     QtLab::PI
     QtLab::Hamamatsu
