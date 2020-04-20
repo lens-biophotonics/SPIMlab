@@ -1,11 +1,12 @@
 #include <QHBoxLayout>
 #include <QSettings>
 
+#include <qtlab/widgets/logwidget.h>
+
 #include "spim.h"
 
 #include "camerapage.h"
 #include "settingspage.h"
-#include "logwidget.h"
 #include "laserpage.h"
 
 #include "centralwidget.h"

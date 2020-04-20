@@ -39,7 +39,6 @@ set(SPIMlab_SRCS
     displayworker.cpp
     laserpage.cpp
     settingspage.cpp
-    logwidget.cpp
 
     utils.cpp
     
