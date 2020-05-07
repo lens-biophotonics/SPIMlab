@@ -55,7 +55,8 @@ void MainWindow::setupUi()
     QAction *saveSettingsAction = new QAction(this);
     saveSettingsAction->setText("Save settings");
     saveSettingsAction->setShortcut(QKeySequence("Ctrl+S"));
-    connect(quitAction, &QAction::triggered, this, &MainWindow::saveSettings);
+    connect(saveSettingsAction, &QAction::triggered,
+            this, &MainWindow::saveSettings);
 
     QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
