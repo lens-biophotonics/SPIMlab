@@ -9,9 +9,8 @@ using namespace NI;
 
 #define CHANNEL_NAME "galvoRampAOChan"
 
-GalvoRamp::GalvoRamp(QObject *parent) : NIAbstractTask(parent)
+GalvoRamp::GalvoRamp(QObject *parent) : NITask("galvoRampAO", parent)
 {
-    setTaskName("galvoRampAO");
 }
 
 void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
@@ -76,58 +75,60 @@ void GalvoRamp::updateWaveform()
     }
 }
 
-int GalvoRamp::nOfChannels()
-{
-    return physicalChannels.count();
-}
-
 void GalvoRamp::initializeTask_impl()
 {
-    DAQmxErrChk(
-        DAQmxCreateAOVoltageChan(
-            task,
-            getPhysicalChannels().join(":").toLatin1(),
-            CHANNEL_NAME,
-            -10.0,  // minVal
-            10.0,  // maxVal
-            DAQmx_Val_Volts,  // units
-            nullptr // customScaleName
-            )
-        );
+    NITask::initializeTask_impl();
 
-    configureTriggering();
-    configureSampleClockTiming("", DAQmx_Val_Rising, DAQmx_Val_ContSamps);
     computeWaveform();
     write();
 }
 
-void GalvoRamp::setPhysicalChannels_impl()
+void GalvoRamp::configureChannels_impl()
+{
+    createAOVoltageChan(
+        physicalChannels.join(":").toLatin1(),
+        CHANNEL_NAME,
+        -10.0, 10.0, VoltUnits_Volts,
+        nullptr);
+}
+
+void GalvoRamp::configureTriggering_impl()
+{
+    cfgDigEdgeStartTrig(triggerTerm.toLatin1(), TrigEdge_Rising);
+}
+
+void GalvoRamp::configureTiming_impl()
+{
+    cfgSampClkTiming(
+        sampClkTimingSource.isEmpty() ? nullptr : sampClkTimingSource.toLatin1(),
+        sampleRate,
+        TrigEdge_Rising,
+        SampMode_ContSamps,
+        sampsPerChan);
+}
+
+void GalvoRamp::resetWaveFormParams(const int nOfChannels)
 {
     waveformParams.clear();
-    waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels());
+    waveformParams.fill(0, GALVORAMP_N_OF_PARAMS * nOfChannels);
 }
 
 void GalvoRamp::write()
 {
-    DAQmxErrChk(
-        DAQmxWriteAnalogF64(
-            task,
-            waveform.size() / nOfChannels(),
-            false,  // autostart
-            10,  // timeout in seconds
-            DAQmx_Val_GroupByChannel,
-            waveform.data(),
-            nullptr,
-            nullptr  // reserved
-            )
-        );
+    writeAnalogF64(
+        waveform.size() / nOfChannels(),
+        false,
+        10,
+        DataLayout_GroupByChannel,
+        waveform.data(),
+        nullptr);
 }
 
 void GalvoRamp::computeWaveform()
 {
     waveform.clear();
-    waveform.reserve(static_cast<int>(nSamples) * nOfChannels());
-    double delay = static_cast<double>(nSamples) / nOfChannels() / getSampleRate(); // hardcoded delay between waveforms
+    waveform.reserve(static_cast<int>(sampsPerChan) * nOfChannels());
+    double delay = static_cast<double>(sampsPerChan) / nOfChannels() / getSampleRate(); // hardcoded delay between waveforms
     for (int i = 0; i < nOfChannels(); ++i) {
         appendToWaveform(
             waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_OFFSET_IDX],
@@ -140,25 +141,25 @@ void GalvoRamp::computeWaveform()
 void GalvoRamp::appendToWaveform(
     double offset, const double amplitude, const double fraction, const double delay)
 {
-    int nSamples = static_cast<int>(this->nSamples);
-    int nRamp = static_cast<int>(floor(nSamples * fraction));
+    int sampsPerChan = static_cast<int>(this->sampsPerChan);
+    int nRamp = static_cast<int>(floor(sampsPerChan * fraction));
     int nDelay = static_cast<int>(round(delay * getSampleRate()));
     double halfAmplitude = 0.5 * amplitude;
-    QVector<double> temp(static_cast<int>(nSamples), 0);
+    QVector<double> temp(static_cast<int>(sampsPerChan), 0);
 
     int i = 0;
     for (; i < nRamp; ++i)
         temp[i] = offset - halfAmplitude + amplitude * i / nRamp;
-    int nRamp2 = nSamples - nRamp;
-    for (; i < nSamples; ++i)
+    int nRamp2 = sampsPerChan - nRamp;
+    for (; i < sampsPerChan; ++i)
         temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
 
     if (nDelay == 0 || nDelay == temp.size()) {
         waveform << temp;
     }
     else if (nDelay > 0) {
-        waveform << temp.mid(nSamples - nDelay);
-        waveform << temp.mid(0, nSamples - nDelay);
+        waveform << temp.mid(sampsPerChan - nDelay);
+        waveform << temp.mid(0, sampsPerChan - nDelay);
     } else {
         waveform << temp.mid(-nDelay);
         waveform << temp.mid(0, -nDelay);

@@ -148,8 +148,8 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
-        cameraTrigger->clear();
-        galvoRamp->clear();
+        cameraTrigger->clearTask();
+        galvoRamp->clearTask();
         foreach (OrcaFlash * orca, camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
@@ -376,8 +376,8 @@ void SPIM::setupStateMachine()
             for (OrcaFlash *orca : camList) {
                 orca->cap_start();
             }
-            galvoRamp->start();
-            cameraTrigger->start();
+            galvoRamp->startTask();
+            cameraTrigger->startTask();
         }
         catch (std::runtime_error e) {
             onError(e.what());
@@ -453,8 +453,8 @@ void SPIM::setupStateMachine()
         if (!capturing) {
             return;
         }
-        galvoRamp->stop();
-        cameraTrigger->stop();
+        galvoRamp->stopTask();
+        cameraTrigger->stopTask();
 
         // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
@@ -525,8 +525,8 @@ void SPIM::setupStateMachine()
                 orca->cap_start();
             }
 
-            galvoRamp->start();
-            cameraTrigger->start();
+            galvoRamp->startTask();
+            cameraTrigger->startTask();
 
             // move stack axis to end position
             double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
@@ -580,8 +580,8 @@ void SPIM::stop()
         for (OrcaFlash * orca : camList) {
             orca->stop();
         }
-        galvoRamp->stop();
-        cameraTrigger->stop();
+        galvoRamp->stopTask();
+        cameraTrigger->stopTask();
     } catch (std::runtime_error e) {
         emit error(e.what());
         return;
@@ -633,12 +633,12 @@ void SPIM::_setExposureTime(double expTime)
         cameraTrigger->setSampleRate(sampRate);
 
         uint64_t nSamples = static_cast<uint64_t>(sampRate / triggerRate);
-        galvoRamp->setNSamples(nSamples);
-        cameraTrigger->setNSamples(nSamples);
+        galvoRamp->setSampsPerChan(nSamples);
+        cameraTrigger->setSampsPerChan(nSamples);
 
-        // to reinitialize NI output tasks with updated waveforms
-        galvoRamp->clear();
-        cameraTrigger->clear();
+        // reinitialize NI output tasks with updated waveforms
+        galvoRamp->initializeTask();
+        cameraTrigger->initializeTask();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

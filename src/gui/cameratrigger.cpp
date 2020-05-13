@@ -12,28 +12,18 @@ static Logger *logger = getLogger("CameraTrigger");
 #define DUTY_CYCLE_BLANKING 0.9485
 #define CAMERA_ACQUISITION_DELAY 85e-6
 
-CameraTrigger::CameraTrigger(QObject *parent) : NIAbstractTask(parent)
+CameraTrigger::CameraTrigger(QObject *parent)
+    : NITask("cameraTriggerDO", parent)
 {
-    setTaskName("cameraTriggerDO");
 }
 
 void CameraTrigger::initializeTask_impl()
 {
-    DAQmxErrChk(
-        DAQmxCreateDOChan(
-            task,
-            physicalChannels.join(",").toLatin1(),
-            nullptr,
-            DAQmx_Val_ChanPerLine
-            )
-        );
+    NITask::initializeTask_impl();
 
-    configureTriggering();
-
-    configureSampleClockTiming("", DAQmx_Val_Rising, DAQmx_Val_ContSamps);
-
+    // waveform
     QVector<uInt8> waveformTrigger;
-    int ns = static_cast<int>(nSamples);
+    int ns = static_cast<int>(sampsPerChan);
     int nHigh = static_cast<int>(ns * DUTY_CYCLE);
     int nLow = ns - nHigh;
     waveformTrigger << QVector<uInt8>(nHigh, 1) << QVector<uInt8>(nLow, 0);
@@ -54,7 +44,7 @@ void CameraTrigger::initializeTask_impl()
     int delay = ns / nCameras;
 
     for (int i = 0; i < nChannels; ++i) {
-        int splitIdx = delay * i; // hardcoded delay between triggers for different cameras
+        int splitIdx = delay * i; // delay between triggers for different cameras
         waveform << waveformTrigger.mid(ns - splitIdx);
         waveform << waveformTrigger.mid(0, ns - splitIdx);
 
@@ -62,26 +52,34 @@ void CameraTrigger::initializeTask_impl()
         waveform << waveformBlanking.mid(0, ns - splitIdx);
     }
 
-    DAQmxErrChk(
-        DAQmxWriteDigitalLines(
-            task,
-            static_cast<int32>(nSamples),
-            false,                // autostart
-            0,                    // timeout
-            DAQmx_Val_GroupByChannel,
-            waveform.data(),
-            nullptr,              // sampsPerChanWritten
-            nullptr               // reserved
-            )
+    writeDigitalLines(
+        static_cast<int32>(sampsPerChan),
+        false,          //autostart
+        0,              // timeout
+        DataLayout_GroupByChannel,
+        waveform.data(),
+        nullptr         // sampsPerChanWritten
         );
 }
 
-void CameraTrigger::configureTriggering()
+void CameraTrigger::configureChannels_impl()
+{
+    createDOChan(physicalChannels.join(",").toLatin1(),
+                 nullptr, LineGrp_ChanPerLine);
+}
+
+void CameraTrigger::configureTiming_impl()
+{
+    cfgSampClkTiming(
+        "", sampleRate, TrigEdge_Rising, SampMode_ContSamps, sampsPerChan);
+}
+
+void CameraTrigger::configureTriggering_impl()
 {
     if (isFreeRun) {
-        DAQmxErrChk(DAQmxDisableStartTrig(task));
+        disableStartTrig();
     } else {
-        NIAbstractTask::configureTriggering();
+        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), TrigEdge_Rising);
     }
 }
 

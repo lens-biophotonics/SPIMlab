@@ -208,6 +208,7 @@ void MainWindow::loadSettings()
     QVector<double> wp;
     const QList<QVariant> wafeformParams =
         mySettings.value(group, SETTING_WFPARAMS).toList();
+    gr->resetWaveFormParams(SPIM_NCAMS);
     for (int i = 0; i < wafeformParams.count(); i++) {
         wp << wafeformParams.at(i).toDouble();
     }

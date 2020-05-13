@@ -33,7 +33,7 @@ void NISettingsWidget::setupUI()
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getDOLines());
         comboBox->setCurrentText(
-            spim().getCameraTrigger()->getPhysicalChannel(i * 2));
+            spim().getCameraTrigger()->getPhysicalChannels().at(i * 2));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerCtrComboBoxList.insert(i, comboBox);
 
@@ -41,7 +41,7 @@ void NISettingsWidget::setupUI()
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getDOLines());
         comboBox->setCurrentText(
-            spim().getCameraTrigger()->getPhysicalChannel(i * 2 + 1));
+            spim().getCameraTrigger()->getPhysicalChannels().at(i * 2 + 1));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         aotfBlankingComboBoxList.insert(i, comboBox);
 

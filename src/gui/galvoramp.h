@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include <qtlab/hw/ni/niabstracttask.h>
+#include <qtlab/hw/ni/nitask.h>
 
 #define GALVORAMP_N_OF_PARAMS 4
 #define GALVORAMP_OFFSET_IDX 0
@@ -11,7 +11,7 @@
 #define GALVORAMP_DELAY_IDX 2
 #define GALVORAMP_FRACTION_IDX 3
 
-class GalvoRamp : public NIAbstractTask
+class GalvoRamp : public NITask
 {
 public:
     GalvoRamp(QObject *parent = nullptr);
@@ -28,14 +28,16 @@ public:
 
     QVector<double> getWaveformParams() const;
     void setWaveformParams(const QVector<double> &values);
+    void resetWaveFormParams(const int nOfChannels);
 
     void updateWaveform();
 
-    int nOfChannels();
-
 protected:
-    virtual void initializeTask_impl();
-    virtual void setPhysicalChannels_impl();
+    virtual void initializeTask_impl() override;
+    virtual void configureChannels_impl() override;
+    virtual void configureTriggering_impl() override;
+    virtual void configureTiming_impl() override;
+
 
 private:
     QVector<double> waveformParams;

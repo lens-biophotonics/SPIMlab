@@ -1,9 +1,9 @@
 #ifndef CAMERATRIGGER_H
 #define CAMERATRIGGER_H
 
-#include <qtlab/hw/ni/niabstracttask.h>
+#include <qtlab/hw/ni/nitask.h>
 
-class CameraTrigger : public NIAbstractTask
+class CameraTrigger : public NITask
 {
 public:
     CameraTrigger(QObject *parent = nullptr);
@@ -12,8 +12,10 @@ public:
     bool isFreeRunEnabled() const;
 
 protected:
-    void initializeTask_impl();
-    virtual void configureTriggering();
+    virtual void initializeTask_impl() override;
+    virtual void configureChannels_impl() override;
+    virtual void configureTiming_impl() override;
+    virtual void configureTriggering_impl() override;
 
 private:
     bool isFreeRun;
