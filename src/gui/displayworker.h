@@ -3,24 +3,26 @@
 
 #include <QThread>
 
+class CameraDisplay;
+
 class OrcaFlash;
 
 class DisplayWorker : public QThread
 {
     Q_OBJECT
 public:
-    DisplayWorker(OrcaFlash *orca, double *data, QObject *parent = nullptr);
+    DisplayWorker(OrcaFlash *orca, CameraDisplay *cd, QObject *parent = nullptr);
     virtual ~DisplayWorker();
 
 signals:
-    void newImage();
+    void newImage(double *data, size_t n);
 
 protected:
     virtual void run();
 
 private:
     OrcaFlash *orca;
-    double *buf;
+    CameraDisplay *cd;
     uint16_t *mybuf;
     bool running;
 };

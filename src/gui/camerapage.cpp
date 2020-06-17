@@ -4,6 +4,7 @@
 #include <QLabel>
 
 #include <qtlab/widgets/cameradisplay.h>
+#include <qtlab/widgets/cameraplot.h>
 
 #include "spim.h"
 #include "settings.h"
@@ -30,9 +31,9 @@ void CameraPage::setupUI()
         QVBoxLayout *vLayout = new QVBoxLayout();
         CameraDisplay *cd = new CameraDisplay();
         cd->setTitle(QString("Cam %1").arg(i));
-        DisplayWorker *worker = new DisplayWorker(spim().getCamera(i),
-                                                  cd->getBuffer());
-        connect(worker, &DisplayWorker::newImage, cd, &CameraDisplay::replot);
+        DisplayWorker *worker = new DisplayWorker(spim().getCamera(i), cd);
+        void (CameraPlot::*fp)(const double*, const size_t) = &CameraPlot::setData;
+        connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
         cd->setLUTPath(LUTPath);
         vLayout->addWidget(cd);
         cameraHLayout->addLayout(vLayout, 1);

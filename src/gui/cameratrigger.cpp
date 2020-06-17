@@ -71,7 +71,7 @@ void CameraTrigger::configureChannels_impl()
 void CameraTrigger::configureTiming_impl()
 {
     cfgSampClkTiming(
-        "", sampleRate, TrigEdge_Rising, SampMode_ContSamps, sampsPerChan);
+        "", sampleRate, Edge_Rising, SampMode_ContSamps, sampsPerChan);
 }
 
 void CameraTrigger::configureTriggering_impl()
@@ -79,7 +79,7 @@ void CameraTrigger::configureTriggering_impl()
     if (isFreeRun) {
         disableStartTrig();
     } else {
-        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), TrigEdge_Rising);
+        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
     }
 }
 

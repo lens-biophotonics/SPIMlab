@@ -94,7 +94,7 @@ void GalvoRamp::configureChannels_impl()
 
 void GalvoRamp::configureTriggering_impl()
 {
-    cfgDigEdgeStartTrig(triggerTerm.toLatin1(), TrigEdge_Rising);
+    cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
 }
 
 void GalvoRamp::configureTiming_impl()
@@ -102,7 +102,7 @@ void GalvoRamp::configureTiming_impl()
     cfgSampClkTiming(
         sampClkTimingSource.isEmpty() ? nullptr : sampClkTimingSource.toLatin1(),
         sampleRate,
-        TrigEdge_Rising,
+        Edge_Rising,
         SampMode_ContSamps,
         sampsPerChan);
 }
