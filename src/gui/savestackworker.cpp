@@ -112,7 +112,7 @@ void SaveStackWorker::run()
     free(buf);
 #endif
 
-    orca->cap_stop();
+    emit captureCompleted();
     logger->info(QString("Saved %1 frames").arg(i));
     close(fd);
 

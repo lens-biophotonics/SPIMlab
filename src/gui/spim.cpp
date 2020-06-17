@@ -502,6 +502,9 @@ void SPIM::setupStateMachine()
                 connect(acqWorker, &SaveStackWorker::error,
                         this, &SPIM::onError);
 
+                connect(acqWorker, &SaveStackWorker::captureCompleted,
+                        orca, &OrcaFlash::cap_stop);
+
                 acqWorker->layOutFileOnDisk();
                 connect(orca, &OrcaFlash::captureStarted, acqWorker, [ = ](){
                     acqWorker->start();
@@ -578,7 +581,7 @@ void SPIM::stop()
     capturing = false;
     try {
         for (OrcaFlash * orca : camList) {
-            orca->stop();
+            orca->cap_stop();
         }
         galvoRamp->stopTask();
         cameraTrigger->stopTask();

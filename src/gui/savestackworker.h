@@ -24,6 +24,7 @@ public:
 
 signals:
     void error(QString msg = "");
+    void captureCompleted();
 
 protected:
     virtual void run();
