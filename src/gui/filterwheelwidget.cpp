@@ -240,6 +240,6 @@ void FilterWheelWidget::refreshValues()
             QString("Filter: %1").arg(fw->getPosition()));
     }
     catch (std::runtime_error e) {
-        logger->error(e.what());
+        logger->critical(e.what());
     }
 }

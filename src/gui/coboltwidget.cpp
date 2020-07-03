@@ -204,6 +204,6 @@ void CoboltWidget::refreshValues()
             QString("Power: %1 mW").arg(cobolt->getOutputPower() * 1000));
     }
     catch (std::runtime_error e) {
-        logger->error(e.what());
+        logger->critical(e.what());
     }
 }
