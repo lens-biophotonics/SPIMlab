@@ -106,7 +106,7 @@ void SPIM::initialize()
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
             orca->setPropertyValue(
                 DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
-            orca->buf_alloc(100);
+            orca->buf_alloc(1500);
         }
 
         for (int devnumber = 1; devnumber <= 16; ++devnumber) {
