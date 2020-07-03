@@ -481,12 +481,16 @@ void SPIM::setupStateMachine()
 
             // prepare and start acquisition thread
             for (OrcaFlash *orca : camList) {
-                QString fname;
+                QString fname, fname2;
+                QStringList axis = {"x_", "y_", "z_"};
+                QStringList side = {"l", "r"};
+                int k = 0;
                 for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                     double pos = targetPositions[d_enum];
-                    fname += QString("%1_").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
+                    fname += axis.at(k) + QString("%1_").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
+                    k += 1;
                 }
-                fname += QString("cam_%1").arg(orca->getCameraIndex());
+                fname += "cam_" + side.at(orca->getCameraIndex());
 
                 // setup thread
                 SaveStackWorker *acqWorker = new SaveStackWorker(orca);
