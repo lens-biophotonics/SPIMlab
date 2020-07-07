@@ -481,7 +481,7 @@ void SPIM::setupStateMachine()
 
             // prepare and start acquisition thread
             for (OrcaFlash *orca : camList) {
-                QString fname, fname2;
+                QString fname;
                 QStringList axis = {"x_", "y_", "z_"};
                 QStringList side = {"l", "r"};
                 int k = 0;

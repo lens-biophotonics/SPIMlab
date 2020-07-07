@@ -17,6 +17,12 @@ if (FORCE_FUSION_STYLE)
     message(AUTHOR_WARNING "Forcing fusion style")
 endif ()
 
+option(DEMO_MODE "Demo mode" OFF)
+
+if (NOT DEMO_MODE)
+    add_definitions(-DWITH_HARDWARE)
+endif()
+
 set(SPIMlab_SRCS
     resources.qrc
     main.cpp
