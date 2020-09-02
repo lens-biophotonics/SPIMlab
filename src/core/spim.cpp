@@ -56,6 +56,34 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
             PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
         xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     });
+    PIDevice *yaxis = getPIDevice(PI_DEVICE_Y_AXIS);
+    connect(yaxis, &PIDevice::connected, this, [ = ](){
+        yaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
+        yaxis->setTriggerOutput(
+            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        yaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
+    });
+    PIDevice *zaxis = getPIDevice(PI_DEVICE_Z_AXIS);
+    connect(zaxis, &PIDevice::connected, this, [ = ](){
+        zaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
+        zaxis->setTriggerOutput(
+            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        zaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
+    });
+    PIDevice *zlaxis = getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS);
+    connect(zlaxis, &PIDevice::connected, this, [ = ](){
+        zlaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
+        zlaxis->setTriggerOutput(
+            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        zlaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
+    });
+    PIDevice *zraxis = getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS);
+    connect(zraxis, &PIDevice::connected, this, [ = ](){
+        zraxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
+        zraxis->setTriggerOutput(
+            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        zraxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
+    });
 
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
