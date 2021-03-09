@@ -12,6 +12,7 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *pare
     qRegisterMetaType<size_t>("size_t");
 
     mybuf = new uint16_t[BUFSIZE];
+    mybufDouble = new double[BUFSIZE];
 
     orca = camera;
     this->cd = cd;
@@ -27,12 +28,11 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *pare
 DisplayWorker::~DisplayWorker()
 {
     delete[] mybuf;
+    delete[] mybufDouble;
 }
 
 void DisplayWorker::run()
 {
-    double *mybufDouble = new double[BUFSIZE];
-
     running = true;
     while (true) {
         msleep(250);
@@ -50,5 +50,4 @@ void DisplayWorker::run()
         }
         emit newImage(mybufDouble, BUFSIZE);
     }
-    delete[] mybufDouble;
 }
