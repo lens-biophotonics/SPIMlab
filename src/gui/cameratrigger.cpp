@@ -29,9 +29,8 @@ void CameraTrigger::initializeTask_impl()
     waveformTrigger << QVector<uInt8>(nHigh, 1) << QVector<uInt8>(nLow, 0);
 
     QVector<uInt8> waveformBlanking;
-    double sr = 1 / getSampleRate();
     nHigh = static_cast<int>(ns * DUTY_CYCLE_BLANKING);
-    int nLowStart = static_cast<int>(CAMERA_ACQUISITION_DELAY / sr);
+    int nLowStart = static_cast<int>(CAMERA_ACQUISITION_DELAY * getSampleRate());
     int nLowEnd = ns - nHigh - nLowStart;
     waveformBlanking << QVector<uInt8>(nLowStart, 0)
                      << QVector<uInt8>(nHigh, 1)
