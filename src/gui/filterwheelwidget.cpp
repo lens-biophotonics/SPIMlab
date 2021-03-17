@@ -214,7 +214,7 @@ void FilterWheelWidget::connectDevice()
     try {
         fw->getSerialPort()->setPortName(
             serialPortComboBox->currentData().toString());
-        fw->open();
+        fw->connect();
     }
     catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
@@ -224,7 +224,7 @@ void FilterWheelWidget::connectDevice()
 void FilterWheelWidget::disconnectDevice()
 {
     try {
-        fw->close();
+        fw->disconnect();
         filterComboBox->clear();
         motionEnabled = false;
     }

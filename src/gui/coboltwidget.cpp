@@ -99,10 +99,8 @@ void CoboltWidget::setupUI()
     bl->addWidget(gb);
     setLayout(bl);
 
-    connect(connectPushButton, &QPushButton::clicked,
-            this, &CoboltWidget::connectDevice);
-    connect(disconnectPushButton, &QPushButton::clicked,
-            cobolt, &Cobolt::close);
+    connect(connectPushButton, &QPushButton::clicked, this, &CoboltWidget::connectDevice);
+    connect(disconnectPushButton, &QPushButton::clicked, cobolt, &Cobolt::disconnect);
 
     connect(onPushButton, &QPushButton::clicked, this, [ = ](){
         try {
@@ -190,7 +188,7 @@ void CoboltWidget::connectDevice()
     try {
         cobolt->getSerialPort()->setPortName(
             serialPortComboBox->currentData().toString());
-        cobolt->open();
+        cobolt->connect();
     }
     catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
