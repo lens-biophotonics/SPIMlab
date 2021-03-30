@@ -321,10 +321,10 @@ void PIControllerSettingsWidget::connectDevice()
 
     try {
         device->close();
-        device->connectDaisyChainSerial(
-            serialPortComboBox->currentData().toString(),
-            deviceNumberSpinBox->value(),
-            baud);
+        device->setPortName(serialPortComboBox->currentData().toString());
+        device->setDeviceNumber(deviceNumberSpinBox->value());
+        device->setBaud(baud);
+        device->connectDevice();
     }
     catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
