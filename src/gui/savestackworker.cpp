@@ -79,8 +79,8 @@ void SaveStackWorker::run()
                 if (i != 0) {
                     double delta = double(timeStamps[i]) - double(timeStamps[i - 1]);
                     if (abs(delta) > timeout) {
-                        logger->error(QString("Camera %1 timeout by %2 ms at frame %3")
-                                      .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
+                        logger->critical(QString("Camera %1 timeout by %2 ms at frame %3")
+                                         .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
                     }
                     else if (abs(delta) > timeout * 0.75 || abs(delta) < timeout * 0.25) {
                         logger->warning(QString("Camera %1 timeout by %2 ms at frame %3")
