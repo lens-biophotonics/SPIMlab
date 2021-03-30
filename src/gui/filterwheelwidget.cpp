@@ -98,6 +98,7 @@ void FilterWheelWidget::setupUI()
 
     QVBoxLayout *vlayout = new QVBoxLayout();
     vlayout->addWidget(gb);
+    vlayout->setContentsMargins(0, 0, 0, 0);
 
     setLayout(vlayout);
 

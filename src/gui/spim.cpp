@@ -13,6 +13,7 @@
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
+#include <qtlab/hw/serial/AA_MPDSnCxx.h>
 
 #include "spim.h"
 #include "cameratrigger.h"
@@ -26,6 +27,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
 {
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         camList.insert(i, new OrcaFlash(this));
+        aotfList.insert(i, new AA_MPDSnCxx(this));
     }
 
     cameraTrigger = new CameraTrigger(this);
@@ -175,6 +177,11 @@ double SPIM::getScanVelocity() const
 void SPIM::setScanVelocity(double value)
 {
     scanVelocity = value;
+}
+
+AA_MPDSnCxx *SPIM::getAOTF(int dev)
+{
+    return aotfList.at(dev);
 }
 
 void SPIM::haltStages()

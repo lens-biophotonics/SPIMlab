@@ -31,6 +31,8 @@ class GalvoRamp;
 class PIDevice;
 class Cobolt;
 class FilterWheel;
+class AA_MPDSnCxx;
+
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -102,6 +104,8 @@ public:
     double getScanVelocity() const;
     void setScanVelocity(double value);
 
+    AA_MPDSnCxx *getAOTF(int dev);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -128,6 +132,7 @@ private:
     QList<OrcaFlash *>camList;
     QList<Cobolt *>laserList;
     QList<FilterWheel *>filterWheelList;
+    QList<AA_MPDSnCxx *>aotfList;
 
     QStateMachine *sm = nullptr;
 
