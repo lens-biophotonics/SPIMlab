@@ -148,8 +148,12 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
-        cameraTrigger->clearTask();
-        galvoRamp->clearTask();
+        if (cameraTrigger->isInitialized()) {
+            cameraTrigger->clearTask();
+        }
+        if (galvoRamp->isInitialized()) {
+            galvoRamp->clearTask();
+        }
         foreach (OrcaFlash * orca, camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
@@ -581,11 +585,16 @@ void SPIM::setupStateMachine()
 
 void SPIM::stop()
 {
+    if (!capturing) {
+        return;
+    }
     logger->info("Stop");
     capturing = false;
     try {
         for (OrcaFlash * orca : camList) {
-            orca->cap_stop();
+            if (orca->isOpen()) {
+                orca->cap_stop();
+            }
         }
         galvoRamp->stopTask();
         cameraTrigger->stopTask();
