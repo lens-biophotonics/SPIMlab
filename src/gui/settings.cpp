@@ -135,7 +135,7 @@ void Settings::loadSettings()
     for (const QString &group : groups) {
         settings.beginGroup(group);
 
-        SET_VALUE(group, SETTING_PORTNAME, QString());
+        SET_VALUE(group, SETTING_SERIALNUMBER, QString());
         SET_VALUE(group, SETTING_FILTER_LIST, filterNames);
 
         settings.endGroup();

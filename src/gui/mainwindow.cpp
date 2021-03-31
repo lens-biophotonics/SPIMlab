@@ -119,7 +119,7 @@ void MainWindow::saveSettings() const
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
         SerialPort *sp = spim().getFilterWheel(i)->getSerialPort();
         group = SETTINGSGROUP_FILTERWHEEL(i);
-        mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
+        mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();
@@ -195,8 +195,8 @@ void MainWindow::loadSettings()
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
         FilterWheel *dev = spim().getFilterWheel(i);
         group = SETTINGSGROUP_FILTERWHEEL(i);
-        dev->getSerialPort()->setPortName(
-            mySettings.value(group, SETTING_PORTNAME).toString());
+        dev->getSerialPort()->setPortBySerialNumber(
+            mySettings.value(group, SETTING_SERIALNUMBER).toString());
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();
