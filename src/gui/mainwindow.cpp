@@ -10,6 +10,7 @@
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
+#include <qtlab/hw/serial/AA_MPDSnCxx.h>
 
 #include "spim.h"
 #include "galvoramp.h"
@@ -35,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     thread->start();
 
     QMetaObject::connectSlotsByName(this);
+    logManager().flushMessages();
 }
 
 MainWindow::~MainWindow()
