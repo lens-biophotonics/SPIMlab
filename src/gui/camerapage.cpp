@@ -31,6 +31,7 @@ void CameraPage::setupUI()
         QVBoxLayout *vLayout = new QVBoxLayout();
         CameraDisplay *cd = new CameraDisplay();
         cd->setTitle(QString("Cam %1").arg(i));
+        cd->setPlotSize(QSize(2048, 2048));
         DisplayWorker *worker = new DisplayWorker(spim().getCamera(i), cd);
         void (CameraPlot::*fp)(const double*, const size_t) = &CameraPlot::setData;
         connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
