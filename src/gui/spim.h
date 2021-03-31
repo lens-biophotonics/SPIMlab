@@ -14,6 +14,9 @@
 #ifndef SPIM_NFILTERWHEEL
 #define SPIM_NFILTERWHEEL 2
 #endif
+#ifndef SPIM_NAOTF
+#define SPIM_NAOTF 2
+#endif
 #ifndef SPIM_NPIDEVICES
 #define SPIM_NPIDEVICES 5
 #endif

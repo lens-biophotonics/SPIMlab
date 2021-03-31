@@ -124,6 +124,12 @@ void MainWindow::saveSettings() const
         mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
     }
 
+    for (int i = 0; i < SPIM_NAOTF; ++i) {
+        SerialPort *sp = spim().getAOTF(i)->serialPort();
+        group = SETTINGSGROUP_AOTF(i);
+        mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
+    }
+
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
@@ -196,6 +202,13 @@ void MainWindow::loadSettings()
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
         FilterWheel *dev = spim().getFilterWheel(i);
         group = SETTINGSGROUP_FILTERWHEEL(i);
+        dev->serialPort()->setPortBySerialNumber(
+            mySettings.value(group, SETTING_SERIALNUMBER).toString());
+    }
+
+    for (int i = 0; i < SPIM_NAOTF; ++i) {
+        AA_MPDSnCxx *dev = spim().getAOTF(i);
+        group = SETTINGSGROUP_AOTF(i);
         dev->serialPort()->setPortBySerialNumber(
             mySettings.value(group, SETTING_SERIALNUMBER).toString());
     }

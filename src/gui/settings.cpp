@@ -140,6 +140,18 @@ void Settings::loadSettings()
 
         settings.endGroup();
     }
+
+    groups.clear();
+    for (int i = 0; i < SPIM_NAOTF; ++i) {
+        groups << SETTINGSGROUP_AOTF(i);
+    }
+    for (const QString &group : groups) {
+        settings.beginGroup(group);
+
+        SET_VALUE(group, SETTING_SERIALNUMBER, QString());
+
+        settings.endGroup();
+    }
 }
 
 void Settings::saveSettings() const

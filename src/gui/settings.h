@@ -10,6 +10,7 @@
 #define SETTINGSGROUP_AXIS(n) QString("AXIS_%1").arg(n)
 #define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
 #define SETTINGSGROUP_FILTERWHEEL(n) QString("FilterWheel_%1").arg(n)
+#define SETTINGSGROUP_AOTF(n) QString("AOTF_%1").arg(n)
 
 #define SETTINGSGROUP_CAMTRIG "CameraTrigger"
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
