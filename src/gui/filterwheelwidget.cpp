@@ -63,8 +63,7 @@ void FilterWheelWidget::setupUI()
         serialPortComboBox->addItem(descr, info.portName());
     }
 
-    serialPortComboBox->setCurrentIndex(
-        serialPortComboBox->findData(fw->getSerialPort()->portName()));
+    serialPortComboBox->setCurrentIndex(serialPortComboBox->findData(fw->serialPort()->portName()));
 
     serialPortComboBox->model()->sort(0);
 
@@ -132,8 +131,8 @@ void FilterWheelWidget::setupUI()
         }
     });
 
-    QState *cs = fw->getSerialPort()->getConnectedState();
-    QState *ds = fw->getSerialPort()->getDisconnectedState();
+    QState *cs = fw->serialPort()->getConnectedState();
+    QState *ds = fw->serialPort()->getDisconnectedState();
 
     QList<QWidget *> wList;
 
@@ -212,8 +211,7 @@ void FilterWheelWidget::setupUI()
 void FilterWheelWidget::connectDevice()
 {
     try {
-        fw->getSerialPort()->setPortName(
-            serialPortComboBox->currentData().toString());
+        fw->serialPort()->setPortName(serialPortComboBox->currentData().toString());
         fw->connect();
     }
     catch (std::runtime_error e) {

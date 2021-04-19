@@ -113,13 +113,13 @@ void MainWindow::saveSettings() const
     }
 
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
-        SerialPort *sp = spim().getLaser(i)->getSerialPort();
+        SerialPort *sp = spim().getLaser(i)->serialPort();
         group = SETTINGSGROUP_COBOLT(i);
         mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
     }
 
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
-        SerialPort *sp = spim().getFilterWheel(i)->getSerialPort();
+        SerialPort *sp = spim().getFilterWheel(i)->serialPort();
         group = SETTINGSGROUP_FILTERWHEEL(i);
         mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
     }
@@ -190,14 +190,13 @@ void MainWindow::loadSettings()
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         Cobolt *dev = spim().getLaser(i);
         group = SETTINGSGROUP_COBOLT(i);
-        dev->getSerialPort()->setPortName(
-            mySettings.value(group, SETTING_PORTNAME).toString());
+        dev->serialPort()->setPortName(mySettings.value(group, SETTING_PORTNAME).toString());
     }
 
     for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
         FilterWheel *dev = spim().getFilterWheel(i);
         group = SETTINGSGROUP_FILTERWHEEL(i);
-        dev->getSerialPort()->setPortBySerialNumber(
+        dev->serialPort()->setPortBySerialNumber(
             mySettings.value(group, SETTING_SERIALNUMBER).toString());
     }
 

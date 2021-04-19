@@ -58,7 +58,7 @@ void CoboltWidget::setupUI()
     }
 
     serialPortComboBox->setCurrentIndex(
-        serialPortComboBox->findData(cobolt->getSerialPort()->portName()));
+        serialPortComboBox->findData(cobolt->serialPort()->portName()));
 
     serialPortComboBox->model()->sort(0);
 
@@ -150,8 +150,8 @@ void CoboltWidget::setupUI()
         }
     });
 
-    QState *cs = cobolt->getSerialPort()->getConnectedState();
-    QState *ds = cobolt->getSerialPort()->getDisconnectedState();
+    QState *cs = cobolt->serialPort()->getConnectedState();
+    QState *ds = cobolt->serialPort()->getDisconnectedState();
 
     ds->assignProperty(line, "styleSheet", "background-color: gray");
 
@@ -186,8 +186,7 @@ void CoboltWidget::setupUI()
 void CoboltWidget::connectDevice()
 {
     try {
-        cobolt->getSerialPort()->setPortName(
-            serialPortComboBox->currentData().toString());
+        cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
         cobolt->connect();
     }
     catch (std::runtime_error e) {
