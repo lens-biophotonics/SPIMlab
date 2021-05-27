@@ -5,11 +5,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <qtlab/widgets/picontrollersettingswidget.h>
+
 #include "spim.h"
 
 #include "settingspage.h"
 #include "nisettingswidget.h"
-#include "picontrollersettingswidget.h"
 #include "settings.h"
 #include "version.h"
 

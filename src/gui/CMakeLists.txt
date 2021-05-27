@@ -31,7 +31,6 @@ set(SPIMlab_SRCS
     settings.cpp
 
     controlwidget.cpp
-    picontrollersettingswidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
     pipositioncontrolwidget.cpp
