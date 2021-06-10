@@ -5,7 +5,7 @@
 
 #include <qtlab/widgets/cameradisplay.h>
 #include <qtlab/widgets/cameraplot.h>
-#include <qtlab/widgets/pipositioncontrolwidget.h>
+#include <qtlab/widgets/customspinbox.h>
 
 #include "spim.h"
 #include "settings.h"
@@ -22,10 +22,15 @@ CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
     setupUI();
 }
 
+CameraPage::~CameraPage()
+{
+    saveSettings();
+}
+
 void CameraPage::setupUI()
 {
-    QString LUTPath = settings().value(SETTINGSGROUP_OTHERSETTINGS,
-                                       SETTING_LUTPATH).toString();
+    const Settings s = settings();
+    QString LUTPath = s.value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH).toString();
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         QVBoxLayout *vLayout = new QVBoxLayout();
@@ -41,13 +46,20 @@ void CameraPage::setupUI()
     }
     cameraHLayout->addStretch(0);
 
-    PIPositionControlWidget *cw = new PIPositionControlWidget();
+    cw = new PIPositionControlWidget();
     cw->setTitle("Translational stages");
     cw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
     cw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
     cw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
     cw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
     cw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
+
+    for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
+        QString g = SETTINGSGROUP_AXIS(i);
+        cw->getPositionSpinbox(i)->setValue(s.value(g, SETTING_POS).toDouble());
+        cw->getVelocitySpinBox(i)->setValue(s.value(g, SETTING_VELOCITY).toDouble());
+        cw->getStepSpinBox(i)->setValue(s.value(g, SETTING_STEPSIZE).toDouble());
+    }
 
     QBoxLayout *stageLayout = new QVBoxLayout();
     stageLayout->addWidget(cw);
@@ -71,4 +83,15 @@ void CameraPage::setupUI()
     vLayout->addLayout(controlsHLayout);
 
     setLayout(vLayout);
+}
+
+void CameraPage::saveSettings()
+{
+    Settings s = settings();
+    for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
+        QString g = SETTINGSGROUP_AXIS(i);
+        s.setValue(g, SETTING_POS, cw->getPositionSpinbox(i)->value());
+        s.setValue(g, SETTING_VELOCITY, cw->getVelocitySpinBox(i)->value());
+        s.setValue(g, SETTING_STEPSIZE, cw->getStepSpinBox(i)->value());
+    }
 }
