@@ -5,11 +5,11 @@
 
 #include <qtlab/widgets/cameradisplay.h>
 #include <qtlab/widgets/cameraplot.h>
+#include <qtlab/widgets/pipositioncontrolwidget.h>
 
 #include "spim.h"
 #include "settings.h"
 
-#include "pipositioncontrolwidget.h"
 #include "acquisitionwidget.h"
 #include "camerapage.h"
 #include "controlwidget.h"
@@ -43,11 +43,11 @@ void CameraPage::setupUI()
 
     PIPositionControlWidget *cw = new PIPositionControlWidget();
     cw->setTitle("Translational stages");
-    cw->appendRow(PI_DEVICE_X_AXIS, "1", "X");
-    cw->appendRow(PI_DEVICE_Y_AXIS, "1", "Y");
-    cw->appendRow(PI_DEVICE_Z_AXIS, "1", "Z");
-    cw->appendRow(PI_DEVICE_LEFT_OBJ_AXIS, "1", "Z L");
-    cw->appendRow(PI_DEVICE_RIGHT_OBJ_AXIS, "1", "Z R");
+    cw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
+    cw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
+    cw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
+    cw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
+    cw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
 
     QBoxLayout *stageLayout = new QVBoxLayout();
     stageLayout->addWidget(cw);

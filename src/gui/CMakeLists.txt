@@ -33,7 +33,6 @@ set(SPIMlab_SRCS
     controlwidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
-    pipositioncontrolwidget.cpp
     coboltwidget.cpp
     filterwheelwidget.cpp
     acquisitionwidget.cpp
