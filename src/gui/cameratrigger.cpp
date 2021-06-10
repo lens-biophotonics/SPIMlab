@@ -13,8 +13,9 @@ static Logger *logger = getLogger("CameraTrigger");
 #define CAMERA_ACQUISITION_DELAY 85e-6
 
 CameraTrigger::CameraTrigger(QObject *parent)
-    : NITask("cameraTriggerDO", parent)
+    : NITask(parent)
 {
+    setTaskName("cameraTriggerDO");
 }
 
 void CameraTrigger::initializeTask_impl()

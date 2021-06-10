@@ -9,8 +9,9 @@ using namespace NI;
 
 #define CHANNEL_NAME "galvoRampAOChan"
 
-GalvoRamp::GalvoRamp(QObject *parent) : NITask("galvoRampAO", parent)
+GalvoRamp::GalvoRamp(QObject *parent) : NITask(parent)
 {
+    setTaskName("galvoRampAO");
 }
 
 void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
