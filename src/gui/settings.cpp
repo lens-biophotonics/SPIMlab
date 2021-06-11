@@ -125,7 +125,7 @@ void Settings::loadSettings()
     }
 
     groups.clear();
-    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         groups << SETTINGSGROUP_FILTERWHEEL(i);
     }
 

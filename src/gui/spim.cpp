@@ -28,6 +28,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         camList.insert(i, new OrcaFlash(this));
         aotfList.insert(i, new AA_MPDSnCxx(this));
+        filterWheelList.insert(i, new FilterWheel());
     }
 
     cameraTrigger = new CameraTrigger(this);
@@ -63,11 +64,6 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         laserList.insert(i, new Cobolt());
-    }
-
-    filterWheelList.reserve(SPIM_NFILTERWHEEL);
-    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
-        filterWheelList.insert(i, new FilterWheel());
     }
 
     stackStage = PI_DEVICE_X_AXIS;

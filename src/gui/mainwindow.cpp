@@ -118,7 +118,7 @@ void MainWindow::saveSettings() const
         mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
     }
 
-    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         SerialPort *sp = spim().getFilterWheel(i)->serialPort();
         group = SETTINGSGROUP_FILTERWHEEL(i);
         mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
@@ -199,7 +199,7 @@ void MainWindow::loadSettings()
         dev->serialPort()->setPortName(mySettings.value(group, SETTING_PORTNAME).toString());
     }
 
-    for (int i = 0; i < SPIM_NFILTERWHEEL; ++i) {
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
         FilterWheel *dev = spim().getFilterWheel(i);
         group = SETTINGSGROUP_FILTERWHEEL(i);
         dev->serialPort()->setPortBySerialNumber(

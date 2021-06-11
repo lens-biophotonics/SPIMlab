@@ -11,9 +11,6 @@
 #ifndef SPIM_NCOBOLT
 #define SPIM_NCOBOLT 4
 #endif
-#ifndef SPIM_NFILTERWHEEL
-#define SPIM_NFILTERWHEEL 2
-#endif
 #ifndef SPIM_NAOTF
 #define SPIM_NAOTF 2
 #endif
