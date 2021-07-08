@@ -14,6 +14,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PROGRAM_NAME);
 
     QApplication a(argc, argv);
+    setlocale(LC_NUMERIC, "C");  // needed by PI_GCS library, otherwise it doesn't parse doubles
+                                 // in the response strings correctly
+    QLocale::setDefault(QLocale::C);  // this overrides the system settings: e.g. it allows doubles
+                                      // in QSpinBoxes to be entered with dot instead of comma
 
 #ifdef FORCE_FUSION_STYLE
     a.setStyle(QStyleFactory::create("fusion"));
