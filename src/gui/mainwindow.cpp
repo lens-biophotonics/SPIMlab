@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     loadSettings();
 
     setupUi();
+    setWindowIcon(QIcon(":/res/spim-icon.svg"));
 
     QThread *thread = new QThread();
     thread->setObjectName("SPIM_thread");
