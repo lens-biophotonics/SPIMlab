@@ -22,7 +22,7 @@
 #define SPIM_RANGE_TO_IDX 1
 #define SPIM_RANGE_STEP_IDX 2
 
-#define SPIM_SCAN_DECIMALS 5
+#define SPIM_SCAN_DECIMALS 3
 
 class SaveStackWorker;
 class OrcaFlash;
