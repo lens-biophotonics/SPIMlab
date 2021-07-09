@@ -7,10 +7,13 @@
 #include <QSerialPortInfo>
 
 #include <qtlab/core/logmanager.h>
+#include <qtlab/hw/ni/natinst.h>
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
+
+#include <qwt_global.h>
 
 #include "spim.h"
 #include "galvoramp.h"
@@ -20,7 +23,6 @@
 #include "centralwidget.h"
 #include "settings.h"
 #include "version.h"
-
 
 static Logger *logger = getLogger("MainWindow");
 
@@ -255,14 +257,15 @@ void MainWindow::on_aboutAction_triggered() const
     ts << "<i>Version</i>:&nbsp;" << getProgramVersionString() << "<br>";
     ts << "<i>Authors</i>:<br>";
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giacomo Mazzamuto<br>";
-    ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ludovico Silvestri<br>";
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vladislav Gavryusev<br>";
-    ts << "<i>Date</i>:&nbsp; November 2018<br>";
-    ts << "Qt version: " << qVersion();
+    ts << "<i>Date</i>:&nbsp; November 2018 &mdash; July 2021<br><br>";
+    ts << "Qt version: " << qVersion() << "<br>";
+    ts << "Qwt version: " << QWT_VERSION_STR << "<br>";
+    ts << "NIDAQmx version: " << NI::getVersion() << "<br>";
 
     msgBox.setText(text);
     msgBox.setWindowTitle(QString("About %1").arg(PROGRAM_NAME));
-    msgBox.setIconPixmap(QPixmap(":/res/logo_lens.png"));
+    msgBox.setIconPixmap(QPixmap(":/res/logos.png"));
     msgBox.exec();
 }
 
