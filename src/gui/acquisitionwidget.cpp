@@ -76,12 +76,10 @@ void AcquisitionWidget::setupUI()
     grid->addWidget(line, row++, 0, 1, 4);
 
     col = 0;
-    grid->addWidget(new QLabel("Path"), row, col++);
+    grid->addWidget(new QLabel("Run name"), row, col++);
     QLineEdit *lineEdit = new QLineEdit();
-    lineEdit->setText(spim().getOutputPath());
-    grid->addWidget(lineEdit, row, col, 1, 2); col += 2;
-    QPushButton *pushButton = new QPushButton("...");
-    grid->addWidget(pushButton, row++, col++);
+    lineEdit->setText(spim().getRunName());
+    grid->addWidget(lineEdit, row++, col, 1, 3); col += 3;
 
     QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
     expTimeSpinBox->setRange(0, 10000);
@@ -92,7 +90,7 @@ void AcquisitionWidget::setupUI()
     col = 0;
     grid->addWidget(new QLabel("Exposure Time"), row, col++);
     grid->addWidget(expTimeSpinBox, row, col++);
-    grid->addWidget(setExpTimePushButton, row, col++);
+    grid->addWidget(setExpTimePushButton, row++, col++);
 
     QBoxLayout *boxLayout;
 
@@ -107,20 +105,7 @@ void AcquisitionWidget::setupUI()
     boxLayout->addWidget(gb);
     setLayout(boxLayout);
 
-    connect(lineEdit, &QLineEdit::textChanged, &spim(), &SPIM::setOutputPath);
-
-    connect(pushButton, &QPushButton::clicked, this, [ = ](){
-        QFileDialog dialog;
-        dialog.setDirectory(lineEdit->text());
-        dialog.setFileMode(QFileDialog::Directory);
-        dialog.setOption(QFileDialog::ShowDirsOnly, true);
-
-        if (!dialog.exec())
-            return;
-
-        QString path = dialog.selectedFiles().at(0);
-        lineEdit->setText(path);
-    });
+    connect(lineEdit, &QLineEdit::textChanged, &spim(), &SPIM::setRunName);
 
     connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
         spim().setExposureTime(expTimeSpinBox->value());

@@ -3,7 +3,6 @@
 
 #include <QTimer>
 #include <QFinalState>
-#include <QDir>
 #include <QHistoryState>
 
 #include <qtlab/core/logger.h>
@@ -163,6 +162,16 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+QString SPIM::getRunName() const
+{
+    return runName;
+}
+
+void SPIM::setRunName(const QString &value)
+{
+    runName = value;
 }
 
 double SPIM::getScanVelocity() const
@@ -342,7 +351,10 @@ void SPIM::_startAcquisition()
                      .arg(totalSteps).arg(nSteps[stackStage]));
 
         currentStep = 0;
-        QDir(outputPath).mkpath(".");
+        // create output directories
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            fullOutputDir(i).mkpath(".");
+        }
     }
     emit captureStarted();
 }
@@ -487,7 +499,8 @@ void SPIM::setupStateMachine()
             }
 
             // prepare and start acquisition thread
-            for (OrcaFlash *orca : camList) {
+            for (int i = 0; i < SPIM_NCAMS; ++i) {
+                OrcaFlash *orca = camList.at(i);
                 QString fname;
                 QStringList axis = {"x_", "y_", "z_"};
                 QStringList side = {"l", "r"};
@@ -503,7 +516,7 @@ void SPIM::setupStateMachine()
                 SaveStackWorker *acqWorker = new SaveStackWorker(orca);
 
                 acqWorker->setTimeout(2 * 1e6 / getTriggerRate());
-                acqWorker->setOutputPath(outputPath);
+                acqWorker->setOutputPath(fullOutputDir(i).absolutePath());
                 acqWorker->setOutputFileName(fname);
                 acqWorker->setFrameCount(nSteps[stackStage]);
 
@@ -664,14 +677,14 @@ void SPIM::_setExposureTime(double expTime)
     }
 }
 
-QString SPIM::getOutputPath() const
+QStringList SPIM::getOutputPathList() const
 {
     return outputPath;
 }
 
-void SPIM::setOutputPath(const QString &value)
+void SPIM::setOutputPathList(const QStringList &sl)
 {
-    outputPath = value;
+    outputPath = sl;
 }
 
 QState *SPIM::getState(const SPIM::MACHINE_STATE stateEnum)
@@ -698,6 +711,11 @@ void SPIM::onError(const QString &errMsg)
 {
     stop();
     emit error(errMsg);
+}
+
+QDir SPIM::fullOutputDir(int cam)
+{
+    return QDir::cleanPath(outputPath.at(cam) + QDir::separator() + runName);
 }
 
 SPIM &spim()

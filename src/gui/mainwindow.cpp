@@ -150,10 +150,11 @@ void MainWindow::saveSettings() const
 
     group = SETTINGSGROUP_ACQUISITION;
     mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
-    mySettings.setValue(group, SETTING_OUTPUTPATH, spim().getOutputPath());
+    mySettings.setValue(group, SETTING_RUN_NAME, spim().getRunName());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
     mySettings.setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
+    mySettings.setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
 
     mySettings.saveSettings();
 }
@@ -239,11 +240,12 @@ void MainWindow::loadSettings()
 
     group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());
-    spim().setOutputPath(mySettings.value(group, SETTING_OUTPUTPATH).toString());
+    spim().setRunName(mySettings.value(group, SETTING_RUN_NAME).toString());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
     spim().setScanVelocity(
         mySettings.value(group, SETTING_SCANVELOCITY).toDouble());
+    spim().setOutputPathList(mySettings.value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
 }
 
 void MainWindow::on_aboutAction_triggered() const

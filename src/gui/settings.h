@@ -17,6 +17,7 @@
 
 #define SETTING_LUTPATH "LUTPath"
 #define SETTING_SCANVELOCITY "scanVelocity"
+#define SETTING_CAM_OUTPUT_PATH_LIST "camOutputPathList"
 
 #define SETTING_BAUD "baud"
 #define SETTING_DEVICENUMBER "deviceNumber"
@@ -30,7 +31,7 @@
 
 #define SETTING_EXPTIME "exposureTime"
 
-#define SETTING_OUTPUTPATH "outputPath"
+#define SETTING_RUN_NAME "runName"
 
 #define SETTING_FROM "from"
 #define SETTING_TO "to"

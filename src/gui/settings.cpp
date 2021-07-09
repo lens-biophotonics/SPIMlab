@@ -48,6 +48,9 @@ void Settings::loadSettings()
 
     SET_VALUE(groupName, SETTING_LUTPATH, "/opt/Fiji.app/luts/");
     SET_VALUE(groupName, SETTING_SCANVELOCITY, 2.0);
+    QStringList camOutputPath;
+    camOutputPath << "/mnt/left_cam/data" << "/mnt/right_cam/data";
+    SET_VALUE(groupName, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
 
     settings.endGroup();
 
@@ -107,8 +110,7 @@ void Settings::loadSettings()
     settings.beginGroup(groupName);
 
     SET_VALUE(groupName, SETTING_EXPTIME, 0.15);
-    SET_VALUE(groupName, SETTING_OUTPUTPATH,
-              QDir::toNativeSeparators(QDir::homePath()));
+    SET_VALUE(groupName, SETTING_RUN_NAME, QString());
 
     settings.endGroup();
 

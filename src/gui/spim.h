@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QStateMachine>
+#include <QDir>
 
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
@@ -90,8 +91,8 @@ public:
 
     QList<double> *getScanRange(const SPIM_PI_DEVICES dev) const;
 
-    QString getOutputPath() const;
-    void setOutputPath(const QString &value);
+    QStringList getOutputPathList() const;
+    void setOutputPathList(const QStringList &sl);
 
     QState *getState(const MACHINE_STATE stateEnum);
 
@@ -105,6 +106,9 @@ public:
     void setScanVelocity(double value);
 
     AA_MPDSnCxx *getAOTF(int dev);
+
+    QString getRunName() const;
+    void setRunName(const QString &value);
 
 public slots:
     void startFreeRun();
@@ -146,7 +150,9 @@ private:
     QMap<SPIM_PI_DEVICES, QList<double>*> scanRangeMap;
     double scanVelocity = 1;
 
-    QString outputPath;
+    QStringList outputPath;
+    QString runName;
+    QDir fullOutputDir(int cam);
 
     bool freeRun = true;
     bool capturing = false;
