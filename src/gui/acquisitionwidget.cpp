@@ -2,7 +2,6 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDoubleSpinBox>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QFileDialog>
 
@@ -13,6 +12,11 @@
 AcquisitionWidget::AcquisitionWidget(QWidget *parent) : QWidget(parent)
 {
     setupUI();
+}
+
+QString AcquisitionWidget::getRunName()
+{
+    return runNameLineEdit->text();
 }
 
 void AcquisitionWidget::setupUI()
@@ -77,9 +81,11 @@ void AcquisitionWidget::setupUI()
 
     col = 0;
     grid->addWidget(new QLabel("Run name"), row, col++);
-    QLineEdit *lineEdit = new QLineEdit();
-    lineEdit->setText(spim().getRunName());
-    grid->addWidget(lineEdit, row++, col, 1, 3); col += 3;
+    runNameLineEdit = new QLineEdit();
+    QRegularExpression rx = QRegularExpression("^\\w+[\\w.-]*");
+    runNameLineEdit->setValidator(new QRegularExpressionValidator(rx));
+    runNameLineEdit->setText(spim().getRunName());
+    grid->addWidget(runNameLineEdit, row++, col, 1, 3); col += 3;
 
     QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
     expTimeSpinBox->setRange(0, 10000);
@@ -105,7 +111,7 @@ void AcquisitionWidget::setupUI()
     boxLayout->addWidget(gb);
     setLayout(boxLayout);
 
-    connect(lineEdit, &QLineEdit::textChanged, &spim(), &SPIM::setRunName);
+    connect(runNameLineEdit, &QLineEdit::textChanged, &spim(), &SPIM::setRunName);
 
     connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
         spim().setExposureTime(expTimeSpinBox->value());
