@@ -353,7 +353,7 @@ void SPIM::_startAcquisition()
         currentStep = 0;
         // create output directories
         for (int i = 0; i < SPIM_NCAMS; ++i) {
-            fullOutputDir(i).mkpath(".");
+            getFullOutputDir(i).mkpath(".");
         }
     }
     emit captureStarted();
@@ -516,7 +516,7 @@ void SPIM::setupStateMachine()
                 SaveStackWorker *acqWorker = new SaveStackWorker(orca);
 
                 acqWorker->setTimeout(2 * 1e6 / getTriggerRate());
-                acqWorker->setOutputPath(fullOutputDir(i).absolutePath());
+                acqWorker->setOutputPath(getFullOutputDir(i).absolutePath());
                 acqWorker->setOutputFileName(fname);
                 acqWorker->setFrameCount(nSteps[stackStage]);
 
@@ -713,7 +713,7 @@ void SPIM::onError(const QString &errMsg)
     emit error(errMsg);
 }
 
-QDir SPIM::fullOutputDir(int cam)
+QDir SPIM::getFullOutputDir(int cam)
 {
     return QDir::cleanPath(outputPath.at(cam) + QDir::separator() + runName);
 }

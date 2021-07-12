@@ -110,6 +110,8 @@ public:
     QString getRunName() const;
     void setRunName(const QString &value);
 
+    QDir getFullOutputDir(int cam);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -152,7 +154,6 @@ private:
 
     QStringList outputPath;
     QString runName;
-    QDir fullOutputDir(int cam);
 
     bool freeRun = true;
     bool capturing = false;

@@ -2,6 +2,7 @@
 #include <QList>
 #include <QPushButton>
 #include <QLabel>
+#include <QMessageBox>
 
 #include <qtlab/widgets/cameradisplay.h>
 #include <qtlab/widgets/cameraplot.h>
@@ -78,8 +79,39 @@ void CameraPage::setupUI()
             &spim(), &SPIM::startFreeRun);
 
     QPushButton *startAcqPushButton = new QPushButton("Start acquisition");
-    connect(startAcqPushButton, &QPushButton::clicked,
-            &spim(), &SPIM::startAcquisition);
+    connect(startAcqPushButton, &QPushButton::clicked, [ = ](){
+        if (acqWidget->getRunName().isEmpty()) {
+            QMessageBox::critical(this, "Error", "Please specify a run name");
+            return;
+        }
+        QList<QDir> outputDirs;
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            outputDirs << spim().getFullOutputDir(i);
+        }
+        bool exists = false;
+        for (QDir d : outputDirs) {
+            if (d.exists()) {
+                exists = true;
+                break;
+            }
+        }
+        if (exists)
+        {
+            QMessageBox msgBox;
+            QString msg("A measurement with this run name (%1) already exists.");
+            msg = msg.arg(acqWidget->getRunName());
+            msgBox.setText(msg);
+            msgBox.setInformativeText("Do you want to overwrite existing files?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::No) {
+                return;
+            }
+        }
+
+        QMetaObject::invokeMethod(&spim(), &SPIM::startAcquisition, Qt::QueuedConnection);
+    });
 
     QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
     connect(stopCapturePushButton, &QPushButton::clicked,
