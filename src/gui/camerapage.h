@@ -20,7 +20,7 @@ private:
     void setupUI();
     void saveSettings();
 
-    PIPositionControlWidget *cw;
+    PIPositionControlWidget *stageCw;
 };
 
 #endif // CAMERAPAGE_H

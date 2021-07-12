@@ -30,7 +30,6 @@ set(SPIMlab_SRCS
     version.cpp
     settings.cpp
 
-    controlwidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
     coboltwidget.cpp

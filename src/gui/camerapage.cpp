@@ -12,7 +12,6 @@
 
 #include "acquisitionwidget.h"
 #include "camerapage.h"
-#include "controlwidget.h"
 #include "galvowaveformwidget.h"
 #include "progresswidget.h"
 #include "displayworker.h"
@@ -29,10 +28,10 @@ CameraPage::~CameraPage()
 
 void CameraPage::setupUI()
 {
-    const Settings s = settings();
-    QString LUTPath = s.value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH).toString();
     QHBoxLayout *cameraHLayout = new QHBoxLayout();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
+        const Settings s = settings();
+        QString LUTPath = s.value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH).toString();
         QVBoxLayout *vLayout = new QVBoxLayout();
         CameraDisplay *cd = new CameraDisplay();
         cd->setTitle(QString("Cam %1").arg(i));
@@ -46,37 +45,104 @@ void CameraPage::setupUI()
     }
     cameraHLayout->addStretch(0);
 
-    cw = new PIPositionControlWidget();
-    cw->setTitle("Translational stages");
-    cw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
-    cw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
-    cw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
-    cw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
-    cw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
+    stageCw = new PIPositionControlWidget();
+    stageCw->setTitle("Translational stages");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
+        const Settings s = settings();
         QString g = SETTINGSGROUP_AXIS(i);
-        cw->getPositionSpinbox(i)->setValue(s.value(g, SETTING_POS).toDouble());
-        cw->getVelocitySpinBox(i)->setValue(s.value(g, SETTING_VELOCITY).toDouble());
-        cw->getStepSpinBox(i)->setValue(s.value(g, SETTING_STEPSIZE).toDouble());
+        stageCw->getPositionSpinbox(i)->setValue(s.value(g, SETTING_POS).toDouble());
+        stageCw->getVelocitySpinBox(i)->setValue(s.value(g, SETTING_VELOCITY).toDouble());
+        stageCw->getStepSpinBox(i)->setValue(s.value(g, SETTING_STEPSIZE).toDouble());
     }
 
-    QBoxLayout *stageLayout = new QVBoxLayout();
-    stageLayout->addWidget(cw);
-
-    QBoxLayout *acquisitionLayout = new QVBoxLayout();
-    acquisitionLayout->addWidget(new AcquisitionWidget());
+    AcquisitionWidget *acqWidget = new AcquisitionWidget();
 
     QBoxLayout *galvoProgressLayout = new QVBoxLayout();
     galvoProgressLayout->addWidget(new GalvoWaveformWidget());
     galvoProgressLayout->addWidget(new ProgressWidget());
 
+    QPushButton *initPushButton = new QPushButton("Initialize");
+    connect(initPushButton, &QPushButton::clicked, &spim(), [ = ](){
+        initPushButton->setEnabled(false);
+        spim().initialize();
+    });
+
+    QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
+    connect(startFreeRunPushButton, &QPushButton::clicked,
+            &spim(), &SPIM::startFreeRun);
+
+    QPushButton *startAcqPushButton = new QPushButton("Start acquisition");
+    connect(startAcqPushButton, &QPushButton::clicked,
+            &spim(), &SPIM::startAcquisition);
+
+    QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
+    connect(stopCapturePushButton, &QPushButton::clicked,
+            &spim(), &SPIM::stop);
+
+    QPushButton *emergencyStopPushButton = new QPushButton("EMERGENCY STOP");
+    emergencyStopPushButton->setStyleSheet("QPushButton {color: red;}");
+    connect(emergencyStopPushButton, &QPushButton::clicked,
+            &spim(), &SPIM::emergencyStop);
+
+    QLabel *statusLabel = new QLabel();
+    statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+
+    QState *s;
+
+    s = spim().getState(SPIM::STATE_UNINITIALIZED);
+    s->assignProperty(initPushButton, "enabled", true);
+    s->assignProperty(startFreeRunPushButton, "enabled", false);
+    s->assignProperty(startAcqPushButton, "enabled", false);
+    s->assignProperty(stopCapturePushButton, "enabled", false);
+    s->assignProperty(emergencyStopPushButton, "enabled", false);
+    s->assignProperty(statusLabel, "text", "Uninitialized");
+
+    s = spim().getState(SPIM::STATE_READY);
+    s->assignProperty(initPushButton, "enabled", false);
+    s->assignProperty(startFreeRunPushButton, "enabled", true);
+    s->assignProperty(startAcqPushButton, "enabled", true);
+    s->assignProperty(stopCapturePushButton, "enabled", false);
+    s->assignProperty(emergencyStopPushButton, "enabled", true);
+    s->assignProperty(statusLabel, "text", "Ready");
+
+    s = spim().getState(SPIM::STATE_CAPTURING);
+    s->assignProperty(startFreeRunPushButton, "enabled", false);
+    s->assignProperty(startAcqPushButton, "enabled", false);
+    s->assignProperty(stopCapturePushButton, "enabled", true);
+    s->assignProperty(emergencyStopPushButton, "enabled", true);
+    s->assignProperty(statusLabel, "text", "Capturing");
+
+    spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(
+        statusLabel, "text", "Precapture");
+    spim().getState(SPIM::STATE_CAPTURE)->assignProperty(
+        statusLabel, "text", "Capture");
+    spim().getState(SPIM::STATE_FREERUN)->assignProperty(
+        statusLabel, "text", "Free run");
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->addWidget(initPushButton);
+    layout->addWidget(startFreeRunPushButton);
+    layout->addWidget(startAcqPushButton);
+    layout->addWidget(stopCapturePushButton);
+    layout->addStretch();
+    layout->addWidget(emergencyStopPushButton);
+    layout->addWidget(statusLabel);
+
+    QGroupBox *controlsGb = new QGroupBox("Controls");
+    controlsGb->setLayout(layout);
+
     QHBoxLayout *controlsHLayout = new QHBoxLayout();
-    controlsHLayout->addLayout(stageLayout);
-    controlsHLayout->addLayout(acquisitionLayout);
+    controlsHLayout->addWidget(stageCw);
+    controlsHLayout->addWidget(acqWidget);
     controlsHLayout->addLayout(galvoProgressLayout);
     controlsHLayout->addStretch();
-    controlsHLayout->addWidget(new ControlWidget());
+    controlsHLayout->addWidget(controlsGb);
 
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(cameraHLayout, 1);
@@ -90,8 +156,8 @@ void CameraPage::saveSettings()
     Settings s = settings();
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         QString g = SETTINGSGROUP_AXIS(i);
-        s.setValue(g, SETTING_POS, cw->getPositionSpinbox(i)->value());
-        s.setValue(g, SETTING_VELOCITY, cw->getVelocitySpinBox(i)->value());
-        s.setValue(g, SETTING_STEPSIZE, cw->getStepSpinBox(i)->value());
+        s.setValue(g, SETTING_POS, stageCw->getPositionSpinbox(i)->value());
+        s.setValue(g, SETTING_VELOCITY, stageCw->getVelocitySpinBox(i)->value());
+        s.setValue(g, SETTING_STEPSIZE, stageCw->getStepSpinBox(i)->value());
     }
 }
