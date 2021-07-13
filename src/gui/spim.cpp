@@ -503,14 +503,15 @@ void SPIM::setupStateMachine()
                 OrcaFlash *orca = camList.at(i);
                 QString fname;
                 QStringList axis = {"x_", "y_", "z_"};
-                QStringList side = {"l", "r"};
                 int k = 0;
                 for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                     double pos = targetPositions[d_enum];
-                    fname += axis.at(k) + QString("%1_").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
+                    fname += axis.at(k) + QString("%1").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
                     k += 1;
+                    if (k < stageEnumList.size()) {
+                        fname += "_";
+                    }
                 }
-                fname += "cam_" + side.at(orca->getCameraIndex());
 
                 // setup thread
                 SaveStackWorker *acqWorker = new SaveStackWorker(orca);
