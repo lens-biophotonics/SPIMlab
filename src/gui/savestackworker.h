@@ -25,6 +25,7 @@ public:
 signals:
     void error(QString msg = "");
     void captureCompleted();
+    void progress(int frameCount);
 
 protected:
     virtual void run();

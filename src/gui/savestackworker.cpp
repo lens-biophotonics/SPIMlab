@@ -93,6 +93,7 @@ void SaveStackWorker::run()
             }
             write(fd, buf, n);
             i++;
+            emit progress(i);
             break;
         case DCAMERR_TIMEOUT:
             logger->warning(QString("Camera %1 timeout").arg(orca->getCameraIndex()));
@@ -104,6 +105,7 @@ void SaveStackWorker::run()
         orca->copyLastFrame(buf, n);
         write(fd, buf, n);
         i++;
+        emit progress(i);
 #endif
     }
 

@@ -126,6 +126,7 @@ signals:
     void captureStarted() const;
     void stopped() const;
     void error(const QString) const;
+    void stackProgress(int camIndex, int frameCount) const;
 
 private:
     CameraTrigger *cameraTrigger = nullptr;

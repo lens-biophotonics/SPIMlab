@@ -530,6 +530,10 @@ void SPIM::setupStateMachine()
                 connect(acqWorker, &SaveStackWorker::captureCompleted,
                         orca, &OrcaFlash::cap_stop);
 
+                connect(acqWorker, &SaveStackWorker::progress, this, [ = ](int frameCount){
+                    emit stackProgress(i, frameCount);
+                });
+
                 connect(orca, &OrcaFlash::captureStarted, acqWorker, [ = ](){
                     acqWorker->start();
                 });

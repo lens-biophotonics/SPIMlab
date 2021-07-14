@@ -18,35 +18,43 @@ ProgressWidget::ProgressWidget(QWidget *parent) : QWidget(parent)
 
 void ProgressWidget::setupUI()
 {
-    QGridLayout *grid = new QGridLayout();
+    QList<QProgressBar *> stackPbList;
 
-    int row = 0;
-    int col = 0;
-
-    QProgressBar *stackProgressBar = new QProgressBar();
     QProgressBar *progressBar = new QProgressBar();
 
-    stackProgressBar->setSizePolicy(
-        QSizePolicy::Minimum, progressBar->sizePolicy().verticalPolicy());
+    QVBoxLayout *stackPbLayout = new QVBoxLayout();
+
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        QProgressBar *stackPb = new QProgressBar();
+        stackPb->setSizePolicy(
+            QSizePolicy::Minimum, progressBar->sizePolicy().verticalPolicy());
+        stackPb->setFormat(QString("%p% (cam %1)").arg(i));
+        stackPbList << stackPb;
+        stackPbLayout->addWidget(stackPb);
+    }
+
     progressBar->setSizePolicy(
         QSizePolicy::Expanding, progressBar->sizePolicy().verticalPolicy());
 
-    stackProgressBar->setFormat("%p% (stack)");
     progressBar->setFormat("%p% (%v/%m)");
 
-    grid->addWidget(stackProgressBar, row, col++, 1, 1);
-    grid->addWidget(progressBar, row++, col, 1, -1);
-
-    col = 0;
-    grid->addWidget(new QLabel("Time / ETA:"), row, col++);
-
+    QHBoxLayout *labelHlayout = new QHBoxLayout;
     QLabel *timeLabel = new QLabel();
-    grid->addWidget(timeLabel, row, col++);
+    labelHlayout->addWidget(timeLabel);
     QLabel *etaLabel = new QLabel();
-    grid->addWidget(etaLabel, row, col++);
+    labelHlayout->addWidget(etaLabel);
+
+    QVBoxLayout *progressLayout = new QVBoxLayout;
+    progressLayout->addWidget(progressBar);
+    progressLayout->addLayout(labelHlayout);
+
+    QHBoxLayout *hLayout = new QHBoxLayout;
+
+    hLayout->addLayout(stackPbLayout);
+    hLayout->addLayout(progressLayout);
 
     QGroupBox *gb = new QGroupBox("Progress");
-    gb->setLayout(grid);
+    gb->setLayout(hLayout);
 
     QBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(gb);
@@ -71,28 +79,27 @@ void ProgressWidget::setupUI()
         progressBar->setRange(0, spim().getTotalSteps());
         progressBar->setValue(0);
 
-        // times 1000 to reduce round error in progress (when multiplying by
-        // the trigger rate)
-        stackProgressBar->setRange(
-            0, spim().getNSteps(spim().getStackStage()) * 1000);
+        for (QProgressBar *pb : stackPbList) {
+            pb->setRange(0, spim().getNSteps(spim().getStackStage()));
+        }
     });
 
-    QTimer *stackProgressTimer = new QTimer();
-
-    connect(stackProgressTimer, &QTimer::timeout, this, [ = ](){
-        stackProgressBar->setValue(
-            stackProgressBar->value() + spim().getTriggerRate() * 1000);
+    // do not remove receiver (this)
+    connect(&spim(), &SPIM::stackProgress, this, [ = ](int camIndex, int frameCount){
+        stackPbList.at(camIndex)->setValue(frameCount);
     });
 
     s = spim().getState(SPIM::STATE_CAPTURE);
     connect(s, &QState::entered, this, [ = ](){
-        stackProgressBar->setValue(0);
-        stackProgressTimer->start(1000);
+        for (QProgressBar *pb : stackPbList) {
+            pb->setValue(0);
+        }
     });
 
     connect(s, &QState::exited, this, [ = ](){
-        stackProgressTimer->stop();
-        stackProgressBar->reset();
+        for (QProgressBar *pb : stackPbList) {
+            pb->reset();
+        }
         qint64 seconds = startDateTime->secsTo(QDateTime::currentDateTime());
         int currentStep = spim().getCurrentStep();
 
