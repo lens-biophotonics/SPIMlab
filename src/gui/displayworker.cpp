@@ -11,7 +11,6 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *pare
 {
     qRegisterMetaType<size_t>("size_t");
 
-    mybuf = new uint16_t[BUFSIZE];
     mybufDouble = new double[BUFSIZE];
 
     orca = camera;
@@ -27,24 +26,32 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *pare
 
 DisplayWorker::~DisplayWorker()
 {
-    delete[] mybuf;
     delete[] mybufDouble;
 }
 
 void DisplayWorker::run()
 {
+    void *buf = nullptr;
+#ifdef QTLAB_DCAM_DEMO
+    quint16 *bufInt = new quint16[BUFSIZE];
+    buf = bufInt;
+#endif
     running = true;
     while (true) {
         msleep(250);
         if (!running) {
+#ifdef QTLAB_DCAM_DEMO
+            delete [] bufInt;
+#endif
             break;
         }
         try {
-            orca->copyLastFrame(mybuf, BUFSIZE * sizeof(uint16_t));
+            orca->lockFrame(-1, &buf);
         }
         catch (std::exception) {
             continue;
         }
+        quint16 *mybuf = static_cast<quint16 *>(buf);
         for (int i = 0; i < BUFSIZE; ++i) {
             mybufDouble[i] = mybuf[i];
         }

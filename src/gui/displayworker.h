@@ -23,7 +23,6 @@ protected:
 private:
     OrcaFlash *orca;
     CameraDisplay *cd;
-    uint16_t *mybuf;
     double *mybufDouble;
     bool running;
 };
