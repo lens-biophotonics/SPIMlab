@@ -54,7 +54,7 @@ void SaveStackWorker::run()
         stopped = true;
     });
 
-    int fd = open(rawFileName().toLatin1(), O_WRONLY);
+    int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
 
     while (!stopped && i < frameCount) {
 #ifdef WITH_HARDWARE

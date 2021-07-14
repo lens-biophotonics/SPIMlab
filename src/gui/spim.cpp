@@ -530,7 +530,6 @@ void SPIM::setupStateMachine()
                 connect(acqWorker, &SaveStackWorker::captureCompleted,
                         orca, &OrcaFlash::cap_stop);
 
-                acqWorker->layOutFileOnDisk();
                 connect(orca, &OrcaFlash::captureStarted, acqWorker, [ = ](){
                     acqWorker->start();
                 });
