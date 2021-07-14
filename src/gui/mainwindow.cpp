@@ -130,7 +130,10 @@ void MainWindow::saveSettings() const
     for (int i = 0; i < SPIM_NAOTF; ++i) {
         SerialPort *sp = spim().getAOTF(i)->serialPort();
         group = SETTINGSGROUP_AOTF(i);
-        mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
+        QString sn = sp->portInfo().serialNumber();
+        if (!sn.isEmpty()) {
+            mySettings.setValue(group, SETTING_SERIALNUMBER, sn);
+        }
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();
