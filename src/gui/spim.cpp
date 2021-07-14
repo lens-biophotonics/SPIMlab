@@ -307,6 +307,8 @@ void SPIM::_startAcquisition()
 {
     capturing = true;
 
+    cameraTrigger->setFreeRunEnabled(freeRun);
+
     try {
         _setExposureTime(exposureTime / 1000.);
     }
@@ -314,8 +316,6 @@ void SPIM::_startAcquisition()
         onError(e.what());
         return;
     }
-
-    cameraTrigger->setFreeRunEnabled(freeRun);
 
     if (freeRun) {
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_FREERUN]);
