@@ -97,9 +97,9 @@ void Settings::loadSettings()
     groupName = SETTINGSGROUP_CAMTRIG;
     settings.beginGroup(groupName);
 
-    SET_VALUE(groupName, SETTING_PHYSCHANS,
-              QStringList({"/Dev1/port0/line0", "/Dev1/port0/line1", "/Dev1/port0/line8", "/Dev1/port0/line9"}));
-    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI1");
+    SET_VALUE(groupName, SETTING_PULSE_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
+    SET_VALUE(groupName, SETTING_BLANKING_TERMS, QStringList({"/Dev1/PFI2", "/Dev1/PFI3"}));
+    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
 
     settings.endGroup();
 

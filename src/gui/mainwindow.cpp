@@ -16,8 +16,9 @@
 #include <qwt_global.h>
 
 #include "spim.h"
-#include "galvoramp.h"
 #include "cameratrigger.h"
+#include "galvoramp.h"
+#include "tasks.h"
 
 #include "mainwindow.h"
 #include "centralwidget.h"
@@ -133,19 +134,19 @@ void MainWindow::saveSettings() const
         }
     }
 
-    GalvoRamp *gr = spim().getGalvoRamp();
+    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     s.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
     QList<QVariant> waveformParams;
-    for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
+    for (QVariant variant : gr->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
     }
     s.setValue(group, SETTING_WFPARAMS, waveformParams);
-
-    CameraTrigger *ct = spim().getCameraTrigger();
+    CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
     group = SETTINGSGROUP_CAMTRIG;
-    s.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
-    s.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
+    s.setValue(group, SETTING_PULSE_TERMS, ct->getPulseTerms());
+    s.setValue(group, SETTING_BLANKING_TERMS, ct->getBlankingPulseTerms());
+    s.setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
 
     group = SETTINGSGROUP_ACQUISITION;
     s.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
@@ -205,13 +206,7 @@ void MainWindow::loadSettings()
         dev->serialPort()->setPortBySerialNumber(s.value(group, SETTING_SERIALNUMBER).toString());
     }
 
-    for (int i = 0; i < SPIM_NAOTF; ++i) {
-        AA_MPDSnCxx *dev = spim().getAOTF(i);
-        group = SETTINGSGROUP_AOTF(i);
-        dev->serialPort()->setPortBySerialNumber(s.value(group, SETTING_SERIALNUMBER).toString());
-    }
-
-    GalvoRamp *gr = spim().getGalvoRamp();
+    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     gr->setPhysicalChannels(s.value(group, SETTING_PHYSCHANS).toStringList());
     QVector<double> wp;
@@ -222,10 +217,17 @@ void MainWindow::loadSettings()
     }
     gr->setWaveformParams(wp);
 
+    for (int i = 0; i < SPIM_NAOTF; ++i) {
+        AA_MPDSnCxx *dev = spim().getAOTF(i);
+        group = SETTINGSGROUP_AOTF(i);
+        dev->serialPort()->setPortBySerialNumber(s.value(group, SETTING_SERIALNUMBER).toString());
+    }
+
     group = SETTINGSGROUP_CAMTRIG;
-    CameraTrigger *ct = spim().getCameraTrigger();
-    ct->setPhysicalChannels(s.value(group, SETTING_PHYSCHANS).toStringList());
-    ct->setTriggerTerm(s.value(group, SETTING_TRIGGER_TERM).toString());
+    CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
+    ct->setPulseTerms(s.value(group, SETTING_PULSE_TERMS).toStringList());
+    ct->setBlankingPulseTerms(s.value(group, SETTING_BLANKING_TERMS).toStringList());
+    ct->setStartTriggerTerm(s.value(group, SETTING_TRIGGER_TERM).toString());
 
     group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(s.value(group, SETTING_EXPTIME).toDouble());

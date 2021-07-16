@@ -21,7 +21,7 @@ void GalvoRamp::initializeTask_impl()
     createTask("galvoRamp");
 
     createAOVoltageChan(
-        physicalChannels.join(":").toLatin1(),
+        physicalChannels.join(":"),
         "galvoRampAOChan",
         -10.0, 10.0, VoltUnits_Volts,
         nullptr);
@@ -30,19 +30,11 @@ void GalvoRamp::initializeTask_impl()
         sampClkTimingSource,
         sampleRate,
         Edge_Rising,
-        SampMode_ContSamps,
+        SampMode_FiniteSamps,
         sampsPerChan);
 
-    QRegularExpression re("^(\\w+/)");
-    QRegularExpressionMatch match = re.match(physicalChannels.at(0));
-    if (match.hasMatch()) {
-        triggerTerm =  "/" + match.captured(1) + "do/StartTrigger";
-    } else {
-        throw std::runtime_error(
-                  ("Cannot parse device name in string" + physicalChannels.at(0)).toLatin1());
-    }
-
     cfgDigEdgeStartTrig(triggerTerm, Edge_Rising);
+    setStartTrigRetriggerable(true);
 
     computeWaveform();
     write();

@@ -47,6 +47,7 @@ set(SPIMlab_SRCS
     
     cameratrigger.cpp
     galvoramp.cpp
+    tasks.cpp
     
     savestackworker.cpp
     spim.cpp

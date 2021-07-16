@@ -11,9 +11,10 @@
 #define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
 #define SETTINGSGROUP_FILTERWHEEL(n) QString("FilterWheel_%1").arg(n)
 #define SETTINGSGROUP_AOTF(n) QString("AOTF_%1").arg(n)
-
 #define SETTINGSGROUP_CAMTRIG "CameraTrigger"
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
+#define SETTING_PULSE_TERMS "pulseTerms"
+#define SETTING_BLANKING_TERMS "blankingTerms"
 
 #define SETTING_LUTPATH "LUTPath"
 #define SETTING_SCANVELOCITY "scanVelocity"

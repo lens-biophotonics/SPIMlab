@@ -16,6 +16,7 @@
 
 #include "spim.h"
 #include "cameratrigger.h"
+#include "tasks.h"
 #include "galvoramp.h"
 #include "savestackworker.h"
 
@@ -30,8 +31,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         filterWheelList.insert(i, new FilterWheel());
     }
 
-    cameraTrigger = new CameraTrigger(this);
-    galvoRamp = new GalvoRamp(this);
+    tasks = new Tasks(this);
 
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -145,12 +145,7 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
-        if (cameraTrigger->isInitialized()) {
-            cameraTrigger->clearTask();
-        }
-        if (galvoRamp->isInitialized()) {
-            galvoRamp->clearTask();
-        }
+        tasks->clearTasks();
         for (OrcaFlash * orca : camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
@@ -162,6 +157,11 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+Tasks *SPIM::getTasks() const
+{
+    return tasks;
 }
 
 QString SPIM::getRunName() const
@@ -254,16 +254,6 @@ void SPIM::setExposureTime(double ms)
     exposureTime = ms;
 }
 
-GalvoRamp *SPIM::getGalvoRamp() const
-{
-    return galvoRamp;
-}
-
-CameraTrigger *SPIM::getCameraTrigger() const
-{
-    return cameraTrigger;
-}
-
 QList<OrcaFlash *> SPIM::getCameraDevices()
 {
     return camList;
@@ -306,8 +296,6 @@ void SPIM::startAcquisition()
 void SPIM::_startAcquisition()
 {
     capturing = true;
-
-    cameraTrigger->setFreeRunEnabled(freeRun);
 
     try {
         _setExposureTime(exposureTime / 1000.);
@@ -356,6 +344,11 @@ void SPIM::_startAcquisition()
             getFullOutputDir(i).mkpath(".");
         }
     }
+
+    tasks->clearTasks();
+    tasks->getCameraTrigger()->setFreeRunEnabled(freeRun);
+    tasks->getCameraTrigger()->setNPulses(nSteps[stackStage]);
+
     emit captureStarted();
 }
 
@@ -395,8 +388,8 @@ void SPIM::setupStateMachine()
             for (OrcaFlash *orca : camList) {
                 orca->cap_start();
             }
-            galvoRamp->startTask();
-            cameraTrigger->startTask();
+
+            tasks->start();
         }
         catch (std::runtime_error e) {
             onError(e.what());
@@ -472,8 +465,7 @@ void SPIM::setupStateMachine()
         if (!capturing) {
             return;
         }
-        galvoRamp->stopTask();
-        cameraTrigger->stopTask();
+        tasks->stop();
 
         // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
@@ -556,8 +548,7 @@ void SPIM::setupStateMachine()
                 orca->cap_start();
             }
 
-            galvoRamp->startTask();
-            cameraTrigger->startTask();
+            tasks->start();
 
             // move stack axis to end position
             double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
@@ -616,8 +607,7 @@ void SPIM::stop()
                 orca->cap_stop();
             }
         }
-        galvoRamp->stopTask();
-        cameraTrigger->stopTask();
+        tasks->clearTasks();
     } catch (std::runtime_error e) {
         emit error(e.what());
         return;
@@ -665,16 +655,12 @@ void SPIM::_setExposureTime(double expTime)
         logger->info(QString("Achievable frame rate: %1 Hz").arg(frameRate));
         logger->info(QString("Acquisition rate: %1 Hz").arg(triggerRate));
 
-        galvoRamp->setSampleRate(sampRate);
-        cameraTrigger->setSampleRate(sampRate);
-
         uint64_t nSamples = static_cast<uint64_t>(sampRate / triggerRate);
-        galvoRamp->setSampsPerChan(nSamples);
-        cameraTrigger->setSampsPerChan(nSamples);
 
-        // reinitialize NI output tasks with updated waveforms
-        galvoRamp->initializeTask();
-        cameraTrigger->initializeTask();
+        tasks->getCameraTrigger()->setPulseFreq(sampRate / nSamples);
+
+        tasks->getGalvoRamp()->setSampleRate(sampRate);
+        tasks->getGalvoRamp()->setSampsPerChan(nSamples);
     } catch (std::runtime_error e) {
         onError(e.what());
         return;

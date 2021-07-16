@@ -21,9 +21,9 @@ private:
     void setupUI();
 
     QList<QComboBox *> galvoRampComboBoxList;
-    QList<QComboBox *> aotfBlankingComboBoxList;
-    QList<QComboBox *> cameraTriggerCtrComboBoxList;
-    QComboBox *PITriggerOutput;
+    QList<QComboBox *> blankingComboBoxList;
+    QList<QComboBox *> cameraTriggerPulseComboBoxList;
+    QComboBox *PITriggerOutputComboBox;
 };
 
 #endif // NISETTINGSWIDGET_H

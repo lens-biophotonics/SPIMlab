@@ -27,12 +27,11 @@
 
 class SaveStackWorker;
 class OrcaFlash;
-class CameraTrigger;
-class GalvoRamp;
 class PIDevice;
 class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
+class Tasks;
 
 
 enum SPIM_PI_DEVICES : int {
@@ -67,14 +66,9 @@ public:
     QList<OrcaFlash *> getCameraDevices();
     void setCamera(OrcaFlash *getCamera);
 
-    void setupGalvoRampTriggerSource(const QStringList &terminals);
-
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
     QList<PIDevice *> getPIDevices() const;
-
-    CameraTrigger *getCameraTrigger() const;
-    GalvoRamp *getGalvoRamp() const;
 
     double getExposureTime() const;
     void setExposureTime(double ms);
@@ -112,6 +106,8 @@ public:
 
     QDir getFullOutputDir(int cam);
 
+    Tasks *getTasks() const;
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -129,8 +125,7 @@ signals:
     void stackProgress(int camIndex, int frameCount) const;
 
 private:
-    CameraTrigger *cameraTrigger = nullptr;
-    GalvoRamp *galvoRamp = nullptr;
+    Tasks *tasks;
 
     double exposureTime;  // in ms
     double triggerRate;

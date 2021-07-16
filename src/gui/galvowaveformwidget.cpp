@@ -5,6 +5,7 @@
 #include <qtlab/widgets/customspinbox.h>
 
 #include "spim.h"
+#include "tasks.h"
 #include "galvoramp.h"
 #include "galvowaveformwidget.h"
 
@@ -18,7 +19,7 @@ void GalvoWaveformWidget::setupUI()
     int row = 0;
     int col = 0;
 
-    GalvoRamp *gr = spim().getGalvoRamp();
+    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
 
     QGridLayout *grid = new QGridLayout();
     col = 0;
@@ -30,7 +31,7 @@ void GalvoWaveformWidget::setupUI()
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         col = 0;
-        QVector<double> wp = spim().getGalvoRamp()->getWaveformParams();
+        QVector<double> wp = gr->getWaveformParams();
         wp = wp.mid(i * GALVORAMP_N_OF_PARAMS, GALVORAMP_N_OF_PARAMS);
 
         DoubleSpinBox *offsetSpinBox = new DoubleSpinBox();

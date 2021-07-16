@@ -1,6 +1,7 @@
 #include <qtlab/core/logmanager.h>
 
 #include "cameratrigger.h"
+#include "spim.h"
 
 #include <QVector>
 
@@ -22,53 +23,48 @@ void CameraTrigger::initializeTask_impl()
     if (isInitialized()) {
         clearTask();
     }
+    QStringList counters = NI::getCOPhysicalChans().filter("/ctr");
+#ifndef WITH_HARDWARE
+    for (int i = 0; i < pulseTerms.size(); ++i) {
+        counters << "" << "";
+    }
+#endif
+    int counterIdx = 0;
 
-    createTask("cameraTriggerDO");
-    createDOChan(physicalChannels.join(",").toLatin1(), nullptr, LineGrp_ChanPerLine);
-    cfgSampClkTiming(nullptr, sampleRate, Edge_Rising, SampMode_ContSamps, sampsPerChan);
+    createTask("Camera trigger");
+    int nCams = SPIM_NCAMS;
+    for (int i = 0; i < nCams; i++) {
+        // camera trigger
+        QString chanName = QString("CamTrig%1").arg(i);
+        double delay = i * (1 / pulseFreq) / nCams;
+        createCOPulseChanFreq(counters.at(counterIdx++), chanName, DAQmx_Val_Hz,
+                              IdleState_Low, delay, pulseFreq, 0.1);
+        setCOPulseTerm(chanName, pulseTerms.at(i));
+
+        // blanking
+        chanName = QString("Blanking%1").arg(i);
+        createCOPulseChanFreq(counters.at(counterIdx++), chanName, DAQmx_Val_Hz,
+                              IdleState_Low, delay, pulseFreq, 0.9485);
+        setCOPulseTerm(chanName, blankingPulseTerms.at(i));
+    }
+
 
     if (isFreeRun) {
-        disableStartTrig();
+        cfgImplicitTiming(SampMode_ContSamps, 10);
     } else {
-        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
+        cfgImplicitTiming(SampMode_FiniteSamps, nPulses);
+        cfgDigEdgeStartTrig(startTriggerTerm, Edge_Rising);
     }
+}
 
-    // waveform
-    QVector<uInt8> waveformTrigger;
-    int ns = static_cast<int>(sampsPerChan);
-    int nHigh = static_cast<int>(ns * DUTY_CYCLE);
-    int nLow = ns - nHigh;
-    waveformTrigger << QVector<uInt8>(nHigh, 1) << QVector<uInt8>(nLow, 0);
+int CameraTrigger::getNPulses() const
+{
+    return nPulses;
+}
 
-    QVector<uInt8> waveformBlanking;
-    nHigh = static_cast<int>(ns * DUTY_CYCLE_BLANKING);
-    int nLowStart = static_cast<int>(CAMERA_ACQUISITION_DELAY * getSampleRate());
-    int nLowEnd = ns - nHigh - nLowStart;
-    waveformBlanking << QVector<uInt8>(nLowStart, 0)
-                     << QVector<uInt8>(nHigh, 1)
-                     << QVector<uInt8>(nLowEnd, 0);
-
-    QVector<uInt8> waveform;
-    int nChannels = physicalChannels.size();
-
-    int nCameras = nChannels / 2; // divide by 2 to account for trigger + blanking
-    int delay = ns / nCameras;
-
-    for (int i = 0; i < nChannels; ++i) {
-        int splitIdx = delay * i; // delay between triggers for different cameras
-        waveform << waveformTrigger.mid(ns - splitIdx);
-        waveform << waveformTrigger.mid(0, ns - splitIdx);
-
-        waveform << waveformBlanking.mid(ns - splitIdx);
-        waveform << waveformBlanking.mid(0, ns - splitIdx);
-    }
-
-    writeDigitalLines(
-        static_cast<int32>(sampsPerChan),
-        false,          //autostart
-        0,              // timeout
-        DataLayout_GroupByChannel,
-        waveform.data());
+void CameraTrigger::setNPulses(int value)
+{
+    nPulses = value;
 }
 
 void CameraTrigger::setFreeRunEnabled(const bool enable)
@@ -82,4 +78,45 @@ void CameraTrigger::setFreeRunEnabled(const bool enable)
 bool CameraTrigger::isFreeRunEnabled() const
 {
     return isFreeRun;
+}
+
+
+QString CameraTrigger::getStartTriggerTerm() const
+{
+    return startTriggerTerm;
+}
+
+void CameraTrigger::setStartTriggerTerm(const QString &value)
+{
+    startTriggerTerm = value;
+}
+
+QStringList CameraTrigger::getBlankingPulseTerms() const
+{
+    return blankingPulseTerms;
+}
+
+void CameraTrigger::setBlankingPulseTerms(const QStringList &value)
+{
+    blankingPulseTerms = value;
+}
+
+QStringList CameraTrigger::getPulseTerms() const
+{
+    return pulseTerms;
+}
+
+void CameraTrigger::setPulseTerms(const QStringList &value)
+{
+    pulseTerms = value;
+}
+
+void CameraTrigger::setPulseFreq(double value)
+{
+    pulseFreq = value;
+}
+
+double CameraTrigger::getPulseFreq() const
+{
+    return pulseFreq;
 }
