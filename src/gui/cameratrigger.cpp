@@ -15,12 +15,23 @@ static Logger *logger = getLogger("CameraTrigger");
 CameraTrigger::CameraTrigger(QObject *parent)
     : NITask(parent)
 {
-    setTaskName("cameraTriggerDO");
 }
 
 void CameraTrigger::initializeTask_impl()
 {
-    NITask::initializeTask_impl();
+    if (isInitialized()) {
+        clearTask();
+    }
+
+    createTask("cameraTriggerDO");
+    createDOChan(physicalChannels.join(",").toLatin1(), nullptr, LineGrp_ChanPerLine);
+    cfgSampClkTiming(nullptr, sampleRate, Edge_Rising, SampMode_ContSamps, sampsPerChan);
+
+    if (isFreeRun) {
+        disableStartTrig();
+    } else {
+        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
+    }
 
     // waveform
     QVector<uInt8> waveformTrigger;
@@ -60,27 +71,6 @@ void CameraTrigger::initializeTask_impl()
         waveform.data(),
         nullptr         // sampsPerChanWritten
         );
-}
-
-void CameraTrigger::configureChannels_impl()
-{
-    createDOChan(physicalChannels.join(",").toLatin1(),
-                 nullptr, LineGrp_ChanPerLine);
-}
-
-void CameraTrigger::configureTiming_impl()
-{
-    cfgSampClkTiming(
-        "", sampleRate, Edge_Rising, SampMode_ContSamps, sampsPerChan);
-}
-
-void CameraTrigger::configureTriggering_impl()
-{
-    if (isFreeRun) {
-        disableStartTrig();
-    } else {
-        cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
-    }
 }
 
 void CameraTrigger::setFreeRunEnabled(const bool enable)

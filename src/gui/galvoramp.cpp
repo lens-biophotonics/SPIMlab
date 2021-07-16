@@ -3,15 +3,38 @@
 #include "galvoramp.h"
 #include <qtlab/core/logger.h>
 
-static Logger *logger = getLogger("GalvorampTrigger");
+static Logger *logger = getLogger("GalvoRamp");
 
 using namespace NI;
 
-#define CHANNEL_NAME "galvoRampAOChan"
-
 GalvoRamp::GalvoRamp(QObject *parent) : NITask(parent)
 {
-    setTaskName("galvoRampAO");
+}
+
+void GalvoRamp::initializeTask_impl()
+{
+    if (isInitialized()) {
+        clearTask();
+    }
+    createTask("galvoRamp");
+
+    createAOVoltageChan(
+        physicalChannels.join(":").toLatin1(),
+        "galvoRampAOChan",
+        -10.0, 10.0, VoltUnits_Volts,
+        nullptr);
+
+    cfgSampClkTiming(
+        sampClkTimingSource,
+        sampleRate,
+        Edge_Rising,
+        SampMode_ContSamps,
+        sampsPerChan);
+
+    cfgDigEdgeStartTrig(triggerTerm, Edge_Rising);
+
+    computeWaveform();
+    write();
 }
 
 void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
@@ -74,38 +97,6 @@ void GalvoRamp::updateWaveform()
         computeWaveform();
         write();
     }
-}
-
-void GalvoRamp::initializeTask_impl()
-{
-    NITask::initializeTask_impl();
-
-    computeWaveform();
-    write();
-}
-
-void GalvoRamp::configureChannels_impl()
-{
-    createAOVoltageChan(
-        physicalChannels.join(":").toLatin1(),
-        CHANNEL_NAME,
-        -10.0, 10.0, VoltUnits_Volts,
-        nullptr);
-}
-
-void GalvoRamp::configureTriggering_impl()
-{
-    cfgDigEdgeStartTrig(triggerTerm.toLatin1(), Edge_Rising);
-}
-
-void GalvoRamp::configureTiming_impl()
-{
-    cfgSampClkTiming(
-        sampClkTimingSource.isEmpty() ? nullptr : sampClkTimingSource.toLatin1(),
-        sampleRate,
-        Edge_Rising,
-        SampMode_ContSamps,
-        sampsPerChan);
 }
 
 void GalvoRamp::resetWaveFormParams(const int nOfChannels)

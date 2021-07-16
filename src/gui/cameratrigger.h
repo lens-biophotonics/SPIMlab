@@ -13,9 +13,6 @@ public:
 
 protected:
     virtual void initializeTask_impl() override;
-    virtual void configureChannels_impl() override;
-    virtual void configureTiming_impl() override;
-    virtual void configureTriggering_impl() override;
 
 private:
     bool isFreeRun;
