@@ -16,11 +16,12 @@ LaserPage::LaserPage(QWidget *parent) : QWidget(parent)
 
 void LaserPage::setupUI()
 {
-    QBoxLayout *hl = new QHBoxLayout();
+    QBoxLayout *laserLayout = new QVBoxLayout();
 
     for (int i = 0; i < SPIM_NCOBOLT; i++) {
-        hl->addWidget(new CoboltWidget(spim().getLaser(i)));
+        laserLayout->addWidget(new CoboltWidget(spim().getLaser(i)));
     }
+    laserLayout->addStretch();
 
     QBoxLayout *vLeft = new QVBoxLayout();
     QBoxLayout *vRight = new QVBoxLayout();
@@ -55,15 +56,11 @@ void LaserPage::setupUI()
     vRight->addWidget(aotfGb);
     vRight->addStretch();
 
-    QBoxLayout *hf = new QHBoxLayout();
-    hf->addLayout(vLeft);
-    hf->addLayout(vRight);
-    hf->addStretch();
+    QBoxLayout *hLayout = new QHBoxLayout();
+    hLayout->addLayout(vLeft);
+    hLayout->addLayout(vRight);
+    hLayout->addStretch();
+    hLayout->addLayout(laserLayout);
 
-    QBoxLayout *bl = new QVBoxLayout();
-    bl->addLayout(hl);
-    bl->addLayout(hf);
-    bl->addStretch();
-
-    setLayout(bl);
+    setLayout(hLayout);
 }

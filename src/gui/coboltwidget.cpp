@@ -93,6 +93,9 @@ void CoboltWidget::setupUI()
     grid->addWidget(powerLabel, row, 0, 1, 1);
     grid->addWidget(powerDoubleSpinBox, row++, 1, 1, 1);
 
+    grid->setColumnStretch(0, 1);
+    grid->setColumnStretch(1, 1);
+
     QGroupBox *gb = new QGroupBox("Laser");
     gb->setLayout(grid);
     QBoxLayout *bl = new QHBoxLayout();

@@ -42,9 +42,8 @@ void CameraPage::setupUI()
         connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
         cd->setLUTPath(LUTPath);
         vLayout->addWidget(cd);
-        cameraHLayout->addLayout(vLayout, 1);
+        cameraHLayout->addLayout(vLayout);
     }
-    cameraHLayout->addStretch(0);
 
     stageCw = new PIPositionControlWidget();
     stageCw->setTitle("Translational stages");

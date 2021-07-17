@@ -4,8 +4,8 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
-
-#include <qtlab/widgets/picontrollersettingswidget.h>
+#include <QDoubleSpinBox>
+#include <QLabel>
 
 #include "spim.h"
 
@@ -22,20 +22,6 @@ SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
 
 void SettingsPage::setupUI()
 {
-    QHBoxLayout *piHLayout = new QHBoxLayout();
-    QHBoxLayout *piHLayout2 = new QHBoxLayout();
-    for (int i = 0; i < 3; ++i) {
-        piHLayout->addWidget(
-            new PIControllerSettingsWidget(spim().getPIDevice(i)));
-    }
-    for (int i = 3; i < 5; ++i) {
-        piHLayout2->addWidget(
-            new PIControllerSettingsWidget(spim().getPIDevice(i)));
-    }
-
-    piHLayout->addStretch();
-    piHLayout2->addStretch();
-
     NISettingsWidget *nisw = new NISettingsWidget();
 
     QLineEdit *LUTPathLineEdit = new QLineEdit();
@@ -151,14 +137,9 @@ void SettingsPage::setupUI()
     hLayout->addWidget(otherSettingsGB);
     hLayout->addStretch();
 
-    QVBoxLayout *vlayout = new QVBoxLayout();
-    vlayout->addLayout(piHLayout);
-    vlayout->addLayout(piHLayout2);
-    vlayout->addLayout(hLayout);
-    vlayout->addStretch();
+    QVBoxLayout *vLayout = new QVBoxLayout();
+    vLayout->addLayout(hLayout);
+    vLayout->addStretch(1);
 
-    QHBoxLayout *hlayout = new QHBoxLayout();
-    hlayout->addLayout(vlayout);
-    hlayout->addStretch();
-    setLayout(hlayout);
+    setLayout(vLayout);
 }
