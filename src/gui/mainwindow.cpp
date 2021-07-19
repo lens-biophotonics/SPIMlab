@@ -84,7 +84,7 @@ void MainWindow::setupUi()
 
 void MainWindow::saveSettings() const
 {
-    Settings mySettings = settings();
+    Settings s = settings();
 
     QSettings settings;
 
@@ -98,33 +98,30 @@ void MainWindow::saveSettings() const
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
         group = SETTINGSGROUP_AXIS(i);
-        mySettings.setValue(group, SETTING_BAUD, dev->getBaud());
-        mySettings.setValue(
-            group, SETTING_DEVICENUMBER, dev->getDeviceNumber());
-        mySettings.setValue(group, SETTING_PORTNAME, dev->getPortName());
+        s.setValue(group, SETTING_BAUD, dev->getBaud());
+        s.setValue(group, SETTING_DEVICENUMBER, dev->getDeviceNumber());
+        s.setValue(group, SETTING_PORTNAME, dev->getPortName());
         if (!dev->getPortName().isEmpty()) {
             QSerialPortInfo info(dev->getPortName());
-            mySettings.setValue(
-                group, SETTING_SERIALNUMBER, info.serialNumber());
+            s.setValue(group, SETTING_SERIALNUMBER, info.serialNumber());
         }
 
-        QList<double> *scanRange =
-            spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
-        mySettings.setValue(group, SETTING_FROM, scanRange->at(0));
-        mySettings.setValue(group, SETTING_TO, scanRange->at(1));
-        mySettings.setValue(group, SETTING_STEP, scanRange->at(2));
+        QList<double> *scanRange = spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
+        s.setValue(group, SETTING_FROM, scanRange->at(0));
+        s.setValue(group, SETTING_TO, scanRange->at(1));
+        s.setValue(group, SETTING_STEP, scanRange->at(2));
     }
 
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         SerialPort *sp = spim().getLaser(i)->serialPort();
         group = SETTINGSGROUP_COBOLT(i);
-        mySettings.setValue(group, SETTING_PORTNAME, sp->portName());
+        s.setValue(group, SETTING_PORTNAME, sp->portName());
     }
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         SerialPort *sp = spim().getFilterWheel(i)->serialPort();
         group = SETTINGSGROUP_FILTERWHEEL(i);
-        mySettings.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
+        s.setValue(group, SETTING_SERIALNUMBER, sp->portInfo().serialNumber());
     }
 
     for (int i = 0; i < SPIM_NAOTF; ++i) {
@@ -132,39 +129,39 @@ void MainWindow::saveSettings() const
         group = SETTINGSGROUP_AOTF(i);
         QString sn = sp->portInfo().serialNumber();
         if (!sn.isEmpty()) {
-            mySettings.setValue(group, SETTING_SERIALNUMBER, sn);
+            s.setValue(group, SETTING_SERIALNUMBER, sn);
         }
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
-    mySettings.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
-    mySettings.setValue(group, SETTING_TRIGGER_TERM, gr->getTriggerTerm());
+    s.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
+    s.setValue(group, SETTING_TRIGGER_TERM, gr->getTriggerTerm());
     QList<QVariant> waveformParams;
     for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
     }
-    mySettings.setValue(group, SETTING_WFPARAMS, waveformParams);
+    s.setValue(group, SETTING_WFPARAMS, waveformParams);
 
     CameraTrigger *ct = spim().getCameraTrigger();
     group = SETTINGSGROUP_CAMTRIG;
-    mySettings.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
-    mySettings.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
+    s.setValue(group, SETTING_PHYSCHANS, ct->getPhysicalChannels());
+    s.setValue(group, SETTING_TRIGGER_TERM, ct->getTriggerTerm());
 
     group = SETTINGSGROUP_ACQUISITION;
-    mySettings.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
-    mySettings.setValue(group, SETTING_RUN_NAME, spim().getRunName());
+    s.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
+    s.setValue(group, SETTING_RUN_NAME, spim().getRunName());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
-    mySettings.setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
-    mySettings.setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
+    s.setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
+    s.setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
 
-    mySettings.saveSettings();
+    s.saveSettings();
 }
 
 void MainWindow::loadSettings()
 {
-    const Settings mySettings = settings();
+    const Settings s = settings();
 
     QString group;
 
@@ -178,10 +175,9 @@ void MainWindow::loadSettings()
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
         group = SETTINGSGROUP_AXIS(i);
-        dev->setBaud(mySettings.value(group, SETTING_BAUD).toInt());
-        dev->setDeviceNumber(
-            mySettings.value(group, SETTING_DEVICENUMBER).toInt());
-        QString sn = mySettings.value(group, SETTING_SERIALNUMBER).toString();
+        dev->setBaud(s.value(group, SETTING_BAUD).toInt());
+        dev->setDeviceNumber(s.value(group, SETTING_DEVICENUMBER).toInt());
+        QString sn = s.value(group, SETTING_SERIALNUMBER).toString();
         if (!sn.isEmpty()) {
             QSerialPortInfo info = SerialPort::findPortFromSerialNumber(sn);
             if (!info.portName().isEmpty()) {
@@ -189,46 +185,39 @@ void MainWindow::loadSettings()
             }
         }
         else {
-            dev->setPortName(
-                mySettings.value(group, SETTING_PORTNAME).toString());
+            dev->setPortName(s.value(group, SETTING_PORTNAME).toString());
         }
 
-        QList<double> *scanRange =
-            spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
-        scanRange->replace(0, mySettings.value(group, SETTING_FROM).toDouble());
-        scanRange->replace(1, mySettings.value(group, SETTING_TO).toDouble());
-        scanRange->replace(2, mySettings.value(group, SETTING_STEP).toDouble());
+        QList<double> *scanRange = spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
+        scanRange->replace(0, s.value(group, SETTING_FROM).toDouble());
+        scanRange->replace(1, s.value(group, SETTING_TO).toDouble());
+        scanRange->replace(2, s.value(group, SETTING_STEP).toDouble());
     }
 
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         Cobolt *dev = spim().getLaser(i);
         group = SETTINGSGROUP_COBOLT(i);
-        dev->serialPort()->setPortName(mySettings.value(group, SETTING_PORTNAME).toString());
+        dev->serialPort()->setPortName(s.value(group, SETTING_PORTNAME).toString());
     }
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         FilterWheel *dev = spim().getFilterWheel(i);
         group = SETTINGSGROUP_FILTERWHEEL(i);
-        dev->serialPort()->setPortBySerialNumber(
-            mySettings.value(group, SETTING_SERIALNUMBER).toString());
+        dev->serialPort()->setPortBySerialNumber(s.value(group, SETTING_SERIALNUMBER).toString());
     }
 
     for (int i = 0; i < SPIM_NAOTF; ++i) {
         AA_MPDSnCxx *dev = spim().getAOTF(i);
         group = SETTINGSGROUP_AOTF(i);
-        dev->serialPort()->setPortBySerialNumber(
-            mySettings.value(group, SETTING_SERIALNUMBER).toString());
+        dev->serialPort()->setPortBySerialNumber(s.value(group, SETTING_SERIALNUMBER).toString());
     }
 
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
-    gr->setPhysicalChannels(
-        mySettings.value(group, SETTING_PHYSCHANS).toStringList());
-    gr->setTriggerTerm(
-        mySettings.value(group, SETTING_TRIGGER_TERM).toString());
+    gr->setPhysicalChannels(s.value(group, SETTING_PHYSCHANS).toStringList());
+    gr->setTriggerTerm(s.value(group, SETTING_TRIGGER_TERM).toString());
     QVector<double> wp;
-    const QList<QVariant> wafeformParams =
-        mySettings.value(group, SETTING_WFPARAMS).toList();
+    const QList<QVariant> wafeformParams = s.value(group, SETTING_WFPARAMS).toList();
     gr->resetWaveFormParams(SPIM_NCAMS);
     for (int i = 0; i < wafeformParams.count(); i++) {
         wp << wafeformParams.at(i).toDouble();
@@ -237,18 +226,16 @@ void MainWindow::loadSettings()
 
     group = SETTINGSGROUP_CAMTRIG;
     CameraTrigger *ct = spim().getCameraTrigger();
-    ct->setPhysicalChannels(
-        mySettings.value(group, SETTING_PHYSCHANS).toStringList());
-    ct->setTriggerTerm(mySettings.value(group, SETTING_TRIGGER_TERM).toString());
+    ct->setPhysicalChannels(s.value(group, SETTING_PHYSCHANS).toStringList());
+    ct->setTriggerTerm(s.value(group, SETTING_TRIGGER_TERM).toString());
 
     group = SETTINGSGROUP_ACQUISITION;
-    spim().setExposureTime(mySettings.value(group, SETTING_EXPTIME).toDouble());
-    spim().setRunName(mySettings.value(group, SETTING_RUN_NAME).toString());
+    spim().setExposureTime(s.value(group, SETTING_EXPTIME).toDouble());
+    spim().setRunName(s.value(group, SETTING_RUN_NAME).toString());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
-    spim().setScanVelocity(
-        mySettings.value(group, SETTING_SCANVELOCITY).toDouble());
-    spim().setOutputPathList(mySettings.value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
+    spim().setScanVelocity(s.value(group, SETTING_SCANVELOCITY).toDouble());
+    spim().setOutputPathList(s.value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
 }
 
 void MainWindow::on_aboutAction_triggered() const
