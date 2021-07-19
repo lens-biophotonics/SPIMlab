@@ -126,22 +126,24 @@ void CoboltWidget::setupUI()
         offPushButton->setEnabled(false);
     });
 
-    connect(cobolt, &Cobolt::connected, this, [ = ](){
-        bool on = false;
+    connect(cobolt->getLaserOnState(), &QState::entered, this, [ = ](){
         try {
-            on = cobolt->getOnOffState();
-            powerDoubleSpinBox->setValue(
-                cobolt->getOutputPowerSetPoint() * 1000);
-            int wl = cobolt->getWavelength();
-            gb->setTitle(QString("%1 nm").arg(wl));
-            line->setStyleSheet(
-                "background-color: " + wavelengthToColor(wl).name());
+            line->setStyleSheet("background-color: "
+                                + wavelengthToColor(cobolt->getWavelength()).name());
+        } catch (std::runtime_error) {
         }
-        catch (std::runtime_error) {
+    });
+
+    connect(cobolt->getLaserOffState(), &QState::entered, this, [ = ](){
+        QColor wlColor;
+        try {
+            wlColor = wavelengthToColor(cobolt->getWavelength());
+        } catch (std::runtime_error) {
         }
-        onPushButton->setEnabled(!on);
-        offPushButton->setEnabled(on);
-        refreshValues();
+        QColor dimmed = QColor::fromHsvF(wlColor.hueF(),
+                                         wlColor.saturationF(),
+                                         wlColor.valueF() * 0.65);
+        line->setStyleSheet("background-color: " + dimmed.name());
     });
 
     connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
@@ -155,6 +157,15 @@ void CoboltWidget::setupUI()
 
     QState *cs = cobolt->serialPort()->getConnectedState();
     QState *ds = cobolt->serialPort()->getDisconnectedState();
+
+    connect(cs,  &QState::entered, [ = ](){
+        try {
+            int wl = cobolt->getWavelength();
+            gb->setTitle(QString("%1 nm").arg(wl));
+        }
+        catch (std::runtime_error) {
+        }
+    });
 
     ds->assignProperty(line, "styleSheet", "background-color: gray");
 
@@ -184,6 +195,11 @@ void CoboltWidget::setupUI()
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
+
+    cobolt->getLaserOnState()->assignProperty(onPushButton, "enabled", false);
+    cobolt->getLaserOnState()->assignProperty(offPushButton, "enabled", true);
+    cobolt->getLaserOffState()->assignProperty(onPushButton, "enabled", true);
+    cobolt->getLaserOffState()->assignProperty(offPushButton, "enabled", false);
 }
 
 void CoboltWidget::connectDevice()
