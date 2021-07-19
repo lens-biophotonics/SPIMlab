@@ -136,7 +136,6 @@ void MainWindow::saveSettings() const
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     s.setValue(group, SETTING_PHYSCHANS, gr->getPhysicalChannels());
-    s.setValue(group, SETTING_TRIGGER_TERM, gr->getTriggerTerm());
     QList<QVariant> waveformParams;
     for (QVariant variant : spim().getGalvoRamp()->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
@@ -215,7 +214,6 @@ void MainWindow::loadSettings()
     GalvoRamp *gr = spim().getGalvoRamp();
     group = SETTINGSGROUP_GRAMP;
     gr->setPhysicalChannels(s.value(group, SETTING_PHYSCHANS).toStringList());
-    gr->setTriggerTerm(s.value(group, SETTING_TRIGGER_TERM).toString());
     QVector<double> wp;
     const QList<QVariant> wafeformParams = s.value(group, SETTING_WFPARAMS).toList();
     gr->resetWaveFormParams(SPIM_NCAMS);

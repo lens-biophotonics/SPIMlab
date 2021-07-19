@@ -24,7 +24,6 @@ private:
     QList<QComboBox *> aotfBlankingComboBoxList;
     QList<QComboBox *> cameraTriggerCtrComboBoxList;
     QComboBox *PITriggerOutput;
-    QComboBox *galvoRampTrigger;
 };
 
 #endif // NISETTINGSWIDGET_H

@@ -91,8 +91,6 @@ void Settings::loadSettings()
               SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
     SET_VALUE(groupName, SETTING_WFPARAMS, QList<QVariant>(
                   {0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
-    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI0");
-
     settings.endGroup();
 
 

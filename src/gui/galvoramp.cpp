@@ -1,3 +1,5 @@
+#include <QRegularExpression>
+
 #include <cmath>
 
 #include "galvoramp.h"
@@ -30,6 +32,15 @@ void GalvoRamp::initializeTask_impl()
         Edge_Rising,
         SampMode_ContSamps,
         sampsPerChan);
+
+    QRegularExpression re("^(\\w+/)");
+    QRegularExpressionMatch match = re.match(physicalChannels.at(0));
+    if (match.hasMatch()) {
+        triggerTerm =  "/" + match.captured(1) + "do/StartTrigger";
+    } else {
+        throw std::runtime_error(
+                  ("Cannot parse device name in string" + physicalChannels.at(0)).toLatin1());
+    }
 
     cfgDigEdgeStartTrig(triggerTerm, Edge_Rising);
 
