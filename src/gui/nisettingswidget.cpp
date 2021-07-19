@@ -26,10 +26,10 @@ void NISettingsWidget::setupUI()
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         row = 0;
-        grid->addWidget(new QLabel(QString("Camera Trigger %1").arg(i)),
+        grid->addWidget(new QLabel(QString("Camera %1").arg(i)),
                         row++, i * 2 + 0, 1, 2);
 
-        grid->addWidget(new QLabel("Line"), row, i * 2 + 0);
+        grid->addWidget(new QLabel("Trigger"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->insertItems(0, NI::getDOLines());
         comboBox->setCurrentText(
@@ -45,9 +45,7 @@ void NISettingsWidget::setupUI()
         grid->addWidget(comboBox, row++, i * 2 + 1);
         aotfBlankingComboBoxList.insert(i, comboBox);
 
-        grid->addWidget(new QLabel(QString("Galvo ramp %1").arg(i)),
-                        row++, i * 2 + 0, 1, 2);
-        grid->addWidget(new QLabel("Channel"), row, i * 2 + 0);
+        grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
         comboBox->setCurrentText(galvoPhysChan.at(i));
@@ -55,6 +53,11 @@ void NISettingsWidget::setupUI()
         galvoRampComboBoxList.insert(i, comboBox);
     }
 
+    QFrame *line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    grid->addWidget(line, row++, 0, 1, 4);
 
     PITriggerOutput = new QComboBox();
     PITriggerOutput->insertItems(0, NI::getTerminals());
