@@ -151,7 +151,7 @@ void SPIM::uninitialize()
         if (galvoRamp->isInitialized()) {
             galvoRamp->clearTask();
         }
-        foreach (OrcaFlash * orca, camList) {
+        for (OrcaFlash * orca : camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
                 orca->close();
