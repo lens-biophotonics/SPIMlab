@@ -68,9 +68,7 @@ void CameraTrigger::initializeTask_impl()
         false,          //autostart
         0,              // timeout
         DataLayout_GroupByChannel,
-        waveform.data(),
-        nullptr         // sampsPerChanWritten
-        );
+        waveform.data());
 }
 
 void CameraTrigger::setFreeRunEnabled(const bool enable)

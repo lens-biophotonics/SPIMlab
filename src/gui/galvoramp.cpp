@@ -123,8 +123,7 @@ void GalvoRamp::write()
         false,
         10,
         DataLayout_GroupByChannel,
-        waveform.data(),
-        nullptr);
+        waveform.data());
 }
 
 void GalvoRamp::computeWaveform()
