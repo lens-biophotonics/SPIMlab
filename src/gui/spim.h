@@ -53,8 +53,8 @@ public:
         STATE_ERROR,
 
         STATE_ACQUISITION,
-        STATE_CAPTURE,
         STATE_PRECAPTURE,
+        STATE_CAPTURE,
 
         STATE_FREERUN,
     };
@@ -65,6 +65,7 @@ public:
     OrcaFlash *getCamera(int camNumber) const;
     QList<OrcaFlash *> getCameraDevices();
     void setCamera(OrcaFlash *getCamera);
+    SaveStackWorker *getSSWorker(int camNumber);
 
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
@@ -121,8 +122,8 @@ signals:
     void initialized() const;
     void captureStarted() const;
     void stopped() const;
+    void jobsCompleted() const;
     void error(const QString) const;
-    void stackProgress(int camIndex, int frameCount) const;
 
 private:
     Tasks *tasks;
@@ -130,11 +131,12 @@ private:
     double exposureTime;  // in ms
     double triggerRate;
 
-    QList<PIDevice *>piDevList;
-    QList<OrcaFlash *>camList;
-    QList<Cobolt *>laserList;
-    QList<FilterWheel *>filterWheelList;
-    QList<AA_MPDSnCxx *>aotfList;
+    QList<PIDevice *> piDevList;
+    QList<OrcaFlash *> camList;
+    QList<SaveStackWorker *> ssWorkerList;
+    QList<Cobolt *> laserList;
+    QList<FilterWheel *> filterWheelList;
+    QList<AA_MPDSnCxx *> aotfList;
 
     QStateMachine *sm = nullptr;
 
@@ -154,11 +156,16 @@ private:
     bool freeRun = true;
     bool capturing = false;
 
+    int completedJobs;
+    int successJobs;
+
     QMap<MACHINE_STATE, QState *> stateMap;
 
     void _setExposureTime(double expTime);
     void _startAcquisition();
     void setupStateMachine();
+
+    void incrementCompleted(bool ok);
 
 private slots:
     void onError(const QString &errMsg);

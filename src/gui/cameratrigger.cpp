@@ -16,6 +16,24 @@ static Logger *logger = getLogger("CameraTrigger");
 CameraTrigger::CameraTrigger(QObject *parent)
     : NITask(parent)
 {
+    waiter = new TaskWaiter(this);
+
+    connect(this, &CameraTrigger::started, this, [ = ](){
+        if (!isFreeRun) {
+            setLogErrorsEnabled(false);
+            waiter->start();
+        }
+    });
+
+    connect(this, &CameraTrigger::stopped, [ = ](){
+        waiter->requestInterruption();
+        setLogErrorsEnabled(true);
+    });
+
+    connect(waiter, &TaskWaiter::done, this, [ = ](){
+        emit done();
+        setLogErrorsEnabled(true);
+    });
 }
 
 void CameraTrigger::initializeTask_impl()

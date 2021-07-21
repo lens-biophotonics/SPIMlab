@@ -1,12 +1,11 @@
 #ifndef SAVESTACKWORKER_H
 #define SAVESTACKWORKER_H
 
-#include <QThread>
 #include <QString>
 
 class OrcaFlash;
 
-class SaveStackWorker : public QThread
+class SaveStackWorker : public QObject
 {
     Q_OBJECT
 public:
@@ -16,26 +15,32 @@ public:
     double getTimeout() const; // ms
     void setTimeout(double value); // ms
     void setFrameCount(int32_t count);
+    size_t getFrameCount() const;
     void setOutputFileName(const QString &fname);
     void setOutputPath(const QString &value);
+
+    void signalTriggerCompletion();
+
+    size_t getReadFrames() const;
 
     QString rawFileName();
     QString mhdFileName();
 
+    void start();
+    void stop();
+
 signals:
     void error(QString msg = "");
-    void captureCompleted();
-    void progress(int frameCount);
-
-protected:
-    virtual void run();
+    void captureCompleted(bool ok);
 
 private:
-    bool stopped;
+    QString timeoutString(double delta, int i);
+
+    bool stopped, triggerCompleted;
     double timeout;
     QString outputFileName;
     QString outputPath;
-    int32_t frameCount;
+    size_t frameCount, readFrames;
     OrcaFlash *orca;
 };
 

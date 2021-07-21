@@ -8,6 +8,7 @@
 #include <QTimer>
 
 #include "spim.h"
+#include "savestackworker.h"
 
 #include "progresswidget.h"
 
@@ -62,6 +63,7 @@ void ProgressWidget::setupUI()
     setLayout(layout);
 
     QDateTime *startDateTime = new QDateTime();
+    QTimer *timer = new QTimer();
 
     QState *s;
 
@@ -78,28 +80,27 @@ void ProgressWidget::setupUI()
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setRange(0, spim().getTotalSteps());
         progressBar->setValue(0);
+        progressBar->reset();
+    });
 
-        for (QProgressBar *pb : stackPbList) {
-            pb->setRange(0, spim().getNSteps(spim().getStackStage()));
+    connect(timer, &QTimer::timeout, this, [ = ](){
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
         }
     });
 
-    // do not remove receiver (this)
-    connect(&spim(), &SPIM::stackProgress, this, [ = ](int camIndex, int frameCount){
-        stackPbList.at(camIndex)->setValue(frameCount);
-    });
 
     s = spim().getState(SPIM::STATE_CAPTURE);
     connect(s, &QState::entered, this, [ = ](){
-        for (QProgressBar *pb : stackPbList) {
-            pb->setValue(0);
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
+            stackPbList.at(i)->setValue(0);
         }
+        timer->start(1000);
     });
+    connect(s, &QState::exited, timer, &QTimer::stop);
 
     connect(s, &QState::exited, this, [ = ](){
-        for (QProgressBar *pb : stackPbList) {
-            pb->reset();
-        }
         qint64 seconds = startDateTime->secsTo(QDateTime::currentDateTime());
         int currentStep = spim().getCurrentStep();
 

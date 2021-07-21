@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QFileInfo>
+#include <QVector>
 
 #include <qtlab/core/logger.h>
 #include <qtlab/hw/hamamatsu/orcaflash.h>
@@ -19,10 +20,10 @@ static Logger *logger = getLogger("SaveStackWorker");
 using namespace DCAM;
 
 SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
-    : QThread(parent), orca(orca)
+    : QObject(parent), orca(orca)
 {
+    frameCount = readFrames = 0;
 }
-
 void SaveStackWorker::layOutFileOnDisk()
 {
     int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -35,56 +36,66 @@ void SaveStackWorker::layOutFileOnDisk()
     close(fd);
 }
 
-void SaveStackWorker::run()
+void SaveStackWorker::start()
 {
-    const int32_t nFramesInBuffer = orca->nFramesInBuffer();
-    int i = 0;
     void *buf;
-    int n = 2 * 2048 * 2048;
-    uint64_t timeStamps[frameCount] = {0};
+    size_t width = 2048;
+    size_t height = 2048;
+    int n = 2 * width * height;
+
+    readFrames = 0;
+    triggerCompleted = false;
+    stopped = false;
+
+    logger->info(QString("Total number of frames: %1").arg(frameCount));
 
 #ifdef WITH_HARDWARE
+    const int32_t nFramesInBuffer = orca->nFramesInBuffer();
+    QVector<qint64> timeStamps(frameCount, 0);
 #else
     buf = malloc(n);
 #endif
 
-    stopped = false;
 
-    connect(orca, &OrcaFlash::stopped, this, [ = ] () {
-        stopped = true;
-    });
 
     int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
 
-    while (!stopped && i < frameCount) {
+
+    while (!stopped && readFrames < frameCount) {
 #ifdef WITH_HARDWARE
-        int32_t frame = i % nFramesInBuffer;
+        int32_t frame = readFrames % nFramesInBuffer;
         int32_t frameStamp = -1;
 
         DCAM_TIMESTAMP timeStamp;
 
-        int32 mask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED;
-        int32 event;
-        try {
-            event = orca->wait(1000, mask);
+        quint32 mask = DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED;
+        quint32 event = DCAMWAIT_CAPEVENT_FRAMEREADY;
+
+        if (!triggerCompleted) {
+            try {
+                event = orca->wait(1000, mask);
+            }
+            catch (std::runtime_error e) {
+                continue;
+            }
         }
-        catch (std::runtime_error) {
+
+        if (stopped) {
+            break;
         }
 
         switch (event) {
         case DCAMWAIT_CAPEVENT_FRAMEREADY:
             try {
                 orca->lockFrame(frame, &buf, &frameStamp, &timeStamp);
-                timeStamps[i] = timeStamp.sec * 1e6 + timeStamp.microsec;
-                if (i != 0) {
-                    double delta = double(timeStamps[i]) - double(timeStamps[i - 1]);
+                timeStamps[readFrames] = timeStamp.sec * 1e6 + timeStamp.microsec;
+                if (readFrames != 0) {
+                    double delta = double(timeStamps[readFrames]) - double(timeStamps[readFrames - 1]);
                     if (abs(delta) > timeout) {
-                        logger->critical(QString("Camera %1 timeout by %2 ms at frame %3")
-                                         .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
+                        logger->critical(timeoutString(delta, readFrames));
                     }
                     else if (abs(delta) > timeout * 0.75 || abs(delta) < timeout * 0.25) {
-                        logger->warning(QString("Camera %1 timeout by %2 ms at frame %3")
-                                        .arg(orca->getCameraIndex()).arg(delta * 1e-3).arg(i + 1));
+                        logger->warning(timeoutString(delta, readFrames));
                     }
                 }
             }
@@ -92,20 +103,17 @@ void SaveStackWorker::run()
                 continue;
             }
             write(fd, buf, n);
-            i++;
-            emit progress(i);
+            readFrames++;
             break;
         case DCAMERR_TIMEOUT:
-            logger->warning(QString("Camera %1 timeout").arg(orca->getCameraIndex()));
-            break;
         default:
-            break;
+            logger->warning(QString("Camera %1 timeout").arg(orca->getCameraIndex()));
+            continue;
         }
 #else
         orca->copyLastFrame(buf, n);
         write(fd, buf, n);
-        i++;
-        emit progress(i);
+        readFrames++;
 #endif
     }
 
@@ -113,10 +121,15 @@ void SaveStackWorker::run()
 #else
     free(buf);
 #endif
-
-    emit captureCompleted();
-    logger->info(QString("Saved %1 frames").arg(i));
     close(fd);
+
+    emit captureCompleted(readFrames == frameCount);
+    QString msg = QString("Saved %1/%2 frames").arg(readFrames).arg(frameCount);
+    if (readFrames != frameCount) {
+        logger->warning(msg);
+    } else {
+        logger->info(msg);
+    }
 
     QFile outFile(mhdFileName());
     if (!outFile.open(QIODevice::WriteOnly)) {
@@ -131,15 +144,38 @@ void SaveStackWorker::run()
     out << "NDims = 3" << endl;
     out << "BinaryData = True" << endl;
     out << "BinaryDataByteOrderMSB = False" << endl;
-    out << "DimSize = 2048 2048 " << i << endl;
+    out << "DimSize = 2048 2048 " << readFrames << endl;
     out << "ElementType = MET_USHORT" << endl;
     out << "ElementDataFile = " << fi.fileName() << endl;
     outFile.close();
 }
 
+void SaveStackWorker::stop()
+{
+    stopped = true;
+}
+
+size_t SaveStackWorker::getReadFrames() const
+{
+    return readFrames;
+}
+
+size_t SaveStackWorker::getFrameCount() const
+{
+    return frameCount;
+}
+
 void SaveStackWorker::setOutputPath(const QString &value)
 {
     outputPath = value;
+}
+
+QString SaveStackWorker::timeoutString(double delta, int i)
+{
+    return QString("Camera %1 timeout by %2 ms at frame %3 (timeout: %4)")
+           .arg(orca->getCameraIndex())
+           .arg(delta * 1e-3).arg(i + 1)
+           .arg(timeout);
 }
 
 void SaveStackWorker::setFrameCount(int32_t count)
@@ -160,6 +196,11 @@ QString SaveStackWorker::rawFileName()
 QString SaveStackWorker::mhdFileName()
 {
     return QString("%1.mhd").arg(QDir(outputPath).filePath(outputFileName));
+}
+
+void SaveStackWorker::signalTriggerCompletion()
+{
+    triggerCompleted = true;
 }
 
 double SaveStackWorker::getTimeout() const

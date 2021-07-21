@@ -149,12 +149,9 @@ void CameraPage::setupUI()
     s->assignProperty(emergencyStopPushButton, "enabled", true);
     s->assignProperty(statusLabel, "text", "Capturing");
 
-    spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(
-        statusLabel, "text", "Precapture");
-    spim().getState(SPIM::STATE_CAPTURE)->assignProperty(
-        statusLabel, "text", "Capture");
-    spim().getState(SPIM::STATE_FREERUN)->assignProperty(
-        statusLabel, "text", "Free run");
+    spim().getState(SPIM::STATE_FREERUN)->assignProperty(statusLabel, "text", "Free run");
+    spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(statusLabel, "text", "Precapture");
+    spim().getState(SPIM::STATE_CAPTURE)->assignProperty(statusLabel, "text", "Capture");
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(initPushButton);

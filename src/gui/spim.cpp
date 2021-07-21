@@ -25,13 +25,35 @@ static Logger *logger = getLogger("SPIM");
 
 SPIM::SPIM(QObject *parent) : QObject(parent)
 {
+    tasks = new Tasks(this);
+
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        camList.insert(i, new OrcaFlash(this));
+        OrcaFlash *orca = new OrcaFlash(this);
+
+        QThread *thread = new QThread();
+        thread->setObjectName(QString("SaveStackWorker_thread_%1").arg(i));
+        SaveStackWorker *ssWorker = new SaveStackWorker(orca);
+        ssWorker->moveToThread(thread);
+        thread->start();
+
+        connect(ssWorker, &SaveStackWorker::error, this, &SPIM::onError);
+        connect(ssWorker, &SaveStackWorker::captureCompleted, this, &SPIM::incrementCompleted);
+
+        camList.insert(i, orca);
+        ssWorkerList.insert(i, ssWorker);
         aotfList.insert(i, new AA_MPDSnCxx(this));
         filterWheelList.insert(i, new FilterWheel());
     }
 
-    tasks = new Tasks(this);
+    connect(tasks->getCameraTrigger(), &CameraTrigger::done, [ = ](){
+        for (SaveStackWorker *ssWorker : ssWorkerList) {
+            ssWorker->signalTriggerCompletion();
+        }
+        for (OrcaFlash *orca : camList) {
+            orca->cap_stop();
+        }
+    });
+
 
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -259,6 +281,11 @@ QList<OrcaFlash *> SPIM::getCameraDevices()
     return camList;
 }
 
+SaveStackWorker *SPIM::getSSWorker(int camNumber)
+{
+    return ssWorkerList.at(camNumber);
+}
+
 OrcaFlash *SPIM::getCamera(int camNumber) const
 {
     return camList.at(camNumber);
@@ -417,10 +444,8 @@ void SPIM::setupStateMachine()
     precaptureState->setChildMode(QState::ParallelStates);
     captureState->setChildMode(QState::ParallelStates);
 
-    precaptureState->addTransition(precaptureState, &QState::finished,
-                                   captureState);
-    captureState->addTransition(captureState, &QState::finished,
-                                precaptureState);
+    precaptureState->addTransition(precaptureState, &QState::finished, captureState);
+    captureState->addTransition(this, &SPIM::jobsCompleted, precaptureState);
 
     // setup parallel states in precaptureState
     for (PIDevice *dev : stageList) {
@@ -429,18 +454,17 @@ void SPIM::setupStateMachine()
         QFinalState *pollingDone = new QFinalState(pollingState);
 
         pollingState->setInitialState(pollingInProgressState);
-        pollingInProgressState->addTransition(
-            dev, &PIDevice::onTarget, pollingDone);
+        pollingInProgressState->addTransition(dev, &PIDevice::onTarget, pollingDone);
     }
 
     // setup parallel states in captureState
-    for (OrcaFlash *orca : camList) {
+    for (SaveStackWorker *ssWorker : ssWorkerList) {
         QState *camState = new QState(captureState);
         QState *camBusyState = new QState(camState);
         QFinalState *finalState = new QFinalState(camState);
 
         camState->setInitialState(camBusyState);
-        camBusyState->addTransition(orca, &OrcaFlash::stopped, finalState);
+        camBusyState->addTransition(ssWorker, &SaveStackWorker::captureCompleted, finalState);
     }
 
     // polling timer used to check when stages have reached target
@@ -466,6 +490,7 @@ void SPIM::setupStateMachine()
             return;
         }
         tasks->stop();
+        completedJobs = successJobs = 0;
 
         // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
@@ -491,44 +516,23 @@ void SPIM::setupStateMachine()
             }
 
             // prepare and start acquisition thread
-            for (int i = 0; i < SPIM_NCAMS; ++i) {
-                OrcaFlash *orca = camList.at(i);
-                QString fname;
-                QStringList axis = {"x_", "y_", "z_"};
-                int k = 0;
-                for (SPIM_PI_DEVICES d_enum : stageEnumList) {
-                    double pos = targetPositions[d_enum];
-                    fname += axis.at(k) + QString("%1").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
-                    k += 1;
-                    if (k < stageEnumList.size()) {
-                        fname += "_";
-                    }
+            QString fname;
+            QStringList axis = {"x_", "y_", "z_"};
+            int k = 0;
+            for (SPIM_PI_DEVICES d_enum : stageEnumList) {
+                double pos = targetPositions[d_enum];
+                fname += axis.at(k) + QString("%1").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
+                k += 1;
+                if (k < stageEnumList.size()) {
+                    fname += "_";
                 }
-
-                // setup thread
-                SaveStackWorker *acqWorker = new SaveStackWorker(orca);
-
-                acqWorker->setTimeout(2 * 1e6 / getTriggerRate());
-                acqWorker->setOutputPath(getFullOutputDir(i).absolutePath());
-                acqWorker->setOutputFileName(fname);
-                acqWorker->setFrameCount(nSteps[stackStage]);
-
-                connect(acqWorker, &QThread::finished,
-                        acqWorker, &QThread::deleteLater);
-
-                connect(acqWorker, &SaveStackWorker::error,
-                        this, &SPIM::onError);
-
-                connect(acqWorker, &SaveStackWorker::captureCompleted,
-                        orca, &OrcaFlash::cap_stop);
-
-                connect(acqWorker, &SaveStackWorker::progress, this, [ = ](int frameCount){
-                    emit stackProgress(i, frameCount);
-                });
-
-                connect(orca, &OrcaFlash::captureStarted, acqWorker, [ = ](){
-                    acqWorker->start();
-                });
+            }
+            for (int i = 0; i < SPIM_NCAMS; ++i) {
+                SaveStackWorker *ssWorker = ssWorkerList.at(i);
+                ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
+                ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
+                ssWorker->setOutputFileName(fname);
+                ssWorker->setFrameCount(nSteps[stackStage]);
             }
         } catch (std::runtime_error e) {
             onError(e.what());
@@ -544,12 +548,6 @@ void SPIM::setupStateMachine()
         pollTimer->stop();
 
         try {
-            for (OrcaFlash *orca : camList) {
-                orca->cap_start();
-            }
-
-            tasks->start();
-
             // move stack axis to end position
             double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
             double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
@@ -561,35 +559,18 @@ void SPIM::setupStateMachine()
             logger->info(QString("Moving %1 to %2")
                          .arg(dev->getVerboseName())
                          .arg(stackTo));
+
+            for (int i = 0; i < SPIM_NCAMS; ++i) {
+                camList.at(i)->cap_start();
+                QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
+            }
+            tasks->start();
             dev->move(stackTo);
         } catch (std::runtime_error e) {
             onError(e.what());
             return;
         }
     }, Qt::QueuedConnection);
-
-    connect(captureState, &QState::finished, this, [ = ] {
-        currentStep++;
-
-        // check exit condition
-        if (currentStep >= totalSteps) {
-            logger->info("Acquisition completed");
-            stop();
-            return;
-        }
-
-        SPIM_PI_DEVICES xAxis = mosaicStages.at(0);
-
-        int newX = currentSteps[xAxis] + 1;
-        if (newX >= nSteps[xAxis]) {
-            newX = 0;
-            if (mosaicStages.size() > 1) {
-                SPIM_PI_DEVICES yAxis = mosaicStages.at(1);
-                currentSteps[yAxis]++;
-            }
-        }
-        currentSteps[xAxis] = newX;
-    });
 
     sm->start();
 }
@@ -602,6 +583,9 @@ void SPIM::stop()
     logger->info("Stop");
     capturing = false;
     try {
+        for (SaveStackWorker *ssWorker : ssWorkerList) {
+            ssWorker->stop();
+        }
         for (OrcaFlash * orca : camList) {
             if (orca->isOpen()) {
                 orca->cap_stop();
@@ -664,6 +648,43 @@ void SPIM::_setExposureTime(double expTime)
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
+    }
+}
+
+void SPIM::incrementCompleted(bool ok)
+{
+    if (freeRun) {
+        return;
+    }
+    if (ok) {
+        ++successJobs;
+    }
+    if (successJobs == 1) {
+        tasks->stop();
+    }
+    if (++completedJobs == 2) {
+        currentStep++;
+
+        // check exit condition
+        if (currentStep >= totalSteps) {
+            logger->info("Acquisition completed");
+            stop();
+            return;
+        }
+
+        SPIM_PI_DEVICES xAxis = mosaicStages.at(0);
+
+        int newX = currentSteps[xAxis] + 1;
+        if (newX >= nSteps[xAxis]) {
+            newX = 0;
+            if (mosaicStages.size() > 1) {
+                SPIM_PI_DEVICES yAxis = mosaicStages.at(1);
+                currentSteps[yAxis]++;
+            }
+        }
+        currentSteps[xAxis] = newX;
+
+        emit jobsCompleted();
     }
 }
 
