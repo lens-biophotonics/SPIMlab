@@ -117,5 +117,8 @@ void ProgressWidget::setupUI()
                            .arg(s, 2, 10, QChar('0')));
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setValue(currentStep);
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
+        }
     });
 }
