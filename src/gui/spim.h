@@ -162,7 +162,7 @@ private:
     QMap<MACHINE_STATE, QState *> stateMap;
 
     void _setExposureTime(double expTime);
-    void _startAcquisition();
+    void _startCapture();
     void setupStateMachine();
 
     void incrementCompleted(bool ok);

@@ -310,17 +310,51 @@ void SPIM::startFreeRun()
 {
     freeRun = true;
     logger->info("Start free run");
-    _startAcquisition();
+    _startCapture();
 }
 
 void SPIM::startAcquisition()
 {
     freeRun = false;
     logger->info("Start acquisition");
-    _startAcquisition();
+
+    QList<SPIM_PI_DEVICES> stageEnumList;
+    stageEnumList << mosaicStages << stackStage;
+
+    QList<PIDevice *> stageList;
+    for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
+        stageList << getPIDevice(d_enum);
+
+        int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+        int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+        int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+
+        if (step == 0) {
+            nSteps[d_enum] = 1;
+        }
+        else {
+            nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
+        }
+    }
+
+    totalSteps = 1;
+    for (const SPIM_PI_DEVICES d_enum : enabledMosaicStages) {
+        totalSteps *= nSteps[d_enum];
+        currentSteps[d_enum] = 0;
+    }
+    logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
+                 .arg(totalSteps).arg(nSteps[stackStage]));
+
+    currentStep = 0;
+    // create output directories
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        getFullOutputDir(i).mkpath(".");
+    }
+
+    _startCapture();
 }
 
-void SPIM::_startAcquisition()
+void SPIM::_startCapture()
 {
     capturing = true;
 
@@ -337,39 +371,6 @@ void SPIM::_startAcquisition()
     }
     else {
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_ACQUISITION]);
-
-        QList<SPIM_PI_DEVICES> stageEnumList;
-        stageEnumList << mosaicStages << stackStage;
-
-        QList<PIDevice *> stageList;
-        for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
-            stageList << getPIDevice(d_enum);
-
-            int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX) * pow(10, SPIM_SCAN_DECIMALS));
-            int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX) * pow(10, SPIM_SCAN_DECIMALS));
-            int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX) * pow(10, SPIM_SCAN_DECIMALS));
-
-            if (step == 0) {
-                nSteps[d_enum] = 1;
-            }
-            else {
-                nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
-            }
-        }
-
-        totalSteps = 1;
-        for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
-            totalSteps *= nSteps[d_enum];
-            currentSteps[d_enum] = 0;
-        }
-        logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
-                     .arg(totalSteps).arg(nSteps[stackStage]));
-
-        currentStep = 0;
-        // create output directories
-        for (int i = 0; i < SPIM_NCAMS; ++i) {
-            getFullOutputDir(i).mkpath(".");
-        }
     }
 
     tasks->clearTasks();
