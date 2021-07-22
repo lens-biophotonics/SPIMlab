@@ -79,6 +79,7 @@ void Settings::loadSettings()
 
         SET_VALUE(group, SETTING_STEPSIZE, 0.1);
         SET_VALUE(group, SETTING_VELOCITY, 1.);
+        SET_VALUE(group, SETTING_MOSAIC_ENABLED, false);
 
         settings.endGroup();
     }

@@ -4,6 +4,7 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QCheckBox>
 
 #include "spim.h"
 #include <qtlab/hw/pi/pidevice.h>
@@ -28,9 +29,8 @@ void AcquisitionWidget::setupUI()
         this, "enabled", true);
 
     QList<SPIM_PI_DEVICES> devs;
-    devs << spim().getMosaicStages();
     devs << spim().getStackStage();
-    std::sort(devs.begin(), devs.end());
+    devs << spim().getMosaicStages();
 
     QGridLayout *grid = new QGridLayout();
 
@@ -41,25 +41,34 @@ void AcquisitionWidget::setupUI()
     grid->addWidget(new QLabel("To"), row, col++);
     grid->addWidget(new QLabel("Step"), row++, col++);
 
-    void (QDoubleSpinBox::* mySignal)(double d) = &QDoubleSpinBox::valueChanged;
+    void (QDoubleSpinBox::* valueChanged)(double d) = &QDoubleSpinBox::valueChanged;
+
 
     for (const SPIM_PI_DEVICES d_enum : devs) {
         PIDevice *dev = spim().getPIDevice(d_enum);
         QList<double> *scanRange = spim().getScanRange(d_enum);
         col = 0;
-        grid->addWidget(new QLabel(dev->getVerboseName()), row, col++);
+        QCheckBox *checkBox;
+        if (spim().getMosaicStages().contains(d_enum)) {
+            checkBox = new QCheckBox(dev->getVerboseName());
+            grid->addWidget(checkBox, row, col++);
+        } else {
+            grid->addWidget(new QLabel(dev->getVerboseName()), row, col++);
+        }
+
+        QList<QWidget *> wList;
 
         for (int i = 0; i < 3; ++i) {
             QDoubleSpinBox *sb = new QDoubleSpinBox();
+            wList << sb;
             sb->setDecimals(SPIM_SCAN_DECIMALS);
             sb->setSuffix(" mm");
             sb->setRange(-999, 999);
             sb->setValue(scanRange->at(i));
 
-            connect(sb, mySignal, this, [ = ](double d){
+            connect(sb, valueChanged, this, [ = ](double d){
                 scanRange->replace(i, d);
             });
-
 
             connect(dev, &PIDevice::connected, this, [ = ](){
                 double minVal = dev->getTravelRangeLowEnd("1").at(0);
@@ -68,6 +77,19 @@ void AcquisitionWidget::setupUI()
             });
 
             grid->addWidget(sb, row, col++);
+        }
+
+        if (spim().getMosaicStages().contains(d_enum)) {
+            for (QWidget *w : wList) {
+                w->setEnabled(false);
+            }
+            connect(checkBox, &QCheckBox::toggled, [ = ](bool checked){
+                for (QWidget *w : wList) {
+                    w->setEnabled(checked);
+                }
+                spim().setMosaicStageEnabled(d_enum, checked);
+            });
+            checkBox->setChecked(spim().isMosaicStageEnabled(d_enum));
         }
 
         row++;

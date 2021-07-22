@@ -107,10 +107,13 @@ void MainWindow::saveSettings() const
             s.setValue(group, SETTING_SERIALNUMBER, info.serialNumber());
         }
 
-        QList<double> *scanRange = spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
+        SPIM_PI_DEVICES d_enum = static_cast<SPIM_PI_DEVICES>(i);
+        QList<double> *scanRange = spim().getScanRange(d_enum);
         s.setValue(group, SETTING_FROM, scanRange->at(0));
         s.setValue(group, SETTING_TO, scanRange->at(1));
         s.setValue(group, SETTING_STEP, scanRange->at(2));
+
+        s.setValue(group, SETTING_MOSAIC_ENABLED, spim().isMosaicStageEnabled(d_enum));
     }
 
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
@@ -188,10 +191,14 @@ void MainWindow::loadSettings()
             dev->setPortName(s.value(group, SETTING_PORTNAME).toString());
         }
 
-        QList<double> *scanRange = spim().getScanRange(static_cast<SPIM_PI_DEVICES>(i));
+        SPIM_PI_DEVICES d_enum = static_cast<SPIM_PI_DEVICES>(i);
+
+        QList<double> *scanRange = spim().getScanRange(d_enum);
         scanRange->replace(0, s.value(group, SETTING_FROM).toDouble());
         scanRange->replace(1, s.value(group, SETTING_TO).toDouble());
         scanRange->replace(2, s.value(group, SETTING_STEP).toDouble());
+
+        spim().setMosaicStageEnabled(d_enum, s.value(group, SETTING_MOSAIC_ENABLED).toBool());
     }
 
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {

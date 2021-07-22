@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QStateMachine>
 #include <QDir>
+#include <QMap>
 
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
@@ -109,6 +110,9 @@ public:
 
     Tasks *getTasks() const;
 
+    bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
+    void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -142,6 +146,8 @@ private:
 
     SPIM_PI_DEVICES stackStage;
     QList<SPIM_PI_DEVICES> mosaicStages;
+    QList<SPIM_PI_DEVICES> enabledMosaicStages;
+    QMap<SPIM_PI_DEVICES, bool> enabledMosaicStageMap;
 
     int currentStep = 0;
     int totalSteps = 0;

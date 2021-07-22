@@ -70,8 +70,9 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
-        scanRangeMap.insert(static_cast<SPIM_PI_DEVICES>(i),
-                            new QList<double>({0, 0, 0}));
+        SPIM_PI_DEVICES dev = static_cast<SPIM_PI_DEVICES>(i);
+        scanRangeMap.insert(dev, new QList<double>({0, 0, 0}));
+        enabledMosaicStageMap[dev] = false;
     }
 
     PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
@@ -89,6 +90,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
 
     stackStage = PI_DEVICE_X_AXIS;
     mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_Z_AXIS;
+    enabledMosaicStageMap[PI_DEVICE_Y_AXIS] = true;
 
     setupStateMachine();
 }
@@ -179,6 +181,16 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+bool SPIM::isMosaicStageEnabled(SPIM_PI_DEVICES dev) const
+{
+    return enabledMosaicStageMap[dev];
+}
+
+void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
+{
+    enabledMosaicStageMap[dev] = enable;
 }
 
 Tasks *SPIM::getTasks() const
@@ -318,8 +330,15 @@ void SPIM::startAcquisition()
     freeRun = false;
     logger->info("Start acquisition");
 
+    enabledMosaicStages.clear();
+    for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
+        if (enabledMosaicStageMap[d_enum]) {
+            enabledMosaicStages << d_enum;
+        }
+    }
+
     QList<SPIM_PI_DEVICES> stageEnumList;
-    stageEnumList << mosaicStages << stackStage;
+    stageEnumList << enabledMosaicStages << stackStage;
 
     QList<PIDevice *> stageList;
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
@@ -497,7 +516,9 @@ void SPIM::setupStateMachine()
         QMap<SPIM_PI_DEVICES, double> targetPositions;
         targetPositions[stackStage]
             = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
-        for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
+        QList<SPIM_PI_DEVICES> myStageEnumList;
+        myStageEnumList << enabledMosaicStages << stackStage;
+        for (const SPIM_PI_DEVICES d_enum : myStageEnumList) {
             double from = scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX);
             double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
             targetPositions[d_enum] = from + currentSteps[d_enum] * step;
@@ -505,7 +526,7 @@ void SPIM::setupStateMachine()
 
         try {
             // move stages to target position
-            for (SPIM_PI_DEVICES d_enum : stageEnumList) {
+            for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
                 dev->setVelocity(scanVelocity);
 
@@ -516,7 +537,6 @@ void SPIM::setupStateMachine()
                 dev->move(pos);
             }
 
-            // prepare and start acquisition thread
             QString fname;
             QStringList axis = {"x_", "y_", "z_"};
             int k = 0;
@@ -528,6 +548,7 @@ void SPIM::setupStateMachine()
                     fname += "_";
                 }
             }
+            // prepare and start acquisition thread
             for (int i = 0; i < SPIM_NCAMS; ++i) {
                 SaveStackWorker *ssWorker = ssWorkerList.at(i);
                 ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
@@ -673,13 +694,13 @@ void SPIM::incrementCompleted(bool ok)
             return;
         }
 
-        SPIM_PI_DEVICES xAxis = mosaicStages.at(0);
+        SPIM_PI_DEVICES xAxis = enabledMosaicStages.at(0);
 
         int newX = currentSteps[xAxis] + 1;
         if (newX >= nSteps[xAxis]) {
             newX = 0;
-            if (mosaicStages.size() > 1) {
-                SPIM_PI_DEVICES yAxis = mosaicStages.at(1);
+            if (enabledMosaicStages.size() > 1) {
+                SPIM_PI_DEVICES yAxis = enabledMosaicStages.at(1);
                 currentSteps[yAxis]++;
             }
         }

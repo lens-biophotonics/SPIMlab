@@ -37,6 +37,7 @@
 #define SETTING_FROM "from"
 #define SETTING_TO "to"
 #define SETTING_STEP "step"
+#define SETTING_MOSAIC_ENABLED "mosaicEnabled"
 
 #define SETTING_POS "pos"
 #define SETTING_VELOCITY "velocity"
