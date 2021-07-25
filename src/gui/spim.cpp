@@ -539,21 +539,21 @@ void SPIM::setupStateMachine()
 
             QString fname;
             QStringList axis = {"x_", "y_", "z_"};
+            QStringList side = {"l", "r"};
             int k = 0;
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 double pos = targetPositions[d_enum];
                 fname += axis.at(k) + QString("%1").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
                 k += 1;
-                if (k < stageEnumList.size()) {
-                    fname += "_";
-                }
+                fname += "_";
             }
+
             // prepare and start acquisition thread
             for (int i = 0; i < SPIM_NCAMS; ++i) {
                 SaveStackWorker *ssWorker = ssWorkerList.at(i);
                 ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
                 ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
-                ssWorker->setOutputFileName(fname);
+                ssWorker->setOutputFileName(fname + "_cam_" + side.at(i));
                 ssWorker->setFrameCount(nSteps[stackStage]);
             }
         } catch (std::runtime_error e) {
