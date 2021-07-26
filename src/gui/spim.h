@@ -128,6 +128,7 @@ signals:
     void stopped() const;
     void jobsCompleted() const;
     void error(const QString) const;
+    void onTarget();
 
 private:
     Tasks *tasks;

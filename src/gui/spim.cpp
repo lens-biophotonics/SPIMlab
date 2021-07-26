@@ -468,14 +468,13 @@ void SPIM::setupStateMachine()
     captureState->addTransition(this, &SPIM::jobsCompleted, precaptureState);
 
     // setup parallel states in precaptureState
-    for (PIDevice *dev : stageList) {
-        QState *pollingState = new QState(precaptureState);
-        QState *pollingInProgressState = new QState(pollingState);
-        QFinalState *pollingDone = new QFinalState(pollingState);
+    QState *pollingState = new QState(precaptureState);
+    QState *pollingInProgressState = new QState(pollingState);
+    QFinalState *pollingDone = new QFinalState(pollingState);
 
-        pollingState->setInitialState(pollingInProgressState);
-        pollingInProgressState->addTransition(dev, &PIDevice::onTarget, pollingDone);
-    }
+    pollingState->setInitialState(pollingInProgressState);
+    pollingInProgressState->addTransition(this, &SPIM::onTarget, pollingDone);
+
 
     // setup parallel states in captureState
     for (SaveStackWorker *ssWorker : ssWorkerList) {
@@ -490,14 +489,20 @@ void SPIM::setupStateMachine()
     // polling timer used to check when stages have reached target
     QTimer *pollTimer = new QTimer(this);
     connect(pollTimer, &QTimer::timeout, this, [ = ](){
+        QList<SPIM_PI_DEVICES> myStageEnumList;
+        myStageEnumList << enabledMosaicStages << stackStage;
         try {
-            for (PIDevice *dev : stageList) {
-                dev->isOnTarget(); // will emit PIDevice::onTarget
+            for (const SPIM_PI_DEVICES d_enum : myStageEnumList) {
+                if (!getPIDevice(d_enum)->isOnTarget()) {
+                    return;
+                }
             }
         }
         catch (std::runtime_error e) {
             onError(e.what());
         }
+
+        emit onTarget();
     });
 
     connect(acquisitionState, &QState::exited, this, [ = ](){
