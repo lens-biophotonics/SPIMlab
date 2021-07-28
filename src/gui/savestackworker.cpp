@@ -52,6 +52,7 @@ void SaveStackWorker::start()
 #ifdef WITH_HARDWARE
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     QVector<qint64> timeStamps(frameCount, 0);
+    ssize_t written;
 #else
     buf = malloc(n);
 #endif
@@ -113,7 +114,13 @@ void SaveStackWorker::start()
                 break;
             }
 
-            write(fd, buf, n);
+            written =  write(fd, buf, n);
+            if (written != n) {
+                logger->critical(QString("Camera %1: written %2/%3 bytes")
+                                 .arg(orca->getCameraIndex())
+                                 .arg(written)
+                                 .arg(n));
+            }
             readFrames++;
             break;
         case DCAMERR_TIMEOUT:
