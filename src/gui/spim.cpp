@@ -582,7 +582,7 @@ void SPIM::setupStateMachine()
 
             PIDevice *dev = getPIDevice(stackStage);
             dev->setVelocity(triggerRate * stackStep);
-            logger->info(QString("Start acquiring stack: %1/%2")
+            logger->info(QString("Start acquisition of stack: %1/%2")
                          .arg(currentStep + 1).arg(totalSteps));
             logger->info(QString("Moving %1 to %2")
                          .arg(dev->getVerboseName())
@@ -690,28 +690,34 @@ void SPIM::incrementCompleted(bool ok)
     if (successJobs == 1) {
         tasks->stop();
     }
-    if (++completedJobs == 2) {
-        currentStep++;
+    if (++completedJobs == SPIM_NCAMS) {
+        if (successJobs == SPIM_NCAMS)  {
+            currentStep++;
 
-        // check exit condition
-        if (currentStep >= totalSteps) {
-            logger->info("Acquisition completed");
-            stop();
-            return;
-        }
-
-        SPIM_PI_DEVICES xAxis = enabledMosaicStages.at(0);
-
-        int newX = currentSteps[xAxis] + 1;
-        if (newX >= nSteps[xAxis]) {
-            newX = 0;
-            if (enabledMosaicStages.size() > 1) {
-                SPIM_PI_DEVICES yAxis = enabledMosaicStages.at(1);
-                currentSteps[yAxis]++;
+            // check exit condition
+            if (currentStep >= totalSteps) {
+                logger->info("Acquisition completed");
+                stop();
+                return;
             }
-        }
-        currentSteps[xAxis] = newX;
 
+            SPIM_PI_DEVICES xAxis = enabledMosaicStages.at(0);
+
+            int newX = currentSteps[xAxis] + 1;
+            if (newX >= nSteps[xAxis]) {
+                newX = 0;
+                if (enabledMosaicStages.size() > 1) {
+                    SPIM_PI_DEVICES yAxis = enabledMosaicStages.at(1);
+                    currentSteps[yAxis]++;
+                }
+            }
+            currentSteps[xAxis] = newX;
+        }
+        else if (capturing) {  // if not stopped
+            logger->warning(QString("Re-acquiring stack: %1/%2")
+                            .arg(currentStep + 1).arg(totalSteps));
+        }
+        logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(SPIM_NCAMS));
         emit jobsCompleted();
     }
 }
