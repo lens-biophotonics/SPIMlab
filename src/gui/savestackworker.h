@@ -15,7 +15,7 @@ public:
     double getTimeout() const; // ms
     void setTimeout(double value); // ms
     void setFrameCount(int32_t count);
-    size_t getFrameCount() const;
+    int32_t getFrameCount() const;
     void setOutputFileName(const QString &fname);
     void setOutputPath(const QString &value);
 
@@ -40,7 +40,7 @@ private:
     double timeout;
     QString outputFileName;
     QString outputPath;
-    size_t frameCount, readFrames;
+    int32_t frameCount, readFrames;
     OrcaFlash *orca;
 };
 
