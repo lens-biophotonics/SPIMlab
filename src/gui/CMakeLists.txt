@@ -15,6 +15,9 @@ find_package(QtLab REQUIRED
     ThorlabsMC
     Widgets
 )
+find_package(rapid-af REQUIRED)
+find_package(alkusb3 REQUIRED)
+include_directories("${ALKUSB3_INCLUDE_DIR}")
 
 option(FORCE_FUSION_STYLE "Force fusion style" OFF)
 
@@ -72,4 +75,6 @@ target_link_libraries(SPIMlab
     QtLab::Serial-Widgets
     QtLab::ThorlabsMC
     QtLab::Widgets
+    rapid-af
+    ${ALKUSB3_LIBRARY}
 )
