@@ -36,6 +36,7 @@ class Tasks;
 namespace QtLab::hw::Thorlabs {
 class MotorController;
 };
+class Autofocus;
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -111,6 +112,7 @@ public:
     QDir getFullOutputDir(int cam);
 
     Tasks *getTasks() const;
+    Autofocus *getAutoFocus() const;
 
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
@@ -139,6 +141,7 @@ signals:
 
 private:
     Tasks *tasks;
+    Autofocus *autoFocus;
 
     double exposureTime; // in ms
     double triggerRate;

@@ -59,6 +59,7 @@ set(SPIMlab_SRCS
     galvoramp.cpp
     tasks.cpp
     
+    autofocus.cpp
     savestackworker.cpp
     spim.cpp
 )

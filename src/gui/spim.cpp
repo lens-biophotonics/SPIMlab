@@ -1,5 +1,6 @@
 #include "spim.h"
 
+#include "autofocus.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
 #include "savestackworker.h"
@@ -30,6 +31,12 @@ SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
     tasks = new Tasks(this);
+
+    autoFocus = new Autofocus();
+    QThread *thread = new QThread();
+    thread->setObjectName("Autofocus_thread");
+    autoFocus->moveToThread(thread);
+    thread->start();
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
@@ -123,6 +130,9 @@ void SPIM::initialize()
 {
     try {
         logger->info("Initializing microscope");
+
+        autoFocus->init();
+
         int nOfCameras = DCAM::init_dcam();
         if (nOfCameras < SPIM_NCAMS) {
             throw std::runtime_error(
@@ -235,6 +245,11 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
 Tasks *SPIM::getTasks() const
 {
     return tasks;
+}
+
+Autofocus *SPIM::getAutoFocus() const
+{
+    return autoFocus;
 }
 
 QString SPIM::getRunName() const
@@ -421,6 +436,7 @@ void SPIM::_startCapture()
 
     try {
         _setExposureTime(exposureTime / 1000.);
+        autoFocus->start();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -654,6 +670,7 @@ void SPIM::stop()
     logger->info("Stop");
     capturing = false;
     try {
+        autoFocus->stop();
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->stop();
         }
