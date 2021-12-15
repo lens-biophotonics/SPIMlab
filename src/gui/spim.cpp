@@ -64,11 +64,11 @@ SPIM::SPIM(QObject *parent)
     });
 
     piDevList.reserve(SPIM_NPIDEVICES);
-    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
-    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
-    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z axis", this));
-    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice("Left objective", this));
-    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice("Right objective", this));
+    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X", this));
+    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y", this));
+    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z", this));
+    piDevList.insert(PI_DEVICE_THETA_AXIS, new PIDevice("theta", this));
+    piDevList.insert(PI_DEVICE_OBJ_AXIS, new PIDevice("focus", this));
     for (PIDevice *dev : piDevList) {
         connect(dev, &PIDevice::connected, this, [=]() { dev->setServoEnabled(true); });
     }
@@ -96,9 +96,10 @@ SPIM::SPIM(QObject *parent)
         laserList.insert(i, cobolt);
     }
 
-    stackStage = PI_DEVICE_X_AXIS;
-    mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_Z_AXIS;
+    stackStage = PI_DEVICE_Z_AXIS;
+    mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_X_AXIS;
     enabledMosaicStageMap[PI_DEVICE_Y_AXIS] = true;
+    enabledMosaicStageMap[PI_DEVICE_X_AXIS] = true;
 
     setupStateMachine();
 }
@@ -131,7 +132,7 @@ void SPIM::initialize()
             orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
-            orca->buf_alloc(4000);
+            orca->buf_alloc(1100);
             orca->logInfo();
         }
 

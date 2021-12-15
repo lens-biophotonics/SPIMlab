@@ -24,11 +24,21 @@ void FiltersWidget::setupUI()
 
     aotfGb = new QGroupBox("AOTF");
     lay = new QHBoxLayout();
-    lay->addWidget(new AA_AOTFWidget(spim().getAOTF(0)));
+#ifdef DUALSPIM
+#define AOTF_LINES 8
+#else
+#define AOTF_LINES 4
+#endif
+    lay->addWidget(new AA_AOTFWidget(spim().getAOTF(0), AOTF_LINES));
     aotfGb->setLayout(lay);
 
     QLabel *title;
-    title = new QLabel("Left view");
+    title = new QLabel();
+#ifdef DUALSPIM
+    title->setText("Left view");
+#else
+    title->setText("Camera 1");
+#endif
     title->setAlignment(Qt::AlignCenter);
     title->setStyleSheet("QLabel {font-weight: bold; font-size: 14pt;}");
     vLeft->addWidget(title);
@@ -36,12 +46,20 @@ void FiltersWidget::setupUI()
     vLeft->addWidget(aotfGb);
     vLeft->addStretch();
 
+#ifdef DUALSPIM
     aotfGb = new QGroupBox("AOTF");
     lay = new QHBoxLayout();
     lay->addWidget(new AA_AOTFWidget(spim().getAOTF(1)));
     aotfGb->setLayout(lay);
+#endif
 
-    title = new QLabel("Right view");
+    title = new QLabel();
+#ifdef DUALSPIM
+    title->setText("Right view");
+#else
+    title->setText("Camera 2");
+#endif
+
     title->setAlignment(Qt::AlignCenter);
     title->setStyleSheet("QLabel {font-weight: bold; font-size: 14pt;}");
     vRight->addWidget(title);

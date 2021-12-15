@@ -57,8 +57,8 @@ void CameraPage::setupUI()
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
-    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
-    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_THETA_AXIS), "1", "θ");
+    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_OBJ_AXIS), "1", "focus");
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         const Settings s = settings();
