@@ -17,7 +17,6 @@ public:
 signals:
 
 private slots:
-    void connectDevice();
     void refreshValues();
 
 private:

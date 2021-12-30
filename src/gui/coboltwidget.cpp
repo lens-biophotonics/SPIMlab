@@ -102,7 +102,15 @@ void CoboltWidget::setupUI()
     bl->addWidget(gb);
     setLayout(bl);
 
-    connect(connectPushButton, &QPushButton::clicked, this, &CoboltWidget::connectDevice);
+    connect(connectPushButton, &QPushButton::clicked, cobolt, [ = ](){
+        try {
+            cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
+            cobolt->connect();
+        }
+        catch (std::runtime_error e) {
+            QMessageBox::critical(this, "Runtime error", e.what());
+        }
+    });
     connect(disconnectPushButton, &QPushButton::clicked, cobolt, &Cobolt::disconnect);
 
     connect(onPushButton, &QPushButton::clicked, this, [ = ](){
@@ -193,17 +201,6 @@ void CoboltWidget::setupUI()
     cobolt->getLaserOnState()->assignProperty(offPushButton, "enabled", true);
     cobolt->getLaserOffState()->assignProperty(onPushButton, "enabled", true);
     cobolt->getLaserOffState()->assignProperty(offPushButton, "enabled", false);
-}
-
-void CoboltWidget::connectDevice()
-{
-    try {
-        cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
-        cobolt->connect();
-    }
-    catch (std::runtime_error e) {
-        QMessageBox::critical(this, "Runtime error", e.what());
-    }
 }
 
 void CoboltWidget::refreshValues()

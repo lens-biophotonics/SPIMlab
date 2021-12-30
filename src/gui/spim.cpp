@@ -41,7 +41,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
 
         camList.insert(i, orca);
         ssWorkerList.insert(i, ssWorker);
-        aotfList.insert(i, new AA_MPDSnCxx(this));
+        aotfList.insert(i, new AA_MPDSnCxx());
         filterWheelList.insert(i, new FilterWheel());
     }
 
