@@ -127,19 +127,12 @@ void CoboltWidget::setupUI()
     });
 
     connect(cobolt->getLaserOnState(), &QState::entered, this, [ = ](){
-        try {
-            line->setStyleSheet("background-color: "
-                                + wavelengthToColor(cobolt->getWavelength()).name());
-        } catch (std::runtime_error) {
-        }
+        line->setStyleSheet("background-color: "
+                            + wavelengthToColor(cobolt->getWavelength()).name());
     });
 
     connect(cobolt->getLaserOffState(), &QState::entered, this, [ = ](){
-        QColor wlColor;
-        try {
-            wlColor = wavelengthToColor(cobolt->getWavelength());
-        } catch (std::runtime_error) {
-        }
+        QColor wlColor = wavelengthToColor(cobolt->getWavelength());
         QColor dimmed = QColor::fromHsvF(wlColor.hueF(),
                                          wlColor.saturationF(),
                                          wlColor.valueF() * 0.65);
@@ -158,7 +151,7 @@ void CoboltWidget::setupUI()
     QState *cs = cobolt->serialPort()->getConnectedState();
     QState *ds = cobolt->serialPort()->getDisconnectedState();
 
-    connect(cs,  &QState::entered, [ = ](){
+    connect(cobolt,  &SerialDevice::connected, [ = ](){
         try {
             int wl = cobolt->getWavelength();
             gb->setTitle(QString("%1 nm").arg(wl));
