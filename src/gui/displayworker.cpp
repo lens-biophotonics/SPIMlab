@@ -6,7 +6,7 @@
 
 #define BUFSIZE (2048 * 2048)
 
-DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *parent)
+DisplayWorker::DisplayWorker(OrcaFlash *camera, QObject *parent)
     : QThread(parent)
 {
     qRegisterMetaType<size_t>("size_t");
@@ -14,7 +14,6 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, CameraDisplay *cd, QObject *pare
     mybufDouble = new double[BUFSIZE];
 
     orca = camera;
-    this->cd = cd;
 
     connect(orca, &OrcaFlash::captureStarted, this, [ = ](){
         start();

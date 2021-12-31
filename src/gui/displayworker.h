@@ -3,15 +3,13 @@
 
 #include <QThread>
 
-class CameraDisplay;
-
 class OrcaFlash;
 
 class DisplayWorker : public QThread
 {
     Q_OBJECT
 public:
-    DisplayWorker(OrcaFlash *orca, CameraDisplay *cd, QObject *parent = nullptr);
+    DisplayWorker(OrcaFlash *orca, QObject *parent = nullptr);
     virtual ~DisplayWorker();
 
 signals:
@@ -22,7 +20,6 @@ protected:
 
 private:
     OrcaFlash *orca;
-    CameraDisplay *cd;
     double *mybufDouble;
     bool running;
 };
