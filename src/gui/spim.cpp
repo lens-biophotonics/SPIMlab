@@ -45,7 +45,15 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         filterWheelList.insert(i, new FilterWheel());
     }
 
-    connect(tasks->getCameraTrigger(), &CameraTrigger::done, [ = ](){
+#ifdef WITH_HARDWARE
+    auto sender = tasks->getCameraTrigger();
+    auto mySignal = &CameraTrigger::done;
+#else
+    auto sender = ssWorkerList.at(0);
+    auto mySignal = &SaveStackWorker::captureCompleted;
+#endif
+
+    connect(sender, mySignal, this, [ = ](){
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->signalTriggerCompletion();
         }
