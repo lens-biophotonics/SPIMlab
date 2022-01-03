@@ -19,8 +19,8 @@ endif ()
 
 option(DEMO_MODE "Demo mode" OFF)
 
-if (NOT DEMO_MODE)
-    add_definitions(-DWITH_HARDWARE)
+if(DEMO_MODE)
+    add_definitions(-DDEMO_MODE)
 endif()
 
 set(SPIMlab_SRCS

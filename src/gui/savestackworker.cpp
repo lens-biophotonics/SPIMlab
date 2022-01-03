@@ -71,7 +71,7 @@ void SaveStackWorker::start()
 
     logger->info(QString("Total number of frames to acquire: %1").arg(frameCount));
 
-#ifdef WITH_HARDWARE
+#ifndef DEMO_MODE
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     QVector<qint64> timeStamps(frameCount, 0);
 #else
@@ -86,7 +86,7 @@ void SaveStackWorker::start()
     int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
 
     while (!stopped && readFrames < frameCount) {
-#ifdef WITH_HARDWARE
+#ifndef DEMO_MODE
         int32_t frame = readFrames % nFramesInBuffer;
         int32_t frameStamp = -1;
 
@@ -164,7 +164,7 @@ void SaveStackWorker::start()
         readFrames++;
     }
 
-#ifdef WITH_HARDWARE
+#ifndef DEMO_MODE
 #else
     free(buf);
 #endif

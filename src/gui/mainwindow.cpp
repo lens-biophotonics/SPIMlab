@@ -272,7 +272,7 @@ void MainWindow::on_aboutAction_triggered() const
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-#ifdef WITH_HARDWARE
+#ifndef DEMO_MODE
     QMessageBox::StandardButton ret = QMessageBox::question(
         this, QString("Closing %1").arg(PROGRAM_NAME),
         QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),

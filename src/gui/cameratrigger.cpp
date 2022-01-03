@@ -42,7 +42,7 @@ void CameraTrigger::initializeTask_impl()
         clearTask();
     }
     QStringList counters = NI::getCOPhysicalChans().filter("/ctr");
-#ifndef WITH_HARDWARE
+#ifdef DEMO_MODE
     for (int i = 0; i < pulseTerms.size(); ++i) {
         counters << "" << "";
     }

@@ -45,7 +45,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         filterWheelList.insert(i, new FilterWheel());
     }
 
-#ifdef WITH_HARDWARE
+#ifndef DEMO_MODE
     auto sender = tasks->getCameraTrigger();
     auto mySignal = &CameraTrigger::done;
 #else
