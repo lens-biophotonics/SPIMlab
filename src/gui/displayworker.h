@@ -12,6 +12,8 @@ public:
     DisplayWorker(OrcaFlash *orca, QObject *parent = nullptr);
     virtual ~DisplayWorker();
 
+    void setBinning(uint value);
+
 signals:
     void newImage(double *data, size_t n);
 
@@ -22,6 +24,7 @@ private:
     OrcaFlash *orca;
     double *mybufDouble;
     bool running;
+    uint binning = 1;
 };
 
 #endif // DISPLAYWORKER_H

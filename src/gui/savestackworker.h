@@ -29,6 +29,8 @@ public:
     void start();
     void stop();
 
+    void setBinning(const uint &value);
+
 signals:
     void error(QString msg = "");
     void captureCompleted(bool ok);
@@ -42,6 +44,7 @@ private:
     QString outputPath;
     int32_t frameCount, readFrames;
     OrcaFlash *orca;
+    uint binning;
 };
 
 #endif // SAVESTACKWORKER_H

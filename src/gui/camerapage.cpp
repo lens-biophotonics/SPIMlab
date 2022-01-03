@@ -37,12 +37,18 @@ void CameraPage::setupUI()
         CameraDisplay *cd = new CameraDisplay();
         cd->setTitle(QString("Cam %1").arg(i));
         cd->setPlotSize(QSize(2048, 2048));
+        cd->getPlot()->fillGradient();
         DisplayWorker *worker = new DisplayWorker(spim().getCamera(i));
         void (CameraPlot::*fp)(const double*, const size_t) = &CameraPlot::setData;
         connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
         cd->setLUTPath(LUTPath);
         vLayout->addWidget(cd);
         cameraHLayout->addLayout(vLayout);
+        connect(&spim(), &SPIM::captureStarted, this, [ = ](){
+            int binning = spim().getBinning();
+            worker->setBinning(binning);
+            cd->setPlotSize(QSize(2048 / binning, 2048 / binning));
+        });
     }
 
     stageCw = new PIPositionControlWidget();

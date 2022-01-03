@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QCheckBox>
+#include <QButtonGroup>
+#include <QRadioButton>
 
 #include "spim.h"
 #include <qtlab/hw/pi/pidevice.h>
@@ -119,6 +121,34 @@ void AcquisitionWidget::setupUI()
     grid->addWidget(new QLabel("Exposure Time"), row, col++);
     grid->addWidget(expTimeSpinBox, row, col++);
     grid->addWidget(setExpTimePushButton, row++, col++);
+
+    QButtonGroup *binningRadioGroup = new QButtonGroup();
+
+    QRadioButton *noBinningRadioButton  = new QRadioButton("None");
+    QRadioButton *twoBinningRadioButton = new  QRadioButton("2x2");
+    QRadioButton *fourBinningRadioButton = new  QRadioButton("4x4");
+
+    QList<QRadioButton *> radios;
+    radios << noBinningRadioButton << twoBinningRadioButton << fourBinningRadioButton;
+    QMap<uint, QRadioButton *> radioMap;
+
+    int i = 0;
+    for (QRadioButton *radio : radios) {
+        binningRadioGroup->addButton(radio);
+        connect(radio, &QRadioButton::toggled, [ = ](){
+            spim().setBinning(1 << i);
+        });
+        radioMap[1 << i] = radio;
+        i++;
+    }
+
+    radioMap[spim().getBinning()]->setChecked(true);
+
+    col = 0;
+    grid->addWidget(new QLabel("Binning"), row, col++);
+    grid->addWidget(noBinningRadioButton, row, col++);
+    grid->addWidget(twoBinningRadioButton, row, col++);
+    grid->addWidget(fourBinningRadioButton, row, col++);
 
     QBoxLayout *boxLayout;
 

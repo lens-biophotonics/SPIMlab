@@ -154,6 +154,7 @@ void MainWindow::saveSettings() const
     group = SETTINGSGROUP_ACQUISITION;
     s.setValue(group, SETTING_EXPTIME, spim().getExposureTime());
     s.setValue(group, SETTING_RUN_NAME, spim().getRunName());
+    s.setValue(group, SETTING_BINNING, spim().getBinning());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
     s.setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
@@ -239,6 +240,7 @@ void MainWindow::loadSettings()
     group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(s.value(group, SETTING_EXPTIME).toDouble());
     spim().setRunName(s.value(group, SETTING_RUN_NAME).toString());
+    spim().setBinning(s.value(group, SETTING_BINNING).toUInt());
 
     group = SETTINGSGROUP_OTHERSETTINGS;
     spim().setScanVelocity(s.value(group, SETTING_SCANVELOCITY).toDouble());

@@ -31,8 +31,8 @@
 #define SETTING_TRIGGER_TERM "triggerTerm"
 
 #define SETTING_EXPTIME "exposureTime"
-
 #define SETTING_RUN_NAME "runName"
+#define SETTING_BINNING "binning"
 
 #define SETTING_FROM "from"
 #define SETTING_TO "to"

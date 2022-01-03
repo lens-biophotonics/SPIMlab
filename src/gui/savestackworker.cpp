@@ -19,6 +19,27 @@ static Logger *logger = getLogger("SaveStackWorker");
 
 using namespace DCAM;
 
+void performBinning(uint binning, uint16_t *buf, uint16_t *obuf)
+{
+    size_t width = 2048 / binning;
+    size_t height = 2048 / binning;
+    uint binningSq = binning * binning;
+
+    for (size_t oj = 0; oj < height; ++oj) {
+        for (size_t oi = 0; oi < width; ++oi) {
+            size_t jFrom = oj * binning;
+            size_t iFrom = oi * binning;
+            double temp = 0;
+            for (uint j = 0; j < binning; ++j) {
+                for (uint i = 0; i < binning; ++i) {
+                    temp += buf[(jFrom + j) * 2048 + iFrom + i];
+                }
+            }
+            *(obuf++) = temp / binningSq;
+        }
+    }
+}
+
 SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
     : QObject(parent), orca(orca)
 {
@@ -42,6 +63,7 @@ void SaveStackWorker::start()
     size_t width = 2048;
     size_t height = 2048;
     int n = 2 * width * height;
+    int binned_n = n / binning / binning;
 
     readFrames = 0;
     triggerCompleted = false;
@@ -52,15 +74,16 @@ void SaveStackWorker::start()
 #ifdef WITH_HARDWARE
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     QVector<qint64> timeStamps(frameCount, 0);
-    ssize_t written;
 #else
     buf = malloc(n);
 #endif
 
-
+    uint16_t *binnedBuf = nullptr;
+    if (binning > 1) {
+        binnedBuf = new uint16_t[binned_n];
+    }
 
     int fd = open(rawFileName().toLatin1(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
-
 
     while (!stopped && readFrames < frameCount) {
 #ifdef WITH_HARDWARE
@@ -113,16 +136,8 @@ void SaveStackWorker::start()
                 stop();
                 break;
             }
-
-            written =  write(fd, buf, n);
-            if (written != n) {
-                logger->critical(QString("Camera %1: written %2/%3 bytes")
-                                 .arg(orca->getCameraIndex())
-                                 .arg(written)
-                                 .arg(n));
-            }
-            readFrames++;
             break;
+
         case DCAMERR_TIMEOUT:
         default:
             logger->warning(QString("Camera %1 timeout").arg(orca->getCameraIndex()));
@@ -130,9 +145,23 @@ void SaveStackWorker::start()
         }
 #else
         orca->copyLastFrame(buf, n);
-        write(fd, buf, n);
-        readFrames++;
 #endif
+
+        if (stopped) {
+            break;
+        }
+
+        if (binning > 1) {
+            performBinning(binning, static_cast<uint16_t *>(buf), binnedBuf);
+        }
+        ssize_t written =  write(fd, binning > 1 ? binnedBuf : buf, binned_n);
+        if (written != binned_n) {
+            logger->critical(QString("Camera %1: written %2/%3 bytes")
+                             .arg(orca->getCameraIndex())
+                             .arg(written)
+                             .arg(binned_n));
+        }
+        readFrames++;
     }
 
 #ifdef WITH_HARDWARE
@@ -140,6 +169,10 @@ void SaveStackWorker::start()
     free(buf);
 #endif
     close(fd);
+
+    if (binnedBuf != nullptr) {
+        delete [] binnedBuf;
+    }
 
     emit captureCompleted(readFrames == frameCount);
     QString msg = QString("Camera %1: Saved %2/%3 frames")
@@ -163,7 +196,7 @@ void SaveStackWorker::start()
     out << "NDims = 3" << endl;
     out << "BinaryData = True" << endl;
     out << "BinaryDataByteOrderMSB = False" << endl;
-    out << "DimSize = 2048 2048 " << readFrames << endl;
+    out << "DimSize = " << width / binning << " " << height / binning << " " << readFrames << endl;
     out << "ElementType = MET_USHORT" << endl;
     out << "ElementDataFile = " << fi.fileName() << endl;
     outFile.close();
@@ -196,6 +229,11 @@ QString SaveStackWorker::timeoutString(double delta, int i)
            .arg(delta * 1e-3)
            .arg(i + 1)
            .arg(timeout / 1e3);
+}
+
+void SaveStackWorker::setBinning(const uint &value)
+{
+    binning = value;
 }
 
 void SaveStackWorker::setFrameCount(int32_t count)

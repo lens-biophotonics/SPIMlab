@@ -110,6 +110,7 @@ void Settings::loadSettings()
 
     SET_VALUE(groupName, SETTING_EXPTIME, 0.15);
     SET_VALUE(groupName, SETTING_RUN_NAME, QString());
+    SET_VALUE(groupName, SETTING_BINNING, 1);
 
     settings.endGroup();
 

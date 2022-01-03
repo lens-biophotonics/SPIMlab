@@ -113,6 +113,9 @@ public:
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
+    int getBinning() const;
+    void setBinning(uint value);
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -135,6 +138,7 @@ private:
 
     double exposureTime;  // in ms
     double triggerRate;
+    int binning = 1;
 
     QList<PIDevice *> piDevList;
     QList<OrcaFlash *> camList;

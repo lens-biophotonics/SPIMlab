@@ -192,6 +192,16 @@ void SPIM::uninitialize()
     }
 }
 
+int SPIM::getBinning() const
+{
+    return binning;
+}
+
+void SPIM::setBinning(uint value)
+{
+    binning = value;
+}
+
 bool SPIM::isMosaicStageEnabled(SPIM_PI_DEVICES dev) const
 {
     return enabledMosaicStageMap[dev];
@@ -569,6 +579,7 @@ void SPIM::setupStateMachine()
                 ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
                 ssWorker->setOutputFileName(fname + "_cam_" + side.at(i));
                 ssWorker->setFrameCount(nSteps[stackStage]);
+                ssWorker->setBinning(binning);
             }
         } catch (std::runtime_error e) {
             onError(e.what());
