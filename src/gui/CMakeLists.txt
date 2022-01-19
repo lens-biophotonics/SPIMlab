@@ -8,7 +8,16 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
     Widgets
     SerialPort
 )
-find_package(QtLab REQUIRED Core Widgets NI PI Serial Hamamatsu)
+find_package(QtLab REQUIRED
+    Core
+    Hamamatsu
+    NI
+    PI
+    PI-Widgets
+    Serial
+    Serial-Widgets
+    Widgets
+)
 
 option(FORCE_FUSION_STYLE "Force fusion style" OFF)
 
@@ -56,12 +65,12 @@ set(SPIMlab_SRCS
 add_executable(SPIMlab ${SPIMlab_SRCS})
 target_link_libraries(SPIMlab
     stdc++
-    Qt5::Widgets
-    Qt5::SerialPort
     QtLab::Core
-    QtLab::Widgets
+    QtLab::Hamamatsu
     QtLab::NI
     QtLab::PI
-    QtLab::Hamamatsu
+    QtLab::PI-Widgets
     QtLab::Serial
+    QtLab::Serial-Widgets
+    QtLab::Widgets
 )

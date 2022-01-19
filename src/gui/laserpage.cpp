@@ -7,7 +7,7 @@
 #include "coboltwidget.h"
 #include "filterwheelwidget.h"
 
-#include "aotfwidget.h"
+#include <qtlab/hw/serial-widgets/aa_aotf_widget.h>
 
 LaserPage::LaserPage(QWidget *parent) : QWidget(parent)
 {
@@ -31,7 +31,7 @@ void LaserPage::setupUI()
 
     aotfGb = new QGroupBox("AOTF");
     lay = new QHBoxLayout();
-    lay->addWidget(new AOTFWidget(spim().getAOTF(0)));
+    lay->addWidget(new AA_AOTFWidget(spim().getAOTF(0)));
     aotfGb->setLayout(lay);
 
     QLabel *title;
@@ -45,7 +45,7 @@ void LaserPage::setupUI()
 
     aotfGb = new QGroupBox("AOTF");
     lay = new QHBoxLayout();
-    lay->addWidget(new AOTFWidget(spim().getAOTF(1)));
+    lay->addWidget(new AA_AOTFWidget(spim().getAOTF(1)));
     aotfGb->setLayout(lay);
 
     title = new QLabel("Right view");

@@ -3,7 +3,7 @@
 #include <QPushButton>
 
 #include <qtlab/widgets/logwidget.h>
-#include <qtlab/widgets/picontrollersettingswidget.h>
+#include <qtlab/hw/pi-widgets/picontrollersettingswidget.h>
 
 #include "spim.h"
 
