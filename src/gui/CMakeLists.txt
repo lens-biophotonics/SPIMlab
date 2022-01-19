@@ -28,6 +28,11 @@ if(DEMO_MODE)
     add_definitions(-DDEMO_MODE)
 endif()
 
+option(DUALSPIM "Dual spim" ON)
+if (DUALSPIM)
+    add_definitions(-DDUALSPIM)
+endif ()
+
 set(SPIMlab_SRCS
     resources.qrc
     main.cpp
