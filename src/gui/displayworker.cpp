@@ -33,6 +33,7 @@ void DisplayWorker::run()
     buf = bufInt;
 #endif
     running = true;
+
     while (true) {
         msleep(250);
         if (!running) {
@@ -50,12 +51,18 @@ void DisplayWorker::run()
         int c = 0;
         for (int i = 0; i < h; i += binning) {
             for (int j = 0; j < w; j += binning) {
-                mybufDouble[c++] = mybuf[i * w + j];
+                int ii = flipVertically ? h - i - 1 : i;
+                mybufDouble[c++] = mybuf[ii * w + j];
             }
         }
 
         emit newImage(mybufDouble, bufsize / binning / binning);
     }
+}
+
+void DisplayWorker::setVerticalFlipEnabled(bool enable)
+{
+    flipVertically = enable;
 }
 
 void DisplayWorker::setBinning(uint value)

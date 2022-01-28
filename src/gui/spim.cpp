@@ -34,6 +34,11 @@ SPIM::SPIM(QObject *parent)
         QThread *thread = new QThread();
         thread->setObjectName(QString("SaveStackWorker_thread_%1").arg(i));
         SaveStackWorker *ssWorker = new SaveStackWorker(orca);
+#ifndef DUALSPIM
+        if (i == 0) {
+            ssWorker->setVerticalFlipEnabled(true);
+        }
+#endif
         ssWorker->moveToThread(thread);
         thread->start();
 
@@ -129,8 +134,18 @@ void SPIM::initialize()
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
                                    OrcaFlash::POL_POSITIVE,
                                    2e-6);
-            orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
-                                   DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            if (i == 0) {
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            } else {
+#ifdef DUALSPIM
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+#else
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__BACKWARD);
+#endif
+            }
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
             orca->buf_alloc(1100);
             orca->logInfo();
