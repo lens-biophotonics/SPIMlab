@@ -25,14 +25,14 @@ CoboltWidget::CoboltWidget(Cobolt *cobolt, QWidget *parent) :
 
     QTimer *refreshTimer = new QTimer();
     refreshTimer->setInterval(2000);
-    connect(refreshTimer, &QTimer::timeout, this, &CoboltWidget::refreshValues);
+    connect(refreshTimer, &QTimer::timeout, cobolt, [ = ](){
+        refreshValues();
+    });
 
-    connect(cobolt, &Cobolt::connected, [ = ](){
+    connect(cobolt, &Cobolt::connected, this, [ = ](){
         refreshTimer->start();
     });
-    connect(cobolt, &Cobolt::disconnected, [ = ](){
-        refreshTimer->stop();
-    });
+    connect(cobolt, &Cobolt::disconnected, refreshTimer, &QTimer::stop);
 }
 
 void CoboltWidget::setupUI()
@@ -111,35 +111,28 @@ void CoboltWidget::setupUI()
             QMessageBox::critical(this, "Runtime error", e.what());
         }
     });
-    connect(disconnectPushButton, &QPushButton::clicked, cobolt, &Cobolt::disconnect);
-
-    connect(onPushButton, &QPushButton::clicked, this, [ = ](){
-        try {
-            cobolt->setLaserOn();
-        }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(this, "Runtime error", e.what());
-        }
-        onPushButton->setEnabled(false);
-        offPushButton->setEnabled(true);
+    connect(disconnectPushButton, &QPushButton::clicked, cobolt, [ = ] {
+        cobolt->disconnect();
     });
-    connect(offPushButton, &QPushButton::clicked, this, [ = ](){
-        try {
-            cobolt->setLaserOff();
-        }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(this, "Runtime error", e.what());
-        }
-        onPushButton->setEnabled(true);
+
+    connect(onPushButton, &QPushButton::clicked, cobolt, &Cobolt::setLaserOn);
+    connect(onPushButton, &QPushButton::clicked, [ = ](){
+        onPushButton->setEnabled(false);
+    });
+
+    connect(offPushButton, &QPushButton::clicked, [ = ](){
         offPushButton->setEnabled(false);
     });
+    connect(offPushButton, &QPushButton::clicked, cobolt, &Cobolt::setLaserOff);
 
-    connect(cobolt->getLaserOnState(), &QState::entered, this, [ = ](){
+    connect(cobolt->getLaserOnState(), &QState::entered, [ = ](){
+        offPushButton->setEnabled(true);
         line->setStyleSheet("background-color: "
                             + wavelengthToColor(cobolt->getWavelength()).name());
     });
 
-    connect(cobolt->getLaserOffState(), &QState::entered, this, [ = ](){
+    connect(cobolt->getLaserOffState(), &QState::entered, [ = ](){
+        onPushButton->setEnabled(true);
         QColor wlColor = wavelengthToColor(cobolt->getWavelength());
         QColor dimmed = QColor::fromHsvF(wlColor.hueF(),
                                          wlColor.saturationF(),
@@ -147,7 +140,7 @@ void CoboltWidget::setupUI()
         line->setStyleSheet("background-color: " + dimmed.name());
     });
 
-    connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
+    connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, cobolt, [ = ](){
         try {
             cobolt->setOutputPower(powerDoubleSpinBox->value() / 1000.);
         }
@@ -159,10 +152,11 @@ void CoboltWidget::setupUI()
     QState *cs = cobolt->serialPort()->getConnectedState();
     QState *ds = cobolt->serialPort()->getDisconnectedState();
 
-    connect(cobolt,  &SerialDevice::connected, [ = ](){
+    connect(cobolt,  &SerialDevice::connected, cobolt, [ = ](){
         try {
             int wl = cobolt->getWavelength();
             gb->setTitle(QString("%1 nm").arg(wl));
+            refreshValues();
         }
         catch (std::runtime_error) {
         }

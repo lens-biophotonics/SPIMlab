@@ -93,7 +93,12 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
 
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
-        laserList.insert(i, new Cobolt());
+        Cobolt *cobolt = new Cobolt();
+        QThread *thread = new QThread();
+        thread->setObjectName(QString("Cobolt_thread_%1").arg(i));
+        cobolt->moveToThread(thread);
+        thread->start();
+        laserList.insert(i, cobolt);
     }
 
     stackStage = PI_DEVICE_X_AXIS;
