@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     loadSettings();
 
     setupUi();
+
     setWindowIcon(QIcon(":/res/spim-icon.svg"));
 
     QThread *thread = new QThread();
@@ -158,6 +159,12 @@ void MainWindow::saveSettings() const
     settings.beginGroup("MainWindow");
     settings.setValue("mainWindowGeometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
+
+    for (QWidget *w : closableWidgets) {
+        settings.setValue(w->windowTitle() + "_geometry", w->saveGeometry());
+        settings.setValue(w->windowTitle() + "_shown", w->isVisible());
+    }
+
     settings.endGroup();
 
     QString group;
@@ -367,4 +374,17 @@ void MainWindow::closeEvent(QCloseEvent *e)
                               Qt::BlockingQueuedConnection);
     qDeleteAll(closableWidgets);
     QMainWindow::closeEvent(e);
+}
+
+void MainWindow::restoreWidgets()
+{
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    for (QWidget *w : closableWidgets) {
+        w->restoreGeometry(settings.value(w->windowTitle() + "_geometry").toByteArray());
+        if (settings.value(w->windowTitle() + "_shown").toBool()) {
+            w->show();
+        }
+    }
+    settings.endGroup();
 }

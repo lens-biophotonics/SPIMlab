@@ -21,6 +21,7 @@ private:
     void saveSettings() const;
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
+    Q_INVOKABLE void restoreWidgets();
     QList<QWidget *> closableWidgets;
 };
 

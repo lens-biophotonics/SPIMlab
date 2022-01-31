@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+    QMetaObject::invokeMethod(&w, "restoreWidgets", Qt::QueuedConnection);
 
     return a.exec();
 }
