@@ -46,11 +46,11 @@ set(SPIMlab_SRCS
     acquisitionwidget.cpp
     progresswidget.cpp
 
-    centralwidget.cpp
+    stagewidget.cpp
     camerapage.cpp
     displayworker.cpp
-    laserpage.cpp
-    settingspage.cpp
+    filterswidget.cpp
+    settingswidget.cpp
 
     utils.cpp
     

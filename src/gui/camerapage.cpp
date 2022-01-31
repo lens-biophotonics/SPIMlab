@@ -181,6 +181,7 @@ void CameraPage::setupUI()
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(cameraHLayout, 1);
     vLayout->addLayout(controlsHLayout);
+    setMinimumHeight(1000);
 
     setLayout(vLayout);
 }

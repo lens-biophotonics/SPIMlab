@@ -9,18 +9,18 @@
 
 #include "spim.h"
 
-#include "settingspage.h"
+#include "settingswidget.h"
 #include "nisettingswidget.h"
 #include "settings.h"
 #include "version.h"
 
 
-SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
 {
     setupUI();
 }
 
-void SettingsPage::setupUI()
+void SettingsWidget::setupUI()
 {
     NISettingsWidget *nisw = new NISettingsWidget();
 

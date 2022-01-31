@@ -3,26 +3,18 @@
 
 #include "spim.h"
 
-#include "laserpage.h"
-#include "coboltwidget.h"
+#include "filterswidget.h"
 #include "filterwheelwidget.h"
 
 #include <qtlab/hw/serial-widgets/aa_aotf_widget.h>
 
-LaserPage::LaserPage(QWidget *parent) : QWidget(parent)
+FiltersWidget::FiltersWidget(QWidget * parent) : QWidget(parent)
 {
     setupUI();
 }
 
-void LaserPage::setupUI()
+void FiltersWidget::setupUI()
 {
-    QBoxLayout *laserLayout = new QVBoxLayout();
-
-    for (int i = 0; i < SPIM_NCOBOLT; i++) {
-        laserLayout->addWidget(new CoboltWidget(spim().getLaser(i)));
-    }
-    laserLayout->addStretch();
-
     QBoxLayout *vLeft = new QVBoxLayout();
     QBoxLayout *vRight = new QVBoxLayout();
 
@@ -59,8 +51,6 @@ void LaserPage::setupUI()
     QBoxLayout *hLayout = new QHBoxLayout();
     hLayout->addLayout(vLeft);
     hLayout->addLayout(vRight);
-    hLayout->addStretch();
-    hLayout->addLayout(laserLayout);
 
     setLayout(hLayout);
 }

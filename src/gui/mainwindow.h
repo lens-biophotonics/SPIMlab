@@ -2,10 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMenuBar>
-#include <QMap>
+#include <QCloseEvent>
 
-#include <qtlab/hw/pi/pidevice.h>
 
 class MainWindow : public QMainWindow
 {
@@ -23,6 +21,7 @@ private:
     void saveSettings() const;
     void loadSettings();
     void closeEvent(QCloseEvent *e = nullptr);
+    QList<QWidget *> closableWidgets;
 };
 
 #endif // MAINWINDOW_H

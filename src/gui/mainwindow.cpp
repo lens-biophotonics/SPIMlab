@@ -3,15 +3,19 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QToolBar>
+#include <QMenuBar>
 #include <QSettings>
 #include <QSerialPortInfo>
 
 #include <qtlab/core/logmanager.h>
 #include <qtlab/hw/ni/natinst.h>
+#include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/serial/serialport.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
+
+#include <qtlab/widgets/logwidget.h>
 
 #include <qwt_global.h>
 
@@ -21,9 +25,14 @@
 #include "tasks.h"
 
 #include "mainwindow.h"
-#include "centralwidget.h"
+#include "stagewidget.h"
 #include "settings.h"
 #include "version.h"
+#include "camerapage.h"
+#include "settingswidget.h"
+#include "coboltwidget.h"
+#include "filterswidget.h"
+
 
 static Logger *logger = getLogger("MainWindow");
 
@@ -79,8 +88,65 @@ void MainWindow::setupUi()
     QMenu *helpMenu = menuBar->addMenu("?");
     helpMenu->addAction(aboutAction);
 
-    CentralWidget *centralWidget = new CentralWidget(this);
+    CameraPage *centralWidget = new CameraPage(this);
     setCentralWidget(centralWidget);
+
+    QWidget *cw;
+    QBoxLayout *vLayout;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    QBoxLayout *laserLayout = new QVBoxLayout();
+    for (int i = 0; i < SPIM_NCOBOLT; i++) {
+        laserLayout->addWidget(new CoboltWidget(spim().getLaser(i)));
+    }
+    cw->setLayout(laserLayout);
+    cw->setWindowTitle("Lasers");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    vLayout->addWidget(new FiltersWidget());
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Filters");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    vLayout->addWidget(new StageWidget());
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Stages");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    vLayout->addWidget(new SettingsWidget());
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Settings");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    QWidget *w = new LogWidget();
+    w->setMinimumSize(800, 500);
+    vLayout->addWidget(w);
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Messages");
+    closableWidgets << cw;
+
+    QToolBar *toolbar = addToolBar("Main");
+    toolbar->setObjectName("MainToolbar");
+    toolbar->setMovable(false);
+
+    QMap<QWidget *, QAction *> actionMap;
+    for (QWidget *w : closableWidgets) {
+        QAction *action = toolbar->addAction(w->windowTitle(), this, [ = ]() {
+            w->show();
+            w->activateWindow();
+        });
+        actionMap[w] = action;
+        w->adjustSize();
+    }
 }
 
 void MainWindow::saveSettings() const
@@ -299,5 +365,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
     QMetaObject::invokeMethod(&spim(), "uninitialize",
                               Qt::BlockingQueuedConnection);
+    qDeleteAll(closableWidgets);
     QMainWindow::closeEvent(e);
 }
