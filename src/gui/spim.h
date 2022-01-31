@@ -33,6 +33,9 @@ class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
 class Tasks;
+namespace QtLab::hw::Thorlabs {
+class MotorController;
+};
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -115,6 +118,8 @@ public:
     int getBinning() const;
     void setBinning(uint value);
 
+    QtLab::hw::Thorlabs::MotorController *getMotorController() const;
+
 public slots:
     void startFreeRun();
     void startAcquisition();
@@ -145,6 +150,7 @@ private:
     QList<Cobolt *> laserList;
     QList<FilterWheel *> filterWheelList;
     QList<AA_MPDSnCxx *> aotfList;
+    QtLab::hw::Thorlabs::MotorController *mc;
 
     QStateMachine *sm = nullptr;
 

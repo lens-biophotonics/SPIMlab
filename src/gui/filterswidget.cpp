@@ -2,6 +2,7 @@
 
 #include "filterwheelwidget.h"
 #include "spim.h"
+#include "thorlabsmcwidget.h"
 
 #include <qtlab/hw/serial-widgets/aa_aotf_widget.h>
 
@@ -51,6 +52,11 @@ void FiltersWidget::setupUI()
     lay = new QHBoxLayout();
     lay->addWidget(new AA_AOTFWidget(spim().getAOTF(1)));
     aotfGb->setLayout(lay);
+#else
+    QGroupBox *motorControllerGb = new QGroupBox("Thorlabs Motor Controller");
+    lay = new QHBoxLayout();
+    lay->addWidget(new ThorlabsMCWidget(spim().getMotorController()));
+    motorControllerGb->setLayout(lay);
 #endif
 
     title = new QLabel();
@@ -64,7 +70,11 @@ void FiltersWidget::setupUI()
     title->setStyleSheet("QLabel {font-weight: bold; font-size: 14pt;}");
     vRight->addWidget(title);
     vRight->addWidget(new FilterWheelWidget(spim().getFilterWheel(1), 1));
+#ifdef DUALSPIM
     vRight->addWidget(aotfGb);
+#else
+    vRight->addWidget(motorControllerGb);
+#endif
     vRight->addStretch();
 
     QBoxLayout *hLayout = new QHBoxLayout();

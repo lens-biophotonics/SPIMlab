@@ -12,6 +12,7 @@ find_package(QtLab REQUIRED
     PI-Widgets
     Serial
     Serial-Widgets
+    ThorlabsMC
     Widgets
 )
 
@@ -46,6 +47,7 @@ set(SPIMlab_SRCS
     filterwheelwidget.cpp
     acquisitionwidget.cpp
     progresswidget.cpp
+    thorlabsmcwidget.cpp
 
     stagewidget.cpp
     camerapage.cpp
@@ -73,5 +75,6 @@ target_link_libraries(SPIMlab
     QtLab::PI-Widgets
     QtLab::Serial
     QtLab::Serial-Widgets
+    QtLab::ThorlabsMC
     QtLab::Widgets
 )

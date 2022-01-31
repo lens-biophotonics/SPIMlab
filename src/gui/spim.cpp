@@ -16,12 +16,15 @@
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/thorlabs-mc/motorcontroller.h>
 
 #include <QFinalState>
 #include <QHistoryState>
 #include <QTimer>
 
 static Logger *logger = getLogger("SPIM");
+
+using namespace QtLab::hw::Thorlabs;
 
 SPIM::SPIM(QObject *parent)
     : QObject(parent)
@@ -106,6 +109,13 @@ SPIM::SPIM(QObject *parent)
     enabledMosaicStageMap[PI_DEVICE_Y_AXIS] = true;
     enabledMosaicStageMap[PI_DEVICE_X_AXIS] = true;
 
+    mc = new MotorController();
+    {
+        QThread *thread = new QThread();
+        thread->setObjectName("MotorController_thread");
+        mc->moveToThread(thread);
+        thread->start();
+    }
     setupStateMachine();
 }
 
@@ -189,6 +199,7 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
+        QMetaObject::invokeMethod(mc, "disconnect", Qt::BlockingQueuedConnection);
         tasks->clearTasks();
         for (OrcaFlash *orca : camList) {
             if (orca->isOpen()) {
@@ -201,6 +212,11 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+MotorController *SPIM::getMotorController() const
+{
+    return mc;
 }
 
 int SPIM::getBinning() const
