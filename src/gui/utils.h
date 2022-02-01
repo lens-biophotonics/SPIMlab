@@ -3,6 +3,6 @@
 
 #include <QColor>
 
-QColor wavelengthToColor(double wl, double gamma=0.8);
+QColor wavelengthToColor(double wl, double gamma = 0.8);
 
 #endif // UTILS_H

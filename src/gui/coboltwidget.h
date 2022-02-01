@@ -1,10 +1,9 @@
 #ifndef COBOLTWIDGET_H
 #define COBOLTWIDGET_H
 
-#include <QWidget>
 #include <QComboBox>
 #include <QLabel>
-
+#include <QWidget>
 
 class Cobolt;
 

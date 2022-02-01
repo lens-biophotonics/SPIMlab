@@ -1,15 +1,17 @@
-#include <QHBoxLayout>
-#include <QGroupBox>
-#include <QLabel>
+#include "galvowaveformwidget.h"
+
+#include "galvoramp.h"
+#include "spim.h"
+#include "tasks.h"
 
 #include <qtlab/widgets/customspinbox.h>
 
-#include "spim.h"
-#include "tasks.h"
-#include "galvoramp.h"
-#include "galvowaveformwidget.h"
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
 
-GalvoWaveformWidget::GalvoWaveformWidget(QWidget *parent) : QWidget(parent)
+GalvoWaveformWidget::GalvoWaveformWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -66,7 +68,7 @@ void GalvoWaveformWidget::setupUI()
         fractionSpinBox->setValue(wp.at(GALVORAMP_FRACTION_IDX) * 100);
         grid->addWidget(fractionSpinBox, row, col++);
 
-        std::function<void(void)> apply = [ = ](){
+        std::function<void(void)> apply = [=]() {
             gr->setWaveformAmplitude(i, amplitudeSpinBox->value());
             gr->setWaveformOffset(i, offsetSpinBox->value());
             gr->setWaveformDelay(i, delaySpinBox->value() / 1000.);
@@ -81,7 +83,6 @@ void GalvoWaveformWidget::setupUI()
 
         row++;
     }
-
 
     QGroupBox *gbox = new QGroupBox("Galvo Ramp");
     gbox->setLayout(grid);

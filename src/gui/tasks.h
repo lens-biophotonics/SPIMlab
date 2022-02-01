@@ -1,9 +1,9 @@
 #ifndef TASKS_H
 #define TASKS_H
 
-#include <QObject>
-
 #include <qtlab/hw/ni/nitask.h>
+
+#include <QObject>
 
 class GalvoRamp;
 class CameraTrigger;
@@ -22,7 +22,7 @@ public:
     CameraTrigger *getCameraTrigger() const;
 
 private:
-    CameraTrigger * cameraTrigger;
+    CameraTrigger *cameraTrigger;
     GalvoRamp *galvoRamp;
 
     bool initialized = false;

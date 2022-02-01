@@ -72,9 +72,19 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
+IncludeBlocks: Regroup
 IncludeCategories:
+  - Regex:           '"[[:alnum:]./]+"'
+    Priority:        1
+  - Regex:           '^<qtlab.*'
+    Priority:        100
+  - Regex:           '^<qwt.*'
+    Priority:        190
   - Regex:           '^<Q.*'
     Priority:        200
+  - Regex:           '<[[:alnum:]./]+>'
+    Priority:        300
+    SortPriority:    2
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentWidth:     4

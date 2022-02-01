@@ -1,8 +1,8 @@
 #ifndef ACQUISITIONWIDGET_H
 #define ACQUISITIONWIDGET_H
 
-#include <QWidget>
 #include <QLineEdit>
+#include <QWidget>
 
 class AcquisitionWidget : public QWidget
 {

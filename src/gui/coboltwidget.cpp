@@ -1,37 +1,34 @@
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QListView>
-#include <QSerialPortInfo>
-#include <QPushButton>
-#include <QState>
-#include <QMessageBox>
-#include <QTimer>
+#include "coboltwidget.h"
 
+#include "utils.h"
+
+#include <qtlab/core/logger.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/serialport.h>
-#include <qtlab/core/logger.h>
-
 #include <qtlab/widgets/customspinbox.h>
 
-#include "coboltwidget.h"
-#include "utils.h"
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QListView>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSerialPortInfo>
+#include <QState>
+#include <QTimer>
 
 static Logger *logger = getLogger("SerialPort");
 
-CoboltWidget::CoboltWidget(Cobolt *cobolt, QWidget *parent) :
-    QWidget(parent), cobolt(cobolt)
+CoboltWidget::CoboltWidget(Cobolt *cobolt, QWidget *parent)
+    : QWidget(parent)
+    , cobolt(cobolt)
 {
     setupUI();
 
     QTimer *refreshTimer = new QTimer();
     refreshTimer->setInterval(2000);
-    connect(refreshTimer, &QTimer::timeout, cobolt, [ = ](){
-        refreshValues();
-    });
+    connect(refreshTimer, &QTimer::timeout, cobolt, [=]() { refreshValues(); });
 
-    connect(cobolt, &Cobolt::connected, this, [ = ](){
-        refreshTimer->start();
-    });
+    connect(cobolt, &Cobolt::connected, this, [=]() { refreshTimer->start(); });
     connect(cobolt, &Cobolt::disconnected, refreshTimer, &QTimer::stop);
 }
 
@@ -51,9 +48,9 @@ void CoboltWidget::setupUI()
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
-                        .arg(info.portName())
-                        .arg(info.description())
-                        .arg(info.serialNumber());
+                            .arg(info.portName())
+                            .arg(info.description())
+                            .arg(info.serialNumber());
         serialPortComboBox->addItem(descr, info.portName());
     }
 
@@ -102,36 +99,29 @@ void CoboltWidget::setupUI()
     bl->addWidget(gb);
     setLayout(bl);
 
-    connect(connectPushButton, &QPushButton::clicked, cobolt, [ = ](){
+    connect(connectPushButton, &QPushButton::clicked, cobolt, [=]() {
         try {
             cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
             cobolt->connect();
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             QMessageBox::critical(this, "Runtime error", e.what());
         }
     });
-    connect(disconnectPushButton, &QPushButton::clicked, cobolt, [ = ] {
-        cobolt->disconnect();
-    });
+    connect(disconnectPushButton, &QPushButton::clicked, cobolt, [=] { cobolt->disconnect(); });
 
     connect(onPushButton, &QPushButton::clicked, cobolt, &Cobolt::setLaserOn);
-    connect(onPushButton, &QPushButton::clicked, [ = ](){
-        onPushButton->setEnabled(false);
-    });
+    connect(onPushButton, &QPushButton::clicked, [=]() { onPushButton->setEnabled(false); });
 
-    connect(offPushButton, &QPushButton::clicked, [ = ](){
-        offPushButton->setEnabled(false);
-    });
+    connect(offPushButton, &QPushButton::clicked, [=]() { offPushButton->setEnabled(false); });
     connect(offPushButton, &QPushButton::clicked, cobolt, &Cobolt::setLaserOff);
 
-    connect(cobolt->getLaserOnState(), &QState::entered, [ = ](){
+    connect(cobolt->getLaserOnState(), &QState::entered, [=]() {
         offPushButton->setEnabled(true);
         line->setStyleSheet("background-color: "
                             + wavelengthToColor(cobolt->getWavelength()).name());
     });
 
-    connect(cobolt->getLaserOffState(), &QState::entered, [ = ](){
+    connect(cobolt->getLaserOffState(), &QState::entered, [=]() {
         onPushButton->setEnabled(true);
         QColor wlColor = wavelengthToColor(cobolt->getWavelength());
         QColor dimmed = QColor::fromHsvF(wlColor.hueF(),
@@ -140,11 +130,10 @@ void CoboltWidget::setupUI()
         line->setStyleSheet("background-color: " + dimmed.name());
     });
 
-    connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, cobolt, [ = ](){
+    connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, cobolt, [=]() {
         try {
             cobolt->setOutputPower(powerDoubleSpinBox->value() / 1000.);
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             QMessageBox::critical(this, "Runtime error", e.what());
         }
     });
@@ -152,13 +141,12 @@ void CoboltWidget::setupUI()
     QState *cs = cobolt->serialPort()->getConnectedState();
     QState *ds = cobolt->serialPort()->getDisconnectedState();
 
-    connect(cobolt,  &SerialDevice::connected, cobolt, [ = ](){
+    connect(cobolt, &SerialDevice::connected, cobolt, [=]() {
         try {
             int wl = cobolt->getWavelength();
             gb->setTitle(QString("%1 nm").arg(wl));
             refreshValues();
-        }
-        catch (std::runtime_error) {
+        } catch (std::runtime_error) {
         }
     });
 
@@ -175,7 +163,7 @@ void CoboltWidget::setupUI()
         powerLabel,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }
@@ -186,7 +174,7 @@ void CoboltWidget::setupUI()
         serialPortComboBox,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
@@ -199,11 +187,9 @@ void CoboltWidget::setupUI()
 
 void CoboltWidget::refreshValues()
 {
-    try{
-        powerLabel->setText(
-            QString("Power: %1 mW").arg(cobolt->getOutputPower() * 1000));
-    }
-    catch (std::runtime_error e) {
+    try {
+        powerLabel->setText(QString("Power: %1 mW").arg(cobolt->getOutputPower() * 1000));
+    } catch (std::runtime_error e) {
         logger->critical(e.what());
     }
 }

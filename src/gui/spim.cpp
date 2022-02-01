@@ -1,29 +1,30 @@
-#include <memory>
-#include <cmath>
+#include "spim.h"
 
-#include <QTimer>
-#include <QFinalState>
-#include <QHistoryState>
+#include "cameratrigger.h"
+#include "galvoramp.h"
+#include "savestackworker.h"
+#include "tasks.h"
+
+#include <cmath>
+#include <memory>
 
 #include <qtlab/core/logger.h>
 #include <qtlab/hw/hamamatsu/orcaflash.h>
-#include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/pi/pidaisychain.h>
-#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/pi/pidevice.h>
+#include <qtlab/hw/serial/AA_MPDSnCxx.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
-#include <qtlab/hw/serial/AA_MPDSnCxx.h>
+#include <qtlab/hw/serial/serialport.h>
 
-#include "spim.h"
-#include "cameratrigger.h"
-#include "tasks.h"
-#include "galvoramp.h"
-#include "savestackworker.h"
+#include <QFinalState>
+#include <QHistoryState>
+#include <QTimer>
 
 static Logger *logger = getLogger("SPIM");
 
-
-SPIM::SPIM(QObject *parent) : QObject(parent)
+SPIM::SPIM(QObject *parent)
+    : QObject(parent)
 {
     tasks = new Tasks(this);
 
@@ -53,7 +54,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     auto mySignal = &SaveStackWorker::captureCompleted;
 #endif
 
-    connect(sender, mySignal, this, [ = ](){
+    connect(sender, mySignal, this, [=]() {
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->signalTriggerCompletion();
         }
@@ -62,19 +63,14 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
         }
     });
 
-
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
     piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
     piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z axis", this));
-    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS,
-                     new PIDevice("Left objective", this));
-    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS,
-                     new PIDevice("Right objective", this));
-    for (PIDevice * dev : piDevList) {
-        connect(dev, &PIDevice::connected, this, [ = ](){
-            dev->setServoEnabled(true);
-        });
+    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice("Left objective", this));
+    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice("Right objective", this));
+    for (PIDevice *dev : piDevList) {
+        connect(dev, &PIDevice::connected, this, [=]() { dev->setServoEnabled(true); });
     }
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
@@ -84,10 +80,9 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     }
 
     PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
-    connect(xaxis, &PIDevice::connected, this, [ = ](){
+    connect(xaxis, &PIDevice::connected, this, [=]() {
         xaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::Axis, 1);
-        xaxis->setTriggerOutput(
-            PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
+        xaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
         xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     });
 
@@ -108,9 +103,7 @@ SPIM::SPIM(QObject *parent) : QObject(parent)
     setupStateMachine();
 }
 
-SPIM::~SPIM()
-{
-}
+SPIM::~SPIM() {}
 
 void SPIM::initialize()
 {
@@ -119,8 +112,7 @@ void SPIM::initialize()
         int nOfCameras = DCAM::init_dcam();
         if (nOfCameras < SPIM_NCAMS) {
             throw std::runtime_error(
-                      QString("Found %1 of %2 cameras").arg(
-                          nOfCameras).arg(SPIM_NCAMS).toStdString());
+                QString("Found %1 of %2 cameras").arg(nOfCameras).arg(SPIM_NCAMS).toStdString());
         }
 
         for (int i = 0; i < SPIM_NCAMS; ++i) {
@@ -138,14 +130,13 @@ void SPIM::initialize()
                                    2e-6);
             orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
                                    DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
-            orca->setPropertyValue(
-                DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
+            orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
             orca->buf_alloc(4000);
             orca->logInfo();
         }
 
         for (int devnumber = 1; devnumber <= 16; ++devnumber) {
-            for (PIDevice * dev : piDevList) {
+            for (PIDevice *dev : piDevList) {
                 if (dev->getDeviceNumber() > devnumber) {
                     continue;
                 }
@@ -159,8 +150,7 @@ void SPIM::initialize()
                     try {
                         dev->connectDevice();
                         break;
-                    }
-                    catch (std::runtime_error) {
+                    } catch (std::runtime_error) {
                         QString msg = "Cannot open device. Attempt %1 of 5";
                         msg = msg.arg(i + 1);
                         logger->warning(msg);
@@ -184,7 +174,7 @@ void SPIM::uninitialize()
         stop();
         closeAllDaisyChains();
         tasks->clearTasks();
-        for (OrcaFlash * orca : camList) {
+        for (OrcaFlash *orca : camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
                 orca->close();
@@ -249,7 +239,7 @@ AA_MPDSnCxx *SPIM::getAOTF(int dev)
 
 void SPIM::haltStages()
 {
-    for (PIDevice * dev : piDevList) {
+    for (PIDevice *dev : piDevList) {
         if (dev->isConnected()) {
             dev->halt();
         }
@@ -368,14 +358,16 @@ void SPIM::startAcquisition()
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
         stageList << getPIDevice(d_enum);
 
-        int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX) * pow(10, SPIM_SCAN_DECIMALS));
-        int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX) * pow(10, SPIM_SCAN_DECIMALS));
-        int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX) * pow(10, SPIM_SCAN_DECIMALS));
+        int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX)
+                                    * pow(10, SPIM_SCAN_DECIMALS));
+        int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX)
+                                  * pow(10, SPIM_SCAN_DECIMALS));
+        int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX)
+                                    * pow(10, SPIM_SCAN_DECIMALS));
 
         if (step == 0) {
             nSteps[d_enum] = 1;
-        }
-        else {
+        } else {
             nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
         }
     }
@@ -386,7 +378,8 @@ void SPIM::startAcquisition()
         currentSteps[d_enum] = 0;
     }
     logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
-                 .arg(totalSteps).arg(nSteps[stackStage]));
+                     .arg(totalSteps)
+                     .arg(nSteps[stackStage]));
 
     currentStep = 0;
     // create output directories
@@ -403,16 +396,14 @@ void SPIM::_startCapture()
 
     try {
         _setExposureTime(exposureTime / 1000.);
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         onError(e.what());
         return;
     }
 
     if (freeRun) {
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_FREERUN]);
-    }
-    else {
+    } else {
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_ACQUISITION]);
     }
 
@@ -425,12 +416,12 @@ void SPIM::_startCapture()
 
 void SPIM::setupStateMachine()
 {
-    std::function<QState*(const MACHINE_STATE, QState *parent)> newState
-        = [this](const MACHINE_STATE type, QState *parent = nullptr) {
-        QState *state = new QState(parent);
-        this->stateMap[type] = state;
-        return state;
-    };
+    std::function<QState *(const MACHINE_STATE, QState *parent)> newState =
+        [this](const MACHINE_STATE type, QState *parent = nullptr) {
+            QState *state = new QState(parent);
+            this->stateMap[type] = state;
+            return state;
+        };
 
     sm = new QStateMachine();
 
@@ -454,15 +445,14 @@ void SPIM::setupStateMachine()
     /* free run */
 
     QState *freeRunState = newState(STATE_FREERUN, capturingState);
-    connect(freeRunState, &QState::entered, this, [ = ](){
+    connect(freeRunState, &QState::entered, this, [=]() {
         try {
             for (OrcaFlash *orca : camList) {
                 orca->cap_start();
             }
 
             tasks->start();
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             onError(e.what());
         }
     });
@@ -499,7 +489,6 @@ void SPIM::setupStateMachine()
     pollingState->setInitialState(pollingInProgressState);
     pollingInProgressState->addTransition(this, &SPIM::onTarget, pollingDone);
 
-
     // setup parallel states in captureState
     for (SaveStackWorker *ssWorker : ssWorkerList) {
         QState *camState = new QState(captureState);
@@ -512,7 +501,7 @@ void SPIM::setupStateMachine()
 
     // polling timer used to check when stages have reached target
     QTimer *pollTimer = new QTimer(this);
-    connect(pollTimer, &QTimer::timeout, this, [ = ](){
+    connect(pollTimer, &QTimer::timeout, this, [=]() {
         QList<SPIM_PI_DEVICES> myStageEnumList;
         myStageEnumList << enabledMosaicStages << stackStage;
         try {
@@ -521,20 +510,19 @@ void SPIM::setupStateMachine()
                     return;
                 }
             }
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             onError(e.what());
         }
 
         emit onTarget();
     });
 
-    connect(acquisitionState, &QState::exited, this, [ = ](){
+    connect(acquisitionState, &QState::exited, this, [=]() {
         pollTimer->stop();
         haltStages();
     });
 
-    connect(precaptureState, &QState::entered, this, [ = ](){
+    connect(precaptureState, &QState::entered, this, [=]() {
         if (!capturing) {
             return;
         }
@@ -543,8 +531,7 @@ void SPIM::setupStateMachine()
 
         // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
-        targetPositions[stackStage]
-            = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
+        targetPositions[stackStage] = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
         QList<SPIM_PI_DEVICES> myStageEnumList;
         myStageEnumList << enabledMosaicStages << stackStage;
         for (const SPIM_PI_DEVICES d_enum : myStageEnumList) {
@@ -560,9 +547,7 @@ void SPIM::setupStateMachine()
                 dev->setVelocity(scanVelocity);
 
                 double pos = targetPositions[d_enum];
-                logger->info(QString("Moving %1 to %2")
-                             .arg(dev->getVerboseName())
-                             .arg(pos));
+                logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(pos));
                 dev->move(pos);
             }
 
@@ -572,7 +557,12 @@ void SPIM::setupStateMachine()
             int k = 0;
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 double pos = targetPositions[d_enum];
-                fname += axis.at(k) + QString("%1").arg(pos, (4 + SPIM_SCAN_DECIMALS), 'f', SPIM_SCAN_DECIMALS, '0');
+                fname += axis.at(k)
+                         + QString("%1").arg(pos,
+                                             (4 + SPIM_SCAN_DECIMALS),
+                                             'f',
+                                             SPIM_SCAN_DECIMALS,
+                                             '0');
                 k += 1;
                 fname += "_";
             }
@@ -596,33 +586,37 @@ void SPIM::setupStateMachine()
 
     // when stage is on target: start cameras, galvos and trigger
     // then start moving the stack stage
-    connect(captureState, &QState::entered, this, [ = ] {
-        pollTimer->stop();
+    connect(
+        captureState,
+        &QState::entered,
+        this,
+        [=] {
+            pollTimer->stop();
 
-        try {
-            // move stack axis to end position
-            double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
-            double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
+            try {
+                // move stack axis to end position
+                double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
+                double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
 
-            PIDevice *dev = getPIDevice(stackStage);
-            dev->setVelocity(triggerRate * stackStep);
-            logger->info(QString("Start acquisition of stack: %1/%2")
-                         .arg(currentStep + 1).arg(totalSteps));
-            logger->info(QString("Moving %1 to %2")
-                         .arg(dev->getVerboseName())
-                         .arg(stackTo));
+                PIDevice *dev = getPIDevice(stackStage);
+                dev->setVelocity(triggerRate * stackStep);
+                logger->info(QString("Start acquisition of stack: %1/%2")
+                                 .arg(currentStep + 1)
+                                 .arg(totalSteps));
+                logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(stackTo));
 
-            for (int i = 0; i < SPIM_NCAMS; ++i) {
-                camList.at(i)->cap_start();
-                QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
+                for (int i = 0; i < SPIM_NCAMS; ++i) {
+                    camList.at(i)->cap_start();
+                    QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
+                }
+                tasks->start();
+                dev->move(stackTo);
+            } catch (std::runtime_error e) {
+                onError(e.what());
+                return;
             }
-            tasks->start();
-            dev->move(stackTo);
-        } catch (std::runtime_error e) {
-            onError(e.what());
-            return;
-        }
-    }, Qt::QueuedConnection);
+        },
+        Qt::QueuedConnection);
 
     sm->start();
 }
@@ -638,7 +632,7 @@ void SPIM::stop()
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->stop();
         }
-        for (OrcaFlash * orca : camList) {
+        for (OrcaFlash *orca : camList) {
             if (orca->isOpen()) {
                 orca->cap_stop();
             }
@@ -669,12 +663,10 @@ void SPIM::_setExposureTime(double expTime)
                 if (fabs(tempDouble - lineInterval) > 0.001 || tempInt != nOfLines) {
                     QString m("Different values for line interval and number of "
                               "lines: Cam 0: %1 %2; Cam %3: %4 %5");
-                    m = m.arg(lineInterval).arg(nOfLines).arg(i).arg(tempDouble)
-                        .arg(tempInt);
+                    m = m.arg(lineInterval).arg(nOfLines).arg(i).arg(tempDouble).arg(tempInt);
                     logger->warning(m);
                 }
-            }
-            else {
+            } else {
                 lineInterval = tempDouble;
                 nOfLines = tempInt;
             }
@@ -715,7 +707,7 @@ void SPIM::incrementCompleted(bool ok)
         tasks->stop();
     }
     if (++completedJobs == SPIM_NCAMS) {
-        if (successJobs == SPIM_NCAMS)  {
+        if (successJobs == SPIM_NCAMS) {
             currentStep++;
 
             // check exit condition
@@ -736,10 +728,9 @@ void SPIM::incrementCompleted(bool ok)
                 }
             }
             currentSteps[xAxis] = newX;
-        }
-        else if (capturing) {  // if not stopped
-            logger->warning(QString("Re-acquiring stack: %1/%2")
-                            .arg(currentStep + 1).arg(totalSteps));
+        } else if (capturing) { // if not stopped
+            logger->warning(
+                QString("Re-acquiring stack: %1/%2").arg(currentStep + 1).arg(totalSteps));
         }
         logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(SPIM_NCAMS));
         emit jobsCompleted();

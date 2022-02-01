@@ -4,7 +4,6 @@
 #include <qtlab/widgets/cameradisplay.h>
 #include <qtlab/widgets/cameraplot.h>
 
-
 DisplayWorker::DisplayWorker(OrcaFlash *camera, QObject *parent)
     : QThread(parent)
 {
@@ -14,12 +13,8 @@ DisplayWorker::DisplayWorker(OrcaFlash *camera, QObject *parent)
 
     orca = camera;
 
-    connect(orca, &OrcaFlash::captureStarted, this, [ = ](){
-        start();
-    });
-    connect(orca, &OrcaFlash::stopped, this, [ = ](){
-        running = false;
-    });
+    connect(orca, &OrcaFlash::captureStarted, this, [=]() { start(); });
+    connect(orca, &OrcaFlash::stopped, this, [=]() { running = false; });
 }
 
 DisplayWorker::~DisplayWorker()
@@ -42,14 +37,13 @@ void DisplayWorker::run()
         msleep(250);
         if (!running) {
 #ifdef QTLAB_DCAM_DEMO
-            delete [] bufInt;
+            delete[] bufInt;
 #endif
             break;
         }
         try {
             orca->lockFrame(-1, &buf);
-        }
-        catch (std::exception) {
+        } catch (std::exception) {
             continue;
         }
         quint16 *mybuf = static_cast<quint16 *>(buf);

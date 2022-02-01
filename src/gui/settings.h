@@ -45,7 +45,6 @@
 
 #define SETTING_FILTER_LIST "filterList"
 
-
 typedef QMap<QString, QVariant> SettingsMap;
 
 class Settings
@@ -61,9 +60,9 @@ public:
     void saveSettings() const;
 
 private:
-    QMap<QString, SettingsMap*> map;
+    QMap<QString, SettingsMap *> map;
 };
 
-Settings& settings();
+Settings &settings();
 
 #endif // SETTINGS_H

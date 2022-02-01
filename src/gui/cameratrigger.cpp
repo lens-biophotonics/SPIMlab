@@ -1,7 +1,8 @@
-#include <qtlab/core/logmanager.h>
-
 #include "cameratrigger.h"
+
 #include "spim.h"
+
+#include <qtlab/core/logmanager.h>
 
 #include <QVector>
 
@@ -18,19 +19,19 @@ CameraTrigger::CameraTrigger(QObject *parent)
 {
     waiter = new TaskWaiter(this);
 
-    connect(this, &CameraTrigger::started, this, [ = ](){
+    connect(this, &CameraTrigger::started, this, [=]() {
         if (!isFreeRun) {
             setLogErrorsEnabled(false);
             waiter->start();
         }
     });
 
-    connect(this, &CameraTrigger::stopped, [ = ](){
+    connect(this, &CameraTrigger::stopped, [=]() {
         waiter->requestInterruption();
         setLogErrorsEnabled(true);
     });
 
-    connect(waiter, &TaskWaiter::done, this, [ = ](){
+    connect(waiter, &TaskWaiter::done, this, [=]() {
         emit done();
         setLogErrorsEnabled(true);
     });
@@ -44,7 +45,8 @@ void CameraTrigger::initializeTask_impl()
     QStringList counters = NI::getCOPhysicalChans().filter("/ctr");
 #ifdef DEMO_MODE
     for (int i = 0; i < pulseTerms.size(); ++i) {
-        counters << "" << "";
+        counters << ""
+                 << "";
     }
 #endif
     int counterIdx = 0;
@@ -55,17 +57,26 @@ void CameraTrigger::initializeTask_impl()
         // camera trigger
         QString chanName = QString("CamTrig%1").arg(i);
         double delay = i * (1 / pulseFreq) / nCams;
-        createCOPulseChanFreq(counters.at(counterIdx++), chanName, DAQmx_Val_Hz,
-                              IdleState_Low, delay, pulseFreq, 0.1);
+        createCOPulseChanFreq(counters.at(counterIdx++),
+                              chanName,
+                              DAQmx_Val_Hz,
+                              IdleState_Low,
+                              delay,
+                              pulseFreq,
+                              0.1);
         setCOPulseTerm(chanName, pulseTerms.at(i));
 
         // blanking
         chanName = QString("Blanking%1").arg(i);
-        createCOPulseChanFreq(counters.at(counterIdx++), chanName, DAQmx_Val_Hz,
-                              IdleState_Low, delay, pulseFreq, 0.9485);
+        createCOPulseChanFreq(counters.at(counterIdx++),
+                              chanName,
+                              DAQmx_Val_Hz,
+                              IdleState_Low,
+                              delay,
+                              pulseFreq,
+                              0.9485);
         setCOPulseTerm(chanName, blankingPulseTerms.at(i));
     }
-
 
     if (isFreeRun) {
         cfgImplicitTiming(SampMode_ContSamps, 10);
@@ -97,7 +108,6 @@ bool CameraTrigger::isFreeRunEnabled() const
 {
     return isFreeRun;
 }
-
 
 QString CameraTrigger::getStartTriggerTerm() const
 {

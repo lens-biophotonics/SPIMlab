@@ -1,9 +1,9 @@
 #ifndef CAMERAPAGE_H
 #define CAMERAPAGE_H
 
-#include <QWidget>
 #include <qtlab/hw/pi-widgets/pipositioncontrolwidget.h>
 
+#include <QWidget>
 
 class CameraPage : public QWidget
 {

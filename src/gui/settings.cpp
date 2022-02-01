@@ -1,23 +1,20 @@
-#include <memory>
-
-#include <QSettings>
-#include <QDir>
+#include "settings.h"
 
 #include "spim.h"
 
-#include "settings.h"
+#include <memory>
 
-#define SET_VALUE(group, key, default_val) \
-    setValue(group, key, settings.value(key, default_val))
+#include <QDir>
+#include <QSettings>
+
+#define SET_VALUE(group, key, default_val) setValue(group, key, settings.value(key, default_val))
 
 Settings::Settings()
 {
     loadSettings();
 }
 
-Settings::~Settings()
-{
-}
+Settings::~Settings() {}
 
 QVariant Settings::value(const QString &group, const QString &key) const
 {
@@ -27,8 +24,7 @@ QVariant Settings::value(const QString &group, const QString &key) const
     return map[group]->value(key);
 }
 
-void Settings::setValue(const QString &group, const QString &key,
-                        const QVariant val)
+void Settings::setValue(const QString &group, const QString &key, const QVariant val)
 {
     if (!map.contains(group)) {
         map.insert(group, new SettingsMap());
@@ -49,7 +45,8 @@ void Settings::loadSettings()
     SET_VALUE(groupName, SETTING_LUTPATH, "/opt/Fiji.app/luts/");
     SET_VALUE(groupName, SETTING_SCANVELOCITY, 2.0);
     QStringList camOutputPath;
-    camOutputPath << "/mnt/dualspim" << "/mnt/dualspim";
+    camOutputPath << "/mnt/dualspim"
+                  << "/mnt/dualspim";
     SET_VALUE(groupName, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
 
     settings.endGroup();
@@ -63,15 +60,8 @@ void Settings::loadSettings()
         settings.beginGroup(group);
 
         QStringList sl;
-        sl << SETTING_BAUD
-           << SETTING_DEVICENUMBER
-           << SETTING_SERIALNUMBER
-           << SETTING_PORTNAME
-           << SETTING_POS
-           << SETTING_FROM
-           << SETTING_TO
-           << SETTING_STEP
-        ;
+        sl << SETTING_BAUD << SETTING_DEVICENUMBER << SETTING_SERIALNUMBER << SETTING_PORTNAME
+           << SETTING_POS << SETTING_FROM << SETTING_TO << SETTING_STEP;
 
         for (const QString &s : sl) {
             SET_VALUE(group, s, QVariant());
@@ -84,16 +74,14 @@ void Settings::loadSettings()
         settings.endGroup();
     }
 
-
     groupName = SETTINGSGROUP_GRAMP;
     settings.beginGroup(groupName);
 
+    SET_VALUE(groupName, SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
     SET_VALUE(groupName,
-              SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
-    SET_VALUE(groupName, SETTING_WFPARAMS, QList<QVariant>(
-                  {0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
+              SETTING_WFPARAMS,
+              QList<QVariant>({0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
     settings.endGroup();
-
 
     groupName = SETTINGSGROUP_CAMTRIG;
     settings.beginGroup(groupName);
@@ -103,7 +91,6 @@ void Settings::loadSettings()
     SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
 
     settings.endGroup();
-
 
     groupName = SETTINGSGROUP_ACQUISITION;
     settings.beginGroup(groupName);
@@ -160,7 +147,7 @@ void Settings::saveSettings() const
 {
     QSettings settings;
 
-    QMapIterator<QString, SettingsMap*> groupIt(map);
+    QMapIterator<QString, SettingsMap *> groupIt(map);
 
     while (groupIt.hasNext()) {
         groupIt.next();

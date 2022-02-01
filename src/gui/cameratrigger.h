@@ -1,17 +1,17 @@
 #ifndef CAMERATRIGGER_H
 #define CAMERATRIGGER_H
 
-#include <QThread>
-
 #include <qtlab/hw/ni/nitask.h>
 
+#include <QThread>
 
 class TaskWaiter : public QThread
 {
     Q_OBJECT
 public:
-    explicit TaskWaiter(NITask *task, QObject *parent = nullptr) :
-        task(task), QThread(parent)
+    explicit TaskWaiter(NITask *task, QObject *parent = nullptr)
+        : task(task)
+        , QThread(parent)
     {
         setTerminationEnabled(true);
     }

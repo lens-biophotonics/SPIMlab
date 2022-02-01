@@ -1,21 +1,21 @@
-#include <QHBoxLayout>
-#include <QGroupBox>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QDoubleSpinBox>
-#include <QLabel>
-
-#include "spim.h"
-
 #include "settingswidget.h"
+
 #include "nisettingswidget.h"
 #include "settings.h"
+#include "spim.h"
 #include "version.h"
 
+#include <QDoubleSpinBox>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QWidget(parent)
+SettingsWidget::SettingsWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -27,14 +27,13 @@ void SettingsWidget::setupUI()
     QLineEdit *LUTPathLineEdit = new QLineEdit();
     LUTPathLineEdit->setReadOnly(true);
     LUTPathLineEdit->setText(
-        settings().value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH)
-        .toString());
+        settings().value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH).toString());
 
     QDoubleSpinBox *scanVelocitySpinBox = new QDoubleSpinBox();
     scanVelocitySpinBox->setDecimals(4);
     scanVelocitySpinBox->setValue(spim().getScanVelocity());
 
-    QPushButton * chooseLUTPathPushButton = new QPushButton("...");
+    QPushButton *chooseLUTPathPushButton = new QPushButton("...");
 
     QStringList outputPath = spim().getOutputPathList();
 
@@ -45,7 +44,7 @@ void SettingsWidget::setupUI()
     QPushButton *chooseLeftCampPathPushButton = new QPushButton("...");
     QPushButton *chooseRightCamPathPushButton = new QPushButton("...");
 
-    connect(chooseLeftCampPathPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(chooseLeftCampPathPushButton, &QPushButton::clicked, this, [=]() {
         QFileDialog dialog;
         dialog.setDirectory(leftCamPathLineEdit->text());
         dialog.setFileMode(QFileDialog::Directory);
@@ -62,7 +61,7 @@ void SettingsWidget::setupUI()
         settings().setValue(SETTINGSGROUP_OTHERSETTINGS, SETTING_CAM_OUTPUT_PATH_LIST, sl);
     });
 
-    connect(chooseRightCamPathPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(chooseRightCamPathPushButton, &QPushButton::clicked, this, [=]() {
         QFileDialog dialog;
         dialog.setDirectory(rightCamPathLineEdit->text());
         dialog.setFileMode(QFileDialog::Directory);
@@ -111,7 +110,7 @@ void SettingsWidget::setupUI()
         otherSettingsGB->setLayout(vLayout);
     }
 
-    connect(chooseLUTPathPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(chooseLUTPathPushButton, &QPushButton::clicked, this, [=]() {
         QFileDialog dialog;
         dialog.setFileMode(QFileDialog::Directory);
         dialog.setOption(QFileDialog::ShowDirsOnly, true);
@@ -124,12 +123,10 @@ void SettingsWidget::setupUI()
 
         settings().setValue(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH, path);
 
-        QMessageBox::information(
-            this, "Info", QString("Please restart %1").arg(PROGRAM_NAME));
+        QMessageBox::information(this, "Info", QString("Please restart %1").arg(PROGRAM_NAME));
     });
 
-
-    void (QDoubleSpinBox::* mySignal)(double) = &QDoubleSpinBox::valueChanged;
+    void (QDoubleSpinBox::*mySignal)(double) = &QDoubleSpinBox::valueChanged;
     connect(scanVelocitySpinBox, mySignal, &spim(), &SPIM::setScanVelocity);
 
     QHBoxLayout *hLayout = new QHBoxLayout();

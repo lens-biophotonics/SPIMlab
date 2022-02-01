@@ -1,10 +1,9 @@
 #ifndef FILTERWHEELWIDGET_H
 #define FILTERWHEELWIDGET_H
 
-#include <QWidget>
 #include <QComboBox>
 #include <QLabel>
-
+#include <QWidget>
 
 class FilterWheel;
 
@@ -12,8 +11,7 @@ class FilterWheelWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FilterWheelWidget(
-        FilterWheel *fw, int idx, QWidget *parent = nullptr);
+    explicit FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent = nullptr);
 
 signals:
 

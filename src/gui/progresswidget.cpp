@@ -1,18 +1,19 @@
-#include <cmath>
-
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QProgressBar>
-#include <QLabel>
-#include <QDateTime>
-#include <QTimer>
-
-#include "spim.h"
-#include "savestackworker.h"
-
 #include "progresswidget.h"
 
-ProgressWidget::ProgressWidget(QWidget *parent) : QWidget(parent)
+#include "savestackworker.h"
+#include "spim.h"
+
+#include <cmath>
+
+#include <QDateTime>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QProgressBar>
+#include <QTimer>
+
+ProgressWidget::ProgressWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -27,15 +28,13 @@ void ProgressWidget::setupUI()
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         QProgressBar *stackPb = new QProgressBar();
-        stackPb->setSizePolicy(
-            QSizePolicy::Minimum, progressBar->sizePolicy().verticalPolicy());
+        stackPb->setSizePolicy(QSizePolicy::Minimum, progressBar->sizePolicy().verticalPolicy());
         stackPb->setFormat(QString("%p% (cam %1)").arg(i));
         stackPbList << stackPb;
         stackPbLayout->addWidget(stackPb);
     }
 
-    progressBar->setSizePolicy(
-        QSizePolicy::Expanding, progressBar->sizePolicy().verticalPolicy());
+    progressBar->setSizePolicy(QSizePolicy::Expanding, progressBar->sizePolicy().verticalPolicy());
 
     progressBar->setFormat("%p% (%v/%m)");
 
@@ -68,14 +67,13 @@ void ProgressWidget::setupUI()
     QState *s;
 
     s = spim().getState(SPIM::STATE_ACQUISITION);
-    connect(s, &QState::entered, this, [ = ](){
+    connect(s, &QState::entered, this, [=]() {
         *startDateTime = QDateTime::currentDateTime();
         timeLabel->clear();
 
-        qint64 remainingSeconds = static_cast<qint64>(
-            spim().getTotalSteps()
-            * spim().getNSteps(spim().getStackStage())
-            / spim().getTriggerRate());
+        qint64 remainingSeconds = static_cast<qint64>(spim().getTotalSteps()
+                                                      * spim().getNSteps(spim().getStackStage())
+                                                      / spim().getTriggerRate());
 
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setRange(0, spim().getTotalSteps());
@@ -83,15 +81,14 @@ void ProgressWidget::setupUI()
         progressBar->reset();
     });
 
-    connect(timer, &QTimer::timeout, this, [ = ](){
+    connect(timer, &QTimer::timeout, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
             stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
         }
     });
 
-
     s = spim().getState(SPIM::STATE_CAPTURE);
-    connect(s, &QState::entered, this, [ = ](){
+    connect(s, &QState::entered, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
             stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
             stackPbList.at(i)->setValue(0);
@@ -100,7 +97,7 @@ void ProgressWidget::setupUI()
     });
     connect(s, &QState::exited, timer, &QTimer::stop);
 
-    connect(s, &QState::exited, this, [ = ](){
+    connect(s, &QState::exited, this, [=]() {
         qint64 seconds = startDateTime->secsTo(QDateTime::currentDateTime());
         int currentStep = spim().getCurrentStep();
 
@@ -112,9 +109,9 @@ void ProgressWidget::setupUI()
         int s = (seconds % 3600) % 60;
 
         timeLabel->setText(QString("%1:%2:%3")
-                           .arg(h, 2, 10, QChar('0'))
-                           .arg(m, 2, 10, QChar('0'))
-                           .arg(s, 2, 10, QChar('0')));
+                               .arg(h, 2, 10, QChar('0'))
+                               .arg(m, 2, 10, QChar('0'))
+                               .arg(s, 2, 10, QChar('0')));
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setValue(currentStep);
         for (int i = 0; i < SPIM_NCAMS; ++i) {

@@ -1,19 +1,20 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include "savestackworker.h"
 
-#include <QFile>
-#include <QDir>
-#include <QTextStream>
-#include <QFileInfo>
-#include <QVector>
+#include "spim.h"
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <qtlab/core/logger.h>
 #include <qtlab/hw/hamamatsu/orcaflash.h>
 
-#include "savestackworker.h"
-#include "spim.h"
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QVector>
 
 static Logger *logger = getLogger("SaveStackWorker");
 
@@ -41,7 +42,8 @@ void performBinning(uint binning, uint16_t *buf, uint16_t *obuf)
 }
 
 SaveStackWorker::SaveStackWorker(OrcaFlash *orca, QObject *parent)
-    : QObject(parent), orca(orca)
+    : QObject(parent)
+    , orca(orca)
 {
     frameCount = readFrames = 0;
 }
@@ -98,8 +100,7 @@ void SaveStackWorker::start()
         if (!triggerCompleted) {
             try {
                 event = orca->wait(1000, mask);
-            }
-            catch (std::runtime_error e) {
+            } catch (std::runtime_error e) {
                 continue;
             }
         }
@@ -112,8 +113,7 @@ void SaveStackWorker::start()
         case DCAMWAIT_CAPEVENT_FRAMEREADY:
             try {
                 orca->lockFrame(frame, &buf, &frameStamp, &timeStamp);
-            }
-            catch (std::runtime_error) {
+            } catch (std::runtime_error) {
                 continue;
             }
 
@@ -123,7 +123,7 @@ void SaveStackWorker::start()
                 if (abs(delta) > timeout) {
                     logger->warning(timeoutString(delta, readFrames));
                 }
-                if (abs(delta) > 10e6) {  // greater than 10 seconds
+                if (abs(delta) > 10e6) { // greater than 10 seconds
                     logger->critical(timeoutString(delta, readFrames));
                     stop();
                     break;
@@ -154,12 +154,12 @@ void SaveStackWorker::start()
         if (binning > 1) {
             performBinning(binning, static_cast<uint16_t *>(buf), binnedBuf);
         }
-        ssize_t written =  write(fd, binning > 1 ? binnedBuf : buf, binned_n);
+        ssize_t written = write(fd, binning > 1 ? binnedBuf : buf, binned_n);
         if (written != binned_n) {
             logger->critical(QString("Camera %1: written %2/%3 bytes")
-                             .arg(orca->getCameraIndex())
-                             .arg(written)
-                             .arg(binned_n));
+                                 .arg(orca->getCameraIndex())
+                                 .arg(written)
+                                 .arg(binned_n));
         }
         readFrames++;
     }
@@ -171,12 +171,14 @@ void SaveStackWorker::start()
     close(fd);
 
     if (binnedBuf != nullptr) {
-        delete [] binnedBuf;
+        delete[] binnedBuf;
     }
 
     emit captureCompleted(readFrames == frameCount);
     QString msg = QString("Camera %1: Saved %2/%3 frames")
-                  .arg(orca->getCameraIndex()).arg(readFrames).arg(frameCount);
+                      .arg(orca->getCameraIndex())
+                      .arg(readFrames)
+                      .arg(frameCount);
     if (readFrames != frameCount) {
         logger->warning(msg);
     } else {
@@ -185,8 +187,7 @@ void SaveStackWorker::start()
 
     QFile outFile(mhdFileName());
     if (!outFile.open(QIODevice::WriteOnly)) {
-        emit error(QString("Cannot open output file %1")
-                   .arg(outFile.fileName()));
+        emit error(QString("Cannot open output file %1").arg(outFile.fileName()));
         return;
     };
     QFileInfo fi = QFileInfo(rawFileName());
@@ -225,10 +226,10 @@ void SaveStackWorker::setOutputPath(const QString &value)
 QString SaveStackWorker::timeoutString(double delta, int i)
 {
     return QString("Camera %1: detected delta of %2 ms at frame %3 (timeout: %4 ms)")
-           .arg(orca->getCameraIndex())
-           .arg(delta * 1e-3)
-           .arg(i + 1)
-           .arg(timeout / 1e3);
+        .arg(orca->getCameraIndex())
+        .arg(delta * 1e-3)
+        .arg(i + 1)
+        .arg(timeout / 1e3);
 }
 
 void SaveStackWorker::setBinning(const uint &value)

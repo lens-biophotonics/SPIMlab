@@ -1,11 +1,11 @@
-#include <QApplication>
-#include <QStyleFactory>
-#include <QSerialPortInfo>
+#include "mainwindow.h"
+#include "version.h"
 
 #include <qtlab/core/logger.h>
 
-#include "mainwindow.h"
-#include "version.h"
+#include <QApplication>
+#include <QSerialPortInfo>
+#include <QStyleFactory>
 
 int main(int argc, char *argv[])
 {
@@ -14,10 +14,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PROGRAM_NAME);
 
     QApplication a(argc, argv);
-    setlocale(LC_NUMERIC, "C");  // needed by PI_GCS library, otherwise it doesn't parse doubles
-                                 // in the response strings correctly
-    QLocale::setDefault(QLocale::C);  // this overrides the system settings: e.g. it allows doubles
-                                      // in QSpinBoxes to be entered with dot instead of comma
+    setlocale(LC_NUMERIC, "C");      // needed by PI_GCS library, otherwise it doesn't parse doubles
+                                     // in the response strings correctly
+    QLocale::setDefault(QLocale::C); // this overrides the system settings: e.g. it allows doubles
+                                     // in QSpinBoxes to be entered with dot instead of comma
 
 #ifdef FORCE_FUSION_STYLE
     a.setStyle(QStyleFactory::create("fusion"));
@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
     logger->info("Available serial devices:");
     for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
         QString descr = QString("portName = %1, descr=%2, s/n=%3, manufacturer=%4)")
-                        .arg(info.portName())
-                        .arg(info.description())
-                        .arg(info.serialNumber())
-                        .arg(info.manufacturer());
+                            .arg(info.portName())
+                            .arg(info.description())
+                            .arg(info.serialNumber())
+                            .arg(info.manufacturer());
 
         logger->info(descr);
     }

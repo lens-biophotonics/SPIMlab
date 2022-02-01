@@ -1,14 +1,15 @@
-#include <QBoxLayout>
-#include <QGroupBox>
-
-#include "spim.h"
-
 #include "filterswidget.h"
+
 #include "filterwheelwidget.h"
+#include "spim.h"
 
 #include <qtlab/hw/serial-widgets/aa_aotf_widget.h>
 
-FiltersWidget::FiltersWidget(QWidget * parent) : QWidget(parent)
+#include <QBoxLayout>
+#include <QGroupBox>
+
+FiltersWidget::FiltersWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }

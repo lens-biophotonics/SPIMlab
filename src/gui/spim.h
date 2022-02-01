@@ -1,11 +1,11 @@
 #ifndef SPIMHUB_H
 #define SPIMHUB_H
 
-#include <QObject>
-#include <QThread>
-#include <QStateMachine>
 #include <QDir>
 #include <QMap>
+#include <QObject>
+#include <QStateMachine>
+#include <QThread>
 
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
@@ -33,7 +33,6 @@ class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
 class Tasks;
-
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -136,7 +135,7 @@ signals:
 private:
     Tasks *tasks;
 
-    double exposureTime;  // in ms
+    double exposureTime; // in ms
     double triggerRate;
     int binning = 1;
 
@@ -158,7 +157,7 @@ private:
     int totalSteps = 0;
     QMap<SPIM_PI_DEVICES, int> nSteps;
     QMap<SPIM_PI_DEVICES, int> currentSteps;
-    QMap<SPIM_PI_DEVICES, QList<double>*> scanRangeMap;
+    QMap<SPIM_PI_DEVICES, QList<double> *> scanRangeMap;
     double scanVelocity = 1;
 
     QStringList outputPath;
@@ -182,6 +181,6 @@ private slots:
     void onError(const QString &errMsg);
 };
 
-SPIM& spim();
+SPIM &spim();
 
 #endif // SPIMHUB_H

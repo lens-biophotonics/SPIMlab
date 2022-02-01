@@ -1,18 +1,21 @@
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QCheckBox>
-#include <QButtonGroup>
-#include <QRadioButton>
-
-#include "spim.h"
-#include <qtlab/hw/pi/pidevice.h>
 #include "acquisitionwidget.h"
 
-AcquisitionWidget::AcquisitionWidget(QWidget *parent) : QWidget(parent)
+#include "spim.h"
+
+#include <qtlab/hw/pi/pidevice.h>
+
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDoubleSpinBox>
+#include <QFileDialog>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QRadioButton>
+
+AcquisitionWidget::AcquisitionWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -25,10 +28,8 @@ QString AcquisitionWidget::getRunName()
 void AcquisitionWidget::setupUI()
 {
     setEnabled(false);
-    spim().getState(SPIM::STATE_CAPTURING)->assignProperty(
-        this, "enabled", false);
-    spim().getState(SPIM::STATE_READY)->assignProperty(
-        this, "enabled", true);
+    spim().getState(SPIM::STATE_CAPTURING)->assignProperty(this, "enabled", false);
+    spim().getState(SPIM::STATE_READY)->assignProperty(this, "enabled", true);
 
     QList<SPIM_PI_DEVICES> devs;
     devs << spim().getStackStage();
@@ -43,8 +44,7 @@ void AcquisitionWidget::setupUI()
     grid->addWidget(new QLabel("To"), row, col++);
     grid->addWidget(new QLabel("Step"), row++, col++);
 
-    void (QDoubleSpinBox::* valueChanged)(double d) = &QDoubleSpinBox::valueChanged;
-
+    void (QDoubleSpinBox::*valueChanged)(double d) = &QDoubleSpinBox::valueChanged;
 
     for (const SPIM_PI_DEVICES d_enum : devs) {
         PIDevice *dev = spim().getPIDevice(d_enum);
@@ -68,11 +68,9 @@ void AcquisitionWidget::setupUI()
             sb->setRange(-999, 999);
             sb->setValue(scanRange->at(i));
 
-            connect(sb, valueChanged, this, [ = ](double d){
-                scanRange->replace(i, d);
-            });
+            connect(sb, valueChanged, this, [=](double d) { scanRange->replace(i, d); });
 
-            connect(dev, &PIDevice::connected, this, [ = ](){
+            connect(dev, &PIDevice::connected, this, [=]() {
                 double minVal = dev->getTravelRangeLowEnd("1").at(0);
                 double maxVal = dev->getTravelRangeHighEnd("1").at(0);
                 sb->setRange(minVal, maxVal);
@@ -85,7 +83,7 @@ void AcquisitionWidget::setupUI()
             for (QWidget *w : wList) {
                 w->setEnabled(false);
             }
-            connect(checkBox, &QCheckBox::toggled, [ = ](bool checked){
+            connect(checkBox, &QCheckBox::toggled, [=](bool checked) {
                 for (QWidget *w : wList) {
                     w->setEnabled(checked);
                 }
@@ -109,7 +107,8 @@ void AcquisitionWidget::setupUI()
     QRegularExpression rx = QRegularExpression("^\\w+[\\w.-]*");
     runNameLineEdit->setValidator(new QRegularExpressionValidator(rx));
     runNameLineEdit->setText(spim().getRunName());
-    grid->addWidget(runNameLineEdit, row++, col, 1, 3); col += 3;
+    grid->addWidget(runNameLineEdit, row++, col, 1, 3);
+    col += 3;
 
     QDoubleSpinBox *expTimeSpinBox = new QDoubleSpinBox();
     expTimeSpinBox->setRange(0, 10000);
@@ -124,9 +123,9 @@ void AcquisitionWidget::setupUI()
 
     QButtonGroup *binningRadioGroup = new QButtonGroup();
 
-    QRadioButton *noBinningRadioButton  = new QRadioButton("None");
-    QRadioButton *twoBinningRadioButton = new  QRadioButton("2x2");
-    QRadioButton *fourBinningRadioButton = new  QRadioButton("4x4");
+    QRadioButton *noBinningRadioButton = new QRadioButton("None");
+    QRadioButton *twoBinningRadioButton = new QRadioButton("2x2");
+    QRadioButton *fourBinningRadioButton = new QRadioButton("4x4");
 
     QList<QRadioButton *> radios;
     radios << noBinningRadioButton << twoBinningRadioButton << fourBinningRadioButton;
@@ -135,9 +134,7 @@ void AcquisitionWidget::setupUI()
     int i = 0;
     for (QRadioButton *radio : radios) {
         binningRadioGroup->addButton(radio);
-        connect(radio, &QRadioButton::toggled, [ = ](){
-            spim().setBinning(1 << i);
-        });
+        connect(radio, &QRadioButton::toggled, [=]() { spim().setBinning(1 << i); });
         radioMap[1 << i] = radio;
         i++;
     }
@@ -165,7 +162,7 @@ void AcquisitionWidget::setupUI()
 
     connect(runNameLineEdit, &QLineEdit::textChanged, &spim(), &SPIM::setRunName);
 
-    connect(setExpTimePushButton, &QPushButton::clicked, [ = ](){
+    connect(setExpTimePushButton, &QPushButton::clicked, [=]() {
         spim().setExposureTime(expTimeSpinBox->value());
     });
 }

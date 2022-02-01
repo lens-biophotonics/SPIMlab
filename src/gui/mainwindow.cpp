@@ -1,42 +1,41 @@
-#include <QMessageBox>
-#include <QTextStream>
-#include <QApplication>
-#include <QCloseEvent>
-#include <QToolBar>
-#include <QMenuBar>
-#include <QSettings>
-#include <QSerialPortInfo>
+#include "mainwindow.h"
+
+#include "camerapage.h"
+#include "cameratrigger.h"
+#include "coboltwidget.h"
+#include "filterswidget.h"
+#include "galvoramp.h"
+#include "settings.h"
+#include "settingswidget.h"
+#include "spim.h"
+#include "stagewidget.h"
+#include "tasks.h"
+#include "version.h"
 
 #include <qtlab/core/logmanager.h>
 #include <qtlab/hw/ni/natinst.h>
 #include <qtlab/hw/pi/pidevice.h>
-#include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/AA_MPDSnCxx.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
-#include <qtlab/hw/serial/AA_MPDSnCxx.h>
-
+#include <qtlab/hw/serial/serialport.h>
 #include <qtlab/widgets/logwidget.h>
 
 #include <qwt_global.h>
 
-#include "spim.h"
-#include "cameratrigger.h"
-#include "galvoramp.h"
-#include "tasks.h"
-
-#include "mainwindow.h"
-#include "stagewidget.h"
-#include "settings.h"
-#include "version.h"
-#include "camerapage.h"
-#include "settingswidget.h"
-#include "coboltwidget.h"
-#include "filterswidget.h"
-
+#include <QApplication>
+#include <QCloseEvent>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QSerialPortInfo>
+#include <QSettings>
+#include <QTextStream>
+#include <QToolBar>
 
 static Logger *logger = getLogger("MainWindow");
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
 {
     loadSettings();
 
@@ -53,13 +52,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     logManager().flushMessages();
 }
 
-MainWindow::~MainWindow()
-{
-}
+MainWindow::~MainWindow() {}
 
 void MainWindow::setupUi()
 {
-    connect(&spim(), &SPIM::error, this, [ = ](QString s) {
+    connect(&spim(), &SPIM::error, this, [=](QString s) {
         QMessageBox::critical(nullptr, "Error", s);
     });
     QAction *quitAction = new QAction(this);
@@ -71,8 +68,7 @@ void MainWindow::setupUi()
     QAction *saveSettingsAction = new QAction(this);
     saveSettingsAction->setText("Save settings");
     saveSettingsAction->setShortcut(QKeySequence("Ctrl+S"));
-    connect(saveSettingsAction, &QAction::triggered,
-            this, &MainWindow::saveSettings);
+    connect(saveSettingsAction, &QAction::triggered, this, &MainWindow::saveSettings);
 
     QAction *aboutAction = new QAction(this);
     aboutAction->setText("&About...");
@@ -141,7 +137,7 @@ void MainWindow::setupUi()
 
     QMap<QWidget *, QAction *> actionMap;
     for (QWidget *w : closableWidgets) {
-        QAction *action = toolbar->addAction(w->windowTitle(), this, [ = ]() {
+        QAction *action = toolbar->addAction(w->windowTitle(), this, [=]() {
             w->show();
             w->activateWindow();
         });
@@ -260,8 +256,7 @@ void MainWindow::loadSettings()
             if (!info.portName().isEmpty()) {
                 dev->setPortName(info.portName());
             }
-        }
-        else {
+        } else {
             dev->setPortName(s.value(group, SETTING_PORTNAME).toString());
         }
 
@@ -346,10 +341,12 @@ void MainWindow::on_aboutAction_triggered() const
 void MainWindow::closeEvent(QCloseEvent *e)
 {
 #ifndef DEMO_MODE
-    QMessageBox::StandardButton ret = QMessageBox::question(
-        this, QString("Closing %1").arg(PROGRAM_NAME),
-        QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    QMessageBox::StandardButton ret
+        = QMessageBox::question(this,
+                                QString("Closing %1").arg(PROGRAM_NAME),
+                                QString("Are you sure you want to close %1?").arg(PROGRAM_NAME),
+                                QMessageBox::Yes | QMessageBox::No,
+                                QMessageBox::No);
 
     if (ret != QMessageBox::Yes) {
         e->ignore();
@@ -370,8 +367,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
      * destroyed before uninitialize() is called.
      */
 
-    QMetaObject::invokeMethod(&spim(), "uninitialize",
-                              Qt::BlockingQueuedConnection);
+    QMetaObject::invokeMethod(&spim(), "uninitialize", Qt::BlockingQueuedConnection);
     qDeleteAll(closableWidgets);
     QMainWindow::closeEvent(e);
 }

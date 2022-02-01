@@ -1,10 +1,11 @@
 #include "tasks.h"
 
-#include "spim.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
+#include "spim.h"
 
-Tasks::Tasks(QObject *parent) : QObject(parent)
+Tasks::Tasks(QObject *parent)
+    : QObject(parent)
 {
     cameraTrigger = new CameraTrigger;
     galvoRamp = new GalvoRamp;

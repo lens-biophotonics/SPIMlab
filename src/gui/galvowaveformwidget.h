@@ -1,8 +1,8 @@
 #ifndef GALVOWAVEFORMWIDGET_H
 #define GALVOWAVEFORMWIDGET_H
 
-#include <QWidget>
 #include <QDoubleSpinBox>
+#include <QWidget>
 
 class GalvoWaveformWidget : public QWidget
 {

@@ -1,23 +1,24 @@
-#include <QHBoxLayout>
-#include <QList>
-#include <QPushButton>
-#include <QLabel>
-#include <QMessageBox>
+#include "camerapage.h"
+
+#include "acquisitionwidget.h"
+#include "displayworker.h"
+#include "galvowaveformwidget.h"
+#include "progresswidget.h"
+#include "settings.h"
+#include "spim.h"
 
 #include <qtlab/widgets/cameradisplay.h>
 #include <qtlab/widgets/cameraplot.h>
 #include <qtlab/widgets/customspinbox.h>
 
-#include "spim.h"
-#include "settings.h"
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QList>
+#include <QMessageBox>
+#include <QPushButton>
 
-#include "acquisitionwidget.h"
-#include "camerapage.h"
-#include "galvowaveformwidget.h"
-#include "progresswidget.h"
-#include "displayworker.h"
-
-CameraPage::CameraPage(QWidget *parent) : QWidget(parent)
+CameraPage::CameraPage(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -39,12 +40,12 @@ void CameraPage::setupUI()
         cd->setPlotSize(QSize(2048, 2048));
         cd->getPlot()->fillGradient();
         DisplayWorker *worker = new DisplayWorker(spim().getCamera(i));
-        void (CameraPlot::*fp)(const double*, const size_t) = &CameraPlot::setData;
+        void (CameraPlot::*fp)(const double *, const size_t) = &CameraPlot::setData;
         connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
         cd->setLUTPath(LUTPath);
         vLayout->addWidget(cd);
         cameraHLayout->addLayout(vLayout);
-        connect(&spim(), &SPIM::captureStarted, this, [ = ](){
+        connect(&spim(), &SPIM::captureStarted, this, [=]() {
             int binning = spim().getBinning();
             worker->setBinning(binning);
             cd->setPlotSize(QSize(2048 / binning, 2048 / binning));
@@ -74,17 +75,16 @@ void CameraPage::setupUI()
     galvoProgressLayout->addWidget(new ProgressWidget());
 
     QPushButton *initPushButton = new QPushButton("Initialize");
-    connect(initPushButton, &QPushButton::clicked, &spim(), [ = ](){
+    connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
         initPushButton->setEnabled(false);
         spim().initialize();
     });
 
     QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
-    connect(startFreeRunPushButton, &QPushButton::clicked,
-            &spim(), &SPIM::startFreeRun);
+    connect(startFreeRunPushButton, &QPushButton::clicked, &spim(), &SPIM::startFreeRun);
 
     QPushButton *startAcqPushButton = new QPushButton("Start acquisition");
-    connect(startAcqPushButton, &QPushButton::clicked, [ = ](){
+    connect(startAcqPushButton, &QPushButton::clicked, [=]() {
         if (acqWidget->getRunName().isEmpty()) {
             QMessageBox::critical(this, "Error", "Please specify a run name");
             return;
@@ -100,8 +100,7 @@ void CameraPage::setupUI()
                 break;
             }
         }
-        if (exists)
-        {
+        if (exists) {
             QMessageBox msgBox;
             QString msg("A measurement with this run name (%1) already exists.");
             msg = msg.arg(acqWidget->getRunName());
@@ -119,13 +118,11 @@ void CameraPage::setupUI()
     });
 
     QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
-    connect(stopCapturePushButton, &QPushButton::clicked,
-            &spim(), &SPIM::stop);
+    connect(stopCapturePushButton, &QPushButton::clicked, &spim(), &SPIM::stop);
 
     QPushButton *emergencyStopPushButton = new QPushButton("EMERGENCY STOP");
     emergencyStopPushButton->setStyleSheet("QPushButton {color: red;}");
-    connect(emergencyStopPushButton, &QPushButton::clicked,
-            &spim(), &SPIM::emergencyStop);
+    connect(emergencyStopPushButton, &QPushButton::clicked, &spim(), &SPIM::emergencyStop);
 
     QLabel *statusLabel = new QLabel();
     statusLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);

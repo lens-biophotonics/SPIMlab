@@ -1,28 +1,31 @@
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QListView>
-#include <QSerialPortInfo>
-#include <QPushButton>
-#include <QState>
-#include <QMessageBox>
-#include <QTimer>
-#include <QListWidget>
-#include <QStringListModel>
-#include <QDialogButtonBox>
+#include "filterwheelwidget.h"
 
-#include <qtlab/hw/serial/serialport.h>
-#include <qtlab/hw/serial/filterwheel.h>
+#include "settings.h"
+#include "utils.h"
+
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/serial/filterwheel.h>
+#include <qtlab/hw/serial/serialport.h>
 #include <qtlab/widgets/customspinbox.h>
 
-#include "filterwheelwidget.h"
-#include "utils.h"
-#include "settings.h"
+#include <QDialogButtonBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QListView>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSerialPortInfo>
+#include <QState>
+#include <QStringListModel>
+#include <QTimer>
 
 static Logger *logger = getLogger("SerialPort");
 
-FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent) :
-    QWidget(parent), fw(fw), idx(idx)
+FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent)
+    : QWidget(parent)
+    , fw(fw)
+    , idx(idx)
 {
     setupUI();
 
@@ -30,18 +33,14 @@ FilterWheelWidget::FilterWheelWidget(FilterWheel *fw, int idx, QWidget *parent) 
     refreshTimer->setInterval(2000);
     connect(refreshTimer, &QTimer::timeout, this, &FilterWheelWidget::refreshValues);
 
-    connect(fw, &FilterWheel::connected, [ = ](){
-        refreshTimer->start();
-    });
-    connect(fw, &FilterWheel::disconnected, [ = ](){
-        refreshTimer->stop();
-    });
+    connect(fw, &FilterWheel::connected, [=]() { refreshTimer->start(); });
+    connect(fw, &FilterWheel::disconnected, [=]() { refreshTimer->stop(); });
 }
 
 void FilterWheelWidget::setupUI()
 {
     QString group = SETTINGSGROUP_FILTERWHEEL(idx);
-    filterList =  settings().value(group, SETTING_FILTER_LIST).toStringList();
+    filterList = settings().value(group, SETTING_FILTER_LIST).toStringList();
 
     QGridLayout *grid = new QGridLayout();
 
@@ -57,9 +56,9 @@ void FilterWheelWidget::setupUI()
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
-                        .arg(info.portName())
-                        .arg(info.description())
-                        .arg(info.serialNumber());
+                            .arg(info.portName())
+                            .arg(info.description())
+                            .arg(info.serialNumber());
         serialPortComboBox->addItem(descr, info.portName());
     }
 
@@ -102,32 +101,28 @@ void FilterWheelWidget::setupUI()
 
     setLayout(vlayout);
 
-    connect(connectPushButton, &QPushButton::clicked,
-            this, &FilterWheelWidget::connectDevice);
-    connect(disconnectPushButton, &QPushButton::clicked,
-            this, &FilterWheelWidget::disconnectDevice);
+    connect(connectPushButton, &QPushButton::clicked, this, &FilterWheelWidget::connectDevice);
+    connect(disconnectPushButton, &QPushButton::clicked, this, &FilterWheelWidget::disconnectDevice);
 
-    connect(fw, &FilterWheel::connected, this, [ = ](){
+    connect(fw, &FilterWheel::connected, this, [=]() {
         filterComboBox->addItems(filterList);
         try {
             filterComboBox->setCurrentIndex(fw->getPosition() - 1);
             logger->info(QString("Current filter: %1").arg(filterComboBox->currentText()));
             motionEnabled = true;
-        }
-        catch (std::runtime_error) {
+        } catch (std::runtime_error) {
         }
         refreshValues();
     });
 
-    connect(filterComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [ = ](){
+    connect(filterComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]() {
         try {
             if (filterComboBox->currentIndex() >= 0 && motionEnabled) {
                 int posnew = filterComboBox->currentIndex() + 1;
                 fw->setPosition(posnew);
                 logger->info(QString("Selected filter: %1").arg(filterComboBox->currentText()));
             }
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             QMessageBox::critical(this, "Runtime error", e.what());
         }
     });
@@ -144,7 +139,7 @@ void FilterWheelWidget::setupUI()
         filterLabel,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }
@@ -155,32 +150,29 @@ void FilterWheelWidget::setupUI()
         serialPortComboBox,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
 
-    connect(setFilterNamesPushButton, &QPushButton::clicked, [ = ](){
+    connect(setFilterNamesPushButton, &QPushButton::clicked, [=]() {
         QDialog *dialog = new QDialog();
         dialog->setModal(true);
         dialog->setWindowTitle("Set filter names");
         dialog->deleteLater();
 
-        QDialogButtonBox *buttonBox = new QDialogButtonBox(
-            QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                                           | QDialogButtonBox::Cancel);
 
-        connect(buttonBox, &QDialogButtonBox::accepted,
-                dialog, &QDialog::accept);
-        connect(buttonBox, &QDialogButtonBox::rejected,
-                dialog, &QDialog::reject);
+        connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
 
         QListWidget *listWidget = new QListWidget();
         listWidget->setDragDropMode(QAbstractItemView::DragDrop);
         listWidget->setDefaultDropAction(Qt::MoveAction);
         listWidget->insertItems(0, filterList);
 
-        for (int i = 0; i < listWidget->count(); ++i)
-        {
+        for (int i = 0; i < listWidget->count(); ++i) {
             QListWidgetItem *item = listWidget->item(i);
             item->setFlags(item->flags() | Qt::ItemIsEditable);
         }
@@ -198,8 +190,7 @@ void FilterWheelWidget::setupUI()
         }
 
         filterList.clear();
-        for (int i = 0; i < listWidget->count(); ++i)
-        {
+        for (int i = 0; i < listWidget->count(); ++i) {
             filterList << listWidget->item(i)->text();
         }
 
@@ -214,8 +205,7 @@ void FilterWheelWidget::connectDevice()
     try {
         fw->serialPort()->setPortName(serialPortComboBox->currentData().toString());
         fw->connect();
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
     }
 }
@@ -226,19 +216,16 @@ void FilterWheelWidget::disconnectDevice()
         fw->disconnect();
         filterComboBox->clear();
         motionEnabled = false;
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
     }
 }
 
 void FilterWheelWidget::refreshValues()
 {
-    try{
-        filterLabel->setText(
-            QString("Filter: %1").arg(fw->getPosition()));
-    }
-    catch (std::runtime_error e) {
+    try {
+        filterLabel->setText(QString("Filter: %1").arg(fw->getPosition()));
+    } catch (std::runtime_error e) {
         logger->critical(e.what());
     }
 }

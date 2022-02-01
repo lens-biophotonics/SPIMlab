@@ -1,16 +1,17 @@
+#include "nisettingswidget.h"
+
+#include "cameratrigger.h"
+#include "galvoramp.h"
+#include "spim.h"
+#include "tasks.h"
+
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
-#include <QGridLayout>
 
-#include "spim.h"
-#include "tasks.h"
-#include "cameratrigger.h"
-#include "galvoramp.h"
-
-#include "nisettingswidget.h"
-
-NISettingsWidget::NISettingsWidget(QWidget *parent) : QWidget(parent)
+NISettingsWidget::NISettingsWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -29,8 +30,7 @@ void NISettingsWidget::setupUI()
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         row = 0;
-        grid->addWidget(new QLabel(QString("Camera %1").arg(i)),
-                        row++, i * 2 + 0, 1, 2);
+        grid->addWidget(new QLabel(QString("Camera %1").arg(i)), row++, i * 2 + 0, 1, 2);
 
         grid->addWidget(new QLabel("Trigger"), row, i * 2 + 0);
         comboBox = new QComboBox();
@@ -76,8 +76,7 @@ void NISettingsWidget::setupUI()
     layout->setMargin(0);
     setLayout(layout);
 
-    connect(NIApplyPushButton, &QPushButton::clicked,
-            this, &NISettingsWidget::apply);
+    connect(NIApplyPushButton, &QPushButton::clicked, this, &NISettingsWidget::apply);
 }
 
 void NISettingsWidget::apply()

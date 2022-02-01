@@ -1,9 +1,9 @@
 #ifndef GALVORAMP_H
 #define GALVORAMP_H
 
-#include <QVector>
-
 #include <qtlab/hw/ni/nitask.h>
+
+#include <QVector>
 
 #define GALVORAMP_N_OF_PARAMS 4
 #define GALVORAMP_OFFSET_IDX 0
@@ -42,10 +42,10 @@ private:
     void write();
     void computeWaveform();
     void appendToWaveform(double offset,
-                          const double amplitude, const double fraction,
+                          const double amplitude,
+                          const double fraction,
                           const double delay);
-    void setWaveformParam(const int channelNumber,
-                          const int paramID, const double val);
+    void setWaveformParam(const int channelNumber, const int paramID, const double val);
 };
 
 #endif // GALVORAMP_H
