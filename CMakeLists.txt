@@ -9,16 +9,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 set(OTHER_FILES
     .gitignore
-    uncrustify.cfg
+    .clang-format
     LICENSE.txt
 )
 
 add_custom_target(
-    uncrustify
+    clang-format
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    SOURCES uncrustify.cfg
+    SOURCES .clang-format
     COMMAND
-    uncrustify -c uncrustify.cfg --no-backup *.cpp *.h
+    clang-format -i src/gui/*.cpp src/gui/*.h
 )
 
 add_custom_target(project-related-files SOURCES ${OTHER_FILES})
