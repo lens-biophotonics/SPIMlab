@@ -4,10 +4,6 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(Qt5 5.8 REQUIRED COMPONENTS
-    Widgets
-    SerialPort
-)
 find_package(QtLab REQUIRED
     Core
     Hamamatsu
