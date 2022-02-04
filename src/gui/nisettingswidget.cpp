@@ -5,6 +5,7 @@
 #include "spim.h"
 #include "tasks.h"
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -26,6 +27,10 @@ void NISettingsWidget::setupUI()
     CameraTrigger *cameraTrigger = spim().getTasks()->getCameraTrigger();
 
     QStringList terminals = NI::getTerminals().filter("PFI");
+
+    QList<QComboBox *> galvoRampComboBoxList;
+    QList<QComboBox *> blankingComboBoxList;
+    QList<QComboBox *> cameraTriggerPulseComboBoxList;
 
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {
@@ -60,14 +65,11 @@ void NISettingsWidget::setupUI()
 
     grid->addWidget(line, row++, 0, 1, 4);
 
-    PITriggerOutputComboBox = new QComboBox();
+    QComboBox *PITriggerOutputComboBox = new QComboBox();
     PITriggerOutputComboBox->insertItems(0, terminals);
     PITriggerOutputComboBox->setCurrentText(cameraTrigger->getStartTriggerTerm());
     grid->addWidget(new QLabel("PI trig out"), row, 0);
     grid->addWidget(PITriggerOutputComboBox, row++, 1);
-
-    QPushButton *NIApplyPushButton = new QPushButton("Apply");
-    grid->addWidget(NIApplyPushButton, row++, 0, 1, 4);
 
     natinstGroupBox->setLayout(grid);
 
@@ -76,25 +78,32 @@ void NISettingsWidget::setupUI()
     layout->setMargin(0);
     setLayout(layout);
 
-    connect(NIApplyPushButton, &QPushButton::clicked, this, &NISettingsWidget::apply);
-}
+    auto apply = [=]() {
+        QStringList pulseTerms;
+        QStringList blankingTerms;
+        QStringList galvoRampPhysChans;
 
-void NISettingsWidget::apply()
-{
-    QStringList pulseTerms;
-    QStringList blankingTerms;
-    QStringList galvoRampPhysChans;
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            pulseTerms << cameraTriggerPulseComboBoxList.at(i)->currentText();
+            blankingTerms << blankingComboBoxList.at(i)->currentText();
+            galvoRampPhysChans << galvoRampComboBoxList.at(i)->currentText();
+        }
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
-        pulseTerms << cameraTriggerPulseComboBoxList.at(i)->currentText();
-        blankingTerms << blankingComboBoxList.at(i)->currentText();
-        galvoRampPhysChans << galvoRampComboBoxList.at(i)->currentText();
+        GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
+        gr->setPhysicalChannels(galvoRampPhysChans);
+        CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
+        ct->setStartTriggerTerm(PITriggerOutputComboBox->currentText());
+        ct->setPulseTerms(pulseTerms);
+        ct->setBlankingPulseTerms(blankingTerms);
+    };
+
+    QList<QComboBox *> allCombos;
+    allCombos << galvoRampComboBoxList << blankingComboBoxList << cameraTriggerPulseComboBoxList
+              << PITriggerOutputComboBox;
+    for (QComboBox *combo : allCombos) {
+        connect(combo, QOverload<int>::of(&QComboBox::activated), [=]() { apply(); });
+#ifdef DEMO_MODE
+        combo->addItems({"item 1", "item 2"});
+#endif
     }
-
-    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
-    gr->setPhysicalChannels(galvoRampPhysChans);
-    CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
-    ct->setStartTriggerTerm(PITriggerOutputComboBox->currentText());
-    ct->setPulseTerms(pulseTerms);
-    ct->setBlankingPulseTerms(blankingTerms);
 }
