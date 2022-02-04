@@ -68,6 +68,9 @@ public:
     int getNPulses() const;
     void setNPulses(int value);
 
+    double getDelay() const;
+    void setDelay(double ms);
+
 signals:
     void done();
 
@@ -77,6 +80,7 @@ protected:
 private:
     bool isFreeRun;
     double pulseFreq;
+    double delay;
     int nPulses = 0;
     QString startTriggerTerm;
     QStringList pulseTerms;

@@ -44,6 +44,7 @@
 #define SETTING_WFPARAMS "waveformParams"
 
 #define SETTING_TRIGGER_TERM "triggerTerm"
+#define SETTING_TRIGGER_DELAY "delay"
 
 #define SETTING_EXPTIME "exposureTime"
 #define SETTING_RUN_NAME "runName"
@@ -132,6 +133,7 @@ void Settings::loadSettings()
     SET_VALUE(groupName, SETTING_PULSE_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
     SET_VALUE(groupName, SETTING_BLANKING_TERMS, QStringList({"/Dev1/PFI2", "/Dev1/PFI3"}));
     SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
+    SET_VALUE(groupName, SETTING_TRIGGER_DELAY, 0);
 
     settings.endGroup();
 
@@ -248,6 +250,7 @@ void Settings::loadSettings()
     ct->setPulseTerms(value(group, SETTING_PULSE_TERMS).toStringList());
     ct->setBlankingPulseTerms(value(group, SETTING_BLANKING_TERMS).toStringList());
     ct->setStartTriggerTerm(value(group, SETTING_TRIGGER_TERM).toString());
+    ct->setDelay(value(group, SETTING_TRIGGER_DELAY).toDouble());
 
     group = SETTINGSGROUP_ACQUISITION;
     spim().setExposureTime(value(group, SETTING_EXPTIME).toDouble());
@@ -317,6 +320,7 @@ void Settings::saveSettings()
     setValue(group, SETTING_PULSE_TERMS, ct->getPulseTerms());
     setValue(group, SETTING_BLANKING_TERMS, ct->getBlankingPulseTerms());
     setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
+    setValue(group, SETTING_TRIGGER_DELAY, ct->getDelay());
 
     group = SETTINGSGROUP_ACQUISITION;
     setValue(group, SETTING_EXPTIME, spim().getExposureTime());

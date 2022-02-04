@@ -40,11 +40,9 @@ void CameraPage::setupUI()
         cd->setPlotSize(QSize(2048, 2048));
         cd->getPlot()->fillGradient();
         DisplayWorker *worker = new DisplayWorker(spim().getCamera(i));
-#ifndef DUALSPIM
         if (i == 0) {
             worker->setVerticalFlipEnabled(true);
         }
-#endif
         void (CameraPlot::*fp)(const double *, const size_t) = &CameraPlot::setData;
         connect(worker, &DisplayWorker::newImage, cd->getPlot(), fp);
         cd->setLUTPath(LUTPath);

@@ -6,6 +6,7 @@
 #include "tasks.h"
 
 #include <QComboBox>
+#include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -24,7 +25,7 @@ void NISettingsWidget::setupUI()
 
     QComboBox *comboBox;
 
-    CameraTrigger *cameraTrigger = spim().getTasks()->getCameraTrigger();
+    CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
 
     QStringList terminals = NI::getTerminals().filter("PFI");
 
@@ -37,33 +38,52 @@ void NISettingsWidget::setupUI()
     QList<QComboBox *> blankingComboBoxList;
     QList<QComboBox *> cameraTriggerPulseComboBoxList;
 
+    QDoubleSpinBox *delaySpinBox = new QDoubleSpinBox();
+    delaySpinBox->setSuffix("ms");
+    delaySpinBox->setRange(0, 100);
+    delaySpinBox->setDecimals(2);
+    delaySpinBox->setValue(ct->getDelay());
+
+    connect(delaySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
+        ct->setDelay(value);
+    });
+
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         row = 0;
-        grid->addWidget(new QLabel(QString("Camera %1").arg(i)), row++, i * 2 + 0, 1, 2);
 
+        grid->addWidget(new QLabel(QString("Camera %1").arg(i)), row++, i * 2 + 0, 1, 2);
         grid->addWidget(new QLabel("Trigger"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->insertItems(0, terminals);
-        comboBox->setCurrentText(cameraTrigger->getPulseTerms().at(i));
+        comboBox->setCurrentText(ct->getPulseTerms().at(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerPulseComboBoxList.insert(i, comboBox);
 
-        grid->addWidget(new QLabel("Blanking"), row, i * 2 + 0);
-        comboBox = new QComboBox();
-        comboBox->insertItems(0, terminals);
-        comboBox->setCurrentText(cameraTrigger->getBlankingPulseTerms().at(i));
-        grid->addWidget(comboBox, row++, i * 2 + 1);
-        blankingComboBoxList.insert(i, comboBox);
+        if (i == 0) {
+            grid->addWidget(new QLabel("Blanking"), row, i * 2 + 0);
+            comboBox = new QComboBox();
+            comboBox->insertItems(0, terminals);
+            comboBox->setCurrentText(ct->getBlankingPulseTerms().at(i));
+            grid->addWidget(comboBox, row++, i * 2 + 1);
+            blankingComboBoxList.insert(i, comboBox);
 
-        grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
+            grid->addWidget(new QLabel("Illumination arms:"), row++, 0);
+        } else {
+            grid->addWidget(new QLabel("Delay"), row, i * 2 + 0);
+            grid->addWidget(delaySpinBox, row++, i * 2 + 1);
+            row += 2;
+        }
+
+        int col = 0;
+        grid->addWidget(new QLabel(QString("Galvo %1").arg(i)), row, col + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
 #ifdef DEMO_MODE
         comboBox->addItems({"DemoDev/ao0", "DemoDev/ao1"});
 #endif
         comboBox->setCurrentText(spim().getTasks()->getGalvoRamp()->getPhysicalChannels().at(i));
-        grid->addWidget(comboBox, row++, i * 2 + 1);
+        grid->addWidget(comboBox, row++, col + 1);
         galvoRampComboBoxList.insert(i, comboBox);
     }
 
@@ -75,7 +95,7 @@ void NISettingsWidget::setupUI()
 
     QComboBox *PITriggerOutputComboBox = new QComboBox();
     PITriggerOutputComboBox->insertItems(0, terminals);
-    PITriggerOutputComboBox->setCurrentText(cameraTrigger->getStartTriggerTerm());
+    PITriggerOutputComboBox->setCurrentText(ct->getStartTriggerTerm());
     grid->addWidget(new QLabel("PI trig out"), row, 0);
     grid->addWidget(PITriggerOutputComboBox, row++, 1);
 
@@ -93,13 +113,14 @@ void NISettingsWidget::setupUI()
 
         for (int i = 0; i < SPIM_NCAMS; ++i) {
             pulseTerms << cameraTriggerPulseComboBoxList.at(i)->currentText();
-            blankingTerms << blankingComboBoxList.at(i)->currentText();
+            if (i == 0) {
+                blankingTerms << blankingComboBoxList.at(i)->currentText();
+            }
             galvoRampPhysChans << galvoRampComboBoxList.at(i)->currentText();
         }
 
         GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
         gr->setPhysicalChannels(galvoRampPhysChans);
-        CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
         ct->setStartTriggerTerm(PITriggerOutputComboBox->currentText());
         ct->setPulseTerms(pulseTerms);
         ct->setBlankingPulseTerms(blankingTerms);

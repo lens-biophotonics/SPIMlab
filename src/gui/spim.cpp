@@ -37,11 +37,9 @@ SPIM::SPIM(QObject *parent)
         QThread *thread = new QThread();
         thread->setObjectName(QString("SaveStackWorker_thread_%1").arg(i));
         SaveStackWorker *ssWorker = new SaveStackWorker(orca);
-#ifndef DUALSPIM
         if (i == 0) {
             ssWorker->setVerticalFlipEnabled(true);
         }
-#endif
         ssWorker->moveToThread(thread);
         thread->start();
 
@@ -148,13 +146,8 @@ void SPIM::initialize()
                 orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
                                        DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
             } else {
-#ifdef DUALSPIM
-                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
-                                       DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
-#else
                 orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
                                        DCAM::DCAMPROP_READOUT_DIRECTION__BACKWARD);
-#endif
             }
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
             orca->buf_alloc(1100);
@@ -708,7 +701,8 @@ void SPIM::_setExposureTime(double expTime)
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double fraction = 0.95;
-        triggerRate = fraction * frameRate;
+        double totalFrameRate = 1 / (1 / frameRate + tasks->getCameraTrigger()->getDelay() / 1000);
+        triggerRate = fraction * totalFrameRate;
 
         logger->info(QString("Exposure time: %1 ms").arg(expTime * 1000));
         logger->info(QString("Line interval: %1 us").arg(lineInterval));

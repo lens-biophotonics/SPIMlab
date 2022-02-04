@@ -44,12 +44,7 @@ void CoboltWidget::setupUI()
     serialPortComboBox->setMinimumContentsLength(15);
 
     for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
-#ifdef DUALSPIM
-        if (!info.manufacturer().startsWith("Cobolt"))
-#else
-        if (!info.manufacturer().startsWith("FTDI"))
-#endif
-        {
+        if (!info.manufacturer().startsWith("FTDI")) {
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
