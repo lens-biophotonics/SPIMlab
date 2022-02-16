@@ -11,6 +11,7 @@ set(OTHER_FILES
     .gitignore
     .clang-format
     LICENSE.txt
+    README.md
 )
 
 add_custom_target(
