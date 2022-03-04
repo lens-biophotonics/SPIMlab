@@ -38,6 +38,11 @@ SPIM::SPIM(QObject *parent)
     autoFocus->moveToThread(thread);
     thread->start();
 
+    connect(autoFocus, &Autofocus::newCorrection, [=](double correction) {
+        getPIDevice(PI_DEVICE_OBJ_AXIS)->moveRelative("1", &correction);
+    });
+
+    connect(this, &SPIM::stopped, autoFocus, &Autofocus::stop);
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
 
@@ -252,6 +257,14 @@ Autofocus *SPIM::getAutoFocus() const
     return autoFocus;
 }
 
+void SPIM::restartAutofocus()
+{
+    if (getState(SPIM::STATE_CAPTURING)->active()) {
+        autoFocus->stop();
+        autoFocus->start();
+    }
+}
+
 QString SPIM::getRunName() const
 {
     return runName;
@@ -436,7 +449,6 @@ void SPIM::_startCapture()
 
     try {
         _setExposureTime(exposureTime / 1000.);
-        autoFocus->start();
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -493,6 +505,7 @@ void SPIM::setupStateMachine()
             }
 
             tasks->start();
+            autoFocus->start();
         } catch (std::runtime_error e) {
             onError(e.what());
         }
@@ -568,6 +581,7 @@ void SPIM::setupStateMachine()
             return;
         }
         tasks->stop();
+        autoFocus->stop();
         completedJobs = successJobs = 0;
 
         // compute target position
@@ -652,6 +666,7 @@ void SPIM::setupStateMachine()
                 }
                 tasks->start();
                 dev->move(stackTo);
+                autoFocus->start();
             } catch (std::runtime_error e) {
                 onError(e.what());
                 return;
@@ -670,7 +685,6 @@ void SPIM::stop()
     logger->info("Stop");
     capturing = false;
     try {
-        autoFocus->stop();
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->stop();
         }
@@ -748,6 +762,7 @@ void SPIM::incrementCompleted(bool ok)
     }
     if (successJobs == 1) {
         tasks->stop();
+        autoFocus->stop();
     }
     if (++completedJobs == SPIM_NCAMS) {
         if (successJobs == SPIM_NCAMS) {

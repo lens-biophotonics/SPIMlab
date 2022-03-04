@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "autofocus.h"
+#include "autofocuswidget.h"
 #include "camerapage.h"
 #include "coboltwidget.h"
 #include "filterswidget.h"
@@ -109,6 +111,14 @@ void MainWindow::setupUi()
     vLayout->addWidget(new StageWidget());
     cw->setLayout(vLayout);
     cw->setWindowTitle("Stages");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    AutofocusWidget *afw = new AutofocusWidget();
+    vLayout->addWidget(afw);
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Autofocus");
     closableWidgets << cw;
 
     vLayout = new QVBoxLayout();

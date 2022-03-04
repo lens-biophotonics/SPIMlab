@@ -39,6 +39,8 @@ set(SPIMlab_SRCS
     version.cpp
     settings.cpp
 
+    autofocuswidget.cpp
+    autofocuscamdisplaywidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
     coboltwidget.cpp

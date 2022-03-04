@@ -1,5 +1,6 @@
 #include "settings.h"
 
+#include "autofocus.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
 #include "spim.h"
@@ -17,6 +18,8 @@
 #include <QSerialPortInfo>
 #include <QSettings>
 
+#include <rapid-af.h>
+
 #define SET_VALUE(group, key, default_val) setValue(group, key, settings.value(key, default_val))
 
 #define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
@@ -24,6 +27,7 @@
 #define SETTINGSGROUP_AOTF(n) QString("AOTF_%1").arg(n)
 #define SETTINGSGROUP_CAMTRIG "CameraTrigger"
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
+#define SETTINGSGROUP_AUTOFOCUS "Autofocus"
 
 #define SETTING_PULSE_TERMS "pulseTerms"
 #define SETTING_BLANKING_TERMS "blankingTerms"
@@ -47,8 +51,38 @@
 #define SETTING_TRIGGER_DELAY "delay"
 
 #define SETTING_EXPTIME "exposureTime"
+#define SETTING_FRAME_RATE "frameRate"
 #define SETTING_RUN_NAME "runName"
 #define SETTING_BINNING "binning"
+
+#define SETTING_MULTITHREADING_ENABLE "multiThreading"
+#define SETTING_PADDING "padding"
+#define SETTING_AGREEMENT_THRESHOLD "agreementThreshold"
+#define SETTING_QUALITY_ENABLE "qualityEnable"
+#define SETTING_QUALITY_SIGMA_THRESHOLD "qualitySigma"
+#define SETTING_QUALITY_SRATIO_THRESHOLD "qualitySpectralRatioThreshold"
+#define SETTING_QUALITY_SRATIO_RADIUS "qualitySpectralRatioRadius"
+#define SETTING_QUALITY_SRATIO_THICKNESS "qualitySpectralRatioThickness"
+#define SETTING_PREFILTER_ENABLE "prefilterEnable"
+#define SETTING_PREFILTER_KERNEL_SIZE "pfKernelSize"
+#define SETTING_PREFILTER_SIGMA "pfSigma"
+#define SETTING_BINARIZE_ENABLE "binarizeEnable"
+#define SETTING_BINARIZE_THRESHOLD "binarizeThreshold"
+#define SETTING_DOG_ENABLE "dogEnable"
+#define SETTING_DOG_KERNEL_SIZE "dogKernelSize"
+#define SETTING_DOG_SIGMA1 "dogSigma1"
+#define SETTING_DOG_SIGMA2 "dogSigma2"
+#define SETTING_CANNY_ENABLE "cannyEnable"
+#define SETTING_CANNY_KERNEL_SIZE "cannyKernelSize"
+#define SETTING_CANNY_SIGMA "cannySigma"
+#define SETTING_CANNY_ALPHA "cannyAlpha"
+#define SETTING_CANNY_BETA "cannyBeta"
+#define SETTING_CALIBRATION_M "calibration_m"
+#define SETTING_CALIBRATION_Q "calibration_q"
+#define SETTING_ENABLED "enabled"
+#define SETTING_OUTPUT_ENABLED "outputEnabled"
+#define SETTING_RIGHT_ROI "rightRoi"
+#define SETTING_LEFT_ROI "leftRoi"
 
 Settings::Settings()
 {
@@ -187,6 +221,50 @@ void Settings::loadSettings()
         settings.endGroup();
     }
 
+    groupName = SETTINGSGROUP_AUTOFOCUS;
+    settings.beginGroup(groupName);
+
+    SET_VALUE(groupName, SETTING_MULTITHREADING_ENABLE, true);
+    SET_VALUE(groupName, SETTING_PADDING, 100);
+    SET_VALUE(groupName, SETTING_AGREEMENT_THRESHOLD, 5);
+
+    SET_VALUE(groupName, SETTING_PREFILTER_ENABLE, true);
+    SET_VALUE(groupName, SETTING_PREFILTER_KERNEL_SIZE, 20);
+    SET_VALUE(groupName, SETTING_PREFILTER_SIGMA, 5);
+
+    SET_VALUE(groupName, SETTING_QUALITY_ENABLE, true);
+    SET_VALUE(groupName, SETTING_QUALITY_SIGMA_THRESHOLD, 0.1);
+    SET_VALUE(groupName, SETTING_QUALITY_SRATIO_THRESHOLD, 1e-4);
+    SET_VALUE(groupName, SETTING_QUALITY_SRATIO_RADIUS, 30);
+    SET_VALUE(groupName, SETTING_QUALITY_SRATIO_THICKNESS, 5);
+
+    SET_VALUE(groupName, SETTING_BINARIZE_ENABLE, true);
+    SET_VALUE(groupName, SETTING_BINARIZE_THRESHOLD, 0.6);
+
+    SET_VALUE(groupName, SETTING_DOG_ENABLE, true);
+    SET_VALUE(groupName, SETTING_DOG_KERNEL_SIZE, 100);
+    SET_VALUE(groupName, SETTING_DOG_SIGMA1, 5);
+    SET_VALUE(groupName, SETTING_DOG_SIGMA2, 10);
+
+    SET_VALUE(groupName, SETTING_CANNY_ENABLE, true);
+    SET_VALUE(groupName, SETTING_CANNY_KERNEL_SIZE, 29);
+    SET_VALUE(groupName, SETTING_CANNY_SIGMA, 20);
+    SET_VALUE(groupName, SETTING_CANNY_ALPHA, 0);
+    SET_VALUE(groupName, SETTING_CANNY_BETA, 1);
+
+    SET_VALUE(groupName, SETTING_EXPTIME, 10000);
+    SET_VALUE(groupName, SETTING_FRAME_RATE, 5);
+    SET_VALUE(groupName, SETTING_CALIBRATION_M, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_Q, 0);
+
+    SET_VALUE(groupName, SETTING_ENABLED, true);
+    SET_VALUE(groupName, SETTING_OUTPUT_ENABLED, true);
+
+    SET_VALUE(groupName, SETTING_LEFT_ROI, QRect());
+    SET_VALUE(groupName, SETTING_RIGHT_ROI, QRect());
+
+    settings.endGroup();
+
     //////////////////////////////////////
 
     QString group;
@@ -260,6 +338,45 @@ void Settings::loadSettings()
     group = SETTINGSGROUP_OTHERSETTINGS;
     spim().setScanVelocity(value(group, SETTING_SCANVELOCITY).toDouble());
     spim().setOutputPathList(value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
+
+    group = SETTINGSGROUP_AUTOFOCUS;
+    rapid_af::AlignOptions opt;
+    Autofocus *af = spim().getAutoFocus();
+    opt.multithreading_enable = value(group, SETTING_MULTITHREADING_ENABLE).toBool();
+    opt.padding = value(group, SETTING_PADDING).toUInt();
+    opt.agreement_threshold = value(group, SETTING_AGREEMENT_THRESHOLD).toDouble();
+    opt.prefilter_enable = value(group, SETTING_PREFILTER_ENABLE).toBool();
+    opt.prefilter_ksize = value(group, SETTING_PREFILTER_KERNEL_SIZE).toInt();
+    opt.prefilter_sigma = value(group, SETTING_PREFILTER_SIGMA).toDouble();
+    opt.bin_enable = value(group, SETTING_BINARIZE_ENABLE).toBool();
+    opt.bin_threshold = value(group, SETTING_BINARIZE_THRESHOLD).toDouble();
+    opt.dog_enable = value(group, SETTING_DOG_ENABLE).toBool();
+    opt.dog_ksize = value(group, SETTING_DOG_KERNEL_SIZE).toInt();
+    opt.dog_sigma1 = value(group, SETTING_DOG_SIGMA1).toDouble();
+    opt.dog_sigma2 = value(group, SETTING_DOG_SIGMA2).toDouble();
+    opt.canny_enable = value(group, SETTING_CANNY_ENABLE).toBool();
+    opt.canny_ksize = value(group, SETTING_CANNY_KERNEL_SIZE).toInt();
+    opt.canny_sigma = value(group, SETTING_CANNY_SIGMA).toDouble();
+    opt.canny_alpha = value(group, SETTING_CANNY_ALPHA).toDouble();
+    opt.canny_beta = value(group, SETTING_CANNY_BETA).toDouble();
+    af->setOptions(opt);
+
+    rapid_af::ImageQualityOptions iqOpt;
+    iqOpt.sigma_threshold = value(group, SETTING_QUALITY_SIGMA_THRESHOLD).toDouble();
+    iqOpt.sratio_threshold = value(group, SETTING_QUALITY_SRATIO_THRESHOLD).toDouble();
+    iqOpt.sratio_radius = value(group, SETTING_QUALITY_SRATIO_RADIUS).toInt();
+    iqOpt.sratio_thickness = value(group, SETTING_QUALITY_SRATIO_THICKNESS).toInt();
+
+    af->setIqOptions(iqOpt);
+    af->setImageQualityEnabled(value(group, SETTING_QUALITY_ENABLE).toBool());
+    af->setExposureTime_us(value(group, SETTING_EXPTIME).toDouble());
+    af->setFrameRate(value(group, SETTING_FRAME_RATE).toDouble());
+    af->setCalibration(value(group, SETTING_CALIBRATION_M).toDouble(),
+                       value(group, SETTING_CALIBRATION_Q).toDouble());
+    af->setEnabled(value(group, SETTING_ENABLED).toBool());
+    af->setOutputEnabled(value(group, SETTING_OUTPUT_ENABLED).toBool());
+    af->setLeftRoi(value(group, SETTING_LEFT_ROI).toRect());
+    af->setRightRoi(value(group, SETTING_RIGHT_ROI).toRect());
 }
 
 void Settings::saveSettings()
@@ -330,6 +447,46 @@ void Settings::saveSettings()
     group = SETTINGSGROUP_OTHERSETTINGS;
     setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
     setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
+
+    Autofocus *af = spim().getAutoFocus();
+    rapid_af::AlignOptions opt = af->getOptions();
+    group = SETTINGSGROUP_AUTOFOCUS;
+    setValue(group, SETTING_MULTITHREADING_ENABLE, opt.multithreading_enable);
+    setValue(group, SETTING_PADDING, opt.padding);
+    setValue(group, SETTING_AGREEMENT_THRESHOLD, opt.agreement_threshold);
+    setValue(group, SETTING_PREFILTER_ENABLE, opt.prefilter_enable);
+    setValue(group, SETTING_PREFILTER_KERNEL_SIZE, opt.prefilter_ksize);
+    setValue(group, SETTING_PREFILTER_SIGMA, opt.prefilter_sigma);
+    setValue(group, SETTING_BINARIZE_ENABLE, opt.bin_enable);
+    setValue(group, SETTING_BINARIZE_THRESHOLD, opt.bin_threshold);
+    setValue(group, SETTING_DOG_ENABLE, opt.dog_enable);
+    setValue(group, SETTING_DOG_KERNEL_SIZE, opt.dog_ksize);
+    setValue(group, SETTING_DOG_SIGMA1, opt.dog_sigma1);
+    setValue(group, SETTING_DOG_SIGMA2, opt.dog_sigma2);
+    setValue(group, SETTING_CANNY_ENABLE, opt.canny_enable);
+    setValue(group, SETTING_CANNY_KERNEL_SIZE, opt.canny_ksize);
+    setValue(group, SETTING_CANNY_SIGMA, opt.canny_sigma);
+    setValue(group, SETTING_CANNY_ALPHA, opt.canny_alpha);
+    setValue(group, SETTING_CANNY_BETA, opt.canny_beta);
+
+    rapid_af::ImageQualityOptions iqOpt = af->getIqOptions();
+    setValue(group, SETTING_QUALITY_ENABLE, af->isImageQualityEnabled());
+    setValue(group, SETTING_QUALITY_SIGMA_THRESHOLD, iqOpt.sigma_threshold);
+    setValue(group, SETTING_QUALITY_SRATIO_THRESHOLD, iqOpt.sratio_threshold);
+    setValue(group, SETTING_QUALITY_SRATIO_RADIUS, iqOpt.sratio_radius);
+    setValue(group, SETTING_QUALITY_SRATIO_THICKNESS, iqOpt.sratio_thickness);
+
+    setValue(group, SETTING_EXPTIME, af->getExposureTime_us());
+    setValue(group, SETTING_FRAME_RATE, af->getFrameRate());
+
+    setValue(group, SETTING_CALIBRATION_M, af->getCalibration_m());
+    setValue(group, SETTING_CALIBRATION_Q, af->getCalibration_q());
+
+    setValue(group, SETTING_ENABLED, af->isEnabled());
+    setValue(group, SETTING_OUTPUT_ENABLED, af->isOutputEnabled());
+
+    setValue(group, SETTING_LEFT_ROI, af->getLeftRoi());
+    setValue(group, SETTING_RIGHT_ROI, af->getRightRoi());
 
     QSettings settings;
 

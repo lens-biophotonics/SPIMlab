@@ -114,6 +114,8 @@ public:
     Tasks *getTasks() const;
     Autofocus *getAutoFocus() const;
 
+    void restartAutofocus();
+
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
