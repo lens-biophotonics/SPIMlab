@@ -28,6 +28,11 @@ void NISettingsWidget::setupUI()
 
     QStringList terminals = NI::getTerminals().filter("PFI");
 
+#ifdef DEMO_MODE
+    terminals << "/DemoDev/PFI0"
+              << "/DemoDev/PFI1";
+#endif
+
     QList<QComboBox *> galvoRampComboBoxList;
     QList<QComboBox *> blankingComboBoxList;
     QList<QComboBox *> cameraTriggerPulseComboBoxList;
@@ -54,6 +59,9 @@ void NISettingsWidget::setupUI()
         grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
+#ifdef DEMO_MODE
+        comboBox->addItems({"DemoDev/ao0", "DemoDev/ao1"});
+#endif
         comboBox->setCurrentText(spim().getTasks()->getGalvoRamp()->getPhysicalChannels().at(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         galvoRampComboBoxList.insert(i, comboBox);
@@ -102,8 +110,5 @@ void NISettingsWidget::setupUI()
               << PITriggerOutputComboBox;
     for (QComboBox *combo : allCombos) {
         connect(combo, QOverload<int>::of(&QComboBox::activated), [=]() { apply(); });
-#ifdef DEMO_MODE
-        combo->addItems({"item 1", "item 2"});
-#endif
     }
 }

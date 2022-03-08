@@ -57,7 +57,7 @@ public:
     void setValue(const QString &group, const QString &key, const QVariant val);
 
     void loadSettings();
-    void saveSettings() const;
+    void saveSettings();
 
 private:
     QMap<QString, SettingsMap *> map;

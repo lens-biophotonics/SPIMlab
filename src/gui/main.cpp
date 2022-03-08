@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "settings.h"
 #include "version.h"
 
 #include <qtlab/core/logger.h>
@@ -35,6 +36,8 @@ int main(int argc, char *argv[])
 
         logger->info(descr);
     }
+
+    settings(); // force loading of settings
 
     MainWindow w;
     w.show();
