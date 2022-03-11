@@ -19,6 +19,36 @@
 
 #define SET_VALUE(group, key, default_val) setValue(group, key, settings.value(key, default_val))
 
+#define SETTINGSGROUP_COBOLT(n) QString("Cobolt_%1").arg(n)
+#define SETTINGSGROUP_ACQUISITION "Acquisition"
+#define SETTINGSGROUP_AOTF(n) QString("AOTF_%1").arg(n)
+#define SETTINGSGROUP_CAMTRIG "CameraTrigger"
+#define SETTINGSGROUP_GRAMP "GalvoRamp"
+
+#define SETTING_PULSE_TERMS "pulseTerms"
+#define SETTING_BLANKING_TERMS "blankingTerms"
+
+#define SETTING_SCANVELOCITY "scanVelocity"
+
+#define SETTING_FROM "from"
+#define SETTING_TO "to"
+#define SETTING_STEP "step"
+#define SETTING_MOSAIC_ENABLED "mosaicEnabled"
+
+#define SETTING_BAUD "baud"
+#define SETTING_DEVICENUMBER "deviceNumber"
+#define SETTING_SERIALNUMBER "serialNumber"
+#define SETTING_PORTNAME "portName"
+
+#define SETTING_PHYSCHANS "physicalChannels"
+#define SETTING_WFPARAMS "waveformParams"
+
+#define SETTING_TRIGGER_TERM "triggerTerm"
+
+#define SETTING_EXPTIME "exposureTime"
+#define SETTING_RUN_NAME "runName"
+#define SETTING_BINNING "binning"
+
 Settings::Settings()
 {
     loadSettings();
