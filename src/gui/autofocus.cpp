@@ -39,13 +39,17 @@ void Autofocus::init()
         logger->info(QString(stringArray[i]));
     }
 
-    dev.SetCamera(0);            // Open device
-    dev.SetPreserveRates(false); // Ask always for the best performances (FPS)
-    dev.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
-    dev.SetEnableImageThread(false);
+    try {
+        dev.SetCamera(0);            // Open device
+        dev.SetPreserveRates(false); // Ask always for the best performances (FPS)
+        dev.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+        dev.SetEnableImageThread(false);
 
-    dev.SetHorizontalBinning(2);
-    dev.SetVerticalBinning(2);
+        dev.SetHorizontalBinning(2);
+        dev.SetVerticalBinning(2);
+    } catch (CAlkUSB3::Exception e) {
+        logger->warning(e.Message());
+    }
 
     dev.RawFrameAcquired().SetUserData(this);
     dev.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
