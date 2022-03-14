@@ -8,6 +8,8 @@
 
 #include <qtlab/core/logger.h>
 
+#include <QPixmap>
+
 #include "rapid-af.h"
 
 using namespace cv;
@@ -127,7 +129,7 @@ double Autofocus::getDelta()
     bool ok = false;
     Point2f delta;
     try {
-        delta = rapid_af::align(i1, i2, options, &ok);
+        shift = rapid_af::align(i1, i2, options, &ok);
     } catch (cv::Exception e) {
         logger->warning(e.what());
         throw std::runtime_error("OpenCV exception (see log)");
@@ -136,7 +138,7 @@ double Autofocus::getDelta()
         throw std::runtime_error("Agreement threshold not met");
     }
 
-    return delta.x;
+    return shift.x;
 }
 
 double Autofocus::inferCalibrationQ()
@@ -261,7 +263,24 @@ cv::Mat Autofocus::getRightRoiImage() const
     return i2;
 }
 
-double Autofocus::getDeltaX() const
+QImage Autofocus::getMergedImage()
 {
-    return delta_x;
+    QRect r = rightRoi;
+    r.moveTopLeft(leftRoi.topLeft());
+    r = r.intersected(leftRoi);
+    Mat img;
+    int width = qMin(leftRoi.width(), rightRoi.width()) - 1;
+    int height = qMin(leftRoi.height(), rightRoi.height()) - 1;
+    try {
+        img = rapid_af::merge(i1(Range(0, height), Range(0, width)),
+                              i2(Range(0, height), Range(0, width)),
+                              shift);
+    } catch (cv::Exception e) {
+    };
+
+    Mat rgb;
+    cv::cvtColor(img, rgb, cv::COLOR_BGR2RGB);
+    QImage qimg = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+
+    return qimg;
 }

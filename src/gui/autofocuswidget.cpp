@@ -76,6 +76,8 @@ void AutofocusWidget::setupUi()
 
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage);
 
+    pmw = new PixmapWidget();
+
     QGridLayout *grid = new QGridLayout();
     QGroupBox *generalOptionsGb = new QGroupBox("RAPID options");
     QCheckBox *multithreadingCb = new QCheckBox("Multithreading");
@@ -270,7 +272,12 @@ void AutofocusWidget::setupUi()
     grid->addWidget(statusLabel, row++, 0);
     autofocusGb->setLayout(grid);
 
-    connect(af, &Autofocus::newStatus, statusLabel, &QLabel::setText);
+    connect(af, &Autofocus::newStatus, [=](QString s) {
+        statusLabel->setText(s);
+        if (isVisible() && s.startsWith("dx")) {
+            pmw->setPixmap(QPixmap::fromImage(af->getMergedImage()));
+        }
+    });
 
     QPushButton *saveToFile = new QPushButton("Save image");
 
@@ -452,6 +459,7 @@ void AutofocusWidget::setupUi()
 
     hLayout = new QHBoxLayout();
     hLayout->addLayout(vLayout1);
+    hLayout->addWidget(pmw);
     hLayout->addLayout(vLayout2);
     hLayout->addLayout(vLayout3);
     setLayout(hLayout);

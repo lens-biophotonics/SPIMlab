@@ -47,7 +47,7 @@ public:
     cv::Mat getLeftRoiImage() const;
     cv::Mat getRightRoiImage() const;
 
-    double getDeltaX() const;
+    QImage getMergedImage();
 
     rapid_af::AlignOptions getOptions() const;
     void setOptions(const rapid_af::AlignOptions &value);
@@ -79,7 +79,7 @@ private:
     bool outputEnabled = true;
     bool imageQualityEnabled = true;
 
-    double delta_x = 0;
+    cv::Point2f shift;
 
     QRect leftRoi;
     QRect rightRoi;

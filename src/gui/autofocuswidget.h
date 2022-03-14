@@ -3,6 +3,8 @@
 
 #include <ICeleraCamera.h>
 
+#include <qtlab/widgets/pixmapwidget.h>
+
 #include <QWidget>
 
 class AutofocusCamDisplayWidget;
@@ -23,6 +25,7 @@ private:
 
     CAlkUSB3::BufferPtr ptr;
     AutofocusCamDisplayWidget *cd;
+    PixmapWidget *pmw;
     double *mybufDouble;
 };
 
