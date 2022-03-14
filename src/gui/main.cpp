@@ -29,6 +29,9 @@ public:
         } catch (CAlkUSB3::Exception e) {
             logger->critical(e.Message());
             emit spim().error(e.Message());
+        } catch (std::runtime_error e) {
+            logger->critical(e.what());
+            emit spim().error(e.what());
         }
         return done;
     }
