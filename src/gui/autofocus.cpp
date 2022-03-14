@@ -86,6 +86,11 @@ void Autofocus::onFrameAcquired(void *userData)
 
     Autofocus *af = static_cast<Autofocus *>(userData);
 
+    if (!af->leftRoi.isValid() || !af->rightRoi.isValid()) {
+        emit af->newStatus("Invalid ROIs");
+        return;
+    }
+
     CAlkUSB3::IVideoSource &videoSource(af->dev);
     CAlkUSB3::BufferPtr ptr = videoSource.GetRawDataPtr(false);
 
