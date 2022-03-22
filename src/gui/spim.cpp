@@ -165,7 +165,7 @@ void SPIM::initialize()
                                        DCAM::DCAMPROP_READOUT_DIRECTION__BACKWARD);
             }
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
-            orca->buf_alloc(1100);
+            orca->buf_alloc(1600);
             orca->logInfo();
         }
 
