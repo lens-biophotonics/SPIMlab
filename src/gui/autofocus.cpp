@@ -274,9 +274,6 @@ cv::Mat Autofocus::getRightRoiImage() const
 
 QImage Autofocus::getMergedImage()
 {
-    QRect r = rightRoi;
-    r.moveTopLeft(leftRoi.topLeft());
-    r = r.intersected(leftRoi);
     Mat img;
     int width = qMin(leftRoi.width(), rightRoi.width()) - 1;
     int height = qMin(leftRoi.height(), rightRoi.height()) - 1;
