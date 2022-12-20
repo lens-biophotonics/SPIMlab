@@ -100,14 +100,10 @@ void CoboltWidget::setupUI()
     setLayout(bl);
 
     connect(connectPushButton, &QPushButton::clicked, cobolt, [=]() {
-        try {
-            cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
-            cobolt->connect();
-        } catch (std::runtime_error e) {
-            QMessageBox::critical(this, "Runtime error", e.what());
-        }
+        cobolt->serialPort()->setPortName(serialPortComboBox->currentData().toString());
+        cobolt->connect();
     });
-    connect(disconnectPushButton, &QPushButton::clicked, cobolt, [=] { cobolt->disconnect(); });
+    connect(disconnectPushButton, &QPushButton::clicked, cobolt, &Cobolt::disconnect);
 
     connect(onPushButton, &QPushButton::clicked, cobolt, &Cobolt::setLaserOn);
     connect(onPushButton, &QPushButton::clicked, [=]() { onPushButton->setEnabled(false); });
@@ -131,23 +127,16 @@ void CoboltWidget::setupUI()
     });
 
     connect(powerDoubleSpinBox, &DoubleSpinBox::returnPressed, cobolt, [=]() {
-        try {
-            cobolt->setOutputPower(powerDoubleSpinBox->value() / 1000.);
-        } catch (std::runtime_error e) {
-            QMessageBox::critical(this, "Runtime error", e.what());
-        }
+        cobolt->setOutputPower(powerDoubleSpinBox->value() / 1000.);
     });
 
     QState *cs = cobolt->serialPort()->getConnectedState();
     QState *ds = cobolt->serialPort()->getDisconnectedState();
 
     connect(cobolt, &SerialDevice::connected, cobolt, [=]() {
-        try {
-            int wl = cobolt->getWavelength();
-            gb->setTitle(QString("%1 nm").arg(wl));
-            refreshValues();
-        } catch (std::runtime_error) {
-        }
+        int wl = cobolt->getWavelength();
+        gb->setTitle(QString("%1 nm").arg(wl));
+        refreshValues();
     });
 
     ds->assignProperty(line, "styleSheet", "background-color: gray");

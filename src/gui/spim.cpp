@@ -94,6 +94,7 @@ SPIM::SPIM(QObject *parent)
         cobolt->moveToThread(thread);
         thread->start();
         laserList.insert(i, cobolt);
+        connect(cobolt, &Cobolt::error, this, &SPIM::onError);
     }
 
     stackStage = PI_DEVICE_X_AXIS;
