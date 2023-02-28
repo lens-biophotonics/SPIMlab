@@ -53,7 +53,7 @@ void CameraPage::setupUI()
     }
 
     stageCw = new PIPositionControlWidget();
-    stageCw->setTitle("Translational stages");
+    stageCw->setTitle("Stages");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
