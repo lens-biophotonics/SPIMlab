@@ -2,10 +2,13 @@
 #include "settings.h"
 #include "version.h"
 
+#include <QApplication>
+#ifdef MASTER_SPIM
+
 #include <qtlab/core/logger.h>
 
-#include <QApplication>
 #include <QSerialPortInfo>
+#endif
 #include <QStyleFactory>
 
 int main(int argc, char *argv[])
@@ -24,6 +27,7 @@ int main(int argc, char *argv[])
     a.setStyle(QStyleFactory::create("fusion"));
 #endif
 
+#ifdef MASTER_SPIM
     Logger *logger = getLogger();
 
     logger->info("Available serial devices:");
@@ -36,6 +40,7 @@ int main(int argc, char *argv[])
 
         logger->info(descr);
     }
+#endif
 
     settings(); // force loading of settings
 

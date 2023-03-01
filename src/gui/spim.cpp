@@ -1,33 +1,35 @@
 #include "spim.h"
 
-#include "cameratrigger.h"
-#include "galvoramp.h"
 #include "savestackworker.h"
-#include "tasks.h"
 
 #include <cmath>
 #include <memory>
 
 #include <qtlab/core/logger.h>
 #include <qtlab/hw/hamamatsu/orcaflash.h>
+
+#include <QFinalState>
+#include <QHistoryState>
+#include <QTimer>
+
+#ifdef MASTER_SPIM
+#include "cameratrigger.h"
+#include "galvoramp.h"
+#include "tasks.h"
+
 #include <qtlab/hw/pi/pidaisychain.h>
 #include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
-
-#include <QFinalState>
-#include <QHistoryState>
-#include <QTimer>
+#endif
 
 static Logger *logger = getLogger("SPIM");
 
 SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
-    tasks = new Tasks(this);
-
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
 
@@ -42,16 +44,21 @@ SPIM::SPIM(QObject *parent)
 
         camList.insert(i, orca);
         ssWorkerList.insert(i, ssWorker);
+#ifdef MASTER_SPIM
         aotfList.insert(i, new AA_MPDSnCxx());
         filterWheelList.insert(i, new FilterWheel());
+#endif
     }
 
+#ifdef MASTER_SPIM
+    tasks = new Tasks(this);
 #ifdef DEMO_MODE
     auto sender = ssWorkerList.at(0);
     auto mySignal = &SaveStackWorker::captureCompleted;
 #else
     auto sender = tasks->getCameraTrigger();
     auto mySignal = &CameraTrigger::done;
+#endif
 #endif
 
     connect(sender, mySignal, this, [=]() {
@@ -62,6 +69,9 @@ SPIM::SPIM(QObject *parent)
             orca->cap_stop();
         }
     });
+
+#ifdef MASTER_SPIM
+    tasks = new Tasks(this);
 
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
@@ -100,6 +110,7 @@ SPIM::SPIM(QObject *parent)
     stackStage = PI_DEVICE_X_AXIS;
     mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_Z_AXIS;
     enabledMosaicStageMap[PI_DEVICE_Y_AXIS] = true;
+#endif
 
     setupStateMachine();
 }
@@ -136,6 +147,7 @@ void SPIM::initialize()
             orca->logInfo();
         }
 
+#ifdef MASTER_SPIM
         for (int devnumber = 1; devnumber <= 16; ++devnumber) {
             for (PIDevice *dev : piDevList) {
                 if (dev->getDeviceNumber() > devnumber) {
@@ -160,6 +172,7 @@ void SPIM::initialize()
                 }
             }
         }
+#endif
 
         emit initialized();
         logger->info("Initialization completed");
@@ -173,8 +186,10 @@ void SPIM::uninitialize()
 {
     try {
         stop();
+#ifdef MASTER_SPIM
         closeAllDaisyChains();
         tasks->clearTasks();
+#endif
         for (OrcaFlash *orca : camList) {
             if (orca->isOpen()) {
                 orca->buf_release();
@@ -208,11 +223,6 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
     enabledMosaicStageMap[dev] = enable;
 }
 
-Tasks *SPIM::getTasks() const
-{
-    return tasks;
-}
-
 QString SPIM::getRunName() const
 {
     return runName;
@@ -233,26 +243,6 @@ void SPIM::setScanVelocity(double value)
     scanVelocity = value;
 }
 
-AA_MPDSnCxx *SPIM::getAOTF(int dev)
-{
-    return aotfList.at(dev);
-}
-
-void SPIM::haltStages()
-{
-    for (PIDevice *dev : piDevList) {
-        if (dev->isConnected()) {
-            dev->halt();
-        }
-    }
-}
-
-void SPIM::emergencyStop()
-{
-    haltStages();
-    stop();
-}
-
 double SPIM::getTriggerRate() const
 {
     return triggerRate;
@@ -271,26 +261,6 @@ int SPIM::getTotalSteps() const
 int SPIM::getCurrentStep() const
 {
     return currentStep;
-}
-
-QList<Cobolt *> SPIM::getLaserDevices() const
-{
-    return laserList;
-}
-
-Cobolt *SPIM::getLaser(const int n) const
-{
-    return laserList.at(n);
-}
-
-QList<FilterWheel *> SPIM::getFilterWheelDevices() const
-{
-    return filterWheelList;
-}
-
-FilterWheel *SPIM::getFilterWheel(const int n) const
-{
-    return filterWheelList.at(n);
 }
 
 double SPIM::getExposureTime() const
@@ -317,22 +287,6 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 {
     return camList.at(camNumber);
 }
-
-PIDevice *SPIM::getPIDevice(const SPIM_PI_DEVICES dev) const
-{
-    return piDevList.value(dev);
-}
-
-PIDevice *SPIM::getPIDevice(const int dev) const
-{
-    return getPIDevice(static_cast<SPIM_PI_DEVICES>(dev));
-}
-
-QList<PIDevice *> SPIM::getPIDevices() const
-{
-    return piDevList;
-}
-
 void SPIM::startFreeRun()
 {
     freeRun = true;
@@ -345,6 +299,7 @@ void SPIM::startAcquisition()
     freeRun = false;
     logger->info("Start acquisition");
 
+#ifdef MASTER_SPIM
     enabledMosaicStages.clear();
     for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
         if (enabledMosaicStageMap[d_enum]) {
@@ -383,6 +338,8 @@ void SPIM::startAcquisition()
                      .arg(nSteps[stackStage]));
 
     currentStep = 0;
+#endif
+
     // create output directories
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         getFullOutputDir(i).mkpath(".");
@@ -408,9 +365,11 @@ void SPIM::_startCapture()
         stateMap[STATE_CAPTURING]->setInitialState(stateMap[STATE_ACQUISITION]);
     }
 
+#ifdef MASTER_SPIM
     tasks->clearTasks();
     tasks->getCameraTrigger()->setFreeRunEnabled(freeRun);
     tasks->getCameraTrigger()->setNPulses(nSteps[stackStage]);
+#endif
 
     emit captureStarted();
 }
@@ -452,7 +411,9 @@ void SPIM::setupStateMachine()
                 orca->cap_start();
             }
 
+#ifdef MASTER_SPIM
             tasks->start();
+#endif
         } catch (std::runtime_error e) {
             onError(e.what());
         }
@@ -464,10 +425,12 @@ void SPIM::setupStateMachine()
     stageEnumList << stackStage << mosaicStages;
     std::sort(stageEnumList.begin(), stageEnumList.end());
 
+#ifdef MASTER_SPIM
     QList<PIDevice *> stageList;
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
         stageList << getPIDevice(d_enum);
     }
+#endif
 
     QState *acquisitionState = newState(STATE_ACQUISITION, capturingState);
 
@@ -502,6 +465,7 @@ void SPIM::setupStateMachine()
 
     // polling timer used to check when stages have reached target
     QTimer *pollTimer = new QTimer(this);
+#ifdef MASTER_SPIM
     connect(pollTimer, &QTimer::timeout, this, [=]() {
         QList<SPIM_PI_DEVICES> myStageEnumList;
         myStageEnumList << enabledMosaicStages << stackStage;
@@ -517,17 +481,22 @@ void SPIM::setupStateMachine()
 
         emit onTarget();
     });
+#endif
 
     connect(acquisitionState, &QState::exited, this, [=]() {
+#ifdef MASTER_SPIM
         pollTimer->stop();
         haltStages();
+#endif
     });
 
     connect(precaptureState, &QState::entered, this, [=]() {
         if (!capturing) {
             return;
         }
+#ifdef MASTER_SPIM
         tasks->stop();
+#endif
         completedJobs = successJobs = 0;
 
         // compute target position
@@ -542,6 +511,7 @@ void SPIM::setupStateMachine()
         }
 
         try {
+#ifdef MASTER_SPIM
             // move stages to target position
             for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
@@ -551,7 +521,7 @@ void SPIM::setupStateMachine()
                 logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(pos));
                 dev->move(pos);
             }
-
+#endif
             QString fname;
             QStringList axis = {"x_", "y_", "z_"};
             QStringList side = {"l", "r"};
@@ -599,19 +569,23 @@ void SPIM::setupStateMachine()
                 double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
                 double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
 
+#ifdef MASTER_SPIM
                 PIDevice *dev = getPIDevice(stackStage);
                 dev->setVelocity(triggerRate * stackStep);
                 logger->info(QString("Start acquisition of stack: %1/%2")
                                  .arg(currentStep + 1)
                                  .arg(totalSteps));
                 logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(stackTo));
+#endif
 
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
                     camList.at(i)->cap_start();
                     QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
                 }
+#ifdef MASTER_SPIM
                 tasks->start();
                 dev->move(stackTo);
+#endif
             } catch (std::runtime_error e) {
                 onError(e.what());
                 return;
@@ -638,7 +612,9 @@ void SPIM::stop()
                 orca->cap_stop();
             }
         }
+#ifdef MASTER_SPIM
         tasks->clearTasks();
+#endif
     } catch (std::runtime_error e) {
         emit error(e.what());
         return;
@@ -686,10 +662,12 @@ void SPIM::_setExposureTime(double expTime)
 
         uint64_t nSamples = static_cast<uint64_t>(sampRate / triggerRate);
 
+#ifdef MASTER_SPIM
         tasks->getCameraTrigger()->setPulseFreq(sampRate / nSamples);
 
         tasks->getGalvoRamp()->setSampleRate(sampRate);
         tasks->getGalvoRamp()->setSampsPerChan(nSamples);
+#endif
     } catch (std::runtime_error e) {
         onError(e.what());
         return;
@@ -704,9 +682,11 @@ void SPIM::incrementCompleted(bool ok)
     if (ok) {
         ++successJobs;
     }
+#ifdef MASTER_SPIM
     if (successJobs == 1) {
         tasks->stop();
     }
+#endif
     if (++completedJobs == SPIM_NCAMS) {
         if (successJobs == SPIM_NCAMS) {
             currentStep++;
@@ -778,6 +758,70 @@ QDir SPIM::getFullOutputDir(int cam)
 {
     return QDir::cleanPath(outputPath.at(cam) + QDir::separator() + runName);
 }
+
+void SPIM::emergencyStop()
+{
+#ifdef MASTER_SPIM
+    haltStages();
+#endif
+    stop();
+}
+
+#ifdef MASTER_SPIM
+Tasks *SPIM::getTasks() const
+{
+    return tasks;
+}
+
+AA_MPDSnCxx *SPIM::getAOTF(int dev)
+{
+    return aotfList.at(dev);
+}
+
+void SPIM::haltStages()
+{
+    for (PIDevice *dev : piDevList) {
+        if (dev->isConnected()) {
+            dev->halt();
+        }
+    }
+}
+
+QList<Cobolt *> SPIM::getLaserDevices() const
+{
+    return laserList;
+}
+
+Cobolt *SPIM::getLaser(const int n) const
+{
+    return laserList.at(n);
+}
+
+QList<FilterWheel *> SPIM::getFilterWheelDevices() const
+{
+    return filterWheelList;
+}
+
+FilterWheel *SPIM::getFilterWheel(const int n) const
+{
+    return filterWheelList.at(n);
+}
+
+PIDevice *SPIM::getPIDevice(const SPIM_PI_DEVICES dev) const
+{
+    return piDevList.value(dev);
+}
+
+PIDevice *SPIM::getPIDevice(const int dev) const
+{
+    return getPIDevice(static_cast<SPIM_PI_DEVICES>(dev));
+}
+
+QList<PIDevice *> SPIM::getPIDevices() const
+{
+    return piDevList;
+}
+#endif
 
 SPIM &spim()
 {

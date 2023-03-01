@@ -28,11 +28,14 @@
 
 class SaveStackWorker;
 class OrcaFlash;
+
+#ifdef MASTER_SPIM
 class PIDevice;
 class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
 class Tasks;
+#endif
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
@@ -67,18 +70,8 @@ public:
     void setCamera(OrcaFlash *getCamera);
     SaveStackWorker *getSSWorker(int camNumber);
 
-    PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
-    PIDevice *getPIDevice(const int dev) const;
-    QList<PIDevice *> getPIDevices() const;
-
     double getExposureTime() const;
     void setExposureTime(double ms);
-
-    QList<Cobolt *> getLaserDevices() const;
-    Cobolt *getLaser(const int n) const;
-
-    QList<FilterWheel *> getFilterWheelDevices() const;
-    FilterWheel *getFilterWheel(const int n) const;
 
     SPIM_PI_DEVICES getStackStage() const;
 
@@ -100,14 +93,10 @@ public:
     double getScanVelocity() const;
     void setScanVelocity(double value);
 
-    AA_MPDSnCxx *getAOTF(int dev);
-
     QString getRunName() const;
     void setRunName(const QString &value);
 
     QDir getFullOutputDir(int cam);
-
-    Tasks *getTasks() const;
 
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
@@ -115,14 +104,33 @@ public:
     int getBinning() const;
     void setBinning(uint value);
 
+#ifdef MASTER_SPIM
+    PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
+    PIDevice *getPIDevice(const int dev) const;
+    QList<PIDevice *> getPIDevices() const;
+
+    QList<Cobolt *> getLaserDevices() const;
+    Cobolt *getLaser(const int n) const;
+
+    QList<FilterWheel *> getFilterWheelDevices() const;
+    FilterWheel *getFilterWheel(const int n) const;
+
+    AA_MPDSnCxx *getAOTF(int dev);
+
+    Tasks *getTasks() const;
+#endif
+
 public slots:
     void startFreeRun();
     void startAcquisition();
     void stop();
-    void haltStages();
     void emergencyStop();
     void initialize();
     void uninitialize();
+
+#ifdef MASTER_SPIM
+    void haltStages();
+#endif
 
 signals:
     void initialized() const;
@@ -133,18 +141,20 @@ signals:
     void onTarget();
 
 private:
+#ifdef MASTER_SPIM
     Tasks *tasks;
+    QList<PIDevice *> piDevList;
+    QList<Cobolt *> laserList;
+    QList<FilterWheel *> filterWheelList;
+    QList<AA_MPDSnCxx *> aotfList;
+#endif
 
     double exposureTime; // in ms
     double triggerRate;
     int binning = 1;
 
-    QList<PIDevice *> piDevList;
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
-    QList<Cobolt *> laserList;
-    QList<FilterWheel *> filterWheelList;
-    QList<AA_MPDSnCxx *> aotfList;
 
     QStateMachine *sm = nullptr;
 
