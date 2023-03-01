@@ -46,12 +46,12 @@ SPIM::SPIM(QObject *parent)
         filterWheelList.insert(i, new FilterWheel());
     }
 
-#ifndef DEMO_MODE
-    auto sender = tasks->getCameraTrigger();
-    auto mySignal = &CameraTrigger::done;
-#else
+#ifdef DEMO_MODE
     auto sender = ssWorkerList.at(0);
     auto mySignal = &SaveStackWorker::captureCompleted;
+#else
+    auto sender = tasks->getCameraTrigger();
+    auto mySignal = &CameraTrigger::done;
 #endif
 
     connect(sender, mySignal, this, [=]() {
