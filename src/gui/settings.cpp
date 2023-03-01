@@ -54,10 +54,7 @@ Settings::Settings()
     loadSettings();
 }
 
-Settings::~Settings()
-{
-    saveSettings();
-}
+Settings::~Settings() {}
 
 QVariant Settings::value(const QString &group, const QString &key) const
 {

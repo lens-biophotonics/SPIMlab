@@ -3,6 +3,7 @@
 #include "camerapage.h"
 #include "coboltwidget.h"
 #include "filterswidget.h"
+#include "settings.h"
 #include "settingswidget.h"
 #include "spim.h"
 #include "stagewidget.h"
@@ -214,6 +215,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     delete centralWidget();
 
     saveSettings();
+    settings().saveSettings();
 
     /* SPIM::uninitialize() is called in the receiver's thread (i.e. spim's).
      * This ensures that QTimers can be correctly stopped (they can't be
