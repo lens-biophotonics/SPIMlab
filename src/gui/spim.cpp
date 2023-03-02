@@ -485,7 +485,6 @@ void SPIM::setupStateMachine()
 
     connect(acquisitionState, &QState::exited, this, [=]() {
 #ifdef MASTER_SPIM
-        pollTimer->stop();
         haltStages();
 #endif
     });
