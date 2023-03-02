@@ -10,6 +10,7 @@
 
 #include <QFinalState>
 #include <QHistoryState>
+#include <QRemoteObjectNode>
 #include <QTimer>
 
 #ifdef MASTER_SPIM
@@ -23,12 +24,14 @@
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
+
+#include "rep_spim_replica.h"
 #endif
 
 static Logger *logger = getLogger("SPIM");
 
 SPIM::SPIM(QObject *parent)
-    : QObject(parent)
+    : __SPIM_BASE_CLASS__(parent)
 {
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
@@ -170,6 +173,10 @@ bool SPIM::initializeSpim()
                 }
             }
         }
+
+        spimReplica = repNode->acquire<SPIMReplica>();
+        spimReplica->waitForSource(2000);
+        spimReplica->initialize_spim();
 #endif
 
         _initialized = true;
@@ -201,6 +208,7 @@ void SPIM::uninitializeSpim()
         onError(e.what());
         return;
     }
+    uninitRemoteObjects();
 }
 
 int SPIM::getBinning() const
@@ -302,7 +310,6 @@ bool SPIM::startAcquisition()
     freeRun = false;
     logger->info("Start acquisition");
 
-#ifdef MASTER_SPIM
     enabledMosaicStages.clear();
     for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
         if (enabledMosaicStageMap[d_enum]) {
@@ -313,9 +320,13 @@ bool SPIM::startAcquisition()
     QList<SPIM_PI_DEVICES> stageEnumList;
     stageEnumList << enabledMosaicStages << stackStage;
 
+#ifdef MASTER_SPIM
     QList<PIDevice *> stageList;
+#endif
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
+#ifdef MASTER_SPIM
         stageList << getPIDevice(d_enum);
+#endif
 
         int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX)
                                     * pow(10, SPIM_SCAN_DECIMALS));
@@ -341,7 +352,6 @@ bool SPIM::startAcquisition()
                      .arg(nSteps[stackStage]));
 
     currentStep = 0;
-#endif
 
     // create output directories
     for (int i = 0; i < SPIM_NCAMS; ++i) {
@@ -812,6 +822,51 @@ bool SPIM::isSpimInitialized() const
     return _initialized;
 }
 
+void SPIM::initRemoteObjects()
+{
+#ifdef MASTER_SPIM
+    logger->info("connecting to " + remoteNode);
+    repNode = new QRemoteObjectNode(this);
+    repNode->connectToNode(remoteNode);
+#endif
+#ifdef SLAVE_SPIM
+    if (srcNode) {
+        srcNode->disableRemoting(this);
+        delete srcNode;
+    }
+    logger->info("listening on " + remoteNode);
+    srcNode = new QRemoteObjectHost(remoteNode); // create host node without Registry
+    srcNode->enableRemoting(this);
+#endif
+}
+
+void SPIM::uninitRemoteObjects()
+{
+#ifdef MASTER_SPIM
+    if (spimReplica) {
+        delete spimReplica;
+    }
+    if (repNode) {
+        delete repNode;
+    }
+#endif
+#ifdef SLAVE_SPIM
+    if (srcNode) {
+        delete srcNode;
+    }
+#endif
+}
+
+QString SPIM::getRemoteNode() const
+{
+    return remoteNode;
+}
+
+void SPIM::setRemoteNode(const QString &value)
+{
+    remoteNode = value;
+}
+
 #ifdef MASTER_SPIM
 Tasks *SPIM::getTasks() const
 {
@@ -888,6 +943,13 @@ bool SPIM::areLasersOn()
         }
     }
     return false;
+}
+#endif
+
+#ifdef SLAVE_SPIM
+void SPIM::setSrcNode(QRemoteObjectHost *value)
+{
+    srcNode = value;
 }
 #endif
 

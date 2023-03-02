@@ -51,6 +51,11 @@ void SettingsWidget::setupUI()
     QPushButton *chooseLeftCampPathPushButton = new QPushButton("...");
     QPushButton *chooseRightCamPathPushButton = new QPushButton("...");
 
+    QLineEdit *remoteNodeLineEdit = new QLineEdit();
+    remoteNodeLineEdit->setText(spim().getRemoteNode());
+    remoteNodeLineEdit->setToolTip("format is local:service OR tcp://192.168.1.1:9999");
+    QPushButton *applyRemoteNodePushButton = new QPushButton("Apply");
+
     connect(chooseLeftCampPathPushButton, &QPushButton::clicked, this, [=]() {
         QFileDialog dialog;
         dialog.setDirectory(leftCamPathLineEdit->text());
@@ -85,6 +90,12 @@ void SettingsWidget::setupUI()
         settings().setValue(SETTINGSGROUP_OTHERSETTINGS, SETTING_CAM_OUTPUT_PATH_LIST, sl);
     });
 
+    connect(applyRemoteNodePushButton, &QPushButton::clicked, this, [=]() {
+        spim().setRemoteNode(remoteNodeLineEdit->text());
+        // will run in spim's thread. This is needed for socket notifiers
+        QMetaObject::invokeMethod(&spim(), "initRemoteObjects", Qt::BlockingQueuedConnection);
+    });
+
     QGroupBox *otherSettingsGB = new QGroupBox("Other settings");
     {
         QGridLayout *grid = new QGridLayout();
@@ -111,6 +122,15 @@ void SettingsWidget::setupUI()
         grid->addWidget(new QLabel("Right camera path"), row, col++);
         grid->addWidget(rightCamPathLineEdit, row, col++);
         grid->addWidget(chooseRightCamPathPushButton, row++, col++);
+
+        QLabel *nodeLabel = new QLabel("Replica node");
+#ifdef SLAVE_SPIM
+        nodeLabel->setText("Source node (this)");
+#endif
+        col = 0;
+        grid->addWidget(nodeLabel, row, col++);
+        grid->addWidget(remoteNodeLineEdit, row, col++);
+        grid->addWidget(applyRemoteNodePushButton, row++, col++);
 
         QVBoxLayout *vLayout = new QVBoxLayout();
         vLayout->addLayout(grid);

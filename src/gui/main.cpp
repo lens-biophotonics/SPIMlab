@@ -3,6 +3,7 @@
 #include "version.h"
 
 #include <QApplication>
+
 #ifdef MASTER_SPIM
 
 #include <qtlab/core/logger.h>
@@ -11,6 +12,7 @@
 #include <QSerialPortInfo>
 
 #endif
+
 #include <QStyleFactory>
 
 int main(int argc, char *argv[])

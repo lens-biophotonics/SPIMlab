@@ -55,6 +55,8 @@
 
 #define SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION "turnOffLasersAtEndOfAcquisition"
 
+#define SETTING_REMOTE_NODE "remoteNode"
+
 Settings::Settings()
 {
     loadSettings();
@@ -95,6 +97,14 @@ void Settings::loadSettings()
                   << "/mnt/dualspim";
     SET_VALUE(group, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
     SET_VALUE(group, SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION, false);
+
+    QString remoteNode;
+#ifdef DEMO_MODE
+    remoteNode = "local:spim";
+#else
+    remoteNode = "192.168.12.2:8012";
+#endif
+    SET_VALUE(group, SETTING_REMOTE_NODE, remoteNode);
 
     settings.endGroup();
 
@@ -261,6 +271,7 @@ void Settings::loadSettings()
 #ifdef MASTER_SPIM
     spim().setScanVelocity(value(group, SETTING_SCANVELOCITY).toDouble());
 #endif
+    spim().setRemoteNode(value(group, SETTING_REMOTE_NODE).toString());
     spim().setOutputPathList(value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
     spim().setTurnOffLasersAtEndOfAcquisition(
         value(group, SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION).toBool());
@@ -335,6 +346,7 @@ void Settings::saveSettings()
 #ifdef MASTER_SPIM
     setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
 #endif
+    setValue(group, SETTING_REMOTE_NODE, spim().getRemoteNode());
     setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
     setValue(group,
              SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION,

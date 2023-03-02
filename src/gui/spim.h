@@ -35,6 +35,16 @@ class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
 class Tasks;
+class SPIMReplica;
+
+#include <QRemoteObjectNode>
+
+#define __SPIM_BASE_CLASS__ QObject
+#endif
+
+#ifdef SLAVE_SPIM
+#include "rep_spim_source.h"
+#define __SPIM_BASE_CLASS__ SPIMSource
 #endif
 
 enum SPIM_PI_DEVICES : int {
@@ -45,7 +55,7 @@ enum SPIM_PI_DEVICES : int {
     PI_DEVICE_RIGHT_OBJ_AXIS,
 };
 
-class SPIM : public QObject
+class SPIM : public __SPIM_BASE_CLASS__
 {
     Q_OBJECT
 public:
@@ -112,6 +122,9 @@ public:
 
     bool isSpimInitialized() const;
 
+    QString getRemoteNode() const;
+    void setRemoteNode(const QString &value);
+
 #ifdef MASTER_SPIM
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
@@ -131,6 +144,10 @@ public:
     bool areLasersOn();
 #endif
 
+#ifdef SLAVE_SPIM
+    void setSrcNode(QRemoteObjectHost *value);
+#endif
+
 public slots:
     void startFreeRun();
     bool startAcquisition();
@@ -138,6 +155,9 @@ public slots:
     void emergencyStop();
     bool initializeSpim();
     void uninitializeSpim();
+
+    void initRemoteObjects();
+    void uninitRemoteObjects();
 
 #ifdef MASTER_SPIM
     void haltStages();
@@ -160,7 +180,15 @@ private:
     QList<Cobolt *> laserList;
     QList<FilterWheel *> filterWheelList;
     QList<AA_MPDSnCxx *> aotfList;
+
+    QRemoteObjectNode *repNode = nullptr;
+    SPIMReplica *spimReplica = nullptr;
 #endif
+#ifdef SLAVE_SPIM
+    QRemoteObjectHost *srcNode = nullptr;
+#endif
+
+    QString remoteNode;
 
     double exposureTime; // in ms
     double triggerRate;

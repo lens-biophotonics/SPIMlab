@@ -51,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent)
     spim().moveToThread(thread);
     thread->start();
 
+    // will run in spim's thread. This is needed for socket notifiers
+    QMetaObject::invokeMethod(&spim(), "initRemoteObjects", Qt::BlockingQueuedConnection);
+
     QMetaObject::connectSlotsByName(this);
     logManager().flushMessages();
 }
