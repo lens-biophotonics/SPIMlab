@@ -5,6 +5,8 @@
 
 #ifdef MASTER_SPIM
 #define PROGRAM_NAME "SPIMlab"
+#else
+#define PROGRAM_NAME "SPIMlab_slave"
 #endif
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 0

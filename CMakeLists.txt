@@ -10,6 +10,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 14)
+
+cmake_policy(SET CMP0071 NEW)  # Let AUTOMOC and AUTOUIC process GENERATED files
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 set(OTHER_FILES
@@ -46,4 +49,10 @@ option(BUILD_MASTER_SPIM "Build master SPIM" ON)
 
 if(BUILD_MASTER_SPIM)
     add_subdirectory(src/gui)
+endif()
+
+option(BUILD_SLAVE_SPIM "Build slave SPIM" ON)
+
+if(BUILD_SLAVE_SPIM)
+    add_subdirectory(src/slave)
 endif()
