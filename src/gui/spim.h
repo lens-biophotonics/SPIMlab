@@ -104,6 +104,9 @@ public:
     int getBinning() const;
     void setBinning(uint value);
 
+    bool getTurnOffLasersAtEndOfAcquisition() const;
+    void setTurnOffLasersAtEndOfAcquisition(bool enable);
+
 #ifdef MASTER_SPIM
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
@@ -118,6 +121,9 @@ public:
     AA_MPDSnCxx *getAOTF(int dev);
 
     Tasks *getTasks() const;
+
+    void turnOffAllLasers();
+    bool areLasersOn();
 #endif
 
 public slots:
@@ -175,6 +181,8 @@ private:
 
     bool freeRun = true;
     bool capturing = false;
+
+    bool turnOffLasersAtEndOfAcquisition = false;
 
     int completedJobs;
     int successJobs;
