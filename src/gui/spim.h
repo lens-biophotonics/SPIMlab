@@ -121,8 +121,8 @@ public slots:
     void stop();
     void haltStages();
     void emergencyStop();
-    void initialize();
-    void uninitialize();
+    void initialize_spim();
+    void uninitialize_spim();
 
 signals:
     void initialized() const;

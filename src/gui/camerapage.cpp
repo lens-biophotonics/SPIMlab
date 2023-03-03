@@ -77,7 +77,7 @@ void CameraPage::setupUI()
     QPushButton *initPushButton = new QPushButton("Initialize");
     connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
         initPushButton->setEnabled(false);
-        spim().initialize();
+        spim().initialize_spim();
     });
 
     QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
