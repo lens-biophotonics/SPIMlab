@@ -71,8 +71,6 @@ SPIM::SPIM(QObject *parent)
     });
 
 #ifdef MASTER_SPIM
-    tasks = new Tasks(this);
-
     piDevList.reserve(SPIM_NPIDEVICES);
     piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
     piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
@@ -694,6 +692,9 @@ void SPIM::incrementCompleted(bool ok)
             if (currentStep >= totalSteps) {
                 logger->info("Acquisition completed");
                 stop();
+                if (turnOffLasersAtEndOfAcquisition) {
+                    turnOffAllLasers();
+                }
                 return;
             }
 
@@ -766,6 +767,16 @@ void SPIM::emergencyStop()
     stop();
 }
 
+bool SPIM::getTurnOffLasersAtEndOfAcquisition() const
+{
+    return turnOffLasersAtEndOfAcquisition;
+}
+
+void SPIM::setTurnOffLasersAtEndOfAcquisition(bool enable)
+{
+    turnOffLasersAtEndOfAcquisition = enable;
+}
+
 #ifdef MASTER_SPIM
 Tasks *SPIM::getTasks() const
 {
@@ -819,6 +830,29 @@ PIDevice *SPIM::getPIDevice(const int dev) const
 QList<PIDevice *> SPIM::getPIDevices() const
 {
     return piDevList;
+}
+
+void SPIM::turnOffAllLasers()
+{
+    for (Cobolt *c : laserList) {
+        if (c->serialPort()->isOpen()) {
+            c->setLaserOff();
+        }
+    }
+}
+
+/**
+ * @brief Check if at least one connected laser is on.
+ * @return true if at least one connected laser is on
+ */
+bool SPIM::areLasersOn()
+{
+    for (Cobolt *c : laserList) {
+        if (c->serialPort()->isOpen() && c->isLaserOn()) {
+            return true;
+        }
+    }
+    return false;
 }
 #endif
 

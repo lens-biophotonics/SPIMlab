@@ -17,6 +17,7 @@
 #endif
 
 #include <memory>
+
 #include <QDir>
 #include <QSettings>
 
@@ -51,6 +52,8 @@
 #define SETTING_EXPTIME "exposureTime"
 #define SETTING_RUN_NAME "runName"
 #define SETTING_BINNING "binning"
+
+#define SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION "turnOffLasersAtEndOfAcquisition"
 
 Settings::Settings()
 {
@@ -91,6 +94,7 @@ void Settings::loadSettings()
     camOutputPath << "/mnt/dualspim"
                   << "/mnt/dualspim";
     SET_VALUE(group, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
+    SET_VALUE(group, SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION, false);
 
     settings.endGroup();
 
@@ -258,6 +262,8 @@ void Settings::loadSettings()
     spim().setScanVelocity(value(group, SETTING_SCANVELOCITY).toDouble());
 #endif
     spim().setOutputPathList(value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
+    spim().setTurnOffLasersAtEndOfAcquisition(
+        value(group, SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION).toBool());
 }
 
 void Settings::saveSettings()
@@ -330,6 +336,9 @@ void Settings::saveSettings()
     setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
 #endif
     setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
+    setValue(group,
+             SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION,
+             spim().getTurnOffLasersAtEndOfAcquisition());
 
     QSettings settings;
 

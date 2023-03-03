@@ -27,6 +27,7 @@
 #include <qwt_global.h>
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QCloseEvent>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -93,6 +94,14 @@ void MainWindow::setupUi()
     QWidget *cw;
     QBoxLayout *vLayout;
 
+    QCheckBox *turnOffLasersAtEndOfAcquisition = new QCheckBox(
+        "Turn off lasers at end of acquisition");
+    turnOffLasersAtEndOfAcquisition->setChecked(spim().getTurnOffLasersAtEndOfAcquisition());
+
+    connect(turnOffLasersAtEndOfAcquisition, &QCheckBox::toggled, [=](bool checked) {
+        spim().setTurnOffLasersAtEndOfAcquisition(checked);
+    });
+
     vLayout = new QVBoxLayout();
     cw = new QWidget();
 
@@ -101,6 +110,7 @@ void MainWindow::setupUi()
     for (int i = 0; i < SPIM_NCOBOLT; i++) {
         laserLayout->addWidget(new CoboltWidget(spim().getLaser(i)));
     }
+    laserLayout->addWidget(turnOffLasersAtEndOfAcquisition);
     cw->setLayout(laserLayout);
     cw->setWindowTitle("Lasers");
     closableWidgets << cw;

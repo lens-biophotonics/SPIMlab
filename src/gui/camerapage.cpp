@@ -101,6 +101,8 @@ void CameraPage::setupUI()
                 break;
             }
         }
+
+#ifndef DEMO_MODE
         if (exists) {
             QMessageBox msgBox;
             QString msg("A measurement with this run name (%1) already exists.");
@@ -114,6 +116,19 @@ void CameraPage::setupUI()
                 return;
             }
         }
+
+        if (!spim().areLasersOn()) {
+            QMessageBox msgBox;
+            msgBox.setText("All lasers seem to be off or are not connected.");
+            msgBox.setInformativeText("Do you want to continue?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::No) {
+                return;
+            }
+        }
+#endif
 
         QMetaObject::invokeMethod(&spim(), &SPIM::startAcquisition, Qt::QueuedConnection);
     });
