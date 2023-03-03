@@ -44,7 +44,7 @@ class SPIMReplica;
 
 #ifdef SLAVE_SPIM
 #include "rep_spim_source.h"
-#define __SPIM_BASE_CLASS__ SPIMSource
+#define __SPIM_BASE_CLASS__ SPIMSimpleSource
 #endif
 
 enum SPIM_PI_DEVICES : int {
@@ -144,10 +144,6 @@ public:
     bool areLasersOn();
 #endif
 
-#ifdef SLAVE_SPIM
-    void setSrcNode(QRemoteObjectHost *value);
-#endif
-
 public slots:
     void startFreeRun();
     bool startAcquisition();
@@ -159,6 +155,8 @@ public slots:
     void initRemoteObjects();
     void uninitRemoteObjects();
 
+    bool signalTriggerCompletion();
+
 #ifdef MASTER_SPIM
     void haltStages();
 #endif
@@ -169,6 +167,7 @@ signals:
     void stopped() const;
     void error(const QString) const;
     void onTarget();
+    void triggerCompleted();
 #ifdef MASTER_SPIM
     void jobsCompleted(bool ok);
 #endif

@@ -11,6 +11,7 @@ set(SPIMlab_slave_SRCS
     ../gui/camerapage.cpp
     ../gui/displayworker.cpp
     ../gui/settingswidget.cpp
+    ../gui/progresswidget.cpp
 
     ../gui/savestackworker.cpp
     ../gui/spim.cpp

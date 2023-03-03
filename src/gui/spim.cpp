@@ -64,6 +64,11 @@ SPIM::SPIM(QObject *parent)
 #endif
 #endif
 
+#ifdef SLAVE_SPIM
+    auto sender = this;
+    auto mySignal = &SPIM::triggerCompleted;
+#endif
+
     connect(sender, mySignal, this, [=]() {
         for (SaveStackWorker *ssWorker : ssWorkerList) {
             ssWorker->signalTriggerCompletion();
@@ -71,6 +76,13 @@ SPIM::SPIM(QObject *parent)
         for (OrcaFlash *orca : camList) {
             orca->cap_stop();
         }
+
+#ifdef MASTER_SPIM
+        spimReplica->signalTriggerCompletion().waitForFinished();
+#endif
+#ifdef SLAVE_SPIM
+        logger->info("got trigger completed from master");
+#endif
     });
 
 #ifdef MASTER_SPIM
@@ -176,7 +188,11 @@ bool SPIM::initializeSpim()
 
         spimReplica = repNode->acquire<SPIMReplica>();
         spimReplica->waitForSource(2000);
-        spimReplica->initialize_spim();
+        connect(spimReplica, &SPIMReplica::jobsCompleted, this, [=](bool ok) {
+            logger->info("got jobsCompleted from replica");
+            incrementCompleted(ok);
+        });
+        spimReplica->initializeSpim();
 #endif
 
         _initialized = true;
@@ -298,8 +314,13 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 {
     return camList.at(camNumber);
 }
+
 void SPIM::startFreeRun()
 {
+#ifdef MASTER_SPIM
+    spimReplica->setExposureTime(exposureTime);
+    spimReplica->startFreeRun();
+#endif
     freeRun = true;
     logger->info("Start free run");
     _startCapture();
@@ -310,6 +331,7 @@ bool SPIM::startAcquisition()
     freeRun = false;
     logger->info("Start acquisition");
 
+#ifdef MASTER_SPIM
     enabledMosaicStages.clear();
     for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
         if (enabledMosaicStageMap[d_enum]) {
@@ -320,13 +342,9 @@ bool SPIM::startAcquisition()
     QList<SPIM_PI_DEVICES> stageEnumList;
     stageEnumList << enabledMosaicStages << stackStage;
 
-#ifdef MASTER_SPIM
     QList<PIDevice *> stageList;
-#endif
     for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
-#ifdef MASTER_SPIM
         stageList << getPIDevice(d_enum);
-#endif
 
         int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX)
                                     * pow(10, SPIM_SCAN_DECIMALS));
@@ -350,6 +368,7 @@ bool SPIM::startAcquisition()
     logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
                      .arg(totalSteps)
                      .arg(nSteps[stackStage]));
+#endif
 
     currentStep = 0;
 
@@ -460,6 +479,10 @@ void SPIM::setupStateMachine()
     acquisitionState->setInitialState(precaptureState);
     captureState->addTransition(this, &SPIM::jobsCompleted, precaptureState);
 #endif
+#ifdef SLAVE_SPIM
+    acquisitionState->setInitialState(captureState);
+    captureState->addTransition(this, &SPIM::jobsCompleted, readyState);
+#endif
 
     // setup parallel states in precaptureState
     QState *pollingState = new QState(precaptureState);
@@ -509,10 +532,9 @@ void SPIM::setupStateMachine()
         if (!capturing) {
             return;
         }
+
 #ifdef MASTER_SPIM
         tasks->stop();
-        completedJobs = successJobs = 0;
-
         // compute target position
         QMap<SPIM_PI_DEVICES, double> targetPositions;
         targetPositions[stackStage] = scanRangeMap[stackStage]->at(SPIM_RANGE_FROM_IDX);
@@ -537,7 +559,6 @@ void SPIM::setupStateMachine()
                 logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(pos));
                 dev->move(pos);
             }
-#endif
             QStringList axis = {"x_", "y_", "z_"};
             int k = 0;
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
@@ -551,8 +572,17 @@ void SPIM::setupStateMachine()
                 k += 1;
                 fname += "_";
             }
+
             setOutputFname(fname);
             setFrameCount(nSteps[stackStage]);
+
+            if (!spimReplica->setOutputFname(outputFname).waitForFinished()
+                || !spimReplica->setFrameCount(frameCount).waitForFinished()
+                || !spimReplica->setBinning(binning).waitForFinished()
+                || !spimReplica->setRunName(runName).waitForFinished()) {
+                throw std::runtime_error("Cannot reach remote SPIM");
+            }
+#endif
         } catch (std::runtime_error e) {
             onError(e.what());
             return;
@@ -573,7 +603,6 @@ void SPIM::setupStateMachine()
             completedJobs = successJobs = 0;
 
             QStringList side = {"l", "r"};
-
             try {
 #ifdef MASTER_SPIM
                 // move stack axis to end position
@@ -602,7 +631,14 @@ void SPIM::setupStateMachine()
                     camList.at(i)->cap_start();
                     QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
                 }
+
 #ifdef MASTER_SPIM
+                spimReplica->setFrameCount(nSteps[stackStage]).waitForFinished();
+                spimReplica->setExposureTime(exposureTime).waitForFinished();
+                if (!spimReplica->startAcquisition().waitForFinished()) {
+                    throw std::runtime_error("Cannot start acquisition on remote SPIM");
+                }
+
                 tasks->start();
                 dev->move(stackTo);
 #endif
@@ -621,6 +657,9 @@ void SPIM::stop()
     if (!capturing) {
         return;
     }
+#if MASTER_SPIM
+    spimReplica->stop();
+#endif
     logger->info("Stop");
     capturing = false;
     try {
@@ -696,7 +735,11 @@ void SPIM::_setExposureTime(double expTime)
 
 void SPIM::incrementCompleted(bool ok)
 {
+#ifdef MASTER_SPIM
+#define EXPECTED_N_JOBS SPIM_NCAMS + 1
+#else
 #define EXPECTED_N_JOBS SPIM_NCAMS
+#endif
     if (freeRun) {
         return;
     }
@@ -857,6 +900,12 @@ void SPIM::uninitRemoteObjects()
 #endif
 }
 
+bool SPIM::signalTriggerCompletion()
+{
+    emit triggerCompleted();
+    return true;
+}
+
 QString SPIM::getRemoteNode() const
 {
     return remoteNode;
@@ -943,13 +992,6 @@ bool SPIM::areLasersOn()
         }
     }
     return false;
-}
-#endif
-
-#ifdef SLAVE_SPIM
-void SPIM::setSrcNode(QRemoteObjectHost *value)
-{
-    srcNode = value;
 }
 #endif
 

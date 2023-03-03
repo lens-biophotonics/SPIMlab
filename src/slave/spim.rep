@@ -1,4 +1,15 @@
 class SPIM
 {
-    SLOT(initialize_spim());
+    SLOT(bool initializeSpim());
+    SLOT(void startFreeRun());
+    SLOT(bool startAcquisition());
+    SLOT(void stop());
+    SLOT(bool setExposureTime(double ms));
+    SLOT(bool setOutputFname(const QString &name));
+    SLOT(bool setRunName(const QString &name));
+    SLOT(bool setBinning(uint value));
+    SLOT(bool setFrameCount(int count));
+    SLOT(bool signalTriggerCompletion());
+
+    SIGNAL(jobsCompleted(bool ok));
 };

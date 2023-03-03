@@ -190,14 +190,19 @@ void CameraPage::setupUI()
     layout->addStretch();
     layout->addWidget(emergencyStopPushButton);
 #endif
+#ifdef SLAVE_SPIM
+    layout->addStretch();
+#endif
     layout->addWidget(statusLabel);
 
     QGroupBox *controlsGb = new QGroupBox("Controls");
     controlsGb->setLayout(layout);
 
     QHBoxLayout *controlsHLayout = new QHBoxLayout();
+#ifdef MASTER_SPIM
     controlsHLayout->addWidget(stageCw);
     controlsHLayout->addWidget(acqWidget);
+#endif
     controlsHLayout->addLayout(galvoProgressLayout);
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(controlsGb);
