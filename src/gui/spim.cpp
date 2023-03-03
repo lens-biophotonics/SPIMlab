@@ -117,7 +117,7 @@ SPIM::SPIM(QObject *parent)
 
 SPIM::~SPIM() {}
 
-void SPIM::initialize()
+void SPIM::initialize_spim()
 {
     try {
         logger->info("Initializing microscope");
@@ -182,7 +182,7 @@ void SPIM::initialize()
     }
 }
 
-void SPIM::uninitialize()
+void SPIM::uninitialize_spim()
 {
     try {
         stop();

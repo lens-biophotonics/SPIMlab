@@ -125,8 +125,8 @@ public slots:
     void startAcquisition();
     void stop();
     void emergencyStop();
-    void initialize();
-    void uninitialize();
+    void initialize_spim();
+    void uninitialize_spim();
 
 #ifdef MASTER_SPIM
     void haltStages();
