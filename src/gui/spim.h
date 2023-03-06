@@ -71,7 +71,7 @@ public:
     SaveStackWorker *getSSWorker(int camNumber);
 
     double getExposureTime() const;
-    void setExposureTime(double ms);
+    bool setExposureTime(double ms);
 
     SPIM_PI_DEVICES getStackStage() const;
 
@@ -94,7 +94,7 @@ public:
     void setScanVelocity(double value);
 
     QString getRunName() const;
-    void setRunName(const QString &value);
+    bool setRunName(const QString &value);
 
     QDir getFullOutputDir(int cam);
 
@@ -102,10 +102,15 @@ public:
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
     int getBinning() const;
-    void setBinning(uint value);
+    bool setBinning(uint value);
 
     bool getTurnOffLasersAtEndOfAcquisition() const;
     void setTurnOffLasersAtEndOfAcquisition(bool enable);
+
+    bool setOutputFname(const QString &value);
+    bool setFrameCount(int value);
+
+    bool isSpimInitialized() const;
 
 #ifdef MASTER_SPIM
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
@@ -128,11 +133,11 @@ public:
 
 public slots:
     void startFreeRun();
-    void startAcquisition();
+    bool startAcquisition();
     void stop();
     void emergencyStop();
-    void initialize_spim();
-    void uninitialize_spim();
+    bool initializeSpim();
+    void uninitializeSpim();
 
 #ifdef MASTER_SPIM
     void haltStages();
@@ -142,9 +147,11 @@ signals:
     void initialized() const;
     void captureStarted() const;
     void stopped() const;
-    void jobsCompleted() const;
     void error(const QString) const;
     void onTarget();
+#ifdef MASTER_SPIM
+    void jobsCompleted(bool ok);
+#endif
 
 private:
 #ifdef MASTER_SPIM
@@ -177,10 +184,13 @@ private:
     double scanVelocity = 1;
 
     QStringList outputPath;
+    QString outputFname;
     QString runName;
+    int frameCount;
 
     bool freeRun = true;
     bool capturing = false;
+    bool _initialized = false;
 
     bool turnOffLasersAtEndOfAcquisition = false;
 

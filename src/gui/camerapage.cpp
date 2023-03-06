@@ -52,6 +52,18 @@ void CameraPage::setupUI()
         });
     }
 
+    QBoxLayout *galvoProgressLayout = new QVBoxLayout();
+#ifdef MASTER_SPIM
+    galvoProgressLayout->addWidget(new GalvoWaveformWidget());
+#endif
+    galvoProgressLayout->addWidget(new ProgressWidget());
+
+    QPushButton *initPushButton = new QPushButton("Initialize");
+    connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
+        initPushButton->setEnabled(false);
+        spim().initializeSpim();
+    });
+
 #ifdef MASTER_SPIM
     stageCw = new PIPositionControlWidget();
     stageCw->setTitle("Stages");
@@ -70,16 +82,6 @@ void CameraPage::setupUI()
     }
 
     AcquisitionWidget *acqWidget = new AcquisitionWidget();
-
-    QBoxLayout *galvoProgressLayout = new QVBoxLayout();
-    galvoProgressLayout->addWidget(new GalvoWaveformWidget());
-    galvoProgressLayout->addWidget(new ProgressWidget());
-
-    QPushButton *initPushButton = new QPushButton("Initialize");
-    connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
-        initPushButton->setEnabled(false);
-        spim().initialize_spim();
-    });
 
     QPushButton *startFreeRunPushButton = new QPushButton("Start free run");
     connect(startFreeRunPushButton, &QPushButton::clicked, &spim(), &SPIM::startFreeRun);
@@ -132,6 +134,7 @@ void CameraPage::setupUI()
 
         QMetaObject::invokeMethod(&spim(), &SPIM::startAcquisition, Qt::QueuedConnection);
     });
+#endif
 
     QPushButton *stopCapturePushButton = new QPushButton("Stop capture");
     connect(stopCapturePushButton, &QPushButton::clicked, &spim(), &SPIM::stop);
@@ -146,27 +149,33 @@ void CameraPage::setupUI()
     QState *s;
 
     s = spim().getState(SPIM::STATE_UNINITIALIZED);
+    s->assignProperty(statusLabel, "text", "Uninitialized");
     s->assignProperty(initPushButton, "enabled", true);
+#ifdef MASTER_SPIM
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", false);
     s->assignProperty(emergencyStopPushButton, "enabled", false);
-    s->assignProperty(statusLabel, "text", "Uninitialized");
+#endif
 
     s = spim().getState(SPIM::STATE_READY);
+    s->assignProperty(statusLabel, "text", "Ready");
     s->assignProperty(initPushButton, "enabled", false);
+#ifdef MASTER_SPIM
     s->assignProperty(startFreeRunPushButton, "enabled", true);
     s->assignProperty(startAcqPushButton, "enabled", true);
     s->assignProperty(stopCapturePushButton, "enabled", false);
     s->assignProperty(emergencyStopPushButton, "enabled", true);
-    s->assignProperty(statusLabel, "text", "Ready");
+#endif
 
     s = spim().getState(SPIM::STATE_CAPTURING);
+    s->assignProperty(statusLabel, "text", "Capturing");
+#ifdef MASTER_SPIM
     s->assignProperty(startFreeRunPushButton, "enabled", false);
     s->assignProperty(startAcqPushButton, "enabled", false);
     s->assignProperty(stopCapturePushButton, "enabled", true);
     s->assignProperty(emergencyStopPushButton, "enabled", true);
-    s->assignProperty(statusLabel, "text", "Capturing");
+#endif
 
     spim().getState(SPIM::STATE_FREERUN)->assignProperty(statusLabel, "text", "Free run");
     spim().getState(SPIM::STATE_PRECAPTURE)->assignProperty(statusLabel, "text", "Precapture");
@@ -174,11 +183,13 @@ void CameraPage::setupUI()
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(initPushButton);
+#ifdef MASTER_SPIM
     layout->addWidget(startFreeRunPushButton);
     layout->addWidget(startAcqPushButton);
     layout->addWidget(stopCapturePushButton);
     layout->addStretch();
     layout->addWidget(emergencyStopPushButton);
+#endif
     layout->addWidget(statusLabel);
 
     QGroupBox *controlsGb = new QGroupBox("Controls");
@@ -190,13 +201,10 @@ void CameraPage::setupUI()
     controlsHLayout->addLayout(galvoProgressLayout);
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(controlsGb);
-#endif
 
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(cameraHLayout, 1);
-#ifdef MASTER_SPIM
     vLayout->addLayout(controlsHLayout);
-#endif
     setMinimumHeight(1000);
 
     setLayout(vLayout);

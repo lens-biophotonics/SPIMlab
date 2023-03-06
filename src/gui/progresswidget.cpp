@@ -51,7 +51,9 @@ void ProgressWidget::setupUI()
     QHBoxLayout *hLayout = new QHBoxLayout;
 
     hLayout->addLayout(stackPbLayout);
+#ifdef MASTER_SPIM
     hLayout->addLayout(progressLayout);
+#endif
 
     QGroupBox *gb = new QGroupBox("Progress");
     gb->setLayout(hLayout);
@@ -83,18 +85,13 @@ void ProgressWidget::setupUI()
 
     connect(timer, &QTimer::timeout, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
+            stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
             stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
         }
     });
 
     s = spim().getState(SPIM::STATE_CAPTURE);
-    connect(s, &QState::entered, this, [=]() {
-        for (int i = 0; i < SPIM_NCAMS; ++i) {
-            stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
-            stackPbList.at(i)->setValue(0);
-        }
-        timer->start(1000);
-    });
+    connect(s, &QState::entered, this, [=]() { timer->start(1000); });
     connect(s, &QState::exited, timer, &QTimer::stop);
 
     connect(s, &QState::exited, this, [=]() {

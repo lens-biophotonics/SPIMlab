@@ -240,14 +240,14 @@ void MainWindow::closeEvent(QCloseEvent *e)
     saveSettings();
     settings().saveSettings();
 
-    /* SPIM::uninitialize_spim() is called in the receiver's thread (i.e. spim's).
+    /* SPIM::uninitializeSpim() is called in the receiver's thread (i.e. spim's).
      * This ensures that QTimers can be correctly stopped (they can't be
      * stopped from a different thread), etc.
      * The invokation is blocking, so that there is no risk that spim is
      * destroyed before uninitialize_spim() is called.
      */
 
-    QMetaObject::invokeMethod(&spim(), "uninitialize_spim", Qt::BlockingQueuedConnection);
+    QMetaObject::invokeMethod(&spim(), "uninitializeSpim", Qt::BlockingQueuedConnection);
     qDeleteAll(closableWidgets);
     QMainWindow::closeEvent(e);
 }

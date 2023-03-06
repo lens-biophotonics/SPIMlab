@@ -115,7 +115,7 @@ SPIM::SPIM(QObject *parent)
 
 SPIM::~SPIM() {}
 
-void SPIM::initialize_spim()
+bool SPIM::initializeSpim()
 {
     try {
         logger->info("Initializing microscope");
@@ -172,15 +172,17 @@ void SPIM::initialize_spim()
         }
 #endif
 
+        _initialized = true;
         emit initialized();
         logger->info("Initialization completed");
     } catch (std::runtime_error e) {
         onError(e.what());
-        return;
+        return false;
     }
+    return true;
 }
 
-void SPIM::uninitialize_spim()
+void SPIM::uninitializeSpim()
 {
     try {
         stop();
@@ -206,9 +208,10 @@ int SPIM::getBinning() const
     return binning;
 }
 
-void SPIM::setBinning(uint value)
+bool SPIM::setBinning(uint value)
 {
     binning = value;
+    return true;
 }
 
 bool SPIM::isMosaicStageEnabled(SPIM_PI_DEVICES dev) const
@@ -226,9 +229,10 @@ QString SPIM::getRunName() const
     return runName;
 }
 
-void SPIM::setRunName(const QString &value)
+bool SPIM::setRunName(const QString &value)
 {
     runName = value;
+    return true;
 }
 
 double SPIM::getScanVelocity() const
@@ -266,9 +270,10 @@ double SPIM::getExposureTime() const
     return exposureTime;
 }
 
-void SPIM::setExposureTime(double ms)
+bool SPIM::setExposureTime(double ms)
 {
     exposureTime = ms;
+    return true;
 }
 
 QList<OrcaFlash *> SPIM::getCameraDevices()
@@ -292,7 +297,7 @@ void SPIM::startFreeRun()
     _startCapture();
 }
 
-void SPIM::startAcquisition()
+bool SPIM::startAcquisition()
 {
     freeRun = false;
     logger->info("Start acquisition");
@@ -344,6 +349,7 @@ void SPIM::startAcquisition()
     }
 
     _startCapture();
+    return true;
 }
 
 void SPIM::_startCapture()
@@ -435,13 +441,15 @@ void SPIM::setupStateMachine()
     QState *precaptureState = newState(STATE_PRECAPTURE, acquisitionState);
     QState *captureState = newState(STATE_CAPTURE, acquisitionState);
 
-    acquisitionState->setInitialState(precaptureState);
-
     precaptureState->setChildMode(QState::ParallelStates);
     captureState->setChildMode(QState::ParallelStates);
 
     precaptureState->addTransition(precaptureState, &QState::finished, captureState);
+
+#ifdef MASTER_SPIM
+    acquisitionState->setInitialState(precaptureState);
     captureState->addTransition(this, &SPIM::jobsCompleted, precaptureState);
+#endif
 
     // setup parallel states in precaptureState
     QState *pollingState = new QState(precaptureState);
@@ -493,7 +501,6 @@ void SPIM::setupStateMachine()
         }
 #ifdef MASTER_SPIM
         tasks->stop();
-#endif
         completedJobs = successJobs = 0;
 
         // compute target position
@@ -506,7 +513,9 @@ void SPIM::setupStateMachine()
             double step = scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX);
             targetPositions[d_enum] = from + currentSteps[d_enum] * step;
         }
+#endif
 
+        QString fname;
         try {
 #ifdef MASTER_SPIM
             // move stages to target position
@@ -519,9 +528,7 @@ void SPIM::setupStateMachine()
                 dev->move(pos);
             }
 #endif
-            QString fname;
             QStringList axis = {"x_", "y_", "z_"};
-            QStringList side = {"l", "r"};
             int k = 0;
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
                 double pos = targetPositions[d_enum];
@@ -534,16 +541,8 @@ void SPIM::setupStateMachine()
                 k += 1;
                 fname += "_";
             }
-
-            // prepare and start acquisition thread
-            for (int i = 0; i < SPIM_NCAMS; ++i) {
-                SaveStackWorker *ssWorker = ssWorkerList.at(i);
-                ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
-                ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
-                ssWorker->setOutputFileName(fname + "_cam_" + side.at(i));
-                ssWorker->setFrameCount(nSteps[stackStage]);
-                ssWorker->setBinning(binning);
-            }
+            setOutputFname(fname);
+            setFrameCount(nSteps[stackStage]);
         } catch (std::runtime_error e) {
             onError(e.what());
             return;
@@ -561,12 +560,16 @@ void SPIM::setupStateMachine()
         [=] {
             pollTimer->stop();
 
+            completedJobs = successJobs = 0;
+
+            QStringList side = {"l", "r"};
+
             try {
+#ifdef MASTER_SPIM
                 // move stack axis to end position
                 double stackTo = scanRangeMap[stackStage]->at(SPIM_RANGE_TO_IDX);
                 double stackStep = scanRangeMap[stackStage]->at(SPIM_RANGE_STEP_IDX);
 
-#ifdef MASTER_SPIM
                 PIDevice *dev = getPIDevice(stackStage);
                 dev->setVelocity(triggerRate * stackStep);
                 logger->info(QString("Start acquisition of stack: %1/%2")
@@ -574,6 +577,16 @@ void SPIM::setupStateMachine()
                                  .arg(totalSteps));
                 logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(stackTo));
 #endif
+
+                // prepare and start acquisition thread
+                for (int i = 0; i < SPIM_NCAMS; ++i) {
+                    SaveStackWorker *ssWorker = ssWorkerList.at(i);
+                    ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
+                    ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
+                    ssWorker->setOutputFileName(outputFname + "_cam_" + side.at(i));
+                    ssWorker->setFrameCount(frameCount);
+                    ssWorker->setBinning(binning);
+                }
 
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
                     camList.at(i)->cap_start();
@@ -673,6 +686,7 @@ void SPIM::_setExposureTime(double expTime)
 
 void SPIM::incrementCompleted(bool ok)
 {
+#define EXPECTED_N_JOBS SPIM_NCAMS
     if (freeRun) {
         return;
     }
@@ -684,10 +698,12 @@ void SPIM::incrementCompleted(bool ok)
         tasks->stop();
     }
 #endif
-    if (++completedJobs == SPIM_NCAMS) {
-        if (successJobs == SPIM_NCAMS) {
+    if (++completedJobs == EXPECTED_N_JOBS) {
+        logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(EXPECTED_N_JOBS));
+        if (successJobs == EXPECTED_N_JOBS) {
             currentStep++;
 
+#ifdef MASTER_SPIM
             // check exit condition
             if (currentStep >= totalSteps) {
                 logger->info("Acquisition completed");
@@ -709,12 +725,14 @@ void SPIM::incrementCompleted(bool ok)
                 }
             }
             currentSteps[xAxis] = newX;
+#endif
         } else if (capturing) { // if not stopped
+#ifdef MASTER_SPIM
             logger->warning(
                 QString("Re-acquiring stack: %1/%2").arg(currentStep + 1).arg(totalSteps));
+#endif
         }
-        logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(SPIM_NCAMS));
-        emit jobsCompleted();
+        emit jobsCompleted(successJobs == EXPECTED_N_JOBS);
     }
 }
 
@@ -775,6 +793,23 @@ bool SPIM::getTurnOffLasersAtEndOfAcquisition() const
 void SPIM::setTurnOffLasersAtEndOfAcquisition(bool enable)
 {
     turnOffLasersAtEndOfAcquisition = enable;
+}
+
+bool SPIM::setFrameCount(int value)
+{
+    frameCount = value;
+    return true;
+}
+
+bool SPIM::setOutputFname(const QString &value)
+{
+    outputFname = value;
+    return true;
+}
+
+bool SPIM::isSpimInitialized() const
+{
+    return _initialized;
 }
 
 #ifdef MASTER_SPIM
