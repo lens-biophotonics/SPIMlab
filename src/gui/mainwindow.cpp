@@ -1,22 +1,28 @@
 #include "mainwindow.h"
 
 #include "camerapage.h"
-#include "coboltwidget.h"
-#include "filterswidget.h"
 #include "settings.h"
 #include "settingswidget.h"
 #include "spim.h"
-#include "stagewidget.h"
 #include "version.h"
 
 #include <qtlab/core/logmanager.h>
+#include <qtlab/widgets/logwidget.h>
+
+#ifdef MASTER_SPIM
+#include "coboltwidget.h"
+#include "filterswidget.h"
+#include "stagewidget.h"
+
 #include <qtlab/hw/ni/natinst.h>
 #include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
-#include <qtlab/widgets/logwidget.h>
+
+#include <QSerialPortInfo>
+#endif
 
 #include <qwt_global.h>
 
@@ -24,7 +30,6 @@
 #include <QCloseEvent>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QSerialPortInfo>
 #include <QSettings>
 #include <QTextStream>
 #include <QToolBar>
@@ -90,6 +95,8 @@ void MainWindow::setupUi()
 
     vLayout = new QVBoxLayout();
     cw = new QWidget();
+
+#ifdef MASTER_SPIM
     QBoxLayout *laserLayout = new QVBoxLayout();
     for (int i = 0; i < SPIM_NCOBOLT; i++) {
         laserLayout->addWidget(new CoboltWidget(spim().getLaser(i)));
@@ -111,6 +118,7 @@ void MainWindow::setupUi()
     cw->setLayout(vLayout);
     cw->setWindowTitle("Stages");
     closableWidgets << cw;
+#endif
 
     vLayout = new QVBoxLayout();
     cw = new QWidget();
@@ -182,11 +190,16 @@ void MainWindow::on_aboutAction_triggered() const
     ts << "<i>Version</i>:&nbsp;" << getProgramVersionString() << "<br>";
     ts << "<i>Authors</i>:<br>";
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Giacomo Mazzamuto<br>";
+#ifdef MASTER_SPIM
     ts << "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vladislav Gavryusev<br>";
-    ts << "<i>Date</i>:&nbsp; November 2018 &mdash; July 2021<br><br>";
+#endif
+    ts << "<i>Date</i>:&nbsp; November 2018 &mdash; Mar 2023<br><br>";
     ts << "Qt version: " << qVersion() << "<br>";
     ts << "Qwt version: " << QWT_VERSION_STR << "<br>";
+
+#ifdef MASTER_SPIM
     ts << "NIDAQmx version: " << NI::getVersion() << "<br>";
+#endif
 
     msgBox.setText(text);
     msgBox.setWindowTitle(QString("About %1").arg(PROGRAM_NAME));

@@ -1,9 +1,12 @@
 #include "settingswidget.h"
 
-#include "nisettingswidget.h"
 #include "settings.h"
 #include "spim.h"
 #include "version.h"
+
+#ifdef MASTER_SPIM
+#include "nisettingswidget.h"
+#endif
 
 #include <QDoubleSpinBox>
 #include <QFileDialog>
@@ -22,16 +25,20 @@ SettingsWidget::SettingsWidget(QWidget *parent)
 
 void SettingsWidget::setupUI()
 {
+#ifdef MASTER_SPIM
     NISettingsWidget *nisw = new NISettingsWidget();
+#endif
 
     QLineEdit *LUTPathLineEdit = new QLineEdit();
     LUTPathLineEdit->setReadOnly(true);
     LUTPathLineEdit->setText(
         settings().value(SETTINGSGROUP_OTHERSETTINGS, SETTING_LUTPATH).toString());
 
+#ifdef MASTER_SPIM
     QDoubleSpinBox *scanVelocitySpinBox = new QDoubleSpinBox();
     scanVelocitySpinBox->setDecimals(4);
     scanVelocitySpinBox->setValue(spim().getScanVelocity());
+#endif
 
     QPushButton *chooseLUTPathPushButton = new QPushButton("...");
 
@@ -89,9 +96,11 @@ void SettingsWidget::setupUI()
         grid->addWidget(LUTPathLineEdit, row, col++);
         grid->addWidget(chooseLUTPathPushButton, row++, col++);
 
+#ifdef MASTER_SPIM
         col = 0;
         grid->addWidget(new QLabel("Scan velocity"), row, col++);
         grid->addWidget(scanVelocitySpinBox, row++, col++);
+#endif
 
         col = 0;
         grid->addWidget(new QLabel("Left camera path"), row, col++);
@@ -126,11 +135,15 @@ void SettingsWidget::setupUI()
         QMessageBox::information(this, "Info", QString("Please restart %1").arg(PROGRAM_NAME));
     });
 
+#ifdef MASTER_SPIM
     void (QDoubleSpinBox::*mySignal)(double) = &QDoubleSpinBox::valueChanged;
     connect(scanVelocitySpinBox, mySignal, &spim(), &SPIM::setScanVelocity);
+#endif
 
     QHBoxLayout *hLayout = new QHBoxLayout();
+#ifdef MASTER_SPIM
     hLayout->addWidget(nisw);
+#endif
     hLayout->addWidget(otherSettingsGB);
     hLayout->addStretch();
 

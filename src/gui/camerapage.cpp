@@ -52,6 +52,7 @@ void CameraPage::setupUI()
         });
     }
 
+#ifdef MASTER_SPIM
     stageCw = new PIPositionControlWidget();
     stageCw->setTitle("Stages");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_X_AXIS), "1", "X");
@@ -174,10 +175,13 @@ void CameraPage::setupUI()
     controlsHLayout->addLayout(galvoProgressLayout);
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(controlsGb);
+#endif
 
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(cameraHLayout, 1);
+#ifdef MASTER_SPIM
     vLayout->addLayout(controlsHLayout);
+#endif
     setMinimumHeight(1000);
 
     setLayout(vLayout);
@@ -185,6 +189,7 @@ void CameraPage::setupUI()
 
 void CameraPage::saveSettings()
 {
+#ifdef MASTER_SPIM
     Settings s = settings();
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         QString g = SETTINGSGROUP_AXIS(i);
@@ -192,4 +197,5 @@ void CameraPage::saveSettings()
         s.setValue(g, SETTING_VELOCITY, stageCw->getVelocitySpinBox(i)->value());
         s.setValue(g, SETTING_STEPSIZE, stageCw->getStepSpinBox(i)->value());
     }
+#endif
 }

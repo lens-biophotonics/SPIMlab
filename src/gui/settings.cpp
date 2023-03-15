@@ -5,7 +5,7 @@
 #include "spim.h"
 #include "tasks.h"
 
-#include <memory>
+#ifdef MASTER_SPIM
 
 #include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
@@ -13,8 +13,11 @@
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
 
-#include <QDir>
 #include <QSerialPortInfo>
+#endif
+
+#include <memory>
+#include <QDir>
 #include <QSettings>
 
 #define SET_VALUE(group, key, default_val) setValue(group, key, settings.value(key, default_val))
@@ -77,20 +80,21 @@ void Settings::loadSettings()
     map.clear();
 
     QSettings settings;
-    QString groupName;
+    QString group;
 
-    groupName = SETTINGSGROUP_OTHERSETTINGS;
-    settings.beginGroup(groupName);
+    group = SETTINGSGROUP_OTHERSETTINGS;
+    settings.beginGroup(group);
 
-    SET_VALUE(groupName, SETTING_LUTPATH, "/opt/Fiji.app/luts/");
-    SET_VALUE(groupName, SETTING_SCANVELOCITY, 2.0);
+    SET_VALUE(group, SETTING_LUTPATH, "/opt/Fiji.app/luts/");
+    SET_VALUE(group, SETTING_SCANVELOCITY, 2.0);
     QStringList camOutputPath;
     camOutputPath << "/mnt/dualspim"
                   << "/mnt/dualspim";
-    SET_VALUE(groupName, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
+    SET_VALUE(group, SETTING_CAM_OUTPUT_PATH_LIST, camOutputPath);
 
     settings.endGroup();
 
+#ifdef MASTER_SPIM
     QStringList groups;
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         groups << SETTINGSGROUP_AXIS(i);
@@ -114,30 +118,28 @@ void Settings::loadSettings()
         settings.endGroup();
     }
 
-    groupName = SETTINGSGROUP_GRAMP;
-    settings.beginGroup(groupName);
+    group = SETTINGSGROUP_GRAMP;
+    settings.beginGroup(group);
 
-    SET_VALUE(groupName, SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
-    SET_VALUE(groupName,
-              SETTING_WFPARAMS,
-              QList<QVariant>({0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
+    SET_VALUE(group, SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3"}));
+    SET_VALUE(group, SETTING_WFPARAMS, QList<QVariant>({0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
     settings.endGroup();
 
-    groupName = SETTINGSGROUP_CAMTRIG;
-    settings.beginGroup(groupName);
+    group = SETTINGSGROUP_CAMTRIG;
+    settings.beginGroup(group);
 
-    SET_VALUE(groupName, SETTING_PULSE_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
-    SET_VALUE(groupName, SETTING_BLANKING_TERMS, QStringList({"/Dev1/PFI2", "/Dev1/PFI3"}));
-    SET_VALUE(groupName, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
+    SET_VALUE(group, SETTING_PULSE_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
+    SET_VALUE(group, SETTING_BLANKING_TERMS, QStringList({"/Dev1/PFI2", "/Dev1/PFI3"}));
+    SET_VALUE(group, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
 
     settings.endGroup();
 
-    groupName = SETTINGSGROUP_ACQUISITION;
-    settings.beginGroup(groupName);
+    group = SETTINGSGROUP_ACQUISITION;
+    settings.beginGroup(group);
 
-    SET_VALUE(groupName, SETTING_EXPTIME, 0.15);
-    SET_VALUE(groupName, SETTING_RUN_NAME, QString());
-    SET_VALUE(groupName, SETTING_BINNING, 1);
+    SET_VALUE(group, SETTING_EXPTIME, 0.15);
+    SET_VALUE(group, SETTING_RUN_NAME, QString());
+    SET_VALUE(group, SETTING_BINNING, 1);
 
     settings.endGroup();
 
@@ -183,8 +185,6 @@ void Settings::loadSettings()
     }
 
     //////////////////////////////////////
-
-    QString group;
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
@@ -251,8 +251,12 @@ void Settings::loadSettings()
     spim().setRunName(value(group, SETTING_RUN_NAME).toString());
     spim().setBinning(value(group, SETTING_BINNING).toUInt());
 
+#endif
+
     group = SETTINGSGROUP_OTHERSETTINGS;
+#ifdef MASTER_SPIM
     spim().setScanVelocity(value(group, SETTING_SCANVELOCITY).toDouble());
+#endif
     spim().setOutputPathList(value(group, SETTING_CAM_OUTPUT_PATH_LIST).toStringList());
 }
 
@@ -260,6 +264,7 @@ void Settings::saveSettings()
 {
     QString group;
 
+#ifdef MASTER_SPIM
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         PIDevice *dev = spim().getPIDevice(i);
         group = SETTINGSGROUP_AXIS(i);
@@ -319,9 +324,11 @@ void Settings::saveSettings()
     setValue(group, SETTING_EXPTIME, spim().getExposureTime());
     setValue(group, SETTING_RUN_NAME, spim().getRunName());
     setValue(group, SETTING_BINNING, spim().getBinning());
-
+#endif
     group = SETTINGSGROUP_OTHERSETTINGS;
+#ifdef MASTER_SPIM
     setValue(group, SETTING_SCANVELOCITY, spim().getScanVelocity());
+#endif
     setValue(group, SETTING_CAM_OUTPUT_PATH_LIST, spim().getOutputPathList());
 
     QSettings settings;
