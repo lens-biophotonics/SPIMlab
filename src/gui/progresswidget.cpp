@@ -77,12 +77,12 @@ void ProgressWidget::setupUI()
 
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setRange(0, spim().getTotalSteps());
-        progressBar->setValue(0);
         progressBar->reset();
     });
 
     connect(timer, &QTimer::timeout, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
+            stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
             stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
         }
     });
@@ -90,8 +90,7 @@ void ProgressWidget::setupUI()
     s = spim().getState(SPIM::STATE_CAPTURE);
     connect(s, &QState::entered, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
-            stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
-            stackPbList.at(i)->setValue(0);
+            stackPbList.at(i)->reset();
         }
         timer->start(1000);
     });
