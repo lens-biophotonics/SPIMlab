@@ -519,7 +519,6 @@ void SPIM::setupStateMachine()
     });
 
     connect(acquisitionState, &QState::exited, this, [=]() {
-        pollTimer->stop();
         haltStages();
     });
 
