@@ -1,5 +1,5 @@
 #include "autofocus.h"
-
+*/ssss
 #include <fcntl.h>
 #include <opencv2/opencv.hpp>
 #include <sys/stat.h>
