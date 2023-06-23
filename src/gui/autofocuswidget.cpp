@@ -18,8 +18,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#define PLOT_WIDTH 1224
-#define PLOT_HEIGHT 1024
+#define PLOT_WIDTH 1224/2
+#define PLOT_HEIGHT 1024/2
 
 QRect transformRect(QRectF rect)
 {
@@ -64,16 +64,25 @@ void AutofocusWidget::setupUi()
     cd = new AutofocusCamDisplayWidget();
     cd->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
     cd->setMinimumSize(600, 600);
-    cd->setLeftRoi(invTransformRect(af->getLeftRoi()));
-    cd->setRightRoi(invTransformRect(af->getRightRoi()));
+    cd->setUpLeftRoi(invTransformRect(af->getUpLeftRoi()));
+    cd->setUpRightRoi(invTransformRect(af->getUpRightRoi()));
+    cd->setDownLeftRoi(invTransformRect(af->getDownLeftRoi()));
+    cd->setDownRightRoi(invTransformRect(af->getDownRightRoi()));
+    
 
-    connect(cd, &AutofocusCamDisplayWidget::newLeftRoi, [=](QRectF rect) {
-        af->setLeftRoi(transformRect(rect));
+    connect(cd, &AutofocusCamDisplayWidget::newUpLeftRoi, [=](QRectF rect) {
+        af->setUpLeftRoi(transformRect(rect));
     });
-    connect(cd, &AutofocusCamDisplayWidget::newRightRoi, [=](QRectF rect) {
-        af->setRightRoi(transformRect(rect));
+    connect(cd, &AutofocusCamDisplayWidget::newUpRightRoi, [=](QRectF rect) {
+        af->setUpRightRoi(transformRect(rect));
     });
-
+    connect(cd, &AutofocusCamDisplayWidget::newDownLeftRoi, [=](QRectF rect) {
+        af->setDownLeftRoi(transformRect(rect));
+    });
+    connect(cd, &AutofocusCamDisplayWidget::newDownRightRoi, [=](QRectF rect) {
+        af->setDownRightRoi(transformRect(rect));
+    });
+    
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage);
 
     pmw = new PixmapWidget();
