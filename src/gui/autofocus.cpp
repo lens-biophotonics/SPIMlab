@@ -41,6 +41,7 @@ void Autofocus::init()
 
     try {
         dev.SetCamera(0);            // Open device
+        dev.SetCamera(1);
         dev.SetPreserveRates(false); // Ask always for the best performances (FPS)
         dev.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
         dev.SetEnableImageThread(false);
@@ -89,70 +90,189 @@ void Autofocus::onFrameAcquired(void *userData)
         return;
 
     Autofocus *af = static_cast<Autofocus *>(userData);
-
-    if (!af->leftRoi.isValid() || !af->rightRoi.isValid()) {
+    
+    if (!af->upLeftRoi.isValid() || !af->upRightRoi.isValid() || !af->downLeftRoi.isValid() || !af->downRightRoi.isValid()) {
         emit af->newStatus("Invalid ROIs");
         return;
     }
 
-    CAlkUSB3::IVideoSource &videoSource(af->dev);
-    CAlkUSB3::BufferPtr ptr = videoSource.GetRawDataPtr(false);
+    CAlkUSB3::IVideoSource &videoSource1 = dev.GetVideoSource(0);
+    CAlkUSB3::IVideoSource &videoSource2 = dev.GetVideoSource(1);
+    
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+    
+    emit af->newImage1(ptr1);
+    emit af->newImage2(ptr2);
 
-    emit af->newImage(ptr);
-
-    double delta;
+    double delta1;
     try {
-        delta = af->getDelta();
+        delta1 = af->getDelta(1);
+    } catch (std::runtime_error e) {
+        emit af->newStatus(e.what());
+        return;
+    }
+    double correction1 = af->m * delta1 + af->q;
+    if (af->isOutputEnabled()) {
+        emit af->newCorrection1(correction1);
+    }
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(delta1).arg(correction1));
+
+    double delta2;
+    try {
+        delta2 = af->getDelta(2);
     } catch (std::runtime_error e) {
         emit af->newStatus(e.what());
         return;
     }
 
-    double correction = af->m * delta + af->q;
+    double correction2 = af->m * delta2 + af->q;
     if (af->isOutputEnabled()) {
-        emit af->newCorrection(correction);
+        emit af->newCorrection2(correction2);
     }
-    emit af->newStatus(QString("dx = %1, corr = %2").arg(delta).arg(correction));
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(delta2).arg(correction2));
+
+    double delta3;
+    try {
+        delta3 = af->getDelta(3);
+    } catch (std::runtime_error e) {
+        emit af->newStatus(e.what());
+        return;
+    }
+
+    double correction3 = af->m * delta3 + af->q;
+    if (af->isOutputEnabled()) {
+        emit af->newCorrection3(correction3);
+    }
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(delta3).arg(correction3));
+
+    double delta4;
+    try {
+        delta4 = af->getDelta(4);
+    } catch (std::runtime_error e) {
+        emit af->newStatus(e.what());
+        return;
+    }
+
+    double correction4 = af->m * delta4 + af->q;
+    if (af->isOutputEnabled()) {
+        emit af->newCorrection4(correction4);
+    }
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(delta4).arg(correction4));
 }
 
 double Autofocus::getDelta()
 {
-    CAlkUSB3::IVideoSource &videoSource(dev);
-    CAlkUSB3::BufferPtr ptr = videoSource.GetRawDataPtr(false);
+    
+    CAlkUSB3::IVideoSource &videoSource1 = dev.GetVideoSource(0);
+    CAlkUSB3::IVideoSource &videoSource2 = dev.GetVideoSource(1);
+    
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
-    if (!ptr) {
+    if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
     }
 
-    Mat img(ptr.GetHeight(), ptr.GetWidth(), CV_8U, (void *) ptr.Data());
-    i1 = img(Range(leftRoi.top(), leftRoi.bottom()), Range(leftRoi.left(), leftRoi.right()));
-    i2 = img(Range(rightRoi.top(), rightRoi.bottom()), Range(rightRoi.left(), rightRoi.right()));
-
+    Mat img1(ptr1.GetHeight(), ptr1.GetWidth(), CV_8U, (void *) ptr1.Data());  // from ICelera1
+    Mat img2(ptr2.GetHeight(), ptr2.GetWidth(), CV_8U, (void *) ptr2.Data()); // from ICelera2
+    
+    i1 = img1(Range(upLeftRoi.top(), upLeftRoi.bottom()), Range(upLeftRoi.left(), upLeftRoi.right()));
+    i2 = img2(Range(upLeftRoi.top(), upLeftRoi.bottom()), Range(upLeftRoi.left(), upLeftRoi.right()));
+    
+    i3 = img1(Range(upRightRoi.top(), upRightRoi.bottom()), Range(upRightRoi.left(), upRightRoi.right()));
+    i4 = img2(Range(upRightRoi.top(), upRightRoi.bottom()), Range(upRightRoi.left(), upRightRoi.right()));
+    
+    i5 = img1(Range(downLeftRoi.top(), downLeftRoi.bottom()), Range(downLeftRoi.left(), downLeftRoi.right()));
+    i6 = img2(Range(downLeftRoi.top(), downLeftRoi.bottom()), Range(downLeftRoi.left(), downLeftRoi.right())); 
+    
+    i7 = img1(Range(downRightRoi.top(), downRightRoi.bottom()), Range(downRightRoi.left(), downRightRoi.right()));
+    i8 = img2(Range(downRightRoi.top(), downRightRoi.bottom()), Range(downRightRoi.left(), downRightRoi.right()));
+    
     if (imageQualityEnabled) {
         if (!rapid_af::checkImageQuality(i1, iqOptions)
-            || !rapid_af::checkImageQuality(i2, iqOptions)) {
+            || !rapid_af::checkImageQuality(i2, iqOptions) 
+            || !rapid_af::checkImageQuality(i3, iqOptions) 
+            || !rapid_af::checkImageQuality(i4, iqOptions) 
+            || !rapid_af::checkImageQuality(i5, iqOptions) 
+            || !rapid_af::checkImageQuality(i6, iqOptions) 
+            || !rapid_af::checkImageQuality(i7, iqOptions) 
+            || !rapid_af::checkImageQuality(i8, iqOptions)) {
             throw std::runtime_error("low image quality");
         }
     }
-
-    bool ok = false;
-    Point2f delta;
-    try {
-        shift = rapid_af::align(i1, i2, options, &ok);
-    } catch (cv::Exception e) {
-        logger->warning(e.what());
-        throw std::runtime_error("OpenCV exception (see log)");
+    
+    Point2f shift
+    if (deltaNumber == 1) {
+        bool ok1 = false;
+        try {
+            shift = rapid_af::align(i1, i2, options, &ok);
+        } catch (cv::Exception e) {
+            logger->warning(e.what());
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+        if (!ok1) {
+            throw std::runtime_error("Agreement threshold not met");
+        }     
     }
-    if (!ok) {
-        throw std::runtime_error("Agreement threshold not met");
+    
+    if (deltaNumber == 2) {
+        bool ok2 = false;
+        try {
+            shift = rapid_af::align(i3, i4, options, &ok);
+        } catch (cv::Exception e) {
+            logger->warning(e.what());
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+        if (!ok2) {
+            throw std::runtime_error("Agreement threshold not met");
+        } 
+    }
+
+    if (deltaNumber == 3) {
+        bool ok3 = false;
+        try {
+            shift = rapid_af::align(i5, i6, options, &ok);
+        } catch (cv::Exception e) {
+            logger->warning(e.what());
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+        if (!ok3) {
+            throw std::runtime_error("Agreement threshold not met");
+        }     
+    }
+    
+    if (deltaNumber == 4) {
+        bool ok4 = false;
+        try {
+            shift = rapid_af::align(i7, i8, options, &ok);
+        } catch (cv::Exception e) {
+            logger->warning(e.what());
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+        if (!ok4) {
+            throw std::runtime_error("Agreement threshold not met");
+        } 
     }
 
     return shift.x;
 }
 
-double Autofocus::inferCalibrationQ()
+double Autofocus::inferCalibrationQ(int deltaNumber)
 {
-    q = -m * getDelta();
+    if (deltaNumber == 1){
+        q = -m * getDelta(1);
+    }
+    if (deltaNumber == 2){
+        q = -m * getDelta(2);
+    }
+    if (deltaNumber == 3){
+        q = -m * getDelta(3);
+    }
+    if (deltaNumber == 4){
+        q = -m * getDelta(4);
+    }
+    
     return q;
 }
 
@@ -242,37 +362,88 @@ void Autofocus::setOutputEnabled(bool enable)
     outputEnabled = enable;
 }
 
-QRect Autofocus::getLeftRoi() const
+QRect Autofocus::getUpLeftRoi() const
 {
-    return leftRoi;
+    return upLeftRoi;
 }
 
-void Autofocus::setLeftRoi(const QRect &value)
+void Autofocus::setUpLeftRoi(const QRect &value)
 {
-    leftRoi = value;
+    upLeftRoi = value;
 }
 
-QRect Autofocus::getRightRoi() const
+QRect Autofocus::getUpRightRoi() const
 {
-    return rightRoi;
+    return upRightRoi;
 }
 
-void Autofocus::setRightRoi(const QRect &value)
+void Autofocus::setUpRightRoi(const QRect &value)
 {
-    rightRoi = value;
+    upRightRoi = value;
 }
 
-cv::Mat Autofocus::getLeftRoiImage() const
+QRect Autofocus::getDownLeftRoi() const
+{
+    return downLeftRoi;
+}
+
+void Autofocus::setDownLeftRoi(const QRect &value)
+{
+    downLeftRoi = value;
+}
+
+QRect Autofocus::getDownRightRoi() const
+{
+    return downRightRoi;
+}
+
+void Autofocus::setDownRightRoi(const QRect &value)
+{
+    downRightRoi = value;
+}
+
+cv::Mat Autofocus::getUpLeftRoiImagecam1() const
 {
     return i1;
 }
 
-cv::Mat Autofocus::getRightRoiImage() const
+cv::Mat Autofocus::getUpLeftRoiImagecam2() const
 {
     return i2;
 }
 
-QImage Autofocus::getMergedImage()
+cv::Mat Autofocus::getUpRightRoiImagecam1() const
+{
+    return i3;
+}
+
+cv::Mat Autofocus::getUpRightRoiImagecam2() const
+{
+    return i4;
+}
+
+cv::Mat Autofocus::getDownLeftRoiImagecam1() const
+{
+    return i5;
+}
+
+cv::Mat Autofocus::getDownLeftRoiImagecam2() const
+{
+    return i6;
+}
+
+cv::Mat Autofocus::getDownRightRoiImagecam1() const
+{
+    return i7;
+}
+
+cv::Mat Autofocus::getDownRightRoiImagecam2() const
+{
+    return i8;
+}
+
+
+QImage Autofocus::getMergedImage(int deltaNumber)
 {
     Mat img;
     int width = qMin(leftRoi.width(), rightRoi.width()) - 1;
