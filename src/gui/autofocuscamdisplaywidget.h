@@ -11,16 +11,23 @@ class AutofocusCamDisplayWidget : public CameraDisplay
 public:
     AutofocusCamDisplayWidget(QWidget *parent = nullptr);
 
-    void setLeftRoi(QRectF);
-    void setRightRoi(QRectF rect);
+    void setUpLeftRoi(QRectF);
+    void setUpRightRoi(QRectF rect);
+    void setDownLeftRoi(QRectF);
+    void setDownRightRoi(QRectF rect);
+
 
 signals:
-    void newLeftRoi(QRectF);
-    void newRightRoi(QRectF);
+    void newUpLeftRoi(QRectF);
+    void newUpRightRoi(QRectF);
+    void newDownLeftRoi(QRectF);
+    void newDownRightRoi(QRectF);
 
 private:
-    QwtPlotShapeItem *leftRoiItem;
-    QwtPlotShapeItem *rightRoiItem;
+    QwtPlotShapeItem *upLeftRoiItem;
+    QwtPlotShapeItem *upRightRoiItem;
+    QwtPlotShapeItem *downLeftRoiItem;
+    QwtPlotShapeItem *downRightRoiItem;
 };
 
 #endif // AUTOFOCUSCAMDISPLAYWIDGET_H
