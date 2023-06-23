@@ -30,7 +30,7 @@ public:
 
     void setCalibration(double m, double q);
 
-    double inferCalibrationQ();
+    double inferCalibrationQ(int deltaNumber);
 
     bool isEnabled() const;
     void setEnabled(bool enable);
@@ -38,14 +38,26 @@ public:
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enable);
 
-    QRect getLeftRoi() const;
-    void setLeftRoi(const QRect &value);
+    QRect getUpLeftRoi() const;
+    void setUpLeftRoi(const QRect &value);
 
-    QRect getRightRoi() const;
-    void setRightRoi(const QRect &value);
+    QRect getUpRightRoi() const;
+    void setUpRightRoi(const QRect &value);
 
-    cv::Mat getLeftRoiImage() const;
-    cv::Mat getRightRoiImage() const;
+    QRect getDownLeftRoi() const;
+    void setDownLeftRoi(const QRect &value);
+
+    QRect getDownRightRoi() const;
+    void setDownRightRoi(const QRect &value);
+
+    cv::Mat getUpLeftRoiImagecam1() const;
+    cv::Mat getUpLeftRoiImagecam2() const;
+    cv::Mat getUpRightRoiImagecam1() const;
+    cv::Mat getUpRightRoiImagecam2() const;
+    cv::Mat getDownLeftRoiImagecam1() const;
+    cv::Mat getDownLeftRoiImagecam2() const;
+    cv::Mat getDownRightRoiImagecam1() const;
+    cv::Mat getDownRightRoiImagecam2() const;
 
     QImage getMergedImage();
 
@@ -59,9 +71,13 @@ public:
     void setImageQualityEnabled(bool enable);
 
 signals:
-    void newImage(CAlkUSB3::BufferPtr);
+    void newImage1(CAlkUSB3::BufferPtr);
+    void newImage2(CAlkUSB3::BufferPtr);
     void newStatus(QString);
-    void newCorrection(double);
+    void newCorrection1(double);
+    void newCorrection2(double);
+    void newCorrection3(double);
+    void newCorrection4(double);
 
 private:
     /**
@@ -81,13 +97,17 @@ private:
 
     cv::Point2f shift;
 
-    QRect leftRoi;
-    QRect rightRoi;
+    QRect upLeftRoi;
+    QRect upRightRoi;
+    QRect downLeftRoi;
+    QRect downRightRoi;
 
-    cv::Mat i1, i2;
+    cv::Mat i1, i2, i3, i4, i5, i6, i7, i8;
+
+    int deltaNumber
 
     static void onFrameAcquired(void *userData);
-    double getDelta();
+    double getDelta(int deltaNumber);
 };
 
 #endif // AUTOFOCUS_H
