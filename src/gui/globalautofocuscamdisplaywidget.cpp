@@ -41,51 +41,51 @@ AutofocusCamDisplayWidget::AutofocusCamDisplayWidget(QWidget *parent)
     rightPicker->setRubberBand(QwtPicker::RectRubberBand);
     rightPicker->setRubberBandPen(QColor(0x00, 0xaa, 0x00));
 
-    leftRoiItem = new QwtPlotShapeItem();
-    leftRoiItem->setPen(leftPicker->rubberBandPen());
-    leftRoiItem->attach(plot);
+    image1 = new QwtPlotShapeItem();
+    image1->setPen(leftPicker->rubberBandPen());
+    image1->attach(plot);
 
-    rightRoiItem = new QwtPlotShapeItem();
-    rightRoiItem->setPen(rightPicker->rubberBandPen());
-    rightRoiItem->attach(plot);
+    image2 = new QwtPlotShapeItem();
+    image2->setPen(rightPicker->rubberBandPen());
+    image2->attach(plot);
 
     connect(leftPicker,
             qOverload<const QRectF &>(&QwtPlotPicker::selected),
             [=](const QRectF &rect) {
-                setLeftRoi(rect);
-                emit newLeftRoi(rect);
+                setImage1(rect);
+                emit newImage1(rect);
             });
 
     connect(rightPicker,
             qOverload<const QRectF &>(&QwtPlotPicker::selected),
             [=](const QRectF &rect) {
-                setRightRoi(rect);
-                emit newRightRoi(rect);
+                setImage2(rect);
+                emit newImage2(rect);
             });
 
     menu->addSeparator();
     menu->addAction("Clear left ROI", [=]() {
-        leftRoiItem->setShape(QPainterPath());
+        image1Item->setShape(QPainterPath());
         plot->replot();
     });
     menu->addAction("Clear right ROI", [=]() {
-        rightRoiItem->setShape(QPainterPath());
+        image2Item->setShape(QPainterPath());
         plot->replot();
     });
 }
 
-void AutofocusCamDisplayWidget::setLeftRoi(QRectF rect)
+void AutofocusCamDisplayWidget::setImage1(QRectF rect)
 {
     QPainterPath pp;
     pp.addRect(rect);
-    leftRoiItem->setShape(pp);
+    image1Item->setShape(pp);
     plot->replot();
 }
 
-void AutofocusCamDisplayWidget::setRightRoi(QRectF rect)
+void AutofocusCamDisplayWidget::setImage2(QRectF rect)
 {
     QPainterPath pp;
     pp.addRect(rect);
-    rightRoiItem->setShape(pp);
+    image2Item->setShape(pp);
     plot->replot();
 }
