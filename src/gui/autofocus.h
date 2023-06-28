@@ -74,10 +74,7 @@ signals:
     void newImage1(CAlkUSB3::BufferPtr);
     void newImage2(CAlkUSB3::BufferPtr);
     void newStatus(QString);
-    void newCorrection1(double);
-    void newCorrection2(double);
-    void newCorrection3(double);
-    void newCorrection4(double);
+    void newCorrection(double);
 
 private:
     /**
