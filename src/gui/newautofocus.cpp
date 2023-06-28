@@ -125,7 +125,7 @@ void Autofocus::onFrameAcquired(void *userData)
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
     emit af->newImage(ptr);
-    emit af->newImage(ptr2);
+    emit af->newImage2(ptr2);
     
     QList<double> deltaList;
     try {
