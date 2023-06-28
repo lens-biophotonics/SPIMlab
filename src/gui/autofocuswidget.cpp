@@ -61,14 +61,13 @@ void AutofocusWidget::setupUi()
 
     Autofocus *af = spim().getAutoFocus();
     rapid_af::AlignOptions opt = af->getOptions();
-    cd = new AutofocusCamDisplayWidget();
-    cd->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
-    cd->setMinimumSize(600, 600);
-    cd->setUpLeftRoi(invTransformRect(af->getUpLeftRoi()));
-    cd->setUpRightRoi(invTransformRect(af->getUpRightRoi()));
-    cd->setDownLeftRoi(invTransformRect(af->getDownLeftRoi()));
-    cd->setDownRightRoi(invTransformRect(af->getDownRightRoi()));
-    
+    cd1 = new AutofocusCamDisplayWidget();
+    cd1->setPlotSize(QSize(PLOT_WIDTH*4, PLOT_HEIGHT*4));
+    cd1->setMinimumSize(600, 600);
+    cd1->setUpLeftRoi1(invTransformRect(af->getUpLeftRoi1()));
+    cd1->setUpRightRoi1(invTransformRect(af->getUpRightRoi1()));
+    cd1->setDownLeftRoi1(invTransformRect(af->getDownLeftRoi1()));
+    cd1->setDownRightRoi1(invTransformRect(af->getDownRightRoi1()));
 
     connect(cd, &AutofocusCamDisplayWidget::newUpLeftRoi, [=](QRectF rect) {
         af->setUpLeftRoi(transformRect(rect));
@@ -493,4 +492,25 @@ void AutofocusWidget::onNewImage(CAlkUSB3::BufferPtr ptr)
     }
 
     cd->getPlot()->setData(mybufDouble, c);
+}
+
+void AutofocusWidget::onNewImage2(CAlkUSB3::BufferPtr ptr2)
+{
+    this->ptr2 = ptr2;
+    if (!isVisible()) {
+        return;
+    }
+
+    cd2->setPlotSize(QSize(ptr2.GetWidth(), ptr2.GetHeight()));
+
+    quint8 *buf = (quint8 *) (ptr2.Data());
+    int c = 0;
+    for (size_t i = 0; i < ptr2.GetWidth(); i += 1) {
+        for (size_t j = 0; j < ptr2.GetHeight(); j += 1) {
+            mybufDouble[c] = buf[c];
+            c++;
+        }
+    }
+
+    cd2->getPlot()->setData(mybufDouble, c);
 }
