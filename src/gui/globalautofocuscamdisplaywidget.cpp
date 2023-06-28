@@ -27,65 +27,57 @@ public:
 AutofocusCamDisplayWidget::AutofocusCamDisplayWidget(QWidget *parent)
     : CameraDisplay(parent)
 {
-    QwtPlotPicker *leftPicker = new RoiPicker(plot->canvas());
-    leftPicker->setStateMachine(new QwtPickerDragRectMachine());
-    leftPicker->setMousePattern(QwtEventPattern::MouseSelect1, Qt::LeftButton, Qt::ShiftModifier);
-    leftPicker->setRubberBand(QwtPicker::RectRubberBand);
-    leftPicker->setRubberBandPen(QColor(0xff, 0xaa, 0x00));
+    QwtPlotPicker *globalPicker = new RoiPicker(plot->canvas());
+    globalPicker->setStateMachine(new QwtPickerDragRectMachine());
+    globalPicker->setMousePattern(QwtEventPattern::MouseSelect1, Qt::LeftButton, Qt::ShiftModifier);
+    globalPicker->setRubberBand(QwtPicker::RectRubberBand);
+    globalPicker->setRubberBandPen(QColor(0xff, 0xaa, 0x00));
 
-    QwtPlotPicker *rightPicker = new RoiPicker(plot->canvas());
-    rightPicker->setStateMachine(new QwtPickerDragRectMachine());
-    rightPicker->setMousePattern(QwtEventPattern::MouseSelect1,
-                                 Qt::LeftButton,
-                                 Qt::ShiftModifier | Qt::ControlModifier);
-    rightPicker->setRubberBand(QwtPicker::RectRubberBand);
-    rightPicker->setRubberBandPen(QColor(0x00, 0xaa, 0x00));
-
-    image1 = new QwtPlotShapeItem();
-    image1->setPen(leftPicker->rubberBandPen());
-    image1->attach(plot);
-
-    image2 = new QwtPlotShapeItem();
-    image2->setPen(rightPicker->rubberBandPen());
-    image2->attach(plot);
-
-    connect(leftPicker,
+    QPainterPath sharedPath;
+  
+    image1Item = new QwtPlotShapeItem();
+    image1Item->setPen(globalPicker->rubberBandPen());
+    image1Item->setShape(sharedPath);
+    image1Item->attach(plot);
+    
+    image2Item = new QwtPlotShapeItem(); 
+    image2Item->setShape(sharedPath);
+    image2Item->attach(plot);    
+    
+    connect(globalPicker,
             qOverload<const QRectF &>(&QwtPlotPicker::selected),
             [=](const QRectF &rect) {
-                setImage1(rect);
+                sharedPath = QPainterPath();
+                sharedPath.addRect(rect);
+                setImage1(sharedPath);
                 emit newImage1(rect);
-            });
-
-    connect(rightPicker,
-            qOverload<const QRectF &>(&QwtPlotPicker::selected),
-            [=](const QRectF &rect) {
-                setImage2(rect);
+                setImage2(sharedPath);
                 emit newImage2(rect);
             });
-
+    
     menu->addSeparator();
-    menu->addAction("Clear left ROI", [=]() {
-        image1Item->setShape(QPainterPath());
+    menu->addAction("Clear image 1", [=]() {
+        image1Item->setShape(sharedPath);
         plot->replot();
     });
-    menu->addAction("Clear right ROI", [=]() {
-        image2Item->setShape(QPainterPath());
+    menu->addAction("Clear image 2", [=]() {
+        image2Item->setShape(sharedPath);
         plot->replot();
     });
 }
 
-void AutofocusCamDisplayWidget::setImage1(QRectF rect)
+void AutofocusCamDisplayWidget::setImage1(QPainterPath sharedPath)
 {
     QPainterPath pp;
-    pp.addRect(rect);
+    pp.addRect( sharedPath);
     image1Item->setShape(pp);
     plot->replot();
 }
 
-void AutofocusCamDisplayWidget::setImage2(QRectF rect)
+void AutofocusCamDisplayWidget::setImage2(QPainterPath sharedPath)
 {
     QPainterPath pp;
-    pp.addRect(rect);
+    pp.addRect(sharedPath);
     image2Item->setShape(pp);
     plot->replot();
 }
