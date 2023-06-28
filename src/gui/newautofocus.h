@@ -49,7 +49,8 @@ public:
     void setImageQualityEnabled(bool enable);
 
 signals:
-    void newImage(CAlkUSB3::BufferPtr);
+    void newImage1(CAlkUSB3::BufferPtr);
+    void newImage2(CAlkUSB3::BufferPtr);
     void newStatus(QString);
     void newCorrection(QList<double>);
 
