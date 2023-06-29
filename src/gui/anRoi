@@ -2,7 +2,25 @@ class anRoi
 {
     class anRoi : anRoi (publicQWidget *parent)(QRect rect)
 
-    border = 
+    //img is data.ptr
+    //roi is roi rect(x,y,width,height)
+
+
+    x1 = 5% of img_width
+    x2 = 60% of img_width
+    y1 = 60% of img_height
+    y2 = 5% of img_height
+    roi_width = 90% of img_width/2 or 40% of img_width
+    roi_height = 90% of img_height/2 or 40% of img_height
+
+    cv::Rect roi1(x1, y1, 100, 50);
+    cv::Rect roi2(x2, y1, 100, 50);
+    cv::Rect roi3(x1, y2, 100, 50);
+    cv::Rect roi4(x2, y2, 100, 50);
+
+    QList<cv::Mat> roi = {roi1, roi2, roi3, roi4}
+
+    i1 = img(roi[0])
 
 
     
