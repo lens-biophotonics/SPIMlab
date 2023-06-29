@@ -18,40 +18,22 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#define PLOT_WIDTH 2448
-#define PLOT_HEIGHT 2048
+#define PLOT_WIDTH 1224
+#define PLOT_HEIGHT 1024 
 
-QRect transformRect(QRectF rect)
-{
-    rect.setTop(PLOT_HEIGHT - rect.top());
-    rect.setBottom(PLOT_HEIGHT - rect.bottom());
-    rect = rect.normalized();
-    QRect r;
-    r.setTop(rect.top());
-    r.setBottom(rect.bottom());
-    r.setLeft(rect.left());
-    r.setRight(rect.right());
-    return r;
-};
-
-QRectF invTransformRect(QRect rect)
-{
-    rect.setTop(PLOT_HEIGHT - rect.top());
-    rect.setBottom(PLOT_HEIGHT - rect.bottom());
-    rect = rect.normalized();
-    return rect;
-};
 
 AutofocusWidget::AutofocusWidget(QWidget *parent)
     : QWidget(parent)
 {
-    mybufDouble = new double[PLOT_WIDTH * PLOT_HEIGHT];
+    mybufDouble1 = new double[PLOT_WIDTH * PLOT_HEIGHT];
+    mybufDouble2 = new double[PLOT_WIDTH * PLOT_HEIGHT];
     setupUi();
 }
 
 AutofocusWidget::~AutofocusWidget()
 {
-    delete[] mybufDouble;
+    delete[] mybufDouble1;
+    delete[] mybufDouble2;
 }
 
 void AutofocusWidget::setupUi()
@@ -365,7 +347,7 @@ void AutofocusWidget::setupUi()
         afAlpha->setImageQualityEnabled(qualityGb->isChecked());
         afAlpha->setIqOptions(iqOpt);
 
-        afAlpha->setCalibration(mSb->value(), qSb->value());
+        afAlpha->setCalibration(mSb->value(), qSb->value());         //tf did i do?
         afAlpha->setOutputEnabled(outputEnableCb->isChecked());
     };
 
@@ -434,31 +416,47 @@ void AutofocusWidget::setupUi()
     vLayout1->addWidget(cd1);
     vLayout1->addWidget(cd2);
     vLayout1->addLayout(hLayout);
-
+    
     QBoxLayout *vLayout2 = new QVBoxLayout();
-    vLayout2->addWidget(prefilterGb);
-    vLayout2->addWidget(qualityGb);
-    vLayout2->addWidget(binarizeGb);
-    vLayout2->addWidget(dogGb);
-    vLayout2->addWidget(cannyGb);
-    vLayout2->addStretch();
-    vLayout2->addStretch();
-
+    QBoxLayout *hLayout1 = new QHBoxLayout();
+    hLayout1->addStretch();
+    hLayout1->addWidget(pmw[0]);
+    hLayout1->addStretch();
+    hLayout1->addWidget(pmw[1]);
+    hLayout1->addStretch();
+    QBoxLayout *hLayout2 = new QHBoxLayout();
+    hLayout2->addStretch();
+    hLayout2->addWidget(pmw[2]);
+    hLayout2->addStretch();
+    hLayout2->addWidget(pmw[3]);
+    hLayout2->addStretch();
+    vLayout2->addLayout(hLayout1);
+    vLayout2->addLayout(hLayout2);
+    
     QBoxLayout *vLayout3 = new QVBoxLayout();
-    vLayout3->addWidget(cameraGb);
-    vLayout3->addWidget(calibrationGb);
-    vLayout3->addWidget(generalOptionsGb);
+    vLayout3->addWidget(prefilterGb);
+    vLayout3->addWidget(qualityGb);
+    vLayout3->addWidget(binarizeGb);
+    vLayout3->addWidget(dogGb);
+    vLayout3->addWidget(cannyGb);
     vLayout3->addStretch();
-    vLayout3->addWidget(autofocusGb);
-    vLayout3->addWidget(saveLeftRoiToFile);
-    vLayout3->addWidget(saveRightRoiToFile);
-    vLayout3->addWidget(saveToFile);
+    vLayout3->addStretch();
+
+    QBoxLayout *vLayout4 = new QVBoxLayout();
+    vLayout4->addWidget(cameraGb);
+    vLayout4->addWidget(calibrationGb);
+    vLayout4->addWidget(generalOptionsGb);
+    vLayout4->addStretch();
+    vLayout4->addWidget(autofocusGb);
+    vLayout4->addWidget(saveLeftRoiToFile);
+    vLayout4->addWidget(saveRightRoiToFile);
+    vLayout4->addWidget(saveToFile);
 
     hLayout = new QHBoxLayout();
     hLayout->addLayout(vLayout1);
-    hLayout->addWidget(pmw);
     hLayout->addLayout(vLayout2);
     hLayout->addLayout(vLayout3);
+    hLayout->addLayout(vLayout4);
     setLayout(hLayout);
 }
 
