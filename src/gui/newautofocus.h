@@ -39,6 +39,9 @@ public:
     bool isImageQualityEnabled() const;
     void setImageQualityEnabled(bool enable);
 
+    int cd_width;
+    int cd_height;
+
 signals:
     void newImage(QList<CAlkUSB3::BufferPtr>);
     void newStatus(QString);
