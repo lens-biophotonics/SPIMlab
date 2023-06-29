@@ -121,11 +121,12 @@ void Autofocus::onFrameAcquired(void *userData)
 
     CAlkUSB3::IVideoSource &videoSource(af->dev);
     CAlkUSB3::IVideoSource &videoSource2(af->dev2);
-    CAlkUSB3::BufferPtr ptr = videoSource.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr1 = videoSource.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
-    emit af->newImage1(ptr);
-    emit af->newImage2(ptr2);
+    QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
+
+    emit af->newImage(ptr);
     
     QList<double> deltaList;
     try {
@@ -151,16 +152,16 @@ QList<double> Autofocus::getDelta()
 {
     CAlkUSB3::IVideoSource &videoSource(dev);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr = videoSource.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr1 = videoSource.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
-    if (!ptr || !ptr2) {
+    if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
     }
 
-    Mat img(ptr.GetHeight(), ptr.GetWidth(), CV_8U, (void *) ptr.Data());
+    Mat img(ptr1.GetHeight(), ptr1.GetWidth(), CV_8U, (void *) ptr1.Data());
     Mat img2(ptr2.GetHeight(), ptr2.GetWidth(), CV_8U, (void *) ptr2.Data()); 
-
+    
     Mat couple1[2] = {img(Range(upLeftRoi1.top(), upLeftRoi1.bottom()), Range(upLeftRoi1.left(), upLeftRoi1.right())),
                         img2(Range(upLeftRoi2.top(), upLeftRoi2.bottom()), Range(upLeftRoi2.left(), upLeftRoi2.right()))};
     Mat couple2[2] = {img(Range(upRightRoi1.top(), upRightRoi1.bottom()), Range(upRightRoi1.left(), upRightRoi1.right())),
