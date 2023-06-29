@@ -153,8 +153,8 @@ QList<double> Autofocus::getDelta()
         throw std::runtime_error("No frame was received");
     }
 
-    int cd_height = ptr1.GetHeight()  // ptr1 and ptr2 will have same dimensions so...
-    int cd_width = ptr1.GetWidth()
+    cd_height = ptr1.GetHeight()  // ptr1 and ptr2 will have same dimensions so...
+    cd_width = ptr1.GetWidth()
         
     Mat img1(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
     Mat img2(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
