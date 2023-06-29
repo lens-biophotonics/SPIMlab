@@ -28,16 +28,7 @@ public:
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enable);
 
-    QRect getLeftRoi() const;
-    void setLeftRoi(const QRect &value);
-
-    QRect getRightRoi() const;
-    void setRightRoi(const QRect &value);
-
-    cv::Mat getLeftRoiImage() const;
-    cv::Mat getRightRoiImage() const;
-
-    QImage getMergedImage();
+    QList<QImage> getMergedImage();
 
     rapid_af::AlignOptions getOptions() const;
     void setOptions(const rapid_af::AlignOptions &value);
@@ -70,14 +61,7 @@ private:
     bool outputEnabled = true;
     bool imageQualityEnabled = true;
 
-    QList<cv::Point2f> shifts;
-    QList<cv::Point2f> shift1;
-    QList<cv::Point2f> shift2;
-    QList<cv::Point2f> shift3;
-    QList<cv::Point2f> shift4;
-
-    QRect leftRoi;
-    QRect rightRoi;
+    QList<cv::Point2f> deltaList;
 
     static void onFrameAcquired(void *userData);
     QList<double> getDelta();
