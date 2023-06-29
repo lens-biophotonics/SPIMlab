@@ -24,9 +24,9 @@ Autofocus::Autofocus(QObject *parent)
 
 void Autofocus::init()
 {
-    ICeleraCamera& dev = CAlkUSB3::ICeleraCamera::Create() ;
+    ICeleraCamera& dev1 = CAlkUSB3::ICeleraCamera::Create() ;
 
-    auto stringArray = dev.GetCameraList();
+    auto stringArray = dev1.GetCameraList();
 
     size_t n = stringArray.Size();
 
@@ -41,19 +41,19 @@ void Autofocus::init()
     }
 
     try {
-        dev.SetCamera(0);            // Open device
-        dev.SetPreserveRates(false); // Ask always for the best performances (FPS)
-        dev.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
-        dev.SetEnableImageThread(false);
+        dev1.SetCamera(0);            // Open device
+        dev1.SetPreserveRates(false); // Ask always for the best performances (FPS)
+        dev1.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+        dev1.SetEnableImageThread(false);
 
-        dev.SetHorizontalBinning(2);
-        dev.SetVerticalBinning(2);
+        dev1.SetHorizontalBinning(2);
+        dev1.SetVerticalBinning(2);
     } catch (CAlkUSB3::Exception e) {
         logger->warning(e.Message());
     }
 
-    dev.RawFrameAcquired().SetUserData(this);
-    dev.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
+    dev1.RawFrameAcquired().SetUserData(this);
+    dev1.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
 
     ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create();
 
@@ -78,19 +78,19 @@ void Autofocus::start()
     if (!enabled) {
         return;
     }
-    if (dev.GetAcquire() && dev2.GetAcquire() ) {
+    if (dev1.GetAcquire() && dev2.GetAcquire() ) {
         stop();
     }
-    dev.SetEnableImageThread(false); // No image conversion needed
-    dev.SetFrameRate(frameRate);
-    dev.SetShutter(exposureTime_us);
+    dev1.SetEnableImageThread(false); // No image conversion needed
+    dev1.SetFrameRate(frameRate);
+    dev1.SetShutter(exposureTime_us);
 
-    dev2.SetEnableImageThread(false); // No image conversion needed
+    dev2.SetEnableImageThread(false); 
     dev2.SetFrameRate(frameRate);
     dev2.SetShutter(exposureTime_us);
 
     try {
-        dev.SetAcquire(true);
+        dev1.SetAcquire(true);
         dev2.SetAcquire(true);
     } catch (CAlkUSB3::InvalidOperationException e) {
         throw std::runtime_error("Alkeria: invalid operation");
@@ -99,7 +99,7 @@ void Autofocus::start()
 
 void Autofocus::stop()
 {
-    dev.SetAcquire(false);
+    dev1.SetAcquire(false);
     dev2.SetAcquire(false);
 }
 
@@ -113,11 +113,6 @@ void Autofocus::onFrameAcquired(void *userData)
         return;
 
     Autofocus af = static_cast<Autofocus *>(userData);
-    
-    if (!af->leftRoi.isValid() || !af->rightRoi.isValid()) {
-        emit af->newStatus("Invalid ROIs");
-        return;
-    }
 
     CAlkUSB3::IVideoSource &videoSource(af->dev);
     CAlkUSB3::IVideoSource &videoSource2(af->dev2);
@@ -128,7 +123,6 @@ void Autofocus::onFrameAcquired(void *userData)
 
     emit af->newImage(ptr);
     
-    QList<double> deltaList;
     try {
         deltaList = af->getDelta();
     } catch (std::runtime_error e) {
@@ -136,7 +130,7 @@ void Autofocus::onFrameAcquired(void *userData)
         return;
     }
 
-    QList<double> correctionList
+    QList<double> correctionList  
     correctionList.reserve(deltaList.size());
     for (i=0; i<deltaList.size(); i++){
       correctionList.append(af->m * deltaList[i]+af->q[i])
@@ -150,26 +144,40 @@ void Autofocus::onFrameAcquired(void *userData)
 
 QList<double> Autofocus::getDelta()
 {
-    CAlkUSB3::IVideoSource &videoSource(dev);
+    CAlkUSB3::IVideoSource &videoSource(dev1);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
     if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
     }
 
-    Mat img(ptr1.GetHeight(), ptr1.GetWidth(), CV_8U, (void *) ptr1.Data());
-    Mat img2(ptr2.GetHeight(), ptr2.GetWidth(), CV_8U, (void *) ptr2.Data()); 
+    int cd_height = ptr1.GetHeight()  // ptr1 and ptr2 will have same dimensions so...
+    int cd_width = ptr1.GetWidth()
+        
+    Mat img1(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
+    Mat img2(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
+
+    int x1 = static_cast<int>(cd_width*0.05)          // 5% of img_width
+    int x2 = static_cast<int>(cd_width*0.6)   // 60% of img_width
+    int y1 = static_cast<int>(cd_height*0.6)  // 60% of img_height
+    int y2 = static_cast<int>(cd_height*0.05)         // 5% of img_height
     
-    Mat couple1[2] = {img(Range(upLeftRoi1.top(), upLeftRoi1.bottom()), Range(upLeftRoi1.left(), upLeftRoi1.right())),
-                        img2(Range(upLeftRoi2.top(), upLeftRoi2.bottom()), Range(upLeftRoi2.left(), upLeftRoi2.right()))};
-    Mat couple2[2] = {img(Range(upRightRoi1.top(), upRightRoi1.bottom()), Range(upRightRoi1.left(), upRightRoi1.right())),
-                        img2(Range(upRightRoi2.top(), upRightRoi2.bottom()), Range(upRightRoi2.left(), upRightRoi2.right()))};
-    Mat couple3[2] = {img(Range(downLeftRoi1.top(), downLeftRoi1.bottom()), Range(downLeftRoi1.left(), downLeftRoi1.right())),
-                        img2(Range(downLeftRoi2.top(), downLeftRoi2.bottom()), Range(downLeftRoi2.left(), downLeftRoi2.right()))};
-    Mat couple4[2] = {img(Range(downRightRoi1.top(), downRightRoi1.bottom()), Range(downRightRoi1.left(), downRightRoi1.right())),
-                        img2(Range(downRightRoi2.top(), downRightRoi2.bottom()), Range(downRightRoi2.left(), downRightRoi2.right()))};     
+    int roi_width = static_cast<int>(cd_width*0.4)
+    int roi_height = static_cast<int>(cd_height*0.4)
+
+    cv::Rect roi1(x1, y1, roi_width, roi_height); // upperLeft ROI
+    cv::Rect roi2(x2, y1, roi_width, roi_height); // upperRight ROI
+    cv::Rect roi3(x1, y2, roi_width, roi_height); // buttomLeft ROI
+    cv::Rect roi4(x2, y2, roi_width, roi_height); // buttomRightROI
+
+    QList<cv::Mat> roi = {roi1, roi2, roi3, roi4}
+
+    Mat couple1[2] = {img(roi[0]),img2(roi[0])};  // delta1
+    Mat couple2[2] = {img(roi[1]),img2(roi[1])};  // delta2
+    Mat couple3[2] = {img(roi[2]),img2(roi[2])};  // delta3
+    Mat couple4[2] = {img(roi[3]),img2(roi[3])};  // delta4
 
     if (imageQualityEnabled) {
         if (!rapid_af::checkImageQuality(couple1[0], iqOptions)
@@ -203,14 +211,14 @@ QList<double> Autofocus::getDelta()
     }
     
     QList<double> shifts;
-    delta << shift1.x << shift2.x << shifts3.x << shifts4.x;
+    shifts << shift1.x << shift2.x << shifts3.x << shifts4.x;
     return shifts;
 }
 
 QList<double> Autofocus::inferCalibrationQ()
 {
-    q = -m * getDelta();
-    return q;
+    qList = -mList * deltaList["the alpha we leave for tomorrow"];
+    return qList;
 }
 
 rapid_af::AlignOptions Autofocus::getOptions() const
@@ -299,51 +307,60 @@ void Autofocus::setOutputEnabled(bool enable)
     outputEnabled = enable;
 }
 
-QRect Autofocus::getLeftRoi() const
-{
-    return leftRoi;
-}
 
-void Autofocus::setLeftRoi(const QRect &value)
+QList<QImage> Autofocus::getMergedImage()
 {
-    leftRoi = value;
-}
-
-QRect Autofocus::getRightRoi() const
-{
-    return rightRoi;
-}
-
-void Autofocus::setRightRoi(const QRect &value)
-{
-    rightRoi = value;
-}
-
-cv::Mat Autofocus::getLeftRoiImage() const
-{
-    return i1;
-}
-
-cv::Mat Autofocus::getRightRoiImage() const
-{
-    return i2;
-}
-
-QImage Autofocus::getMergedImage()
-{
-    Mat img;
-    int width = qMin(leftRoi.width(), rightRoi.width()) - 1;
-    int height = qMin(leftRoi.height(), rightRoi.height()) - 1;
+    QList<Mat> mergedImages;
+    Mat img1
+    int width = qMin(roi[0].width(), roi[0].width()) - 1;
+    int height = qMin(roi[0].height(), roi[0].height()) - 1;   // All ROIs have same dimensions
     try {
-        img = rapid_af::merge(i1(Range(0, height), Range(0, width)),
-                              i2(Range(0, height), Range(0, width)),
-                              shift);
+        img1 = rapid_af::merge(couple1[0](Range(0, height), Range(0, width)),
+                              couple1[1](Range(0, height), Range(0, width)),
+                              deltaList[0]);
+    } catch (cv::Exception e) {
+    };
+        
+    Mat rgb;
+    cv::cvtColor(img1, rgb, cv::COLOR_BGR2RGB);
+    QImage qimg1 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+    mergedImages.append(qimg1)
+        
+    Mat img2
+    try {
+        img2 = rapid_af::merge(couple2[0](Range(0, height), Range(0, width)),
+                              couple2[1](Range(0, height), Range(0, width)),
+                              deltaList[1]);
     } catch (cv::Exception e) {
     };
 
-    Mat rgb;
-    cv::cvtColor(img, rgb, cv::COLOR_BGR2RGB);
-    QImage qimg = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+    cv::cvtColor(img2, rgb, cv::COLOR_BGR2RGB);
+    QImage qimg2 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+    mergedImages.append(qimg2)
 
-    return qimg;
+    Mat img3
+    try {
+        img3 = rapid_af::merge(couple3[0](Range(0, height), Range(0, width)),
+                              couple3[1](Range(0, height), Range(0, width)),
+                              deltaList[2]);
+    } catch (cv::Exception e) {
+    };
+
+    cv::cvtColor(img3, rgb, cv::COLOR_BGR2RGB);
+    QImage qimg3 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+    mergedImages.append(qimg3)
+
+    Mat img4
+    try {
+        img4 = rapid_af::merge(couple4[0](Range(0, height), Range(0, width)),
+                              couple4[1](Range(0, height), Range(0, width)),
+                              deltaList[3]);
+    } catch (cv::Exception e) {
+    };
+
+    cv::cvtColor(img4, rgb, cv::COLOR_BGR2RGB);
+    QImage qimg4 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
+    mergedImages.append(qimg4)
+
+    return mergedImages;
 }
