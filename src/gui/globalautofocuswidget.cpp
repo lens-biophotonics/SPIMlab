@@ -431,11 +431,8 @@ void AutofocusWidget::setupUi()
     }
 
     QBoxLayout *vLayout1 = new QVBoxLayout();
-    QBoxLayout *hLayout = new QHBoxLayout();
-    hLayout->addStretch();
-    hLayout->addWidget(new QLabel("shift + drag: left ROI\t ctrl + shift + drag: right ROI"));
-    hLayout->addStretch();
-    vLayout1->addWidget(cd);
+    vLayout1->addWidget(cd1);
+    vLayout1->addWidget(cd2);
     vLayout1->addLayout(hLayout);
 
     QBoxLayout *vLayout2 = new QVBoxLayout();
@@ -465,29 +462,37 @@ void AutofocusWidget::setupUi()
     setLayout(hLayout);
 }
 
-void AutofocusWidget::onNewImage(CAlkUSB3::BufferPtr ptr1, CAlkUSB3::BufferPtr ptr2)
+void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
 {
-    this->ptr1 = ptr1;
+    this->ptr[0] = ptr[0];
     if (!isVisible()) {
         return;
     }
-    this->ptr2 = ptr2;
+    this->ptr[1] = ptr[1];
     if (!isVisible()) {
         return;
     }
 
-  CAlkUSB3::BufferPtr ptr
-  ptr = ptr1 + ptr2
-    cd->setPlotSize(QSize(ptr.GetWidth(), ptr.GetHeight()));
-
-    quint8 *buf = (quint8 *) (ptr.Data());
+    cd1->setPlotSize(QSize(ptr[0].GetWidth(), ptr[0].GetHeight()));
+    cd2->setPlotSize(QSize(ptr[1].GetWidth(), ptr[1].GetHeight()));
+    
+    quint8 *buf1 = (quint8 *) (ptr[0].Data());
     int c = 0;
-    for (size_t i = 0; i < ptr.GetWidth(); i += 1) {
-        for (size_t j = 0; j < ptr.GetHeight(); j += 1) {
-            mybufDouble[c] = buf[c];
+    for (size_t i = 0; i < ptr[0].GetWidth(); i += 1) {
+        for (size_t j = 0; j < ptr[0].GetHeight(); j += 1) {
+            mybufDouble1[c] = buf1[c];
             c++;
         }
     }
-
-    cd->getPlot()->setData(mybufDouble, c);
+    
+    quint8 *buf2 = (quint8 *) (ptr[1].Data());
+    int c = 0;
+    for (size_t i = 0; i < ptr[1].GetWidth(); i += 1) {
+        for (size_t j = 0; j < ptr[1].GetHeight(); j += 1) {
+            mybufDouble1[c] = buf1[c];
+            c++;
+        }
+    }
+    cd1->getPlot()->setData(mybufDouble1, c);
+    cd2->getPlot()->setData(mybufDouble1, c);
 }
