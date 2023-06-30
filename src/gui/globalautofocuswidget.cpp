@@ -21,6 +21,9 @@
 #define PLOT_WIDTH 1224
 #define PLOT_HEIGHT 1024 
 
+#ifndef AF_NCAMS
+#define AF_NCAMS 2
+#endif
 
 AutofocusWidget::AutofocusWidget(QWidget *parent)
     : QWidget(parent)
@@ -43,13 +46,18 @@ void AutofocusWidget::setupUi()
 
     Autofocus *af = spim().getAutoFocus();
     rapid_af::AlignOptions opt = af->getOptions();
-    CameraDisplay *cd1 = new CameraDisplay();
-    cd->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
-    cd->setMinimumSize(600, 600);
 
-    //connect(afAlpha, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
+    QHBoxLayout *cameraHLayout = new QHBoxLayout();
+    cd1 = new AutofocusCamDisplayWidget();
+    cd2 = new AutofocusCamDisplayWidget();
+    cd1->setTitle(QString("Cam 1");
+    cd2->setTitle(QString("Cam 2");
+    cd1->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
+    cd2->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
+    cd1->setMinimumSize(600, 600);
+    cd2->setMinimumSize(600, 600);
 
-    pmw = new PixmapWidget();
+    connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
 
     QGridLayout *grid = new QGridLayout();
     QGroupBox *generalOptionsGb = new QGroupBox("RAPID options");
