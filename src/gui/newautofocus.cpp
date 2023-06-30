@@ -129,12 +129,10 @@ void Autofocus::onFrameAcquired(void *userData)
         emit af->newStatus(e.what());
         return;
     }
-
-    QList<double> correctionList  
-    correctionList.reserve(deltaList.size());
-    for (i=0; i<deltaList.size(); i++){
-      correctionList.append(af->m * deltaList[i]+af->q[i])
-    }
+    double alpha = af->mAlpha *mean().deltaList() + af->qAlpha;
+    double beta1 = af->mbeta1 *(deltaList[1]-deltaList[0] + deltaList[3]-deltaList[2])/2 + af->qbeta1;
+    double beta2 = af->mbeta2 *(deltaList[0]-deltaList[2] + deltaList[1]-deltaList[3])/2 + af->qbeta2;
+    QList<double> correctionList = {alpha, beta1, beta2};
         
     if (af->isOutputEnabled()) {
         emit af->newCorrection(correctionList);
@@ -215,10 +213,22 @@ QList<double> Autofocus::getDelta()
     return shifts;
 }
 
-QList<double> Autofocus::inferCalibrationQ()
-{
-    qList = -mList * deltaList["the alpha we leave for tomorrow"];
-    return qList;
+double Autofocus::inferCalibrationQAlpha()
+{    
+    qAlpha = -mAlpha* correction[0];
+    return qAlpha;
+}
+
+double Autofocus::inferCalibrationQBeta1()
+{    
+    qBeta1 = -mBeta1* correction[1];
+    return qBeta1;
+}
+
+double Autofocus::inferCalibrationQBeta2()
+{    
+    qBeta2 = -mBeta2* correction[2];
+    return qBeta2;
 }
 
 rapid_af::AlignOptions Autofocus::getOptions() const
@@ -271,20 +281,46 @@ void Autofocus::setFrameRate(double value)
     frameRate = value;
 }
 
-double Autofocus::getCalibration_m() const
+double Autofocus::getCalibration_mAlpha() const
 {
-    return m;
+    return mAlpha;
+}
+void Autofocus::setCalibrationAlpha(double mAlpha, double qAlpha)
+{
+    this->mAlpha = mAlpha;
+    this->qAlpha = qAlpha;
+}
+QList<double> Autofocus::getCalibration_qAlpha() const
+{     
+    return qAlpha;
 }
 
-void Autofocus::setCalibration(double m, QList<double> q)
+double Autofocus::getCalibration_mBeta1() const
 {
-    this->m = m;
-    this->q = q;
+    return mBeta1;
+}
+void Autofocus::setCalibrationBeta1(double mBeta1, double qBeta1)
+{
+    this->mBeta1 = mBeta1;
+    this->qBeta1 = qBeta1;
+}
+QList<double> Autofocus::getCalibration_qBeta1() const
+{     
+    return qBeta1;
 }
 
-QList<double> Autofocus::getCalibration_q() const
+double Autofocus::getCalibration_mBeta2() const
 {
-    return q;
+    return mBeta2;
+}
+void Autofocus::setCalibrationBeta2(double mBeta2, double qBeta2)
+{
+    this->mBeta2 = mBeta2;
+    this->qBeta2 = qBeta2;
+}
+QList<double> Autofocus::getCalibration_qBeta2() const
+{     
+    return qBeta2;
 }
 
 bool Autofocus::isEnabled() const
