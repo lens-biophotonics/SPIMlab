@@ -123,6 +123,8 @@ void Autofocus::onFrameAcquired(void *userData)
 
     emit af->newImage(ptr);
     
+    QList<cv::Point2f> deltaList;
+    
     try {
         deltaList = af->getDelta();
     } catch (std::runtime_error e) {
@@ -345,7 +347,15 @@ void Autofocus::setOutputEnabled(bool enable)
 
 
 QList<QImage> Autofocus::getMergedImage()
-{
+{     
+    QList<cv::Point2f> deltaList;
+    try {
+        deltaList = af->getDelta();
+    } catch (std::runtime_error e) {
+        emit af->newStatus(e.what());
+        return;
+    }
+    
     QList<Mat> mergedImages;
     Mat img1
     int width = qMin(roi[0].width(), roi[0].width()) - 1;
