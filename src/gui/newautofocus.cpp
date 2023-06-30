@@ -153,19 +153,19 @@ QList<double> Autofocus::getDelta()
         throw std::runtime_error("No frame was received");
     }
 
-    cd_height = ptr1.GetHeight()  // ptr1 and ptr2 will have same dimensions so...
-    cd_width = ptr1.GetWidth()
+    cd_height = ptr1.GetHeight();  // ptr1 and ptr2 will have same dimensions so...
+    cd_width = ptr1.GetWidth();
         
     Mat img1(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
     Mat img2(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
 
-    int x1 = static_cast<int>(cd_width*0.05)          // 5% of img_width
-    int x2 = static_cast<int>(cd_width*0.6)   // 60% of img_width
-    int y1 = static_cast<int>(cd_height*0.6)  // 60% of img_height
-    int y2 = static_cast<int>(cd_height*0.05)         // 5% of img_height
+    int x1 = static_cast<int>(cd_width*0.05);  // 5% of img_width
+    int x2 = static_cast<int>(cd_width*0.6);   // 60% of img_width
+    int y1 = static_cast<int>(cd_height*0.6);  // 60% of img_height
+    int y2 = static_cast<int>(cd_height*0.05); // 5% of img_height
     
-    int roi_width = static_cast<int>(cd_width*0.4)
-    int roi_height = static_cast<int>(cd_height*0.4)
+    int roi_width = static_cast<int>(cd_width*0.4);
+    int roi_height = static_cast<int>(cd_height*0.4);
 
     cv::Rect roi1(x1, y1, roi_width, roi_height); // upperLeft ROI
     cv::Rect roi2(x2, y1, roi_width, roi_height); // upperRight ROI
