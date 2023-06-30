@@ -41,22 +41,13 @@ void AutofocusWidget::setupUi()
     setEnabled(false);
     spim().getState(SPIM::STATE_READY)->assignProperty(this, "enabled", true);
 
-    Autofocus *afAlpha = spim().getAutoFocus(alpha);
-    rapid_af::AlignOptions opt = afAlpha->getOptions();
-    cd = new globalAutofocusCamDisplayWidget();
+    Autofocus *af = spim().getAutoFocus();
+    rapid_af::AlignOptions opt = af->getOptions();
+    CameraDisplay *cd1 = new CameraDisplay();
     cd->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
     cd->setMinimumSize(600, 600);
-    cd->setImage1(invTransformRect(afAlpha->getImage1()));
-    cd->setImage2(invTransformRect(afAlpha->getImage2()));
 
-    connect(cd, &AutofocusCamDisplayWidget::newImage1, [=](QRectF rect) {
-        afAlpha->setImage1(transformRect(rect));
-    });
-    connect(cd, &AutofocusCamDisplayWidget::newImage2, [=](QRectF rect) {
-        afAlpha->setImage2(transformRect(rect));
-    });
-
-    connect(afAlpha, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
+    //connect(afAlpha, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
 
     pmw = new PixmapWidget();
 
@@ -122,8 +113,8 @@ void AutofocusWidget::setupUi()
     grid->addWidget(qSratioRadius, row++, 1);
     grid->addWidget(new QLabel("Spectral ratio thickness"), row, 0);
     grid->addWidget(qSratioThickness, row++, 1);
-    qualityGb->setChecked(afAlpha->isImageQualityEnabled());
-    rapid_af::ImageQualityOptions iqOpt = afAlpha->getIqOptions();
+    qualityGb->setChecked(af->isImageQualityEnabled());
+    rapid_af::ImageQualityOptions iqOpt = af->getIqOptions();
     qSratio->setDecimals(4);
 
     qSigma->setToolTip("minimum standard deviation");
@@ -215,8 +206,8 @@ void AutofocusWidget::setupUi()
     mSb->setDecimals(6);
     qSb->setDecimals(6);
 
-    mSb->setValue(afAlpha->getCalibration_m());
-    qSb->setValue(afAlpha->getCalibration_q());
+    mSb->setValue(af->getCalibration_m());
+    qSb->setValue(af->getCalibration_q());
 
     grid = new QGridLayout();
     QGroupBox *calibrationGb = new QGroupBox("Calibration");
@@ -230,7 +221,7 @@ void AutofocusWidget::setupUi()
     grid->addWidget(setQPb, row++, 0, 1, 2);
     connect(setQPb, &QPushButton::clicked, [=]() {
         try {
-            qSb->setValue(afAlpha->inferCalibrationQ());
+            qSb->setValue(af->inferCalibrationQ());
         } catch (std::runtime_error e) {
             QMessageBox::critical(this, "Error", e.what());
         }
@@ -243,7 +234,7 @@ void AutofocusWidget::setupUi()
     QCheckBox *enableCb = new QCheckBox("Enable");
     QCheckBox *outputEnableCb = new QCheckBox("Output enable");
     enableCb->setChecked(af->isEnabled());
-    outputEnableCb->setChecked(afAlpha->isOutputEnabled());
+    outputEnableCb->setChecked(af->isOutputEnabled());
     connect(enableCb, &QCheckBox::toggled, [=](bool checked) {
         outputEnableCb->setEnabled(checked);
     });
@@ -253,11 +244,24 @@ void AutofocusWidget::setupUi()
     grid->addWidget(new QLabel("Status: "), row++, 0);
     grid->addWidget(statusLabel, row++, 0);
     autofocusGb->setLayout(grid);
-
+    
+    PixmapWidget* pmw = new PixmapWidget[4];
+    QList<QImage> mergedList 
+    try{
+        mergedList=af->getMergedImage(); //here we have a list with 4 images
+    } catch (std::runtime_error e) {
+        emit af->newStatus(e.what());
+        return;
+    }   
+    
     connect(af, &Autofocus::newStatus, [=](QString s) {
         statusLabel->setText(s);
-        if (isVisible() && s.startsWith("dx")) {
-            pmw->setPixmap(QPixmap::fromImage(afAlpha->getMergedImage()));
+        if (isVisible() && s.startsWith("dx")) 
+        {
+            for (i=0,i<3,i++)
+                {
+                    pmw[i]->setPixmap(QPixmap::fromImage(mergedList[i])); //we convert them to QPixmap
+                } 
         }
     });
 
@@ -289,7 +293,7 @@ void AutofocusWidget::setupUi()
         }
 
         try {
-            cv::imwrite(fileName.toStdString(), afAlpha->getImage1());
+            cv::imwrite(fileName.toStdString(), af->getImage1());
         } catch (cv::Exception e) {
             QMessageBox::critical(this, "Error", e.what());
         }
@@ -305,7 +309,7 @@ void AutofocusWidget::setupUi()
         }
 
         try {
-            cv::imwrite(fileName.toStdString(), afAlpha->getImage2());
+            cv::imwrite(fileName.toStdString(), af->getImage2());
         } catch (cv::Exception e) {
             QMessageBox::critical(this, "Error", e.what());
         }
@@ -336,7 +340,7 @@ void AutofocusWidget::setupUi()
         opt.canny_alpha = cannyAlpha->value();
         opt.canny_beta = cannyBeta->value();
 
-        afAlpha->setOptions(opt);
+        af->setOptions(opt);
 
         rapid_af::ImageQualityOptions iqOpt;
         iqOpt.sigma_threshold = qSigma->value();
@@ -344,18 +348,18 @@ void AutofocusWidget::setupUi()
         iqOpt.sratio_radius = qSratioRadius->value();
         iqOpt.sratio_thickness = qSratioThickness->value();
 
-        afAlpha->setImageQualityEnabled(qualityGb->isChecked());
-        afAlpha->setIqOptions(iqOpt);
+        af->setImageQualityEnabled(qualityGb->isChecked());
+        af->setIqOptions(iqOpt);
 
-        afAlpha->setCalibration(mSb->value(), qSb->value());         //tf did i do?
-        afAlpha->setOutputEnabled(outputEnableCb->isChecked());
+        af->setCalibration(mSb->value(), qSb->value());         //tf did i do?
+        af->setOutputEnabled(outputEnableCb->isChecked());
     };
 
     auto applyOptionsAndRestart = [=]() {
-        afAlpha->setExposureTime_us(exposureTimeSb->value());
-        afAlpha->setFrameRate(frameRateSb->value());
+        af->setExposureTime_us(exposureTimeSb->value());
+        af->setFrameRate(frameRateSb->value());
 
-        afAlpha->setEnabled(enableCb->isChecked());
+        af->setEnabled(enableCb->isChecked());
 
         spim().restartAutofocus();
     };
