@@ -201,36 +201,88 @@ void AutofocusWidget::setupUi()
     grid->addWidget(new QLabel("Frame rate"), row, 0);
     grid->addWidget(frameRateSb, row++, 1);
 
-    QDoubleSpinBox *mSb = new QDoubleSpinBox();
-    QDoubleSpinBox *qSb = new QDoubleSpinBox();
+    QDoubleSpinBox *mSbAlpha = new QDoubleSpinBox();
+    QDoubleSpinBox *qSbAlpha = new QDoubleSpinBox();  
+    QDoubleSpinBox *mSbBeta1 = new QDoubleSpinBox();
+    QDoubleSpinBox *qSbBeta1 = new QDoubleSpinBox();   
+    QDoubleSpinBox *mSbBeta2 = new QDoubleSpinBox();
+    QDoubleSpinBox *qSbBeta2 = new QDoubleSpinBox();
 
-    mSb->setRange(-1e10, 1e10);
-    qSb->setRange(-1e10, 1e10);
-
-    mSb->setDecimals(6);
-    qSb->setDecimals(6);
-
-    mSb->setValue(af->getCalibration_m());
-    qSb->setValue(af->getCalibration_q());
+    mSbAlpha->setRange(-1e10, 1e10);
+    qSbAlpha->setRange(-1e10, 1e10);
+    mSbBeta1->setRange(-1e10, 1e10);
+    qSbBeta1->setRange(-1e10, 1e10);
+    mSbBeta2->setRange(-1e10, 1e10);
+    qSbBeta2->setRange(-1e10, 1e10);
+    
+    mSbAlpha->setDecimals(6);
+    qSbAlpha->setDecimals(6);
+    mSbBeta1->setDecimals(6);
+    qSbBeta1->setDecimals(6);
+    mSbBeta2->setDecimals(6);
+    qSbBeta2->setDecimals(6);
+    
+    mSbAlpha->setValue(af->getCalibration_mAlpha());
+    qSbAlpha->setValue(af->getCalibration_qAlpha());
+    mSbBeta1->setValue(af->getCalibration_mBeta1());
+    qSbBeta1->setValue(af->getCalibration_qBeta1());
+    mSbBeta2->setValue(af->getCalibration_mBeta2());
+    qSbBeta2->setValue(af->getCalibration_qBeta2());
 
     grid = new QGridLayout();
-    QGroupBox *calibrationGb = new QGroupBox("Calibration");
-    calibrationGb->setLayout(grid);
-    QPushButton *setQPb = new QPushButton("Set Q from correction");
+    QGroupBox *calibrationGbAlpha = new QGroupBox("Alpha Calibration");
+    calibrationGbAlpha->setLayout(grid);
+    QPushButton *setQPbAlpha = new QPushButton("Set Q from correction");
     row = 0;
-    grid->addWidget(new QLabel("m"), row, 0);
-    grid->addWidget(mSb, row++, 1);
-    grid->addWidget(new QLabel("q"), row, 0);
-    grid->addWidget(qSb, row++, 1);
-    grid->addWidget(setQPb, row++, 0, 1, 2);
-    connect(setQPb, &QPushButton::clicked, [=]() {
+    grid->addWidget(new QLabel("m alpha"), row, 0);
+    grid->addWidget(mSbAlpha, row++, 1);
+    grid->addWidget(new QLabel("q alpha"), row, 0);
+    grid->addWidget(qSbAlpha, row++, 1);
+    grid->addWidget(setQPbAlpha, row++, 0, 1, 2);
+    connect(setQPbAlpha, &QPushButton::clicked, [=]() {
         try {
-            qSb->setValue(af->inferCalibrationQ());
+            qSbAlpha->setValue(af->inferCalibrationQAlpha());
         } catch (std::runtime_error e) {
             QMessageBox::critical(this, "Error", e.what());
         }
     });
 
+    grid = new QGridLayout();
+    QGroupBox *calibrationGbBeta1 = new QGroupBox("Beta 1 Calibration");
+    calibrationGbBeta1->setLayout(grid);
+    QPushButton *setQPbBeta1 = new QPushButton("Set Q from correction");
+    row = 0;
+    grid->addWidget(new QLabel("m beta 1"), row, 0);
+    grid->addWidget(mSbBeta1, row++, 1);
+    grid->addWidget(new QLabel("q beta 1"), row, 0);
+    grid->addWidget(qSbBeta1, row++, 1);
+    grid->addWidget(setQPbBeta1, row++, 0, 1, 2);
+    connect(setQPbBeta1, &QPushButton::clicked, [=]() {
+        try {
+            qSbBeta1->setValue(af->inferCalibrationQBeta1());
+        } catch (std::runtime_error e) {
+            QMessageBox::critical(this, "Error", e.what());
+        }
+    });
+
+    grid = new QGridLayout();
+    QGroupBox *calibrationGbBeta2 = new QGroupBox("Beta 2 Calibration");
+    calibrationGbBeta2->setLayout(grid);
+    QPushButton *setQPbBeta2 = new QPushButton("Set Q from correction");
+    row = 0;
+    grid->addWidget(new QLabel("m beta 2"), row, 0);
+    grid->addWidget(mSbBeta2, row++, 1);
+    grid->addWidget(new QLabel("q beta 2"), row, 0);
+    grid->addWidget(qSbBeta2, row++, 1);
+    grid->addWidget(setQPbBeta2, row++, 0, 1, 2);
+    connect(setQPbBeta2, &QPushButton::clicked, [=]() {
+        try {
+            qSbBeta2->setValue(af->inferCalibrationQBeta2());
+        } catch (std::runtime_error e) {
+            QMessageBox::critical(this, "Error", e.what());
+        }
+    });
+    
     grid = new QGridLayout();
     QGroupBox *autofocusGb = new QGroupBox("Autofocus");
     autofocusGb->setLayout(grid);
@@ -452,7 +504,9 @@ void AutofocusWidget::setupUi()
 
     QBoxLayout *vLayout4 = new QVBoxLayout();
     vLayout4->addWidget(cameraGb);
-    vLayout4->addWidget(calibrationGb);
+    vLayout4->addWidget(calibrationGbAlpha);
+    vLayout4->addWidget(calibrationGbBeta1);
+    vLayout4->addWidget(calibrationGbBeta2);
     vLayout4->addWidget(generalOptionsGb);
     vLayout4->addStretch();
     vLayout4->addWidget(autofocusGb);
@@ -496,9 +550,9 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
     int c = 0;
     for (size_t i = 0; i < ptr[1].GetWidth(); i += 1) {
         for (size_t j = 0; j < ptr[1].GetHeight(); j += 1) {
-            mybufDouble1[c] = buf1[c];
+            mybufDouble2[c] = buf2[c];
             c++;
         }
     }
-    cd2->getPlot()->setData(mybufDouble1, c);
+    cd2->getPlot()->setData(mybufDouble2, c);
 }
