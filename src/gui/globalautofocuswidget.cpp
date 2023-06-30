@@ -21,9 +21,6 @@
 #define PLOT_WIDTH 1224
 #define PLOT_HEIGHT 1024 
 
-#ifndef AF_NCAMS
-#define AF_NCAMS 2
-#endif
 
 AutofocusWidget::AutofocusWidget(QWidget *parent)
     : QWidget(parent)
@@ -47,7 +44,6 @@ void AutofocusWidget::setupUi()
     Autofocus *af = spim().getAutoFocus();
     rapid_af::AlignOptions opt = af->getOptions();
 
-    QHBoxLayout *cameraHLayout = new QHBoxLayout();
     cd1 = new AutofocusCamDisplayWidget();
     cd2 = new AutofocusCamDisplayWidget();
     cd1->setTitle(QString("Cam 1");
@@ -426,8 +422,8 @@ void AutofocusWidget::setupUi()
 
     QBoxLayout *vLayout1 = new QVBoxLayout();
     vLayout1->addWidget(cd1);
+    vLayout1->addStretch();
     vLayout1->addWidget(cd2);
-    vLayout1->addLayout(hLayout);
     
     QBoxLayout *vLayout2 = new QVBoxLayout();
     QBoxLayout *hLayout1 = new QHBoxLayout();
