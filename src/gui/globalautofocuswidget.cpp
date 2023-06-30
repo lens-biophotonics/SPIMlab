@@ -537,22 +537,22 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
     cd2->setPlotSize(QSize(ptr[1].GetWidth(), ptr[1].GetHeight()));
     
     quint8 *buf1 = (quint8 *) (ptr[0].Data());
-    int c = 0;
+    int c1 = 0;
     for (size_t i = 0; i < ptr[0].GetWidth(); i += 1) {
         for (size_t j = 0; j < ptr[0].GetHeight(); j += 1) {
-            mybufDouble1[c] = buf1[c];
+            mybufDouble1[c1] = buf1[c1];
             c++;
         }
     }
-    cd1->getPlot()->setData(mybufDouble1, c);    
+    cd1->getPlot()->setData(mybufDouble1, c1);    
     
     quint8 *buf2 = (quint8 *) (ptr[1].Data());
-    int c = 0;
+    int c2 = 0;
     for (size_t i = 0; i < ptr[1].GetWidth(); i += 1) {
         for (size_t j = 0; j < ptr[1].GetHeight(); j += 1) {
-            mybufDouble2[c] = buf2[c];
+            mybufDouble2[c2] = buf2[c2];
             c++;
         }
     }
-    cd2->getPlot()->setData(mybufDouble2, c);
+    cd2->getPlot()->setData(mybufDouble2, c2);
 }
