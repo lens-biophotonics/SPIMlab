@@ -47,6 +47,8 @@ public:
     bool isImageQualityEnabled() const;
     void setImageQualityEnabled(bool enable);
 
+    QList<double> correctionList;
+
     int cd_width;
     int cd_height;
 
@@ -75,8 +77,6 @@ private:
     bool enabled = true;
     bool outputEnabled = true;
     bool imageQualityEnabled = true;
-
-    QList<double> correctionList
 
     static void onFrameAcquired(void *userData);
     QList<double> getDelta();
