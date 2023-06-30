@@ -28,7 +28,7 @@ private:
     AutofocusCamDisplayWidget *cd2;
     PixmapWidget *pmw[4];
     double *mybufDouble1;
-    double *mybufDouble1;
+    double *mybufDouble2;
 };
 
 #endif // AUTOFOCUSWIDGET_H
