@@ -15,12 +15,20 @@ public:
     double getFrameRate() const;
     void setFrameRate(double value);
 
-    double getCalibration_m() const;
-    QList<double> getCalibration_q() const;
+    double getCalibration_mAlpha() const;
+    double getCalibration_qAlpha() const;
+    double getCalibration_mBeta1() const;
+    double getCalibration_qBeta1() const;
+    double getCalibration_mBeta2() const;
+    double getCalibration_qBeta2() const;
 
-    void setCalibration(double m, QList<double> q);
+    void setCalibrationAlpha(double mAlpha, double qAlpha);
+    void setCalibrationBeta1(double mBeta1, double qBeta1);
+    void setCalibrationBeta2(double mBeta2, double qBeta2);
 
-    QList<double> inferCalibrationQ();
+    QList<double> inferCalibrationQAlpha();
+    QList<double> inferCalibrationQBeta1();
+    QList<double> inferCalibrationQBeta2();
 
     bool isEnabled() const;
     void setEnabled(bool enable);
@@ -51,15 +59,19 @@ private:
     /**
      * @brief This object controls the camera.
      */
-    CAlkUSB3::ICeleraCamera &dev;
+    CAlkUSB3::ICeleraCamera &dev1;
     CAlkUSB3::ICeleraCamera &dev2;
     rapid_af::AlignOptions options;
     rapid_af::ImageQualityOptions iqOptions;
 
     double exposureTime_us = 10000;
     double frameRate = 5;
-    double m = 0;
-    double q = 0;
+    double mAlpha = 0;
+    double qAlpha = 0;
+    double mBeta1 = 0;
+    double qBeta1 = 0;
+    double mBeta2 = 0;
+    double qBeta2 = 0;
     bool enabled = true;
     bool outputEnabled = true;
     bool imageQualityEnabled = true;
