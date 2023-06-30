@@ -76,7 +76,7 @@ private:
     bool outputEnabled = true;
     bool imageQualityEnabled = true;
 
-    QList<cv::Point2f> deltaList;
+    QList<double> correctionList
 
     static void onFrameAcquired(void *userData);
     QList<double> getDelta();
