@@ -114,7 +114,7 @@ void Autofocus::onFrameAcquired(void *userData)
 
     Autofocus af = static_cast<Autofocus *>(userData);
 
-    CAlkUSB3::IVideoSource &videoSource(af->dev);
+    CAlkUSB3::IVideoSource &videoSource(af->dev1);
     CAlkUSB3::IVideoSource &videoSource2(af->dev2);
     CAlkUSB3::BufferPtr ptr1 = videoSource.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
@@ -174,10 +174,10 @@ QList<double> Autofocus::getDelta()
 
     QList<cv::Mat> roi = {roi1, roi2, roi3, roi4}
 
-    Mat couple1[2] = {img(roi[0]),img2(roi[0])};  // delta1
-    Mat couple2[2] = {img(roi[1]),img2(roi[1])};  // delta2
-    Mat couple3[2] = {img(roi[2]),img2(roi[2])};  // delta3
-    Mat couple4[2] = {img(roi[3]),img2(roi[3])};  // delta4
+    Mat couple1[2] = {img1(roi[0]),img2(roi[0])};  // delta1
+    Mat couple2[2] = {img1(roi[1]),img2(roi[1])};  // delta2
+    Mat couple3[2] = {img1(roi[2]),img2(roi[2])};  // delta3
+    Mat couple4[2] = {img1(roi[3]),img2(roi[3])};  // delta4
 
     if (imageQualityEnabled) {
         if (!rapid_af::checkImageQuality(couple1[0], iqOptions)
@@ -345,6 +345,45 @@ void Autofocus::setOutputEnabled(bool enable)
     outputEnabled = enable;
 }
 
+cv::Mat Autofocus::getUpLeftRoiImagecam1() const
+{
+    return img1(roi[0]);
+}
+
+cv::Mat Autofocus::getUpLeftRoiImagecam2() const
+{
+    return img2(roi[0]);
+}
+
+cv::Mat Autofocus::getUpRightRoiImagecam1() const
+{
+    return img1(roi[1]);
+}
+
+cv::Mat Autofocus::getUpRightRoiImagecam2() const
+{
+    return img2(roi[1]);
+}
+
+cv::Mat Autofocus::getDownLeftRoiImagecam1() const
+{
+    return img1(roi[2]);
+}
+
+cv::Mat Autofocus::getDownLeftRoiImagecam2() const
+{
+    return img2(roi[2]);
+}
+
+cv::Mat Autofocus::getDownRightRoiImagecam1() const
+{
+    return img1(roi[3]);
+}
+
+cv::Mat Autofocus::getDownRightRoiImagecam2() const
+{
+    return img2(roi[3]);
+}
 
 QList<QImage> Autofocus::getMergedImage()
 {     
