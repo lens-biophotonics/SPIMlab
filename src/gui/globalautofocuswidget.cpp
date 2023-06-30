@@ -46,8 +46,8 @@ void AutofocusWidget::setupUi()
 
     cd1 = new AutofocusCamDisplayWidget();
     cd2 = new AutofocusCamDisplayWidget();
-    cd1->setTitle(QString("Cam 1");
-    cd2->setTitle(QString("Cam 2");
+    cd1->setTitle(QString("Cam 1"));
+    cd2->setTitle(QString("Cam 2"));
     cd1->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
     cd2->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
     cd1->setMinimumSize(600, 600);
@@ -250,7 +250,7 @@ void AutofocusWidget::setupUi()
     autofocusGb->setLayout(grid);
     
     pmw = new PixmapWidget[4];
-    QList<QImage> mergedList 
+    QList<QImage> mergedList;
     try{
         mergedList=af->getMergedImage(); //here we have a list with 4 images
     } catch (std::runtime_error e) {
@@ -262,7 +262,7 @@ void AutofocusWidget::setupUi()
         statusLabel->setText(s);
         if (isVisible() && s.startsWith("dx")) 
         {
-            for (i=0,i<3,i++)
+            for (int i=0,i<3,i++)
                 {
                     pmw[i]->setPixmap(QPixmap::fromImage(mergedList[i])); //we convert them to QPixmap
                 } 
@@ -490,6 +490,7 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
             c++;
         }
     }
+    cd1->getPlot()->setData(mybufDouble1, c);    
     
     quint8 *buf2 = (quint8 *) (ptr[1].Data());
     int c = 0;
@@ -499,6 +500,5 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
             c++;
         }
     }
-    cd1->getPlot()->setData(mybufDouble1, c);
     cd2->getPlot()->setData(mybufDouble1, c);
 }
