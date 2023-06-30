@@ -249,7 +249,7 @@ void AutofocusWidget::setupUi()
     grid->addWidget(statusLabel, row++, 0);
     autofocusGb->setLayout(grid);
     
-    PixmapWidget* pmw = new PixmapWidget[4];
+    pmw = new PixmapWidget[4];
     QList<QImage> mergedList 
     try{
         mergedList=af->getMergedImage(); //here we have a list with 4 images
