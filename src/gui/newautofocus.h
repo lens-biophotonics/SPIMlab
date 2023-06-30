@@ -1,3 +1,12 @@
+#ifndef AUTOFOCUS_H
+#define AUTOFOCUS_H
+
+#include <ICeleraCamera.h>
+
+#include <QObject>
+
+#include <rapid-af.h>
+
 class Autofocus : public QObject
 {
     Q_OBJECT
