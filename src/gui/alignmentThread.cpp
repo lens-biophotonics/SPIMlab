@@ -30,6 +30,20 @@ public:
     }
 
 private:
+    void run() override
+    {
+        try {
+            shift = rapid_af::align(sourceImage1, sourceImage2, options, &ok);
+        } catch (cv::Exception& e) {
+            qWarning() << e.what();
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+
+        if (!ok) {
+            throw std::runtime_error("Agreement threshold not met");
+        }
+    }
+
     cv::Mat sourceImage1;
     cv::Mat sourceImage2;
 
@@ -41,15 +55,41 @@ private:
 };
 
 int main()
-{
-    // Create your source image pairs (img1, img2)
-
+{    
+    sourceImages = autofocus->getRois()
+    
     rapid_af::AlignOptions options; // Initialize your alignment options
+    bool ok1 = false
+    bool ok2= false
+    AlignmentThread thread1 (sourceImages[0][0], sourceImages[0][1], options);
+    AlignmentThread thread2(sourceImages[1][0], sourceImages[1][1], options);
+    thread1.start(); 
+    thread2.start();
+    {
+        try {
+        shift1 = rapid_af::align(sourceImages[0][0], sourceImages[0][1], options, &ok1);
+    } catch (cv::Exception e) {
+        logger->warning(e.what());
+        throw std::runtime_error("OpenCV exception (see log)");
+    }
+        
+        try {
+        shift2 = rapid_af::align(sourceImages[1][0], sourceImages[1][1], options, &ok2);
+    } catch (cv::Exception e) {
+        logger->warning(e.what());
+        throw std::runtime_error("OpenCV exception (see log)");
+    }
+        
+    thread1.start(); 
+    thread2.start();
 
-    AlignmentThread thread1(img1, img2, options);
-    AlignmentThread thread2(img3, img4, options);
-    AlignmentThread thread3(img5, img6, options);
-    AlignmentThread thread4(img7, img8, options);
+    return 0;}
+
+
+    }
+    AlignmentThread thread2(sourceImages[1][0], sourceImages[1][1], options);
+    AlignmentThread thread3(sourceImages[2][0], sourceImages[2][1], options);
+    AlignmentThread thread4(sourceImages[3][0], sourceImages[3][1], options);
 
     thread1.start();
     thread2.start();
