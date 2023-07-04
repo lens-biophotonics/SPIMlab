@@ -63,6 +63,9 @@ public:
 
     QList<cv::Mat> roi;
 
+    cv::Mat getImage1() const;
+    cv::Mat getImage2() const;
+
 signals:
     void newImage(QList<CAlkUSB3::BufferPtr>);
     void newStatus(QString);
@@ -91,6 +94,9 @@ private:
 
     static void onFrameAcquired(void *userData);
     QList<double> getDelta();
+
+    cv::Mat img1;
+    cv::Mat img2;
 };
 
 #endif // AUTOFOCUS_H
