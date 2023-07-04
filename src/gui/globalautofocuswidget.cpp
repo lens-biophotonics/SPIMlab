@@ -56,16 +56,7 @@ void AutofocusWidget::setupUi()
     
     
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
-    
-    QPainter(this);
-    
-    painter.drawPixmap( roi[0], cd);
-    
-    for (i=0;i<4;i++){
-        int x = roi[i].x;
-        int y = roi[i].y;
-        
-    }
+
     cv::rectangle(cd1,roi[0],BLUE,1,8);  //drawing empty recangles
     cv::rectangle(cd2,roi[0],BLUE,1,8); 
     cv::rectangle(cd1,roi[1],RED,1,8);
@@ -562,7 +553,7 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
     for (size_t i = 0; i < ptr[0].GetWidth(); i += 1) {
         for (size_t j = 0; j < ptr[0].GetHeight(); j += 1) {
             mybufDouble1[c1] = buf1[c1];
-            c++;
+            c1++;
         }
     }
     cd1->getPlot()->setData(mybufDouble1, c1);    
@@ -572,16 +563,9 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
     for (size_t i = 0; i < ptr[1].GetWidth(); i += 1) {
         for (size_t j = 0; j < ptr[1].GetHeight(); j += 1) {
             mybufDouble2[c2] = buf2[c2];
-            c++;
+            c2++;
         }
     }
     cd2->getPlot()->setData(mybufDouble2, c2);
 }
 
-
-void QwtPlotGrid::setMajorPen(BLUE,1,style = Qt::SolidLine){
-    
-}
-void QwtPlotGrid::setMinorPen()(0){
-    
-}
