@@ -170,7 +170,7 @@ QList<double> Autofocus::getDelta()
     cv::Rect roi1(x1, y1, roi_width, roi_height); // upperLeft ROI
     cv::Rect roi2(x2, y1, roi_width, roi_height); // upperRight ROI
     cv::Rect roi3(x1, y2, roi_width, roi_height); // buttomLeft ROI
-    cv::Rect roi4(x2, y2, roi_width, roi_height); // buttomRightROI
+    cv::Rect roi4(x2, y2, roi_width, roi_height); // buttomRight ROI
 
     roi = {roi1, roi2, roi3, roi4}
 
@@ -197,6 +197,9 @@ QList<double> Autofocus::getDelta()
     Point2f shift2;
     Point2f shift3;
     Point2f shift4;
+
+
+    
     try {
         shift1 = rapid_af::align(couple1[0], couple1[1], options, &ok);
         shift2 = rapid_af::align(couple2[0], couple2[1], options, &ok);
