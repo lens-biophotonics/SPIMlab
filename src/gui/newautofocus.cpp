@@ -156,8 +156,8 @@ QList<double> Autofocus::getDelta()
     cd_height = ptr1.GetHeight();  // ptr1 and ptr2 will have same dimensions so...
     cd_width = ptr1.GetWidth();
         
-    Mat img1(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
-    Mat img2(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
+    image1= Mat(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
+    image2= Mat(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
 
     int x1 = static_cast<int>(cd_width*0.05);  // 5% of img_width
     int x2 = static_cast<int>(cd_width*0.6);   // 60% of img_width
@@ -174,10 +174,10 @@ QList<double> Autofocus::getDelta()
 
     roi = {roi1, roi2, roi3, roi4}
 
-    Mat couple1[2] = {img1(roi[0]),img2(roi[0])};  // delta1
-    Mat couple2[2] = {img1(roi[1]),img2(roi[1])};  // delta2
-    Mat couple3[2] = {img1(roi[2]),img2(roi[2])};  // delta3
-    Mat couple4[2] = {img1(roi[3]),img2(roi[3])};  // delta4
+    Mat couple1[2] = {image1(roi[0]),image2(roi[0])};  // delta1
+    Mat couple2[2] = {image1(roi[1]),image2(roi[1])};  // delta2
+    Mat couple3[2] = {image1(roi[2]),image2(roi[2])};  // delta3
+    Mat couple4[2] = {image1(roi[3]),image2(roi[3])};  // delta4
 
     if (imageQualityEnabled) {
         if (!rapid_af::checkImageQuality(couple1[0], iqOptions)
@@ -347,12 +347,12 @@ void Autofocus::setOutputEnabled(bool enable)
 
 cv::Mat Autofocus::getImage1() const
 {
-    return img1;
+    return image1;
 }
 
 cv::Mat Autofocus::getImage2() const
 {
-    return img2;
+    return image2;
 }
 
 
