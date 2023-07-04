@@ -61,6 +61,8 @@ public:
     int cd_width;
     int cd_height;
 
+    QList<cv::Mat> roi;
+
 signals:
     void newImage(QList<CAlkUSB3::BufferPtr>);
     void newStatus(QString);
