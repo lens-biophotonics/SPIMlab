@@ -53,8 +53,6 @@ void AutofocusWidget::setupUi()
     cd1->setMinimumSize(600, 600);
     cd2->setMinimumSize(600, 600);
 
-    
-    
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
 
     cv::rectangle(cd1,roi[0],BLUE,1,8);  //drawing empty recangles
@@ -65,7 +63,6 @@ void AutofocusWidget::setupUi()
     cv::rectangle(cd2,roi[2],YELLOW,1,8); 
     cv::rectangle(cd1,roi[3],GREEN,1,8); 
     cv::rectangle(cd2,roi[3],GREEN,1,8); 
-    
     
     QGridLayout *grid = new QGridLayout();
     QGroupBox *generalOptionsGb = new QGroupBox("RAPID options");
@@ -333,28 +330,10 @@ void AutofocusWidget::setupUi()
         }
     });
 
-    QPushButton *saveToFile = new QPushButton("Save image");
+    QPushButton *saveImage1ToFile = new QPushButton("Save camera 1 image");
 
-    connect(saveToFile, &QPushButton::clicked, [=]() {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "autofocusalpha.tiff");
-
-        if (fileName.isEmpty()) {
-            return;
-        }
-
-        cv::Mat img(ptr.GetHeight(), ptr.GetWidth(), CV_16U, (void *) ptr.Data());
-
-        try {
-            cv::imwrite(fileName.toStdString(), img);
-        } catch (cv::Exception e) {
-            QMessageBox::critical(this, "Error", e.what());
-        }
-    });
-
-    QPushButton *saveImage1ToFile = new QPushButton("Save left ROI");
-
-    connect(saveImage1File, &QPushButton::clicked, [=]() {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "left_ROI.tiff");
+    connect(saveImage1ToFile, &QPushButton::clicked, [=]() {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "Cam_1.tiff");
 
         if (fileName.isEmpty()) {
             return;
@@ -367,10 +346,10 @@ void AutofocusWidget::setupUi()
         }
     });
 
-    QPushButton *saveImage2ToFile = new QPushButton("Save right ROI");
+    QPushButton *saveImage2ToFile = new QPushButton("Save camera 2 image");
 
     connect(saveImage2ToFile, &QPushButton::clicked, [=]() {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "right_ROI.tiff");
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "Cam_2.tiff");
 
         if (fileName.isEmpty()) {
             return;
