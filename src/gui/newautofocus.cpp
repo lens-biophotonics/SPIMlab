@@ -345,45 +345,16 @@ void Autofocus::setOutputEnabled(bool enable)
     outputEnabled = enable;
 }
 
-cv::Mat Autofocus::getUpLeftRoiImagecam1() const
+cv::Mat Autofocus::getImage1() const
 {
-    return img1(roi[0]);
+    return img1;
 }
 
-cv::Mat Autofocus::getUpLeftRoiImagecam2() const
+cv::Mat Autofocus::getImage2() const
 {
-    return img2(roi[0]);
+    return img2;
 }
 
-cv::Mat Autofocus::getUpRightRoiImagecam1() const
-{
-    return img1(roi[1]);
-}
-
-cv::Mat Autofocus::getUpRightRoiImagecam2() const
-{
-    return img2(roi[1]);
-}
-
-cv::Mat Autofocus::getDownLeftRoiImagecam1() const
-{
-    return img1(roi[2]);
-}
-
-cv::Mat Autofocus::getDownLeftRoiImagecam2() const
-{
-    return img2(roi[2]);
-}
-
-cv::Mat Autofocus::getDownRightRoiImagecam1() const
-{
-    return img1(roi[3]);
-}
-
-cv::Mat Autofocus::getDownRightRoiImagecam2() const
-{
-    return img2(roi[3]);
-}
 
 QList<QImage> Autofocus::getMergedImage()
 {     
