@@ -107,20 +107,28 @@ void Autofocus::stop()
  * @brief This callback is called upon frame acquisition.
  * @param userData A pointer to this class object.
  */
-void Autofocus::onFrameAcquired(void *userData)
-{
-    if (!userData)
-        return;
 
-    Autofocus af = static_cast<Autofocus *>(userData);
-
+void autofocus::auxPtr(){
     CAlkUSB3::IVideoSource &videoSource1(af->dev1);
     CAlkUSB3::IVideoSource &videoSource2(af->dev2);
     CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
     QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
+    return ptr;
+}
+void Autofocus::onFrameAcquired(void *userData)
+{
+    if (!userData)
+        return;
 
+    Autofocus af = static_cast<Autofocus *>(userData);
+    
+    CAlkUSB3::IVideoSource &videoSource1(dev1);
+    CAlkUSB3::IVideoSource &videoSource2(dev2);
+    CAlkUSB3::BufferPtr ptr1 = auxPtr()[0]
+    CAlkUSB3::BufferPtr ptr2 = auxPtr()[1]
+    
     emit af->newImage(ptr);
     
     QList<cv::Point2f> deltaList;
@@ -146,8 +154,8 @@ QList<double> Autofocus::getDelta()
 {
     CAlkUSB3::IVideoSource &videoSource1(dev1);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr1 = auxPtr()[0]
+    CAlkUSB3::BufferPtr ptr2 = auxPtr()[1]
 
     if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
