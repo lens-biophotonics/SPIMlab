@@ -115,14 +115,32 @@ int main()
 
 
 
+Point2f shift;
+
+double allignmentFunc(sourceImage1,sourceImage2,const struct AlignOptions opt, bool * const ok){
+        try {
+        shift = rapid_af::align(sourceImage1,sourceImage2, options, &ok);
+    } catch (cv::Exception e) {
+        logger->warning(e.what());
+        throw std::runtime_error("OpenCV exception (see log)");
+    }
+    if (!ok) {
+        throw std::runtime_error("Agreement threshold not met");
+    }
+
+    return shift.x;
+}
 
 
+for (i=0;i<4;i++){
+    QThread *thread = new QThread();
+    allignment_of_couple_i = new allignmentFunc(sourceImages[i][0], sourceImages[i][1]);
+    allignment_of_couple_i->moveToThread(thread);
+    thread->start();
+    
 
-
-
-
-
-
+    
+}
 
 
 
