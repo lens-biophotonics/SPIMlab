@@ -174,48 +174,64 @@ QList<double> Autofocus::getDelta()
 
     roi = {roi1, roi2, roi3, roi4}
 
-    Mat couple1[2] = {image1(roi[0]),image2(roi[0])};  // delta1
-    Mat couple2[2] = {image1(roi[1]),image2(roi[1])};  // delta2
-    Mat couple3[2] = {image1(roi[2]),image2(roi[2])};  // delta3
-    Mat couple4[2] = {image1(roi[3]),image2(roi[3])};  // delta4
+    QList<QList<cv::Mat>> couple = {
+        {image1(roi[0]), image2(roi[0])},  // couple1
+        {image1(roi[1]), image2(roi[1])},  // couple2
+        {image1(roi[2]), image2(roi[2])},  // couple3
+        {image1(roi[3]), image2(roi[3])}   // couple4
+    };
 
     if (imageQualityEnabled) {
-        if (!rapid_af::checkImageQuality(couple1[0], iqOptions)
-            || !rapid_af::checkImageQuality(couple1[1], iqOptions)
-            || !rapid_af::checkImageQuality(couple2[0], iqOptions)
-            || !rapid_af::checkImageQuality(couple2[1], iqOptions)
-            || !rapid_af::checkImageQuality(couple3[0], iqOptions)
-            || !rapid_af::checkImageQuality(couple3[1], iqOptions)
-            || !rapid_af::checkImageQuality(couple4[0], iqOptions)
-            || !rapid_af::checkImageQuality(couple4[1], iqOptions)) {
+        if (!rapid_af::checkImageQuality(couple[0][0], iqOptions)
+            || !rapid_af::checkImageQuality(couple[0][1], iqOptions)
+            || !rapid_af::checkImageQuality(couple[1][0], iqOptions)
+            || !rapid_af::checkImageQuality(couple[1][1], iqOptions)
+            || !rapid_af::checkImageQuality(couple[2][0], iqOptions)
+            || !rapid_af::checkImageQuality(couple[2][1], iqOptions)
+            || !rapid_af::checkImageQuality(couple[3][0], iqOptions)
+            || !rapid_af::checkImageQuality(couple[3][1], iqOptions)) {
             throw std::runtime_error("low image quality");
         }
     }
 
+    thread myThreads[4];
     bool ok = false;
-    Point2f shift1;
-    Point2f shift2;
-    Point2f shift3;
-    Point2f shift4;
 
+    Point2f shift;
+    QList<double> deltaList;
 
-    
-    try {
-        shift1 = rapid_af::align(couple1[0], couple1[1], options, &ok);
-        shift2 = rapid_af::align(couple2[0], couple2[1], options, &ok);
-        shift3 = rapid_af::align(couple3[0], couple3[1], options, &ok);
-        shift4 = rapid_af::align(couple4[0], couple4[1], options, &ok);
+    static std::exception_ptr teptr = nullptr;
+
+    double alignThem([&](int j)
+{
+        try {
+        shift = rapid_af::align(couple[j][0], couple[j][1], options, &ok);
     } catch (cv::Exception e) {
         logger->warning(e.what());
         throw std::runtime_error("OpenCV exception (see log)");
+      if (!ok) {
+        throw std::runtime_error("Agreement threshold not met");   }
+      else {
+        deltaList.append(shift.x);
     }
-    if (!ok) {
-        throw std::runtime_error("Agreement threshold not met");
+        }
+})
+    for (j=0;j<4;j++){
+        myThreads[j] = thread(alignThem, j);
+        ok = false;
     }
-    
-    QList<double> shifts;
-    shifts << shift1.x << shift2.x << shifts3.x << shifts4.x;
-    return shifts;
+
+    if (opt.multithreading_enable) {
+        for (int i = 0; i < 4; ++i) {
+            myThreads[i].join();
+        }
+
+        if (teptr) {
+            std::rethrow_exception(teptr);
+        }
+    }
+
+    return deltaList;
 }
 
 double Autofocus::inferCalibrationQAlpha()
