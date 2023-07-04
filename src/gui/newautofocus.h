@@ -95,8 +95,8 @@ private:
     static void onFrameAcquired(void *userData);
     QList<double> getDelta();
 
-    cv::Mat img1;
-    cv::Mat img2;
+    cv::Mat image1;
+    cv::Mat image2;
 };
 
 #endif // AUTOFOCUS_H
