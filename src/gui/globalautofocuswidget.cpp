@@ -44,8 +44,8 @@ void AutofocusWidget::setupUi()
     Autofocus *af = spim().getAutoFocus();
     rapid_af::AlignOptions opt = af->getOptions();
 
-    cd1 = new AutofocusCamDisplayWidget();
-    cd2 = new AutofocusCamDisplayWidget();
+    cd1 = new CameraDisplay();
+    cd2 = new CameraDisplay();
     cd1->setTitle(QString("Cam 1"));
     cd2->setTitle(QString("Cam 2"));
     cd1->setPlotSize(QSize(PLOT_WIDTH, PLOT_HEIGHT));
@@ -53,8 +53,29 @@ void AutofocusWidget::setupUi()
     cd1->setMinimumSize(600, 600);
     cd2->setMinimumSize(600, 600);
 
+    
+    
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
-
+    
+    QPainter(this);
+    
+    painter.drawPixmap( roi[0], cd);
+    
+    for (i=0;i<4;i++){
+        int x = roi[i].x;
+        int y = roi[i].y;
+        
+    }
+    cv::rectangle(cd1,roi[0],BLUE,1,8);  //drawing empty recangles
+    cv::rectangle(cd2,roi[0],BLUE,1,8); 
+    cv::rectangle(cd1,roi[1],RED,1,8);
+    cv::rectangle(cd2,roi[1],RED,1,8); 
+    cv::rectangle(cd1,roi[2],YELLOW,1,8); 
+    cv::rectangle(cd2,roi[2],YELLOW,1,8); 
+    cv::rectangle(cd1,roi[3],GREEN,1,8); 
+    cv::rectangle(cd2,roi[3],GREEN,1,8); 
+    
+    
     QGridLayout *grid = new QGridLayout();
     QGroupBox *generalOptionsGb = new QGroupBox("RAPID options");
     QCheckBox *multithreadingCb = new QCheckBox("Multithreading");
@@ -555,4 +576,12 @@ void AutofocusWidget::onNewImage(QList<CAlkUSB3::BufferPtr> ptr)
         }
     }
     cd2->getPlot()->setData(mybufDouble2, c2);
+}
+
+
+void QwtPlotGrid::setMajorPen(BLUE,1,style = Qt::SolidLine){
+    
+}
+void QwtPlotGrid::setMinorPen()(0){
+    
 }
