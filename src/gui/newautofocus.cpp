@@ -114,9 +114,9 @@ void Autofocus::onFrameAcquired(void *userData)
 
     Autofocus af = static_cast<Autofocus *>(userData);
 
-    CAlkUSB3::IVideoSource &videoSource(af->dev1);
+    CAlkUSB3::IVideoSource &videoSource1(af->dev1);
     CAlkUSB3::IVideoSource &videoSource2(af->dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
     QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
@@ -144,7 +144,7 @@ void Autofocus::onFrameAcquired(void *userData)
 
 QList<double> Autofocus::getDelta()
 {
-    CAlkUSB3::IVideoSource &videoSource(dev1);
+    CAlkUSB3::IVideoSource &videoSource1(dev1);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
     CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
     CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
