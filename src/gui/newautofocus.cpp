@@ -108,15 +108,6 @@ void Autofocus::stop()
  * @param userData A pointer to this class object.
  */
 
-void autofocus::auxPtr(){
-    CAlkUSB3::IVideoSource &videoSource1(af->dev1);
-    CAlkUSB3::IVideoSource &videoSource2(af->dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
-
-    QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
-    return ptr;
-}
 void Autofocus::onFrameAcquired(void *userData)
 {
     if (!userData)
@@ -126,9 +117,10 @@ void Autofocus::onFrameAcquired(void *userData)
     
     CAlkUSB3::IVideoSource &videoSource1(dev1);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = auxPtr()[0]
-    CAlkUSB3::BufferPtr ptr2 = auxPtr()[1]
-    
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+
+    QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
     emit af->newImage(ptr);
     
     QList<cv::Point2f> deltaList;
@@ -154,8 +146,8 @@ QList<double> Autofocus::getDelta()
 {
     CAlkUSB3::IVideoSource &videoSource1(dev1);
     CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = auxPtr()[0]
-    CAlkUSB3::BufferPtr ptr2 = auxPtr()[1]
+    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
 
     if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
@@ -180,7 +172,7 @@ QList<double> Autofocus::getDelta()
     cv::Rect roi3(x1, y2, roi_width, roi_height); // buttomLeft ROI
     cv::Rect roi4(x2, y2, roi_width, roi_height); // buttomRightROI
 
-    QList<cv::Mat> roi = {roi1, roi2, roi3, roi4}
+    roi = {roi1, roi2, roi3, roi4}
 
     Mat couple1[2] = {img1(roi[0]),img2(roi[0])};  // delta1
     Mat couple2[2] = {img1(roi[1]),img2(roi[1])};  // delta2
