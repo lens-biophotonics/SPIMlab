@@ -1,0 +1,79 @@
+void Autofocus::init()
+{
+    auto stringArray = dev.GetCameraList();
+
+    size_t n = stringArray.Size();
+
+    if (n == 0) {
+        throw std::runtime_error("Cannot find Alkeria camera.");
+    }
+
+    logger->info(QString("Found %1 Alkeria cameras").arg(n));
+
+    for (size_t i = 0; i < n; ++i) {
+        logger->info(QString(stringArray[i]));
+    }
+    for (i=0;i<n,i++) {
+            try{
+            dev[i].SetCamera(i);
+            dev[i].SetPreserveRates(false); // Ask always for the best performances (FPS)
+            dev[i].SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+            dev[i].SetEnableImageThread(false);
+
+            dev[i].SetHorizontalBinning(2);
+            dev[i].SetVerticalBinning(2);
+            devList.append(dev[i]);
+        } catch (CAlkUSB3::Exception e) {
+            logger->warning(e.Message());
+        }     
+
+
+    size_t n = stringArray.Size();
+
+    if (n == 0) {
+        throw std::runtime_error("Cannot find Alkeria camera.");
+    }
+
+    logger->info(QString("Found %1 Alkeria cameras").arg(n));
+
+    for (size_t i = 0; i < n; ++i) {
+        logger->info(QString(stringArray[i]));
+    }
+
+           
+        
+            }
+        }
+    
+        try {
+        dev1.SetCamera(0);            // Open device
+        dev1.SetPreserveRates(false); // Ask always for the best performances (FPS)
+        dev1.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+        dev1.SetEnableImageThread(false);
+
+        dev1.SetHorizontalBinning(2);
+        dev1.SetVerticalBinning(2);
+    } catch (CAlkUSB3::Exception e) {
+        logger->warning(e.Message());
+    }
+
+    dev1.RawFrameAcquired().SetUserData(this);
+    dev1.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
+
+    ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create();
+
+    try {
+        dev2.SetCamera(1);            // Open device
+        dev2.SetPreserveRates(false); // Ask always for the best performances (FPS)
+        dev2.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+        dev2.SetEnableImageThread(false);
+
+        dev2.SetHorizontalBinning(2);
+        dev2.SetVerticalBinning(2);
+    } catch (CAlkUSB3::Exception e) {
+        logger->warning(e.Message());
+    }
+
+    dev2.RawFrameAcquired().SetUserData(this);
+    dev2.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
+}
