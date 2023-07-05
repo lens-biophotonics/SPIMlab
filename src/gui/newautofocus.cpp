@@ -27,6 +27,7 @@ Autofocus::Autofocus(QObject *parent)
 void Autofocus::init()
 {
     ICeleraCamera& dev1 = CAlkUSB3::ICeleraCamera::Create() ;
+    ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create() ;
 
     auto stringArray = dev1.GetCameraList();
 
@@ -57,8 +58,6 @@ void Autofocus::init()
     dev1.RawFrameAcquired().SetUserData(this);
     dev1.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
 
-    ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create();
-
     try {
         dev2.SetCamera(1);            // Open device
         dev2.SetPreserveRates(false); // Ask always for the best performances (FPS)
@@ -84,16 +83,25 @@ void Autofocus::start()
         stop();
     }
     dev1.SetEnableImageThread(false); // No image conversion needed
+    dev2.SetEnableImageThread(false);
     dev1.SetFrameRate(frameRate);
     dev1.SetShutter(exposureTime_us);
-
-    dev2.SetEnableImageThread(false); 
-    dev2.SetFrameRate(frameRate);
-    dev2.SetShutter(exposureTime_us);
-
+    
     try {
+        camera.AcquisitionStartTrigger().SetEnabled(true);
+        camera.AcquisitionStartTrigger().SetSource(TriggerSource::Software);
+        camera.SetAcquisitionBurstLength(400);
+        camera.SetAcquire(true);
+
         dev1.SetAcquire(true);
-        dev2.SetAcquire(true);
+        dev1.LineStartTrigger.Source = TriggerSource.Encoder;
+        dev1.LineStartTrigger.Enabled = true;//Enable it
+        dev1.Encoder.InputA = 1;//Set phase A input port
+        dev1.Encoder.InputB = 2;//Set phase B input port
+        dev1.PIOPorts[1].Termination = true;//Terminate input port 1
+        dev1.PIOPorts[2].Termination = true;//Terminate input port 2
+        dev1.PIOPorts[3].Source = OutputSource.LineStartTrigger;
+        
     } catch (CAlkUSB3::InvalidOperationException e) {
         throw std::runtime_error("Alkeria: invalid operation");
     }
@@ -125,7 +133,7 @@ void Autofocus::onFrameAcquired(void *userData)
     QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
     emit af->newImage(ptr);
     
-    QList<cv::Point2f> deltaList;
+    QList<double> deltaList;
     
     try {
         deltaList = af->getDelta();
@@ -200,7 +208,7 @@ QList<double> Autofocus::getDelta()
     bool ok = false;
 
     Point2f shift;
-    QList<double> deltaList;
+    QList<double> shiftList;
 
     static std::exception_ptr teptr = nullptr;
 
@@ -214,7 +222,8 @@ QList<double> Autofocus::getDelta()
       if (!ok) {
         throw std::runtime_error("Agreement threshold not met");   }
       else {
-        deltaList.append(shift.x);
+        shiftList.append(shift.x);
+        deltaList.append(shift); //to be used in getMergedImage()
     }
         }
 })
@@ -233,7 +242,7 @@ QList<double> Autofocus::getDelta()
         }
     }
 
-    return deltaList;
+    return shiftList;
 }
 
 double Autofocus::inferCalibrationQAlpha()
@@ -379,14 +388,6 @@ cv::Mat Autofocus::getImage2() const
 
 QList<QImage> Autofocus::getMergedImage()
 {     
-    QList<cv::Point2f> deltaList;
-    try {
-        deltaList = af->getDelta();
-    } catch (std::runtime_error e) {
-        emit af->newStatus(e.what());
-        return;
-    }
-    
     QList<Mat> mergedImages;
     Mat img1
     int width = qMin(roi[0].width(), roi[0].width()) - 1;
