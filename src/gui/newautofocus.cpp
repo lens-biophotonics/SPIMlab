@@ -52,7 +52,7 @@ void Autofocus::init()
         bandwidthLimits = new uint[] {32}; 
         }
 
-    for (i=0; i<2;i++){
+    for (i=0; i<n; i++){
         try {
             dev[i].SetCamera(i);            // Open device
             dev[i].SetPreserveRates(false); // Ask always for the best performances (FPS)
@@ -63,17 +63,17 @@ void Autofocus::init()
             dev[i].SetVerticalBinning(2);
         } catch (CAlkUSB3::Exception e) {
             logger->warning(e.Message());}
+
+        dev[i].SetBandwidthLimits(bandwidthLimits);
         
-        dev[i].RawFrameAcquired().SetUserData(this);
-        dev[i].RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
+        dev[i].RawFrameAcquired().SetUserData(this); // ??
+        dev[i].RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired); // ??
     
         dev[i].FrameStartTrigger.Source = TriggerSource.External;
         dev[i].FrameStartTrigger.ExternalInput = 1; // Trigger source is port 1
         dev[i].FrameStartTrigger.DetectExternalInputEdge = true;
         dev[i].FrameStartTrigger.InvertExternalInput = true; // Detect falling edge
         dev[i].FrameStartTrigger.Enabled = true; // Enable frame trigger (no free-run)
-
-        dev[i].SetBandwidthLimits(bandwidthLimits);
     }
 
 void Autofocus::start()
@@ -101,12 +101,12 @@ void Autofocus::start()
             throw std::runtime_error("Alkeria: invalid operation");}
     }
     
-    acquisitionThread[0].thread(acquire1);
-    acquisitionThread[1]=thread(acquire2);
+    startAcquire[0]=thread(acquire1);
+    startAcquire[1]=thread(acquire2);
         
     if (opt.multithreading_enable) {
         for (int i = 0; i < 2; ++i) {
-            acquisitionThread[i].join();
+            startAcquire[i].join();
         }
 
         if (teptr) {
@@ -173,10 +173,12 @@ void Autofocus::onFrameAcquired(void *userData)
         emit af->newStatus(e.what());
         return;
     }
-    double alpha = af->mAlpha *mean().deltaList() + af->qAlpha;
+    double averageDelta = (deltaList[0] + deltaList[1] + deltaList[2] + deltaList[3])/deltaList.Size();
+
+    double alpha = af->mAlpha *averageDelta + af->qAlpha;
     double beta1 = af->mbeta1 *(deltaList[1]-deltaList[0] + deltaList[3]-deltaList[2])/2 + af->qbeta1;
     double beta2 = af->mbeta2 *(deltaList[0]-deltaList[2] + deltaList[1]-deltaList[3])/2 + af->qbeta2;
-    QList<double> correctionList = {alpha, beta1, beta2};
+    correctionList = {alpha, beta1, beta2};
         
     if (af->isOutputEnabled()) {
         emit af->newCorrection(correctionList);
@@ -253,22 +255,23 @@ QList<double> Autofocus::getDelta()
 
     static std::exception_ptr teptr = nullptr;
 
-    double alignThem([&](int j)
+    double alignThem([&](int j))
 {
         try {
         shift = rapid_af::align(couple[j][0], couple[j][1], options, &ok);
-    } catch (cv::Exception e) {
-        logger->warning(e.what());
-        throw std::runtime_error("OpenCV exception (see log)");
-      if (!ok) {
-        throw std::runtime_error("Agreement threshold not met");   }
-      else {
+    }   catch (cv::Exception e) {
+            logger->warning(e.what());
+            throw std::runtime_error("OpenCV exception (see log)");
+        }
+        if (!ok) {
+            throw std::runtime_error("Agreement threshold not met");   
+        }
+        else {
         deltaList.append(shift.x);
         shiftList.append(shift); //to be used in getMergedImage()
-    }
         }
-})
-    for (j=0;j<4;j++){
+}
+    for (j=0; j<4; j++){
         myThreads[j] = thread(alignThem, j);
         ok = false;
     }
@@ -288,19 +291,19 @@ QList<double> Autofocus::getDelta()
 
 double Autofocus::inferCalibrationQAlpha()
 {    
-    qAlpha = -mAlpha* correction[0];
+    qAlpha = -mAlpha* correctionList[0];
     return qAlpha;
 }
 
 double Autofocus::inferCalibrationQBeta1()
 {    
-    qBeta1 = -mBeta1* correction[1];
+    qBeta1 = -mBeta1* correctionList[1];
     return qBeta1;
 }
 
 double Autofocus::inferCalibrationQBeta2()
 {    
-    qBeta2 = -mBeta2* correction[2];
+    qBeta2 = -mBeta2* correctionList[2];
     return qBeta2;
 }
 
@@ -430,7 +433,7 @@ cv::Mat Autofocus::getImage2() const
 QList<QImage> Autofocus::getMergedImage()
 {     
     QList<Mat> mergedImages;
-    Mat img1
+    Mat img1;
     int width = qMin(roi[0].width(), roi[0].width()) - 1;
     int height = qMin(roi[0].height(), roi[0].height()) - 1;   // All ROIs have same dimensions
     try {
@@ -443,9 +446,9 @@ QList<QImage> Autofocus::getMergedImage()
     Mat rgb;
     cv::cvtColor(img1, rgb, cv::COLOR_BGR2RGB);
     QImage qimg1 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
-    mergedImages.append(qimg1)
+    mergedImages.append(qimg1);
         
-    Mat img2
+    Mat img2;
     try {
         img2 = rapid_af::merge(couple2[0](Range(0, height), Range(0, width)),
                               couple2[1](Range(0, height), Range(0, width)),
@@ -455,9 +458,9 @@ QList<QImage> Autofocus::getMergedImage()
 
     cv::cvtColor(img2, rgb, cv::COLOR_BGR2RGB);
     QImage qimg2 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
-    mergedImages.append(qimg2)
+    mergedImages.append(qimg2);
 
-    Mat img3
+    Mat img3;
     try {
         img3 = rapid_af::merge(couple3[0](Range(0, height), Range(0, width)),
                               couple3[1](Range(0, height), Range(0, width)),
@@ -467,9 +470,9 @@ QList<QImage> Autofocus::getMergedImage()
 
     cv::cvtColor(img3, rgb, cv::COLOR_BGR2RGB);
     QImage qimg3 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
-    mergedImages.append(qimg3)
+    mergedImages.append(qimg3);
 
-    Mat img4
+    Mat img4;
     try {
         img4 = rapid_af::merge(couple4[0](Range(0, height), Range(0, width)),
                               couple4[1](Range(0, height), Range(0, width)),
@@ -479,7 +482,7 @@ QList<QImage> Autofocus::getMergedImage()
 
     cv::cvtColor(img4, rgb, cv::COLOR_BGR2RGB);
     QImage qimg4 = QImage(rgb.data, rgb.cols, rgb.rows, rgb.step, QImage::Format_RGB888).copy();
-    mergedImages.append(qimg4)
+    mergedImages.append(qimg4);
 
     return mergedImages;
 }
