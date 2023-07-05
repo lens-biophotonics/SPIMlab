@@ -28,9 +28,8 @@ void Autofocus::init()
 {
     ICeleraCamera& dev1 = CAlkUSB3::ICeleraCamera::Create() ;
     ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create() ;
-
+    
     auto stringArray = dev1.GetCameraList();
-
     size_t n = stringArray.Size();
 
     if (n == 0) {
@@ -43,74 +42,96 @@ void Autofocus::init()
         logger->info(QString(stringArray[i]));
     }
 
-    try {
-        dev1.SetCamera(0);            // Open device
-        dev1.SetPreserveRates(false); // Ask always for the best performances (FPS)
-        dev1.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
-        dev1.SetEnableImageThread(false);
+    dev = [dev1,dev2];
 
-        dev1.SetHorizontalBinning(2);
-        dev1.SetVerticalBinning(2);
-    } catch (CAlkUSB3::Exception e) {
-        logger->warning(e.Message());
+    virtual bool GetBandwidthLimitsAvailable ( );  //this is necessary when we have multiple cameras
+    const Array< unsigned int >& bandwidthLimits;
+    if (GetBandwidthLimitsAvailable()) {
+            bandwidthLimits = GetAllowedBandwidthLimits();
+    else {
+        bandwidthLimits = new uint[] {32}; 
+        }
+
+    for (i=0; i<2;i++){
+        try {
+            dev[i].SetCamera(i);            // Open device
+            dev[i].SetPreserveRates(false); // Ask always for the best performances (FPS)
+            dev[i].SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
+            dev[i].SetEnableImageThread(false);
+    
+            dev[i].SetHorizontalBinning(2);
+            dev[i].SetVerticalBinning(2);
+        } catch (CAlkUSB3::Exception e) {
+            logger->warning(e.Message());}
+        
+        dev[i].RawFrameAcquired().SetUserData(this);
+        dev[i].RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
+    
+        dev[i].FrameStartTrigger.Source = TriggerSource.External;
+        dev[i].FrameStartTrigger.ExternalInput = 1; // Trigger source is port 1
+        dev[i].FrameStartTrigger.DetectExternalInputEdge = true;
+        dev[i].FrameStartTrigger.InvertExternalInput = true; // Detect falling edge
+        dev[i].FrameStartTrigger.Enabled = true; // Enable frame trigger (no free-run)
+
+        dev[i].SetBandwidthLimits(bandwidthLimits);
     }
-
-    dev1.RawFrameAcquired().SetUserData(this);
-    dev1.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
-
-    try {
-        dev2.SetCamera(1);            // Open device
-        dev2.SetPreserveRates(false); // Ask always for the best performances (FPS)
-        dev2.SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
-        dev2.SetEnableImageThread(false);
-
-        dev2.SetHorizontalBinning(2);
-        dev2.SetVerticalBinning(2);
-    } catch (CAlkUSB3::Exception e) {
-        logger->warning(e.Message());
-    }
-
-    dev2.RawFrameAcquired().SetUserData(this);
-    dev2.RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired);
-}
 
 void Autofocus::start()
 {
     if (!enabled) {
         return;
     }
-    if (dev1.GetAcquire() && dev2.GetAcquire() ) {
+    if (dev[0].GetAcquire() && dev[1].GetAcquire() ) {
         stop();
     }
-    dev1.SetEnableImageThread(false); // No image conversion needed
-    dev2.SetEnableImageThread(false);
-    dev1.SetFrameRate(frameRate);
-    dev1.SetShutter(exposureTime_us);
-    
-    try {
-        camera.AcquisitionStartTrigger().SetEnabled(true);
-        camera.AcquisitionStartTrigger().SetSource(TriggerSource::Software);
-        camera.SetAcquisitionBurstLength(400);
-        camera.SetAcquire(true);
 
-        dev1.SetAcquire(true);
-        dev1.LineStartTrigger.Source = TriggerSource.Encoder;
-        dev1.LineStartTrigger.Enabled = true;//Enable it
-        dev1.Encoder.InputA = 1;//Set phase A input port
-        dev1.Encoder.InputB = 2;//Set phase B input port
-        dev1.PIOPorts[1].Termination = true;//Terminate input port 1
-        dev1.PIOPorts[2].Termination = true;//Terminate input port 2
-        dev1.PIOPorts[3].Source = OutputSource.LineStartTrigger;
-        
-    } catch (CAlkUSB3::InvalidOperationException e) {
-        throw std::runtime_error("Alkeria: invalid operation");
+    thread startAcquire[2];
+    
+    auto start1([=]){
+        try {
+            dev[0].SetAcquire(true);
+      } catch (CAlkUSB3::InvalidOperationException e) {
+            throw std::runtime_error("Alkeria: invalid operation");}
     }
+    
+    auto start2([=]){
+        try {
+            dev[1].SetAcquire(true);
+      } catch (CAlkUSB3::InvalidOperationException e) {
+            throw std::runtime_error("Alkeria: invalid operation");}
+    }
+    
+    acquisitionThread[0].thread(acquire1);
+    acquisitionThread[1]=thread(acquire2);
+        
+    if (opt.multithreading_enable) {
+        for (int i = 0; i < 2; ++i) {
+            acquisitionThread[i].join();
+        }
+
+        if (teptr) {
+            std::rethrow_exception(teptr);
+        }
+    } 
 }
 
 void Autofocus::stop()
-{
-    dev1.SetAcquire(false);
-    dev2.SetAcquire(false);
+{    
+    thread stopAcquire[2];
+
+    auto stop1 ([=]){dev[0].SetAcquire(false)};
+    auto stop2 ([=]){dev[1].SetAcquire(false)};
+    stopAcquire[0] = thread(stop1);
+    stopAcquire[1] = thread(stop2);
+    if (opt.multithreading_enable) {
+        for (int i = 0; i < 2; ++i) {
+            stopAcquire[i].join();
+        }
+
+    if (teptr) {
+            std::rethrow_exception(teptr);
+        }
+    } 
 }
 
 /**
@@ -124,11 +145,22 @@ void Autofocus::onFrameAcquired(void *userData)
         return;
 
     Autofocus af = static_cast<Autofocus *>(userData);
-    
-    CAlkUSB3::IVideoSource &videoSource1(dev1);
-    CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+
+    thread videoStream[2];
+
+    auto video1([&]){
+            CAlkUSB3::IVideoSource &videoSource1(dev[0]);
+            CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    }
+    auto video2([&]){
+            CAlkUSB3::IVideoSource &videoSource2(dev[1]);
+            CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+    }
+
+    videoStream[0] = thread(video1);
+    videoStream[1] = thread(video2);
+    videoStream[0].join();
+    videoStream[1].join();
 
     QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
     emit af->newImage(ptr);
@@ -154,10 +186,19 @@ void Autofocus::onFrameAcquired(void *userData)
 
 QList<double> Autofocus::getDelta()
 {
-    CAlkUSB3::IVideoSource &videoSource1(dev1);
-    CAlkUSB3::IVideoSource &videoSource2(dev2);
-    CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+    auto video1([&]){
+            CAlkUSB3::IVideoSource &videoSource1(dev[0]);
+            CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+    }
+    auto video2([&]){
+            CAlkUSB3::IVideoSource &videoSource2(dev[1]);
+            CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+    }
+
+    videoStream[0] = thread(video1);
+    videoStream[1] = thread(video2);
+    videoStream[0].join();
+    videoStream[1].join();
 
     if (!ptr1 || !ptr2) {
         throw std::runtime_error("No frame was received");
