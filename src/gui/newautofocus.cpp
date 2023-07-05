@@ -10,6 +10,8 @@
 
 #include <QPixmap>
 
+#include <thread>
+
 #include "rapid-af.h"
 
 using namespace cv;
