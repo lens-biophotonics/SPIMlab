@@ -208,7 +208,7 @@ QList<double> Autofocus::getDelta()
     bool ok = false;
 
     Point2f shift;
-    QList<double> shiftList;
+    QList<double> deltaList;
 
     static std::exception_ptr teptr = nullptr;
 
@@ -222,8 +222,8 @@ QList<double> Autofocus::getDelta()
       if (!ok) {
         throw std::runtime_error("Agreement threshold not met");   }
       else {
-        shiftList.append(shift.x);
-        deltaList.append(shift); //to be used in getMergedImage()
+        deltaList.append(shift.x);
+        shiftList.append(shift); //to be used in getMergedImage()
     }
         }
 })
@@ -242,7 +242,7 @@ QList<double> Autofocus::getDelta()
         }
     }
 
-    return shiftList;
+    return deltaList;
 }
 
 double Autofocus::inferCalibrationQAlpha()
@@ -395,7 +395,7 @@ QList<QImage> Autofocus::getMergedImage()
     try {
         img1 = rapid_af::merge(couple1[0](Range(0, height), Range(0, width)),
                               couple1[1](Range(0, height), Range(0, width)),
-                              deltaList[0]);
+                              shiftList[0]);
     } catch (cv::Exception e) {
     };
         
@@ -408,7 +408,7 @@ QList<QImage> Autofocus::getMergedImage()
     try {
         img2 = rapid_af::merge(couple2[0](Range(0, height), Range(0, width)),
                               couple2[1](Range(0, height), Range(0, width)),
-                              deltaList[1]);
+                              shiftList[1]);
     } catch (cv::Exception e) {
     };
 
@@ -420,7 +420,7 @@ QList<QImage> Autofocus::getMergedImage()
     try {
         img3 = rapid_af::merge(couple3[0](Range(0, height), Range(0, width)),
                               couple3[1](Range(0, height), Range(0, width)),
-                              deltaList[2]);
+                              shiftList[2]);
     } catch (cv::Exception e) {
     };
 
@@ -432,7 +432,7 @@ QList<QImage> Autofocus::getMergedImage()
     try {
         img4 = rapid_af::merge(couple4[0](Range(0, height), Range(0, width)),
                               couple4[1](Range(0, height), Range(0, width)),
-                              deltaList[3]);
+                              shiftList[3]);
     } catch (cv::Exception e) {
     };
 
