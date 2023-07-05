@@ -1,7 +1,7 @@
 #include "autofocuswidget.h"
 
 #include "autofocus.h"
-#include "autofocuscamdisplaywidget.h"
+
 #include "spim.h"
 
 #include <ICeleraCamera.h>
