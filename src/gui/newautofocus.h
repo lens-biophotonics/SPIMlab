@@ -93,7 +93,9 @@ private:
     bool imageQualityEnabled = true;
 
     static void onFrameAcquired(void *userData);
+
     QList<double> getDelta();
+    QList<cv::Point2f> shiftList;
 
     cv::Mat image1;
     cv::Mat image2;
