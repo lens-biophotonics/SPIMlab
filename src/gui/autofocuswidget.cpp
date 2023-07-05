@@ -54,15 +54,6 @@ void AutofocusWidget::setupUi()
     cd2->setMinimumSize(600, 600);
 
     connect(af, &Autofocus::newImage, this, &AutofocusWidget::onNewImage); 
-
-    cv::rectangle(cd1,roi[0],BLUE,1,8);  //drawing empty recangles
-    cv::rectangle(cd2,roi[0],BLUE,1,8); 
-    cv::rectangle(cd1,roi[1],RED,1,8);
-    cv::rectangle(cd2,roi[1],RED,1,8); 
-    cv::rectangle(cd1,roi[2],YELLOW,1,8); 
-    cv::rectangle(cd2,roi[2],YELLOW,1,8); 
-    cv::rectangle(cd1,roi[3],GREEN,1,8); 
-    cv::rectangle(cd2,roi[3],GREEN,1,8); 
     
     QGridLayout *grid = new QGridLayout();
     QGroupBox *generalOptionsGb = new QGroupBox("RAPID options");
