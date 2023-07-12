@@ -41,9 +41,6 @@ void GalvoRamp::initializeTask_impl()
     write();
 }
 
-GALVORAMP_AMPLITUDE_IDX = GALVORAMP_AMPLITUDE_IDX + &correctionList[0];
-GALVORAMP_OFFSET_IDX = GALVORAMP_OFFSET_IDX + &offsetCorrection;
-
 void GalvoRamp::setWaveformAmplitude(const int channelNumber, const double val)
 {
     setWaveformParam(channelNumber, GALVORAMP_AMPLITUDE_IDX, val);
