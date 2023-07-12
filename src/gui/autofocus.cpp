@@ -1,4 +1,4 @@
-#include "newautofocus.h"
+#include "autofocus.h"
 
 #include <fcntl.h>
 #include <opencv2/opencv.hpp>
@@ -10,6 +10,7 @@
 
 #include <QPixmap>
 
+#include <QList>
 #include <thread>
 
 #include "rapid-af.h"
@@ -52,6 +53,16 @@ void Autofocus::init()
         bandwidthLimits = new uint[] {32}; 
         }
 
+    taskHandle = 0;
+    data = 1;  // initiating the trigger to high (on)
+    DAQmxCreateTask("Trigger", &taskHandle);    
+    DAQmxCreateDOChan(taskHandle,"dev1/port1/line0:1"); // Creating two digital channels
+    int32 written;
+    DAQmxStartTask(taskHandle);
+    DAQmxWriteDigitalU8(taskHandle, 1, 1, 10.0, DAQmx_Val_GroupByChannel, &data, &written, NULL);  // generating a digital signal
+    DAQmxStopTask(taskHandle);
+    DAQmxClearTask(taskHandle);
+
     for (i=0; i<n; i++){
         try {
             dev[i].SetCamera(i);            // Open device
@@ -68,12 +79,12 @@ void Autofocus::init()
         
         dev[i].RawFrameAcquired().SetUserData(this); // ??
         dev[i].RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired); // ??
-    
-        dev[i].FrameStartTrigger.Source = TriggerSource.External;
-        dev[i].FrameStartTrigger.ExternalInput = 1; // Trigger source is port 1
-        dev[i].FrameStartTrigger.DetectExternalInputEdge = true;
-        dev[i].FrameStartTrigger.InvertExternalInput = true; // Detect falling edge
-        dev[i].FrameStartTrigger.Enabled = true; // Enable frame trigger (no free-run)
+
+        dev[i].PIOPorts[1].Direction = IODirection.Input; // Camera's port 1 in the input
+        dev[i].PIOPorts[1].DebounceTime = 10; // Set debounce time to 10us
+        dev[i].PIOPorts[1].Termination = true; // Enable termination
+        bool status = dev[i].PIOPorts[1].Value; // Read port 1 value
+        bool rising = dev[i].PIOPorts[1].RisingEvent; // Read port 1 rising event
     }
 
 void Autofocus::start()
@@ -84,55 +95,56 @@ void Autofocus::start()
     if (dev[0].GetAcquire() && dev[1].GetAcquire() ) {
         stop();
     }
+    DAQmxStartTask(taskHandle);
+    data = 1;      // getAcquire() becomes true
+    DAQmxStopTask(taskHandle);
+    DAQmxClearTask(taskHandle);
+    //dev[0].SetAcquire(True);
+    //dev[1].SetAcquire(True);
 
-    thread startAcquire[2];
-    
-    auto start1([=]){
-        try {
-            dev[0].SetAcquire(true);
-      } catch (CAlkUSB3::InvalidOperationException e) {
-            throw std::runtime_error("Alkeria: invalid operation");}
-    }
-    
-    auto start2([=]){
-        try {
-            dev[1].SetAcquire(true);
-      } catch (CAlkUSB3::InvalidOperationException e) {
-            throw std::runtime_error("Alkeria: invalid operation");}
-    }
-    
-    startAcquire[0]=thread(acquire1);
-    startAcquire[1]=thread(acquire2);
+    //thread startAcquire[2];
+    //auto start1([=]){
+    //    try {
+    //       dev[0].SetAcquire(True);
+    //  } catch (CAlkUSB3::InvalidOperationException e) {
+    //        throw std::runtime_error("Alkeria: invalid operation");}
+    //} 
+    //auto start2([=]){
+    //    try {
+    //        dev[1].SetAcquire(true);
+    //  } catch (CAlkUSB3::InvalidOperationException e) {
+    //        throw std::runtime_error("Alkeria: invalid operation");}
+    //}
+    //startAcquire[0]=thread(acquire1);
+    //startAcquire[1]=thread(acquire2);
         
-    if (opt.multithreading_enable) {
-        for (int i = 0; i < 2; ++i) {
-            startAcquire[i].join();
-        }
+    //if (opt.multithreading_enable) {
+    //   for (int i = 0; i < 2; ++i) {
+    //        startAcquire[i].join();
+    //    }
 
-        if (teptr) {
-            std::rethrow_exception(teptr);
-        }
-    } 
-}
+    //    if (teptr) {
+    //        std::rethrow_exception(teptr);    }} }
 
-void Autofocus::stop()
-{    
-    thread stopAcquire[2];
+void Autofocus::stop() {
+    DAQmxStartTask(taskHandle);
+    data=0;
+    DAQmxStopTask(taskHandle);
+    DAQmxClearTask(taskHandle);
 
-    auto stop1 ([=]){dev[0].SetAcquire(false)};
-    auto stop2 ([=]){dev[1].SetAcquire(false)};
-    stopAcquire[0] = thread(stop1);
-    stopAcquire[1] = thread(stop2);
-    if (opt.multithreading_enable) {
-        for (int i = 0; i < 2; ++i) {
-            stopAcquire[i].join();
-        }
+    // dev[0].SetAcquire(False);
+    // dev[1].SetAcquire(Flase);
 
-    if (teptr) {
-            std::rethrow_exception(teptr);
-        }
-    } 
-}
+    //thread stopAcquire[2];
+    //auto stop1 ([=]){dev[0].SetAcquire(false)};
+    //auto stop2 ([=]){dev[1].SetAcquire(false)};
+    //stopAcquire[0] = thread(stop1);
+    //stopAcquire[1] = thread(stop2);
+    //if (opt.multithreading_enable) {
+    //    for (int i = 0; i < 2; ++i) {
+    //        stopAcquire[i].join();}   }
+    //if (teptr) {
+    //        std::rethrow_exception(teptr);   }   }
 
 /**
  * @brief This callback is called upon frame acquisition.
