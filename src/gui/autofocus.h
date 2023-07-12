@@ -101,6 +101,8 @@ private:
 
     cv::Mat image1;
     cv::Mat image2;
+    TaskHandle taskHandle;
+    uInt8 data;
 };
 
 #endif // AUTOFOCUS_H
