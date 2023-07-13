@@ -185,17 +185,21 @@ void Autofocus::onFrameAcquired(void *userData)
         emit af->newStatus(e.what());
         return;
     }
-    double averageDelta = (deltaList[0] + deltaList[1] + deltaList[2] + deltaList[3])/deltaList.Size();
-
+    double averageDelta = (deltaList[0] + deltaList[1] + deltaList[2] + deltaList[3])/deltaList.Size();  //for alpha
+    double deltaB1 = (deltaList[1]-deltaList[0] + deltaList[3]-deltaList[2])/2;  //for beta1
+    double deltaB2 = (deltaList[0]-deltaList[2] + deltaList[1]-deltaList[3])/2; //for beta2
+        
     double alpha = af->mAlpha *averageDelta + af->qAlpha;
-    double beta1 = af->mbeta1 *(deltaList[1]-deltaList[0] + deltaList[3]-deltaList[2])/2 + af->qbeta1;
-    double beta2 = af->mbeta2 *(deltaList[0]-deltaList[2] + deltaList[1]-deltaList[3])/2 + af->qbeta2;
+    double beta1 = af->mbeta1 *deltaB1 + af->qbeta1;
+    double beta2 = af->mbeta2 *deltaB2 + af->qbeta2;
     correctionList = {alpha, beta1, beta2};
         
     if (af->isOutputEnabled()) {
         emit af->newCorrection(correctionList);
     }
-    emit af->newStatus(QString("dx = %1, corr = %2").arg(deltaList).arg(correctionList));
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(averageDelta).arg(alpha));
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(deltaB1).arg(beta1));
+    emit af->newStatus(QString("dx = %1, corr = %2").arg(deltaB2).arg(beta2));
 }
 
 QList<double> Autofocus::getDelta()
