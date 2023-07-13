@@ -48,7 +48,7 @@ void Autofocus::init()
     virtual bool GetBandwidthLimitsAvailable ( );  //this is necessary when we have multiple cameras
     const Array< unsigned int >& bandwidthLimits;
     if (GetBandwidthLimitsAvailable()) {
-            bandwidthLimits = GetAllowedBandwidthLimits();
+            bandwidthLimits = GetAllowedBandwidthLimits();}
     else {
         bandwidthLimits = new uint[] {32}; 
         }
@@ -86,6 +86,7 @@ void Autofocus::init()
         bool status = dev[i].PIOPorts[1].Value; // Read port 1 value
         bool rising = dev[i].PIOPorts[1].RisingEvent; // Read port 1 rising event
     }
+}
 
 void Autofocus::start()
 {
@@ -125,13 +126,13 @@ void Autofocus::start()
 
     //    if (teptr) {
     //        std::rethrow_exception(teptr);    }} }
-
+}
 void Autofocus::stop() {
     DAQmxStartTask(taskHandle);
     data=0;
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
-
+}
     // dev[0].SetAcquire(False);
     // dev[1].SetAcquire(Flase);
 
