@@ -94,7 +94,7 @@ private:
 
     static void onFrameAcquired(void *userData);
 
-    QList<ICeleraCamera&> dev
+    QList<ICeleraCamera&> dev;
 
     QList<double> getDelta();
     QList<cv::Point2f> shiftList;
