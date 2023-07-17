@@ -9,6 +9,7 @@
 #include "spim.h"
 #include "stagewidget.h"
 #include "version.h"
+#include "galvosWidget.h"
 
 #include <qtlab/core/logmanager.h>
 #include <qtlab/hw/ni/natinst.h>
@@ -111,6 +112,13 @@ void MainWindow::setupUi()
     vLayout->addWidget(new StageWidget());
     cw->setLayout(vLayout);
     cw->setWindowTitle("Stages");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    vLayout->addWidget(new galvosWidget());
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Galvos");
     closableWidgets << cw;
 
     vLayout = new QVBoxLayout();
