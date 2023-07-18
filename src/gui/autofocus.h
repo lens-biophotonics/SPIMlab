@@ -18,6 +18,8 @@ public:
     void start();
     void stop();
 
+    void triggerAcqisition();
+
     double getExposureTime_us() const;
     void setExposureTime_us(double value);
 
@@ -95,6 +97,9 @@ private:
     static void onFrameAcquired(void *userData);
 
     QList<ICeleraCamera&> dev;
+    size_t n;
+
+    bool rising;
 
     QList<double> getDelta();
     QList<cv::Point2f> shiftList;
