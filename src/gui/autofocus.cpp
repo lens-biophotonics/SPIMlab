@@ -31,7 +31,7 @@ void Autofocus::init()
     ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create() ;
     
     auto stringArray = dev1.GetCameraList();
-    size_t n = stringArray.Size();
+    n = stringArray.Size();
 
     if (n == 0) {
         throw std::runtime_error("Cannot find Alkeria camera.");
@@ -83,12 +83,19 @@ void Autofocus::init()
         dev[i].RawFrameAcquired().SetUserData(this); // ??
         dev[i].RawFrameAcquired().SetCallbackEx(&Autofocus::onFrameAcquired); // ??
 
-        dev[i].PIOPorts[1].Direction = IODirection.Input; // Camera's port 1 in the input
-        dev[i].PIOPorts[1].DebounceTime = 10; // Set debounce time to 10us
-        dev[i].PIOPorts[1].Termination = true; // Enable termination
-        bool status = dev[i].PIOPorts[1].Value; // Read port 1 value
-        bool rising = dev[i].PIOPorts[1].RisingEvent; // Read port 1 rising event
+        dev[i].PIOPorts[4].Direction = IODirection.Input; // if this is a bidirectional port, sets it to input
+        dev[i].PIOPorts[4].DebounceTime = 10; // Set debounce time to 10us
+        dev[i].PIOPorts[4].Termination = true; // Enable termination
+        bool status = dev[i].PIOPorts[4].Value; // Read port 4 value
+        bool rising = dev[i].PIOPorts[4].RisingEvent; // Read port 4 rising event
+        bool falling = device.PIOPorts[4].FallingEvent;
+        dev[i].SetAcquire(rising);
     }
+}
+
+void Autofocus::triggerAcquisition(){
+    for (i=0; i<n; i++){
+        dev[i].SetAcquire(rising);}
 }
 
 void Autofocus::start()
@@ -101,6 +108,7 @@ void Autofocus::start()
     }
     DAQmxStartTask(taskHandle);
     data = 1;      // getAcquire() becomes true
+    triggerAcquisition();
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
     //dev[0].SetAcquire(True);
@@ -133,6 +141,7 @@ void Autofocus::start()
 void Autofocus::stop() {
     DAQmxStartTask(taskHandle);
     data=0;
+    triggerAcquisition();
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
 }
