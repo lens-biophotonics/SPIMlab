@@ -87,8 +87,8 @@ void Autofocus::init()
         dev[i].PIOPorts[4].DebounceTime = 10; // Set debounce time to 10us
         dev[i].PIOPorts[4].Termination = true; // Enable termination
         bool status = dev[i].PIOPorts[4].Value; // Read port 4 value
-        bool rising = dev[i].PIOPorts[4].RisingEvent; // Read port 4 rising event
-        bool falling = device.PIOPorts[4].FallingEvent;
+        rising = dev[i].PIOPorts[4].RisingEvent; // Read port 4 rising event
+        //bool falling = device.PIOPorts[4].FallingEvent;
         dev[i].SetAcquire(rising);
     }
 }
