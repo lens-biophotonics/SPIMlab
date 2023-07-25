@@ -25,7 +25,7 @@ galvosWidget::setupUI()
     for (int j=0;j<size(titles) ;j++){
         grid->addWidget(new QLabel(titles[j]), row++, 0, 1, 1);
     
-        GalvoRamp *smth = new GalvoRamp;
+        GalvoRamp *smth = new GalvoRamp();
         //GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
     
         int col = 0;
@@ -37,7 +37,6 @@ galvosWidget::setupUI()
             for (int i = 0; i < SPIM_NCAMS; ++i) {
                 col = 0;
                 //QVector<double> wp = gr->getWaveformParams();
-                
                 QVector<double> wp = smth->getWaveformParams();
                 wp = wp.mid(i * GALVORAMP_N_OF_PARAMS, GALVORAMP_N_OF_PARAMS);
 
