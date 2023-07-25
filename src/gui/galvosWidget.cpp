@@ -26,7 +26,7 @@ galvosWidget::setupUI()
         grid->addWidget(new QLabel(titles[j]), row++, 0, 1, 1);
     
         GalvoRamp *smth = new GalvoRamp;
-        smth->spim().list_of_galvo_mirrors(j);
+        smth->spim().correctionGalvos[j];
         
         //GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
     
