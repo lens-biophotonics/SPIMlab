@@ -25,7 +25,9 @@ galvosWidget::setupUI()
     for (int j=0;j<size(titles) ;j++){
         grid->addWidget(new QLabel(titles[j]), row++, 0, 1, 1);
     
-        GalvoRamp *smth = new GalvoRamp();
+        GalvoRamp *smth = new GalvoRamp;
+        smth->spim().list_of_galvo_mirrors(j);
+        
         //GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
     
         int col = 0;
@@ -91,7 +93,8 @@ galvosWidget::setupUI()
                 connect(amplitudeSpinBox, &DoubleSpinBox::returnPressed, this, apply);
                 connect(delaySpinBox, &DoubleSpinBox::returnPressed, this, apply);
                 connect(fractionSpinBox, &DoubleSpinBox::returnPressed, this, apply);
-
+                
+                delete smth;
                 row++;
             }
     }
