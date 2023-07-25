@@ -30,6 +30,12 @@ using namespace QtLab::hw::Thorlabs;
 SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
+    QList<GalvoRamp *> correctionGalvos; //put it in header
+    GalvoRamp G2diagonal = ???
+    GalvoRamp G1Rapid = ???
+    GalvoRamp G1Inclination = ???
+    correctionGalvos<<G2diagonal<<G1Rapid<<G1Inclination;
+
     tasks = new Tasks(this);
 
     autoFocus = new Autofocus();
