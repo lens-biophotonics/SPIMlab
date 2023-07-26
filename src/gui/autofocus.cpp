@@ -238,8 +238,8 @@ QList<double> Autofocus::getDelta()
     cd_height = ptr1.GetHeight();  // ptr1 and ptr2 will have same dimensions so...
     cd_width = ptr1.GetWidth();
         
-    image1= Mat(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
-    image2= Mat(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
+    cv::Mat image1= Mat(cd_height, cd_width, CV_8U, (void *) ptr1.Data());
+    cv::Mat image2= Mat(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
 
     int x1 = static_cast<int>(cd_width*0.05);  // 5% of img_width
     int x2 = static_cast<int>(cd_width*0.6);   // 60% of img_width
@@ -453,9 +453,19 @@ cv::Mat Autofocus::getImage1() const
     return image1;
 }
 
+void Autofocus::setImage1(const cv::Mat &value)
+{
+    image1 = value;
+}
+
 cv::Mat Autofocus::getImage2() const
 {
     return image2;
+}
+
+void Autofocus::setImage2(const cv::Mat &value)
+{
+    image2 = value;
 }
 
 
