@@ -95,7 +95,12 @@ void Autofocus::init()
 
 void Autofocus::triggerAcquisition(){
     for (i=0; i<n; i++){
-        dev[i].SetAcquire(rising);}
+        if (data ==1){
+            dev[i].SetAcquire(True);}
+        else{
+            dev[i].SetAcquire(False);
+        }
+    }
 }
 
 void Autofocus::start()
@@ -111,6 +116,7 @@ void Autofocus::start()
     triggerAcquisition();
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
+    
     //dev[0].SetAcquire(True);
     //dev[1].SetAcquire(True);
 
