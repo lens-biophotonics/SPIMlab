@@ -242,8 +242,8 @@ QList<double> Autofocus::getDelta()
     cv::Mat image2= Mat(cd_height, cd_width, CV_8U, (void *) ptr2.Data()); 
 
     int x1 = static_cast<int>(cd_width*0.05);  // 5% of img_width
-    int x2 = static_cast<int>(cd_width*0.6);   // 60% of img_width
-    int y1 = static_cast<int>(cd_height*0.6);  // 60% of img_height
+    int x2 = static_cast<int>(cd_width*0.55);   // 55% of img_width
+    int y1 = static_cast<int>(cd_height*0.55);  // 55% of img_height
     int y2 = static_cast<int>(cd_height*0.05); // 5% of img_height
     
     int roi_width = static_cast<int>(cd_width*0.4);
