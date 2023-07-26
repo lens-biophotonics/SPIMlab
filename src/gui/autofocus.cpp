@@ -48,7 +48,7 @@ void Autofocus::init()
     virtual bool GetBandwidthLimitsAvailable ( );  //this is necessary when we have multiple cameras
     const Array< unsigned int >& bandwidthLimits;
     if (GetBandwidthLimitsAvailable()) {
-            bandwidthLimits = GetBandwidthLimits();   //gets a list of bandwidth limits for each usb port
+            bandwidthLimits = GetAllowedBandwidthLimits();   //gets a list of bandwidth limits for each usb port
             double n = bandwidthLimits.size();
             bandwidthLimits = bandwidthLimits[n/2];   //sets it to some value inside the list
     }
