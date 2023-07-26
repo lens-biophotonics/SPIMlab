@@ -65,11 +65,11 @@ public:
 
     QList<cv::Mat> roi;
 
-    cv::Mat image1;
-    cv::Mat image2;
-
     cv::Mat getImage1() const;
+    void setImage1(const cv::Mat &value);
+
     cv::Mat getImage2() const;
+    void setImage2(const cv::Mat &value);
 
 signals:
     void newImage(QList<CAlkUSB3::BufferPtr>);
