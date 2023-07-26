@@ -171,14 +171,14 @@ void Autofocus::onFrameAcquired(void *userData)
 
     Autofocus af = static_cast<Autofocus *>(userData);
 
-    thread videoStream[2];
+    thread videoStream[2];   //stream both simultaneously using thread
 
     auto video1([&]){
-            CAlkUSB3::IVideoSource &videoSource1(dev[0]);
+            CAlkUSB3::IVideoSource &videoSource1(af->dev[0]);
             CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
     };
     auto video2([&]){
-            CAlkUSB3::IVideoSource &videoSource2(dev[1]);
+            CAlkUSB3::IVideoSource &videoSource2(af->dev[1]);
             CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
     };
 
@@ -188,7 +188,7 @@ void Autofocus::onFrameAcquired(void *userData)
     videoStream[1].join();
 
     QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
-    emit af->newImage(ptr);
+    emit af->newImage(ptr);  //newImage returns a QList of ptrs
     
     QList<double> deltaList;
     
