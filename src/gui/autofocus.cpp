@@ -27,8 +27,8 @@ Autofocus::Autofocus(QObject *parent)
 
 void Autofocus::init()
 {
-    ICeleraCamera& dev1 = CAlkUSB3::ICeleraCamera::Create() ;
-    ICeleraCamera& dev2 = CAlkUSB3::ICeleraCamera::Create() ;
+    dev1 = CAlkUSB3::ICeleraCamera::Create() ;
+    dev2 = CAlkUSB3::ICeleraCamera::Create() ;
     
     auto stringArray = dev1.GetCameraList();
     n = stringArray.Size();
@@ -176,11 +176,11 @@ void Autofocus::onFrameAcquired(void *userData)
     auto video1([&]){
             CAlkUSB3::IVideoSource &videoSource1(dev[0]);
             CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    }
+    };
     auto video2([&]){
             CAlkUSB3::IVideoSource &videoSource2(dev[1]);
             CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
-    }
+    };
 
     videoStream[0] = thread(video1);
     videoStream[1] = thread(video2);
@@ -220,11 +220,11 @@ QList<double> Autofocus::getDelta()
     auto video1([&]){
             CAlkUSB3::IVideoSource &videoSource1(dev[0]);
             CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
-    }
+    };
     auto video2([&]){
             CAlkUSB3::IVideoSource &videoSource2(dev[1]);
             CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
-    }
+    };
 
     videoStream[0] = thread(video1);
     videoStream[1] = thread(video2);
@@ -254,14 +254,14 @@ QList<double> Autofocus::getDelta()
     cv::Rect roi3(x1, y2, roi_width, roi_height); // buttomLeft ROI
     cv::Rect roi4(x2, y2, roi_width, roi_height); // buttomRight ROI
 
-    roi = {roi1, roi2, roi3, roi4}
+    roi = {roi1, roi2, roi3, roi4};
 
     QList<QList<cv::Mat>> couple = {
         {image1(roi[0]), image2(roi[0])},  // couple1
         {image1(roi[1]), image2(roi[1])},  // couple2
         {image1(roi[2]), image2(roi[2])},  // couple3
         {image1(roi[3]), image2(roi[3])}   // couple4
-    };
+    }
 
     if (imageQualityEnabled) {
         if (!rapid_af::checkImageQuality(couple[0][0], iqOptions)
