@@ -24,8 +24,8 @@ private:
     void setupUi();
 
     QList<CAlkUSB3::BufferPtr> ptr;
-    AutofocusCamDisplayWidget *cd1;
-    AutofocusCamDisplayWidget *cd2;
+    CameraDisplay *cd1;
+    CameraDisplay *cd2;
     PixmapWidget *pmw[4];
     double *mybufDouble1;
     double *mybufDouble2;
