@@ -260,8 +260,8 @@ void Settings::loadSettings()
     SET_VALUE(groupName, SETTING_ENABLED, true);
     SET_VALUE(groupName, SETTING_OUTPUT_ENABLED, true);
 
-    SET_VALUE(groupName, SETTING_LEFT_ROI, QRect());
-    SET_VALUE(groupName, SETTING_RIGHT_ROI, QRect());
+    SET_VALUE(groupName, SETTING_LEFT_ROI, cv::Mat());
+    SET_VALUE(groupName, SETTING_RIGHT_ROI, cv::Mat());
 
     settings.endGroup();
 
@@ -375,8 +375,8 @@ void Settings::loadSettings()
                        value(group, SETTING_CALIBRATION_Q).toDouble());
     af->setEnabled(value(group, SETTING_ENABLED).toBool());
     af->setOutputEnabled(value(group, SETTING_OUTPUT_ENABLED).toBool());
-    af->setLeftRoi(value(group, SETTING_LEFT_ROI).toRect());
-    af->setRightRoi(value(group, SETTING_RIGHT_ROI).toRect());
+    af->setImage1(value(group, SETTING_LEFT_ROI).toMat());
+    af->setImage2(value(group, SETTING_RIGHT_ROI).toMat());
 }
 
 void Settings::saveSettings()
@@ -485,8 +485,8 @@ void Settings::saveSettings()
     setValue(group, SETTING_ENABLED, af->isEnabled());
     setValue(group, SETTING_OUTPUT_ENABLED, af->isOutputEnabled());
 
-    setValue(group, SETTING_LEFT_ROI, af->getLeftRoi());
-    setValue(group, SETTING_RIGHT_ROI, af->getRightRoi());
+    setValue(group, SETTING_LEFT_ROI, af->getImage1());
+    setValue(group, SETTING_RIGHT_ROI, af->getImage2());
 
     QSettings settings;
 
