@@ -77,8 +77,12 @@
 #define SETTING_CANNY_SIGMA "cannySigma"
 #define SETTING_CANNY_ALPHA "cannyAlpha"
 #define SETTING_CANNY_BETA "cannyBeta"
-#define SETTING_CALIBRATION_M "calibration_m"
-#define SETTING_CALIBRATION_Q "calibration_q"
+#define SETTING_CALIBRATION_MALPHA "calibration_mAlpha"
+#define SETTING_CALIBRATION_QALPHA "calibration_qAlpha"
+#define SETTING_CALIBRATION_MBETA1 "calibration_mBeta1"
+#define SETTING_CALIBRATION_QBETA1 "calibration_mBeta1"
+#define SETTING_CALIBRATION_MBETA2 "calibration_mBeta2"
+#define SETTING_CALIBRATION_QBETA2 "calibration_mBeta2"
 #define SETTING_ENABLED "enabled"
 #define SETTING_OUTPUT_ENABLED "outputEnabled"
 #define SETTING_RIGHT_ROI "rightRoi"
@@ -479,8 +483,14 @@ void Settings::saveSettings()
     setValue(group, SETTING_EXPTIME, af->getExposureTime_us());
     setValue(group, SETTING_FRAME_RATE, af->getFrameRate());
 
-    setValue(group, SETTING_CALIBRATION_M, af->getCalibration_m());
-    setValue(group, SETTING_CALIBRATION_Q, af->getCalibration_q());
+    setValue(group, SETTING_CALIBRATION_MALPHA, af->getCalibration_mAlpha());
+    setValue(group, SETTING_CALIBRATION_QALPHA, af->getCalibration_qAlpha());
+
+    setValue(group, SETTING_CALIBRATION_MBETA1, af->getCalibration_mBeta1());
+    setValue(group, SETTING_CALIBRATION_QBETA1, af->getCalibration_qBeta1());
+
+    setValue(group, SETTING_CALIBRATION_MBETA2, af->getCalibration_mBeta2());
+    setValue(group, SETTING_CALIBRATION_QBETA2, af->getCalibration_qBeta2());
 
     setValue(group, SETTING_ENABLED, af->isEnabled());
     setValue(group, SETTING_OUTPUT_ENABLED, af->isOutputEnabled());
