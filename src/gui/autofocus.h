@@ -65,6 +65,9 @@ public:
 
     QList<cv::Mat> roi;
 
+    cv::Mat image1;
+    cv::Mat image2;
+
     cv::Mat getImage1() const;
     cv::Mat getImage2() const;
 
