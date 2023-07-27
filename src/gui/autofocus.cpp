@@ -88,7 +88,6 @@ void Autofocus::init()
         dev[i].PIOPorts[4].Termination = true; // Enable termination
         bool status = dev[i].PIOPorts[4].Value; // Read port 4 value
         rising = dev[i].PIOPorts[4].RisingEvent; // Read port 4 rising event
-        //bool falling = device.PIOPorts[4].FallingEvent;
         dev[i].SetAcquire(rising);
     }
 }
@@ -284,9 +283,9 @@ QList<double> Autofocus::getDelta(){
             throw std::runtime_error("Agreement threshold not met");   
         }
         else {
-        deltaList.append(shift.x);  //to be used for calculating correction
-        shiftList.append(shift); //anto be used in getMergedImage()}
-    }}
+        deltaList.append(shift.x);  //a double to be used for calculating correction
+        shiftList.append(shift);} // a point2f to be used in getMergedImage()
+    }
     for (int j=0; j<4; j++){
         myThreads[j] = thread(alignThem, j);
         ok = false;
