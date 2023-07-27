@@ -112,7 +112,7 @@ void Autofocus::start(){
     DAQmxStartTask(taskHandle);
     data = 1;      //set to high
 
-    for (i=0; i<n; i++){  
+    for (int i=0; i<n; i++){  
         dev[i].SetEnableImageThread(false); // No image conversion needed
         dev[i].SetFrameRate(frameRate);
         dev[i].SetShutter(exposureTime_us);}
