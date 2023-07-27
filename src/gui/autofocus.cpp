@@ -27,10 +27,10 @@ Autofocus::Autofocus(QObject *parent)
 
 void Autofocus::init()
 {
-    dev1 = CAlkUSB3::ICeleraCamera::Create() ;
+    dev1 = CAlkUSB3::ICeleraCamera::Create() ; //two camera devices are created
     dev2 = CAlkUSB3::ICeleraCamera::Create() ;
     
-    auto stringArray = dev1.GetCameraList();
+    auto stringArray = dev1.GetCameraList();  // each contain both cameras
     n = stringArray.Size();
 
     if (n == 0) {
@@ -50,14 +50,14 @@ void Autofocus::init()
     if (GetBandwidthLimitsAvailable()) {
             bandwidthLimits = GetAllowedBandwidthLimits();   //gets a list of bandwidth limits for each usb port
             double n = bandwidthLimits.size();
-            bandwidthLimits = bandwidthLimits[n/2];   //sets it to some value inside the list
+            bandwidthLimits = bandwidthLimits[n/2];   //sets it to some value inside the middle of the list
     }
     else {
         bandwidthLimits = new uint[] {24};            //else, sets it to 24 KiB per micro-frame for each usb port
         }
 
     taskHandle = 0;
-    data = 1;  // initiating the trigger to high (on)
+    data = 1;      // initiating the trigger to high (on)
     DAQmxCreateTask("Trigger", &taskHandle);    
     DAQmxCreateDOChan(taskHandle,"dev1/port1/line0:1"); // Creating two digital channels
     int32 written;
@@ -68,7 +68,7 @@ void Autofocus::init()
 
     for (i=0; i<n; i++){
         try {
-            dev[i].SetCamera(i);            // Open device
+            dev[i].SetCamera(i);            // Each dev opens a camera
             dev[i].SetPreserveRates(false); // Ask always for the best performances (FPS)
             dev[i].SetColorCoding(CAlkUSB3::ColorCoding::Mono8);
             dev[i].SetEnableImageThread(false);
@@ -94,17 +94,16 @@ void Autofocus::init()
 }
 
 void Autofocus::triggerAcquisition(){
-    for (i=0; i<n; i++){
+    for (i=0; i<n; i++){  //for both cameras
         if (data ==1){
-            dev[i].SetAcquire(True);}
+            dev[i].SetAcquire(true);}  //video acqisition on
         else{
-            dev[i].SetAcquire(False);
+            dev[i].SetAcquire(false);  //video acqisition off
         }
     }
 }
 
-void Autofocus::start()
-{
+void Autofocus::start(){
     if (!enabled) {
         return;
     }
@@ -112,38 +111,23 @@ void Autofocus::start()
         stop();
     }
     DAQmxStartTask(taskHandle);
-    data = 1;      // getAcquire() becomes true
-    triggerAcquisition();
+    data = 1;      //set to high
+
+    for (i=0; i<n; i++){  
+        dev[i].SetEnableImageThread(false); // No image conversion needed
+        dev[i].SetFrameRate(frameRate);
+        dev[i].SetShutter(exposureTime_us);}
+
+    try {
+        triggerAcquisition(); // getAcquire() becomes true
+    } catch (CAlkUSB3::InvalidOperationException e) {
+        throw std::runtime_error("Alkeria: invalid operation");
+    }
+    
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
-    
-    //dev[0].SetAcquire(True);
-    //dev[1].SetAcquire(True);
-
-    //thread startAcquire[2];
-    //auto start1([=]){
-    //    try {
-    //       dev[0].SetAcquire(True);
-    //  } catch (CAlkUSB3::InvalidOperationException e) {
-    //        throw std::runtime_error("Alkeria: invalid operation");}
-    //} 
-    //auto start2([=]){
-    //    try {
-    //        dev[1].SetAcquire(true);
-    //  } catch (CAlkUSB3::InvalidOperationException e) {
-    //        throw std::runtime_error("Alkeria: invalid operation");}
-    //}
-    //startAcquire[0]=thread(acquire1);
-    //startAcquire[1]=thread(acquire2);
-        
-    //if (opt.multithreading_enable) {
-    //   for (int i = 0; i < 2; ++i) {
-    //        startAcquire[i].join();
-    //    }
-
-    //    if (teptr) {
-    //        std::rethrow_exception(teptr);    }} }
 }
+
 void Autofocus::stop() {
     DAQmxStartTask(taskHandle);
     data=0;
@@ -151,27 +135,13 @@ void Autofocus::stop() {
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
 }
-    // dev[0].SetAcquire(False);
-    // dev[1].SetAcquire(Flase);
-
-    //thread stopAcquire[2];
-    //auto stop1 ([=]){dev[0].SetAcquire(false)};
-    //auto stop2 ([=]){dev[1].SetAcquire(false)};
-    //stopAcquire[0] = thread(stop1);
-    //stopAcquire[1] = thread(stop2);
-    //if (opt.multithreading_enable) {
-    //    for (int i = 0; i < 2; ++i) {
-    //        stopAcquire[i].join();}   }
-    //if (teptr) {
-    //        std::rethrow_exception(teptr);   }   }
 
 /**
  * @brief This callback is called upon frame acquisition.
  * @param userData A pointer to this class object.
  */
 
-void Autofocus::onFrameAcquired(void *userData)
-{
+void Autofocus::onFrameAcquired(void *userData){
     if (!userData)
         return;
 
@@ -179,13 +149,19 @@ void Autofocus::onFrameAcquired(void *userData)
 
     thread videoStream[2];   //stream both simultaneously using thread
 
-    auto video1([&]){
+    QList<CAlkUSB3::BufferPtr> ptr; //create a ptr list
+    CAlkUSB3::BufferPtr ptr1;
+    CAlkUSB3::BufferPtr ptr2;
+
+    auto video1 = [&] (){
             CAlkUSB3::IVideoSource &videoSource1(af->dev[0]);
-            CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+            ptr1 = videoSource1.GetRawDataPtr(false);
+            ptr.append(ptr1);
     };
-    auto video2([&]){
+    auto video2 = [&] (){
             CAlkUSB3::IVideoSource &videoSource2(af->dev[1]);
-            CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+            ptr2 = videoSource2.GetRawDataPtr(false);
+            ptr.append(ptr2);
     };
 
     videoStream[0] = thread(video1);
@@ -193,7 +169,6 @@ void Autofocus::onFrameAcquired(void *userData)
     videoStream[0].join();
     videoStream[1].join();
 
-    QList<CAlkUSB3::BufferPtr> ptr = {ptr1,ptr2};
     emit af->newImage(ptr);  //newImage returns a QList of ptrs
     
     QList<double> deltaList;
@@ -204,32 +179,40 @@ void Autofocus::onFrameAcquired(void *userData)
         emit af->newStatus(e.what());
         return;
     }
-    double averageDelta = (deltaList[0] + deltaList[1] + deltaList[2] + deltaList[3])/deltaList.Size();  //for alpha
+    double averageDelta = (deltaList[0] + deltaList[1] + deltaList[2] + deltaList[3])/deltaList.size();  //for alpha
     double deltaB1 = (deltaList[1]-deltaList[0] + deltaList[3]-deltaList[2])/2;  //for beta1
     double deltaB2 = (deltaList[0]-deltaList[2] + deltaList[1]-deltaList[3])/2; //for beta2
         
     double alpha = af->mAlpha *averageDelta + af->qAlpha;
     double beta1 = af->mbeta1 *deltaB1 + af->qbeta1;
     double beta2 = af->mbeta2 *deltaB2 + af->qbeta2;
-    correctionList = {alpha, beta1, beta2};
+    correctionList = {alpha, beta1, beta2};  
         
     if (af->isOutputEnabled()) {
-        emit af->newCorrection(correctionList);
+        emit af->newCorrection(correctionList); //This is the correction signal generated
     }
     emit af->newStatus(QString("dx = %1, corr = %2").arg(averageDelta).arg(alpha));
     emit af->newStatus(QString("dx = %1, corr = %2").arg(deltaB1).arg(beta1));
     emit af->newStatus(QString("dx = %1, corr = %2").arg(deltaB2).arg(beta2));
 }
 
-QList<double> Autofocus::getDelta()
-{
+QList<double> Autofocus::getDelta(){
+
+    thread videoStream[2];
+
+    QList<CAlkUSB3::BufferPtr> ptr; //create a ptr list
+    CAlkUSB3::BufferPtr ptr1;
+    CAlkUSB3::BufferPtr ptr2;
+    
     auto video1([&]){
             CAlkUSB3::IVideoSource &videoSource1(dev[0]);
-            CAlkUSB3::BufferPtr ptr1 = videoSource1.GetRawDataPtr(false);
+            ptr1 = videoSource1.GetRawDataPtr(false);
+            ptr.append(ptr1);
     };
     auto video2([&]){
             CAlkUSB3::IVideoSource &videoSource2(dev[1]);
-            CAlkUSB3::BufferPtr ptr2 = videoSource2.GetRawDataPtr(false);
+            ptr2 = videoSource2.GetRawDataPtr(false);
+            ptr.append(ptr2);
     };
 
     videoStream[0] = thread(video1);
@@ -290,11 +273,10 @@ QList<double> Autofocus::getDelta()
 
     static std::exception_ptr teptr = nullptr;
 
-    double alignThem([&](int j))
-{
+    double alignThem([&](int j)){
         try {
-        shift = rapid_af::align(couple[j][0], couple[j][1], options, &ok);
-    }   catch (cv::Exception e) {
+        shift = rapid_af::align(couple[j][0], couple[j][1], options, &ok);   
+        } catch (cv::Exception e) {
             logger->warning(e.what());
             throw std::runtime_error("OpenCV exception (see log)");
         }
@@ -302,11 +284,10 @@ QList<double> Autofocus::getDelta()
             throw std::runtime_error("Agreement threshold not met");   
         }
         else {
-        deltaList.append(shift.x);
-        shiftList.append(shift); //to be used in getMergedImage()
-        }
-}
-    for (j=0; j<4; j++){
+        deltaList.append(shift.x);  //to be used for calculating correction
+        shiftList.append(shift); //anto be used in getMergedImage()}
+    }}
+    for (int j=0; j<4; j++){
         myThreads[j] = thread(alignThem, j);
         ok = false;
     }
