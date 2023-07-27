@@ -389,7 +389,10 @@ void AutofocusWidget::setupUi()
         af->setImageQualityEnabled(qualityGb->isChecked());
         af->setIqOptions(iqOpt);
 
-        af->setCalibration(mSb->value(), qSb->value());         //tf did i do?
+        af->setCalibrationAlpha(mSbAlpha->value(), qSbAlpha->value());
+        af->setCalibrationBeta1(mSbBeta1->value(), qSbBeta1->value());
+        af->setCalibrationBeta2(mSbBeta2->value(), qSbBeta2->value());
+        
         af->setOutputEnabled(outputEnableCb->isChecked());
     };
 
@@ -439,8 +442,12 @@ void AutofocusWidget::setupUi()
         binarizeThreshold,
         qSigma,
         qSratio,
-        qSb,
-        mSb,
+        qSbAlpha,
+        qSbBeta1,
+        qSbBeta2,
+        mSbAlpha,
+        mSbBeta1,
+        mSbBeta2,
         pfSigma,
         dogSigma1,
         dogSigma2,
