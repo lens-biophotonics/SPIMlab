@@ -499,9 +499,8 @@ void AutofocusWidget::setupUi()
     vLayout4->addWidget(generalOptionsGb);
     vLayout4->addStretch();
     vLayout4->addWidget(autofocusGb);
-    vLayout4->addWidget(saveLeftRoiToFile);
-    vLayout4->addWidget(saveRightRoiToFile);
-    vLayout4->addWidget(saveToFile);
+    vLayout4->addWidget(saveImage1ToFile);
+    vLayout4->addWidget(saveImage2ToFile);
 
     hLayout = new QHBoxLayout();
     hLayout->addLayout(vLayout1);
