@@ -66,7 +66,7 @@ void Autofocus::init()
     DAQmxStopTask(taskHandle);
     DAQmxClearTask(taskHandle);
 
-    for (i=0; i<n; i++){
+    for (int i=0; i<n; i++){
         try {
             dev[i].SetCamera(i);            // Each dev opens a camera
             dev[i].SetPreserveRates(false); // Ask always for the best performances (FPS)
