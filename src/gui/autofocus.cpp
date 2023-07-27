@@ -93,7 +93,7 @@ void Autofocus::init()
 }
 
 void Autofocus::triggerAcquisition(){
-    for (i=0; i<n; i++){  //for both cameras
+    for (int i=0; i<n; i++){  //for both cameras
         if (data ==1){
             dev[i].SetAcquire(true);}  //video acqisition on
         else{
