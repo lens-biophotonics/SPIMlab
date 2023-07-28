@@ -258,8 +258,12 @@ void Settings::loadSettings()
 
     SET_VALUE(groupName, SETTING_EXPTIME, 10000);
     SET_VALUE(groupName, SETTING_FRAME_RATE, 5);
-    SET_VALUE(groupName, SETTING_CALIBRATION_M, 0);
-    SET_VALUE(groupName, SETTING_CALIBRATION_Q, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_MALPHA, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_QALPHA, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_MBETA1, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_QBETA1, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_MBETA2, 0);
+    SET_VALUE(groupName, SETTING_CALIBRATION_QBETA2, 0);
 
     SET_VALUE(groupName, SETTING_ENABLED, true);
     SET_VALUE(groupName, SETTING_OUTPUT_ENABLED, true);
@@ -401,8 +405,12 @@ void Settings::loadSettings()
     af->setImageQualityEnabled(value(group, SETTING_QUALITY_ENABLE).toBool());
     af->setExposureTime_us(value(group, SETTING_EXPTIME).toDouble());
     af->setFrameRate(value(group, SETTING_FRAME_RATE).toDouble());
-    af->setCalibration(value(group, SETTING_CALIBRATION_M).toDouble(),
-                       value(group, SETTING_CALIBRATION_Q).toDouble());
+    af->setCalibrationAlpha(value(group, SETTING_CALIBRATION_MALPHA).toDouble(),
+                       value(group, SETTING_CALIBRATION_QALPHA).toDouble());
+    af->setCalibrationBeta1(value(group, SETTING_CALIBRATION_MBETA1).toDouble(),
+                       value(group, SETTING_CALIBRATION_QBETA1).toDouble());
+    af->setCalibrationBeta2(value(group, SETTING_CALIBRATION_MBETA2).toDouble(),
+                       value(group, SETTING_CALIBRATION_QBETA2).toDouble());
     af->setEnabled(value(group, SETTING_ENABLED).toBool());
     af->setOutputEnabled(value(group, SETTING_OUTPUT_ENABLED).toBool());
     af->setImage1(value(group, SETTING_LEFT_ROI).toMat());  //maybe the function is no longuer needed ; also not sure if toMat can be used (it was toRect before) 
