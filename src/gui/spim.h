@@ -19,6 +19,9 @@
 #ifndef SPIM_NPIDEVICES
 #define SPIM_NPIDEVICES 5
 #endif
+#ifndef SPIM_NCORRGALVOS
+#define SPIM_NCORRGALVOS 7
+#endif
 
 #define SPIM_RANGE_FROM_IDX 0
 #define SPIM_RANGE_TO_IDX 1
@@ -45,6 +48,17 @@ enum SPIM_PI_DEVICES : int {
     PI_DEVICE_THETA_AXIS,
     PI_DEVICE_OBJ_AXIS,
 };
+
+enum SPIM_GALVOS : int {
+    G2_Y_AXIS1,
+    G2_Y_AXIS2, 
+    G1_X_AXIS1,
+    G1_X_AXIS2,
+    G1_Y_AXIS1,
+    G1_Y_AXIS2,
+    G3_X_AXIS
+};
+
 
 class SPIM : public QObject
 {
@@ -74,6 +88,10 @@ public:
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
     QList<PIDevice *> getPIDevices() const;
+
+    galvoRamp *getCorrectionGalvos(const SPIM_GALVOS smth) const;
+    galvoRamp *getCorrectionGalvos(const int smth) const;
+    QList<galvoRamp *> getCorrectionGalvos() const;
 
     double getExposureTime() const;
     void setExposureTime(double ms);
@@ -150,6 +168,7 @@ private:
     int binning = 1;
 
     QList<PIDevice *> piDevList;
+    QList<galvoRamp *> correctionGalvos;
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
     QList<Cobolt *> laserList;
