@@ -160,7 +160,7 @@ void Settings::loadSettings()
     groupName = SETTINGSGROUP_GRAMP;
     settings.beginGroup(groupName);
 
-    SET_VALUE(groupName, SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3","Dev1/ao4","Dev1/ao5","Dev1/ao6","Dev1/ao7","Dev1/ao8","Dev1/ao9"}));
+    SET_VALUE(groupName, SETTING_PHYSCHANS, QStringList({"Dev1/ao2", "Dev1/ao3","Dev1/ao4","Dev1/ao5","Dev1/ao6","Dev1/ao7","Dev1/ao8","Dev1/ao9","Dev1/ao10"}));
     SET_VALUE(groupName,
               SETTING_WFPARAMS,
               QList<QVariant>({0.0, 4.0, 0.0, 0.95, 0.0, 4.0, 0.0, 0.95}));
@@ -310,35 +310,43 @@ void Settings::loadSettings()
         group = SETTINGSGROUP_FILTERWHEEL(i);
         dev->serialPort()->setPortBySerialNumber(value(group, SETTING_SERIALNUMBER).toString());
     }
+
+    GalvoRamp *gr = spim().getTasks()->getGalvoRamp(); // for the two G2 Light sheet generation galvos
+    GalvoRamp *smth = spim().getCorrectionGalvos();   // for the other 7 galvos
+    group = SETTINGSGROUP_GRAMP;
     
-    groupName = SETTINGSGROUP_LSGRAMP;
-    settings.beginGroup(groupName);
-    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
-    group = SETTINGSGROUP_LSGRAMP;
-    gr->setPhysicalChannels(value(group, SETTING_PHYSCHANS.at(0 && 1)).toStringList());
+    QStringList SETTING_PHYSCHAN = SETTING_PHYSCHANS;  // making it officially a QStringList to avoid possible problems when i want to access it by index (it might not be necessary)
+    
+    for (int i = 0; i < SPIM_NCAMS; ++i){
+    gr->setPhysicalChannels(value(group, SETTING_PHYSCHAN->at(i)).toStringList());  // only the two first channels of SETTING_PHYSCHANS are selecetd
+    }
+    
+    for (int i =2; i < 7; ++i){
+        smth->setPhysicalChannels(value(group, SETTING_PHYSCHAN->at(i)).toStringList());  // the rest of the strings of SETTING_PHYSCHANS are selected
+    }
+    
+    QList<QVariant> SETTING_WFPARAM = SETTING_WFPARAMS;  //making it official just for safety 
+    
     QVector<double> wp;
-    const QList<QVariant> wafeformParams = value(group, SETTING_WFPARAMS).toList();
+    const QList<QVariant> wafeformParams;
+    for (int i = 0; i < SPIM_NCAMS; i++){
+         wafeformParams.append( value(group, SETTING_WFPARAM->at(i).toList());
     gr->resetWaveFormParams(SPIM_NCAMS);
     for (int i = 0; i < wafeformParams.count(); i++) {
         wp << wafeformParams.at(i).toDouble();
     }
-    gr->setWaveformParams(wp);
 
-    groupName = SETTINGSGROUP_CORRECTIONGRAMP;
-    settings.beginGroup(groupName);
-    for (int i = 0; i < SPIM_NGALVOS; ++i){
-    GalvoRamp *smth;
-    group = SETTINGSGROUP_CORRECTIONGRAMP;
-    smth->setPhysicalChannels(value(group, SETTING_PHYSCHANS.at(2 && 3 && 4 && 5 && 6 && 7)).toStringList());
-    QVector<double> cw;
-    const QList<QVariant> waleformParams = value(group, SETTING_WFPARAMS).toList();
-    smth->resetWaveFormParams(SPIM_NGALVOS*2);
+    QVector<double> ws; // the same operation for the other galvos
+    const QList<QVariant> waleformParams;
+    for (int i = 2; i < 7; i++){
+         waleformParams.append( value(group, SETTING_WFPARAM->at(i).toList());
+    smth->resetWaveFormParams(7); 
     for (int i = 0; i < waleformParams.count(); i++) {
-        cw << waleformParams.at(i).toDouble();
+        ws << waleformParams.at(i).toDouble();
     }
-    smth->setWaveformParams(cw);
-    }
-    settings.endGroup();
+        
+    gr->setWaveformParams(wp);
+    smth->setWaveformParams(ws);  
 
     for (int i = 0; i < SPIM_NAOTF; ++i) {
         AA_MPDSnCxx *dev = spim().getAOTF(i);
@@ -398,7 +406,7 @@ void Settings::loadSettings()
                        value(group, SETTING_CALIBRATION_Q).toDouble());
     af->setEnabled(value(group, SETTING_ENABLED).toBool());
     af->setOutputEnabled(value(group, SETTING_OUTPUT_ENABLED).toBool());
-    af->setImage1(value(group, SETTING_LEFT_ROI).toMat());
+    af->setImage1(value(group, SETTING_LEFT_ROI).toMat());  //maybe no longuer needed?
     af->setImage2(value(group, SETTING_RIGHT_ROI).toMat());
 }
 
@@ -446,31 +454,31 @@ void Settings::saveSettings()
             setValue(group, SETTING_SERIALNUMBER, sn);
         }
     }
-
-    GalvoRamp *gr = spim().getTasks()->getGalvoRamp();
-    group = SETTINGSGROUP_LSGRAMP;
-    setValue(group, SETTING_PHYSCHANS.at(0 && 1), gr->getPhysicalChannels());
+    
+    group = SETTINGSGROUP_GRAMP;
     QList<QVariant> waveformParams;
+    QStringList SETTING_PHYSCHAN = SETTING_PHYSCHANS;
+    
+    GalvoRamp *gr = spim().getTasks()->getGalvoRamp(); 
+    for(int i =0, i<SPIM_NCAMS, i++){
+        setValue(group, SETTING_PHYSCHAN->at(i), gr->getPhysicalChannels());}  
     for (QVariant variant : gr->getWaveformParams()) {
         waveformParams.append(variant.toDouble());
     }
-    setValue(group, SETTING_WFPARAMS, waveformParams);
+    GalvoRamp *smth = spim().getCorrectionGalvos();
+    for(int i =2, i<7, i++){
+    setValue(group, SETTING_PHYSCHAN->at(i), smth->getPhysicalChannels());}  
+    for (QVariant variantt : smth->getWaveformParams()) {  //doing the same for smth
+        waveformParams.append(variantt.toDouble());
+    }        
+    setValue(group, SETTING_WFPARAM, waveformParams);
+    
     CameraTrigger *ct = spim().getTasks()->getCameraTrigger();
     group = SETTINGSGROUP_CAMTRIG;
     setValue(group, SETTING_PULSE_TERMS, ct->getPulseTerms());
     setValue(group, SETTING_BLANKING_TERMS, ct->getBlankingPulseTerms());
     setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
     setValue(group, SETTING_TRIGGER_DELAY, ct->getDelay());
-
-    GalvoRamp *smth ;
-    group = SETTINGSGROUP_CORRGRAMP;
-    setValue(group, SETTING_PHYSCHANS.at(2 && 3 && 4 && 5 && 6 && 7), smth->getPhysicalChannels());
-    QList<QVariant> waleformParams;
-    for (QVariant variant : smth->getWaveformParams()) {
-        wavelormParams.append(variant.toDouble());
-    }
-    setValue(group, SETTING_WFPARAMS, wavelormParams);
-    
 
     group = SETTINGSGROUP_ACQUISITION;
     setValue(group, SETTING_EXPTIME, spim().getExposureTime());
