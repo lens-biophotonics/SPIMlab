@@ -23,10 +23,6 @@
 #include <QHistoryState>
 #include <QTimer>
 
-#IFNDEF SPIM_NCORRGALVOS
-#DEFINE SPIM_NCORRGALVOS=7
-QList<GalvoRamp *> correctionGalvos; //put it in header
-
 static Logger *logger = getLogger("SPIM");
 
 using namespace QtLab::hw::Thorlabs;
