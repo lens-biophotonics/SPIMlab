@@ -23,6 +23,10 @@
 #include <QHistoryState>
 #include <QTimer>
 
+#IFNDEF SPIM_NCORRGALVOS
+#DEFINE SPIM_NCORRGALVOS=7
+QList<GalvoRamp *> correctionGalvos; //put it in header
+
 static Logger *logger = getLogger("SPIM");
 
 using namespace QtLab::hw::Thorlabs;
@@ -30,11 +34,13 @@ using namespace QtLab::hw::Thorlabs;
 SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
-    QList<GalvoRamp *> correctionGalvos; //put it in header
-    GalvoRamp G2diagonal = ???
-    GalvoRamp G1Rapid = ???
-    GalvoRamp G1Inclination = ???
-    correctionGalvos<<G2diagonal<<G1Rapid<<G1Inclination;
+    correctionGalvos.reserve(SPIM_NCORRGALVOS);
+    correctionGalvos.insert(G2_Y_AXIS1, new galvoRamp("Y2_1", this)); //these two for G2 diagonal waveform
+    correctionGalvos.insert(G2_Y_AXIS2, new galvoRamp("Y2_2", this));
+    correctionGalvos.insert(G1_X_AXIS1, new galvoRamp("X1_1", this)); //these two for G1 RAPID
+    correctionGalvos.insert(G1_X_AXIS2, new galvoRamp("X1_2", this));
+    correctionGalvos.insert(G1_Y_AXIS1, new galvoRamp("Y1_1", this)); //these two for G1 Inclination (from G3)
+    correctionGalvos.insert(G1_Y_AXIS2, new galvoRamp("Y1_2", this));
 
     tasks = new Tasks(this);
 
@@ -814,6 +820,21 @@ void SPIM::setOutputPathList(const QStringList &sl)
 QState *SPIM::getState(const SPIM::MACHINE_STATE stateEnum)
 {
     return stateMap[stateEnum];
+}
+
+PIDevice *SPIM::getCorrectionGalvos(const SPIM_GALVOS smth) const
+{
+    return correctionGalvos.value(smth);
+}
+
+PIDevice *SPIM::getCorrectionGalvos(const int smth) const
+{
+    return getCorrectionGalvos(static_cast<SPIM_GALVOS >(smth));
+}
+
+QList<correctionGalvos *> SPIM::getCorrectionGalvos() const
+{
+    return correctionGalvos;
 }
 
 QList<SPIM_PI_DEVICES> SPIM::getMosaicStages() const
