@@ -41,6 +41,7 @@ SPIM::SPIM(QObject *parent)
     correctionGalvos.insert(G1_X_AXIS2, new galvoRamp("X1_2", this));
     correctionGalvos.insert(G1_Y_AXIS1, new galvoRamp("Y1_1", this)); //these two for G1 Inclination (from G3)
     correctionGalvos.insert(G1_Y_AXIS2, new galvoRamp("Y1_2", this));
+    correctionGalvos.insert(G3_X_AXIS, new galvoRamp("X3", this));  //for G3
 
     tasks = new Tasks(this);
 
@@ -395,6 +396,21 @@ PIDevice *SPIM::getPIDevice(const int dev) const
 QList<PIDevice *> SPIM::getPIDevices() const
 {
     return piDevList;
+}
+
+galvoRamp *SPIM::getCorrectionGalvos(const SPIM_GALVOS smth) const
+{
+    return correctionGalvos.value(smth);
+}
+
+galvoRamp *SPIM::getCorrectionGalvos(const int smth) const
+{
+    return getCorrectionGalvos(static_cast<SPIM_GALVOS >(smth));
+}
+
+QList<correctionGalvos *> SPIM::getCorrectionGalvos() const
+{
+    return correctionGalvos;
 }
 
 void SPIM::startFreeRun()
@@ -820,21 +836,6 @@ void SPIM::setOutputPathList(const QStringList &sl)
 QState *SPIM::getState(const SPIM::MACHINE_STATE stateEnum)
 {
     return stateMap[stateEnum];
-}
-
-PIDevice *SPIM::getCorrectionGalvos(const SPIM_GALVOS smth) const
-{
-    return correctionGalvos.value(smth);
-}
-
-PIDevice *SPIM::getCorrectionGalvos(const int smth) const
-{
-    return getCorrectionGalvos(static_cast<SPIM_GALVOS >(smth));
-}
-
-QList<correctionGalvos *> SPIM::getCorrectionGalvos() const
-{
-    return correctionGalvos;
 }
 
 QList<SPIM_PI_DEVICES> SPIM::getMosaicStages() const
