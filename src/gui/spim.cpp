@@ -47,6 +47,7 @@ SPIM::SPIM(QObject *parent)
     autoFocus->moveToThread(thread);
     thread->start();
 
+    //these lines below should be removed, and the galvos list shoud be connected to the correction list found in autofocus
     connect(autoFocus, &Autofocus::newCorrection, [=](double correction) {
         getPIDevice(PI_DEVICE_OBJ_AXIS)->moveRelative("1", &correction);
     });
