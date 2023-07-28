@@ -12,6 +12,7 @@ public:
 
 private:
     void setupUI();
+    void widgetvoxes(galvoRamp* something);
 };
 
 #endif // GALVOSWIDGET_H
