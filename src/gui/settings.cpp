@@ -27,7 +27,6 @@
 #define SETTINGSGROUP_AOTF(n) QString("AOTF_%1").arg(n)
 #define SETTINGSGROUP_CAMTRIG "CameraTrigger"
 #define SETTINGSGROUP_GRAMP "GalvoRamp"
-#define SETTINGSGROUP_LSGRAMP "LightSheetGalvoRamp"
 #define SETTINGSGROUP_AUTOFOCUS "Autofocus"
 
 #define SETTING_PULSE_TERMS "pulseTerms"
@@ -406,7 +405,7 @@ void Settings::loadSettings()
                        value(group, SETTING_CALIBRATION_Q).toDouble());
     af->setEnabled(value(group, SETTING_ENABLED).toBool());
     af->setOutputEnabled(value(group, SETTING_OUTPUT_ENABLED).toBool());
-    af->setImage1(value(group, SETTING_LEFT_ROI).toMat());  //maybe no longuer needed?
+    af->setImage1(value(group, SETTING_LEFT_ROI).toMat());  //maybe the function is no longuer needed ; also not sure if toMat can be used (it was toRect before) 
     af->setImage2(value(group, SETTING_RIGHT_ROI).toMat());
 }
 
