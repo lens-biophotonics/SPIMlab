@@ -324,7 +324,7 @@ void Settings::loadSettings()
     gr->setPhysicalChannels(value(group, SETTING_PHYSCHAN->at(i)).toStringList());  // only the two first channels of SETTING_PHYSCHANS are selecetd
     }
     
-    for (int i =2; i < 7; ++i){
+    for (int i =2; i < SPIM_NCORRGALVOS+2 ; ++i){
         smth->setPhysicalChannels(value(group, SETTING_PHYSCHAN->at(i)).toStringList());  // the rest of the strings of SETTING_PHYSCHANS are selected
     }
     
@@ -341,7 +341,7 @@ void Settings::loadSettings()
 
     QVector<double> ws; // the same operation for the other galvos
     const QList<QVariant> waleformParams;
-    for (int i = 2; i < 7; i++){
+    for (int i = 2; i < SPIM_NCORRGALVOS+2 ; i++){
          waleformParams.append( value(group, SETTING_WFPARAM->at(i).toList());
     smth->resetWaveFormParams(7); 
     for (int i = 0; i < waleformParams.count(); i++) {
@@ -473,7 +473,7 @@ void Settings::saveSettings()
         waveformParams.append(variant.toDouble());
     }
     GalvoRamp *smth = spim().getCorrectionGalvos();
-    for(int i =2, i<7, i++){
+    for(int i =2, i<SPIM_NCORRGALVOS+2, i++){
     setValue(group, SETTING_PHYSCHAN->at(i), smth->getPhysicalChannels());}  
     for (QVariant variantt : smth->getWaveformParams()) {  //doing the same for smth
         waveformParams.append(variantt.toDouble());
