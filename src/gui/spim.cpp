@@ -88,7 +88,7 @@ SPIM::SPIM(QObject *parent)
         });
     
     //the G3 shift connected to offset of G2 y axis (Light-sheet)
-    GalvoRamp *gr = getTasks()->getGalvoRamp();
+    GalvoRamp *gr = tasks()->getGalvoRamp();
     for (int i = 0; i < SPIM_NCAMS; ++i) { 
         connect(autoFocus, &Autofocus::newDescanCorrection[1], [=](double correction) {
                 gr->setWaveformOffset(i, &correction);
