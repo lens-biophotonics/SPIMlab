@@ -1,6 +1,7 @@
 #include "galvosWidget.h"
 
 #include <qtlab/widgets/customspinbox.h>
+#include <qtlab/hw/ni/nitask.cpp>
 
 #include <QGroupBox>
 #include <QGridLayout>
@@ -53,10 +54,10 @@ galvoswidget::widgetboxes(galvoRamp *something)
         grid->addWidget(fractionSpinBox, row, col++);
 
         std::function<void(void)> apply = [=]() {
-            something->setWaveformAmplitude(spim.getPhysicalChannels(), amplitudeSpinBox->value());
-            something->setWaveformOffset(spim.getPhysicalChannels(), offsetSpinBox->value());
-            something->setWaveformDelay(spim.getPhysicalChannels(), delaySpinBox->value() / 1000.);
-            something->setWaveformRampFraction(spim.getPhysicalChannels(), fractionSpinBox->value() / 100.);
+            something->setWaveformAmplitude(getPhysicalChannels(), amplitudeSpinBox->value());
+            something->setWaveformOffset(getPhysicalChannels(), offsetSpinBox->value());
+            something->setWaveformDelay(getPhysicalChannels(), delaySpinBox->value() / 1000.);
+            something->setWaveformRampFraction(getPhysicalChannels(), fractionSpinBox->value() / 100.);
             something->updateWaveform();}
         
         connect(offsetSpinBox, &DoubleSpinBox::returnPressed, this, apply);
