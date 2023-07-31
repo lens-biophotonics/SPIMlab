@@ -83,23 +83,23 @@ galvosWidget::setupUI()
     
     grid->addWidget(new QLabel("Diagonal correction waveform"), row++, 0, 1, 1); //the second mirror of G2
     for (int j = 0; j<SPIM_NCAMS; j++){
-        smth = spim().getCorrectionGalvos[j];  //we first point to the two mirrors of g2
+        smth = spim().getCorrectionGalvo[j];  //we first point to the two mirrors of g2
         widgetboxes(smth); }
 
     grid->addWidget(new QLabel("Image plane galvo pair"), row++, 0, 1, 1); //now the G1 galvos
     
     grid->addWidget(new QLabel("Rapid beta 1 correction"), row++, 0, 1, 1); //the two mirrors of g1 we move thanks to with RAPID
     for (int j = 2; j<SPIM_NCAMS; j++){
-        smth = spim().getCorrectionGalvos[j];  
+        smth = spim().getCorrectionGalvo[j];  
         widgetboxes(smth); }
     
     grid->addWidget(new QLabel("Descan inclination correction"), row++, 0, 1, 1); //the two mirrors of g1 we move thanks to g3's descan inclination
     for (int j = 4; j<SPIM_NCAMS; j++){
-        smth = spim().getCorrectionGalvos[j];  
+        smth = spim().getCorrectionGalvo[j];  
         widgetboxes(smth); }    
 
     grid->addWidget(new QLabel("Descanning galvo "), row++, 0, 1, 1); //G3's parameters
-    smth = spim().getCorrectionGalvos[6];  
+    smth = spim().getCorrectionGalvo[6];  
     widgetboxes(smth);  
 
     QGroupBox *gbox = new QGroupBox("Galvo Ramp");
