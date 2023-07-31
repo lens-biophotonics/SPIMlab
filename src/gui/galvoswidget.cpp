@@ -53,10 +53,10 @@ galvoswidget::widgetboxes(galvoRamp *something)
         grid->addWidget(fractionSpinBox, row, col++);
 
         std::function<void(void)> apply = [=]() {
-            something->setWaveformAmplitude(i, amplitudeSpinBox->value());
-            something->setWaveformOffset(i, offsetSpinBox->value());
-            something->setWaveformDelay(i, delaySpinBox->value() / 1000.);
-            something->setWaveformRampFraction(i, fractionSpinBox->value() / 100.);
+            something->setWaveformAmplitude(spim.getPhysicalChannels(), amplitudeSpinBox->value());
+            something->setWaveformOffset(spim.getPhysicalChannels(), offsetSpinBox->value());
+            something->setWaveformDelay(spim.getPhysicalChannels(), delaySpinBox->value() / 1000.);
+            something->setWaveformRampFraction(spim.getPhysicalChannels(), fractionSpinBox->value() / 100.);
             something->updateWaveform();}
         
         connect(offsetSpinBox, &DoubleSpinBox::returnPressed, this, apply);
@@ -109,15 +109,6 @@ galvosWidget::setupUI()
     layout->addWidget(gbox);
     setLayout(layout);
 }
-        
-
-    
-
-
-    QBoxLayout *LSGalvo = new QHBoxLayout();
-    LSGalvo->addWidget(new GalvoWaveformWidget());
-    controlsHLayout->addLayout(galvoProgressLayout);
-
 
 
 
