@@ -50,8 +50,8 @@ enum SPIM_PI_DEVICES : int {
 };
 
 enum SPIM_GALVOS : int {
-    G2_Y_AXIS1,
-    G2_Y_AXIS2, 
+    G2_x_AXIS1,
+    G2_x_AXIS2, 
     G1_X_AXIS1,
     G1_X_AXIS2,
     G1_Y_AXIS1,
@@ -89,9 +89,8 @@ public:
     PIDevice *getPIDevice(const int dev) const;
     QList<PIDevice *> getPIDevices() const;
 
-    galvoRamp *getCorrectionGalvos(const SPIM_GALVOS smth) const;
-    galvoRamp *getCorrectionGalvos(const int smth) const;
-    QList<galvoRamp *> getCorrectionGalvos() const;
+    galvoRamp *getCorrectionGalvo(int i) const; //returns a galvo of index i from the list
+    QList<galvoRamp *> getCorrectionGalvos() const; //returns the entire list
 
     double getExposureTime() const;
     void setExposureTime(double ms);
