@@ -47,11 +47,55 @@ SPIM::SPIM(QObject *parent)
     autoFocus->moveToThread(thread);
     thread->start();
 
-    //these lines below should be removed, and the galvos list shoud be connected to the correction list found in autofocus
-    connect(autoFocus, &Autofocus::newCorrection, [=](double correction) {
-        getPIDevice(PI_DEVICE_OBJ_AXIS)->moveRelative("1", &correction);
-    });
-
+    //the RAPID average connected to offset of G2 x axis
+    connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {  
+            getCorrectionGalvo(0)->setWaveformRampOffset(0, &correction / 100.););
+            getCorrectionGalvo(0)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {
+            getCorrectionGalvo(1)->setWaveformRampOffset(1, &correction / 100.););
+            getCorrectionGalvo(1)->updateWaveform();
+        });
+    
+    //the RAPID beta2 connected to amplitude of G2 x axis
+    connect(autoFocus, &Autofocus::newCorrection[2], [=](double correction) {
+            getCorrectionGalvo(0)->setWaveformAmplitude(4, &correction);
+            getCorrectionGalvo(0)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[2], [=](double correction) {
+            getCorrectionGalvo(1)->setWaveformAmplitude(5, &correction);
+            getCorrectionGalvo(1)->updateWaveform();
+        });
+    
+    //the RAPID beta1 connected to offset of G1 x axis
+    connect(autoFocus, &Autofocus::newCorrection[1], [=](double correction) {
+            getCorrectionGalvo(2)->setWaveformAmplitude(2, &correction);
+            getCorrectionGalvo(2)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[1], [=](double correction) {
+            getCorrectionGalvo(3)->setWaveformAmplitude(3, &correction);
+            getCorrectionGalvo(3)->updateWaveform();
+        });
+    
+    //the G3 inclination connected to offset of G1 y axis
+    connect(autoFocus, &Autofocus::newDescanCorrection[0], [=](double correction) {
+            getCorrectionGalvo(4)->setWaveformAmplitude(4, &correction);
+            getCorrectionGalvo(4)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newDescanCorrection[0], [=](double correction) {
+            getCorrectionGalvo(5)->setWaveformAmplitude(5, &correction);
+            getCorrectionGalvo(5)->updateWaveform();
+        });
+    
+    //the G3 shift connected to offset of G2 y axis (Light-sheet)
+    GalvoRamp *gr = getTasks()->getGalvoRamp();
+    for (int i = 0; i < SPIM_NCAMS; ++i) { 
+        connect(autoFocus, &Autofocus::newDescanCorrection[1], [=](double correction) {
+                gr->setWaveformOffset(i, &correction);
+                gr->updateWaveform();
+        });  
+    }
+    
     connect(this, &SPIM::stopped, autoFocus, &Autofocus::stop);
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
