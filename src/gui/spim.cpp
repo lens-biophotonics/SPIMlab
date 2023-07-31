@@ -31,8 +31,8 @@ SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
     correctionGalvos.reserve(SPIM_NCORRGALVOS);
-    correctionGalvos.insert(G2_Y_AXIS1, new galvoRamp("Y2_1", this)); //these two for G2 diagonal waveform
-    correctionGalvos.insert(G2_Y_AXIS2, new galvoRamp("Y2_2", this));
+    correctionGalvos.insert(G2_X_AXIS1, new galvoRamp("X2_1", this)); //these two for G2 diagonal waveform
+    correctionGalvos.insert(G2_X_AXIS2, new galvoRamp("X2_2", this));
     correctionGalvos.insert(G1_X_AXIS1, new galvoRamp("X1_1", this)); //these two for G1 RAPID
     correctionGalvos.insert(G1_X_AXIS2, new galvoRamp("X1_2", this));
     correctionGalvos.insert(G1_Y_AXIS1, new galvoRamp("Y1_1", this)); //these two for G1 Inclination (from G3)
@@ -49,11 +49,11 @@ SPIM::SPIM(QObject *parent)
 
     //the RAPID average connected to offset of G2 x axis
     connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {  
-            getCorrectionGalvo(0)->setWaveformRampOffset(0, &correction / 100.););
+            getCorrectionGalvo(0)->setWaveformRampOffset(0, &correction););
             getCorrectionGalvo(0)->updateWaveform();
         });
     connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {
-            getCorrectionGalvo(1)->setWaveformRampOffset(1, &correction / 100.););
+            getCorrectionGalvo(1)->setWaveformRampOffset(1, &correction););
             getCorrectionGalvo(1)->updateWaveform();
         });
     
@@ -439,14 +439,9 @@ QList<PIDevice *> SPIM::getPIDevices() const
     return piDevList;
 }
 
-galvoRamp *SPIM::getCorrectionGalvos(const SPIM_GALVOS smth) const
+galvoRamp *SPIM::getCorrectionGalvo(int i) 
 {
-    return correctionGalvos.value(smth);
-}
-
-galvoRamp *SPIM::getCorrectionGalvos(const int smth) const
-{
-    return getCorrectionGalvos(static_cast<SPIM_GALVOS >(smth));
+    return getCorrectionGalvos->at(i);  //will be used to update each galvo depending on which correcion signal
 }
 
 QList<correctionGalvos *> SPIM::getCorrectionGalvos() const
