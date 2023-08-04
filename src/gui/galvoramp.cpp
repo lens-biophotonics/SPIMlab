@@ -118,8 +118,8 @@ void GalvoRamp::computeWaveform()
 {
     waveform.clear();
     waveform.reserve(static_cast<int>(sampsPerChan) * nOfChannels());
-    double delay = static_cast<double>(sampsPerChan) / nOfChannels()
-                   / getSampleRate(); // hardcoded delay between waveforms
+    // hardcoded delay between waveforms
+    const double delay = 0;
     for (int i = 0; i < nOfChannels(); ++i) {
         appendToWaveform(waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_OFFSET_IDX],
                          waveformParams[GALVORAMP_N_OF_PARAMS * i + GALVORAMP_AMPLITUDE_IDX],

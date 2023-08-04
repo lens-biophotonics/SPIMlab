@@ -1,12 +1,41 @@
 #include "mainwindow.h"
 #include "settings.h"
+#include "spim.h"
 #include "version.h"
 
+#include <ICeleraCamera.h>
+
 #include <qtlab/core/logger.h>
+#include <qtlab/core/logmanager.h>
 
 #include <QApplication>
+#include <QMessageBox>
 #include <QSerialPortInfo>
 #include <QStyleFactory>
+
+static Logger *logger = getLogger("Main");
+
+class MyApplication : public QApplication
+{
+public:
+    MyApplication(int &argc, char **argv)
+        : QApplication(argc, argv){};
+
+    bool notify(QObject *receiver, QEvent *event)
+    {
+        bool done = true;
+        try {
+            done = QApplication::notify(receiver, event);
+        } catch (CAlkUSB3::Exception e) {
+            logger->critical(e.Message());
+            emit spim().error(e.Message());
+        } catch (std::runtime_error e) {
+            logger->critical(e.what());
+            emit spim().error(e.what());
+        }
+        return done;
+    }
+};
 
 int main(int argc, char *argv[])
 {
@@ -14,7 +43,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("lens.unifi.it");
     QCoreApplication::setApplicationName(PROGRAM_NAME);
 
-    QApplication a(argc, argv);
+    MyApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");      // needed by PI_GCS library, otherwise it doesn't parse doubles
                                      // in the response strings correctly
     QLocale::setDefault(QLocale::C); // this overrides the system settings: e.g. it allows doubles

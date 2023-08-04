@@ -19,6 +19,9 @@
 #ifndef SPIM_NPIDEVICES
 #define SPIM_NPIDEVICES 5
 #endif
+#ifndef SPIM_NCORRGALVOS
+#define SPIM_NCORRGALVOS 7
+#endif
 
 #define SPIM_RANGE_FROM_IDX 0
 #define SPIM_RANGE_TO_IDX 1
@@ -33,14 +36,29 @@ class Cobolt;
 class FilterWheel;
 class AA_MPDSnCxx;
 class Tasks;
+namespace QtLab::hw::Thorlabs {
+class MotorController;
+};
+class Autofocus;
 
 enum SPIM_PI_DEVICES : int {
     PI_DEVICE_X_AXIS,
     PI_DEVICE_Y_AXIS,
     PI_DEVICE_Z_AXIS,
-    PI_DEVICE_LEFT_OBJ_AXIS,
-    PI_DEVICE_RIGHT_OBJ_AXIS,
+    PI_DEVICE_THETA_AXIS,
+    PI_DEVICE_OBJ_AXIS,
 };
+
+enum SPIM_GALVOS : int {
+    G2_x_AXIS1,
+    G2_x_AXIS2, 
+    G1_X_AXIS1,
+    G1_X_AXIS2,
+    G1_Y_AXIS1,
+    G1_Y_AXIS2,
+    G3_X_AXIS
+};
+
 
 class SPIM : public QObject
 {
@@ -70,6 +88,9 @@ public:
     PIDevice *getPIDevice(const SPIM_PI_DEVICES dev) const;
     PIDevice *getPIDevice(const int dev) const;
     QList<PIDevice *> getPIDevices() const;
+
+    galvoRamp *getCorrectionGalvo(int i) const; //returns a galvo of index i from the list
+    QList<galvoRamp *> getCorrectionGalvos() const; //returns the entire list
 
     double getExposureTime() const;
     void setExposureTime(double ms);
@@ -108,12 +129,17 @@ public:
     QDir getFullOutputDir(int cam);
 
     Tasks *getTasks() const;
+    Autofocus *getAutoFocus() const;
+
+    void restartAutofocus();
 
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
     int getBinning() const;
     void setBinning(uint value);
+
+    QtLab::hw::Thorlabs::MotorController *getMotorController() const;
 
 public slots:
     void startFreeRun();
@@ -134,17 +160,20 @@ signals:
 
 private:
     Tasks *tasks;
+    Autofocus *autoFocus;
 
     double exposureTime; // in ms
     double triggerRate;
     int binning = 1;
 
     QList<PIDevice *> piDevList;
+    QList<galvoRamp *> correctionGalvos;
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
     QList<Cobolt *> laserList;
     QList<FilterWheel *> filterWheelList;
     QList<AA_MPDSnCxx *> aotfList;
+    QtLab::hw::Thorlabs::MotorController *mc;
 
     QStateMachine *sm = nullptr;
 

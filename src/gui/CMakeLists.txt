@@ -12,8 +12,12 @@ find_package(QtLab REQUIRED
     PI-Widgets
     Serial
     Serial-Widgets
+    ThorlabsMC
     Widgets
 )
+find_package(rapid-af REQUIRED)
+find_package(alkusb3 REQUIRED)
+include_directories("${ALKUSB3_INCLUDE_DIR}")
 
 option(FORCE_FUSION_STYLE "Force fusion style" OFF)
 
@@ -35,12 +39,15 @@ set(SPIMlab_SRCS
     version.cpp
     settings.cpp
 
+    autofocuswidget.cpp
+    autofocuscamdisplaywidget.cpp
     nisettingswidget.cpp
     galvowaveformwidget.cpp
     coboltwidget.cpp
     filterwheelwidget.cpp
     acquisitionwidget.cpp
     progresswidget.cpp
+    thorlabsmcwidget.cpp
 
     stagewidget.cpp
     camerapage.cpp
@@ -54,6 +61,7 @@ set(SPIMlab_SRCS
     galvoramp.cpp
     tasks.cpp
     
+    autofocus.cpp
     savestackworker.cpp
     spim.cpp
 )
@@ -68,5 +76,8 @@ target_link_libraries(SPIMlab
     QtLab::PI-Widgets
     QtLab::Serial
     QtLab::Serial-Widgets
+    QtLab::ThorlabsMC
     QtLab::Widgets
+    rapid-af
+    ${ALKUSB3_LIBRARY}
 )

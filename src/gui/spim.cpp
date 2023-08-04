@@ -1,5 +1,6 @@
 #include "spim.h"
 
+#include "autofocus.h"
 #include "cameratrigger.h"
 #include "galvoramp.h"
 #include "savestackworker.h"
@@ -16,6 +17,7 @@
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
+#include <qtlab/hw/thorlabs-mc/motorcontroller.h>
 
 #include <QFinalState>
 #include <QHistoryState>
@@ -23,17 +25,87 @@
 
 static Logger *logger = getLogger("SPIM");
 
+using namespace QtLab::hw::Thorlabs;
+
 SPIM::SPIM(QObject *parent)
     : QObject(parent)
 {
+    correctionGalvos.reserve(SPIM_NCORRGALVOS);
+    correctionGalvos.insert(G2_X_AXIS1, new galvoRamp("X2_1", this)); //these two for G2 diagonal waveform
+    correctionGalvos.insert(G2_X_AXIS2, new galvoRamp("X2_2", this));
+    correctionGalvos.insert(G1_X_AXIS1, new galvoRamp("X1_1", this)); //these two for G1 RAPID
+    correctionGalvos.insert(G1_X_AXIS2, new galvoRamp("X1_2", this));
+    correctionGalvos.insert(G1_Y_AXIS1, new galvoRamp("Y1_1", this)); //these two for G1 Inclination (from G3)
+    correctionGalvos.insert(G1_Y_AXIS2, new galvoRamp("Y1_2", this));
+    correctionGalvos.insert(G3_X_AXIS, new galvoRamp("X3", this));  //for G3
+
     tasks = new Tasks(this);
 
+    autoFocus = new Autofocus();
+    QThread *thread = new QThread();
+    thread->setObjectName("Autofocus_thread");
+    autoFocus->moveToThread(thread);
+    thread->start();
+
+    //the RAPID average connected to offset of G2 x axis
+    connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {  
+            getCorrectionGalvo(0)->setWaveformRampOffset(0, &correction););
+            getCorrectionGalvo(0)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[0], [=](double correction) {
+            getCorrectionGalvo(1)->setWaveformRampOffset(1, &correction););
+            getCorrectionGalvo(1)->updateWaveform();
+        });
+    
+    //the RAPID beta2 connected to amplitude of G2 x axis
+    connect(autoFocus, &Autofocus::newCorrection[2], [=](double correction) {
+            getCorrectionGalvo(0)->setWaveformAmplitude(4, &correction);
+            getCorrectionGalvo(0)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[2], [=](double correction) {
+            getCorrectionGalvo(1)->setWaveformAmplitude(5, &correction);
+            getCorrectionGalvo(1)->updateWaveform();
+        });
+    
+    //the RAPID beta1 connected to offset of G1 x axis
+    connect(autoFocus, &Autofocus::newCorrection[1], [=](double correction) {
+            getCorrectionGalvo(2)->setWaveformAmplitude(2, &correction);
+            getCorrectionGalvo(2)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newCorrection[1], [=](double correction) {
+            getCorrectionGalvo(3)->setWaveformAmplitude(3, &correction);
+            getCorrectionGalvo(3)->updateWaveform();
+        });
+    
+    //the G3 inclination connected to offset of G1 y axis
+    connect(autoFocus, &Autofocus::newDescanCorrection[0], [=](double correction) {
+            getCorrectionGalvo(4)->setWaveformAmplitude(4, &correction);
+            getCorrectionGalvo(4)->updateWaveform();
+        });
+    connect(autoFocus, &Autofocus::newDescanCorrection[0], [=](double correction) {
+            getCorrectionGalvo(5)->setWaveformAmplitude(5, &correction);
+            getCorrectionGalvo(5)->updateWaveform();
+        });
+    
+    //the G3 shift connected to offset of G2 y axis (Light-sheet)
+    GalvoRamp *gr = tasks()->getGalvoRamp();
+    for (int i = 0; i < SPIM_NCAMS; ++i) { 
+        connect(autoFocus, &Autofocus::newDescanCorrection[1], [=](double correction) {
+                gr->setWaveformOffset(i, &correction);
+                gr->updateWaveform();
+        });  
+    }
+    
+    connect(this, &SPIM::stopped, autoFocus, &Autofocus::stop);
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         OrcaFlash *orca = new OrcaFlash(this);
 
         QThread *thread = new QThread();
         thread->setObjectName(QString("SaveStackWorker_thread_%1").arg(i));
         SaveStackWorker *ssWorker = new SaveStackWorker(orca);
+        if (i == 0) {
+            ssWorker->setVerticalFlipEnabled(true);
+        }
         ssWorker->moveToThread(thread);
         thread->start();
 
@@ -64,11 +136,11 @@ SPIM::SPIM(QObject *parent)
     });
 
     piDevList.reserve(SPIM_NPIDEVICES);
-    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X axis", this));
-    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
-    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z axis", this));
-    piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice("Left objective", this));
-    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice("Right objective", this));
+    piDevList.insert(PI_DEVICE_X_AXIS, new PIDevice("X", this));
+    piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y", this));
+    piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z", this));
+    piDevList.insert(PI_DEVICE_THETA_AXIS, new PIDevice("theta", this));
+    piDevList.insert(PI_DEVICE_OBJ_AXIS, new PIDevice("focus", this));
     for (PIDevice *dev : piDevList) {
         connect(dev, &PIDevice::connected, this, [=]() { dev->setServoEnabled(true); });
     }
@@ -96,10 +168,18 @@ SPIM::SPIM(QObject *parent)
         laserList.insert(i, cobolt);
     }
 
-    stackStage = PI_DEVICE_X_AXIS;
-    mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_Z_AXIS;
+    stackStage = PI_DEVICE_Z_AXIS;
+    mosaicStages << PI_DEVICE_Y_AXIS << PI_DEVICE_X_AXIS;
     enabledMosaicStageMap[PI_DEVICE_Y_AXIS] = true;
+    enabledMosaicStageMap[PI_DEVICE_X_AXIS] = true;
 
+    mc = new MotorController();
+    {
+        QThread *thread = new QThread();
+        thread->setObjectName("MotorController_thread");
+        mc->moveToThread(thread);
+        thread->start();
+    }
     setupStateMachine();
 }
 
@@ -109,6 +189,9 @@ void SPIM::initialize()
 {
     try {
         logger->info("Initializing microscope");
+
+        autoFocus->init();
+
         int nOfCameras = DCAM::init_dcam();
         if (nOfCameras < SPIM_NCAMS) {
             throw std::runtime_error(
@@ -128,10 +211,15 @@ void SPIM::initialize()
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
                                    OrcaFlash::POL_POSITIVE,
                                    2e-6);
-            orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
-                                   DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            if (i == 0) {
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            } else {
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__BACKWARD);
+            }
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
-            orca->buf_alloc(4000);
+            orca->buf_alloc(1600);
             orca->logInfo();
         }
 
@@ -173,6 +261,7 @@ void SPIM::uninitialize()
     try {
         stop();
         closeAllDaisyChains();
+        QMetaObject::invokeMethod(mc, "disconnect", Qt::BlockingQueuedConnection);
         tasks->clearTasks();
         for (OrcaFlash *orca : camList) {
             if (orca->isOpen()) {
@@ -185,6 +274,11 @@ void SPIM::uninitialize()
         onError(e.what());
         return;
     }
+}
+
+MotorController *SPIM::getMotorController() const
+{
+    return mc;
 }
 
 int SPIM::getBinning() const
@@ -210,6 +304,19 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
 Tasks *SPIM::getTasks() const
 {
     return tasks;
+}
+
+Autofocus *SPIM::getAutoFocus() const
+{
+    return autoFocus;
+}
+
+void SPIM::restartAutofocus()
+{
+    if (getState(SPIM::STATE_CAPTURING)->active()) {
+        autoFocus->stop();
+        autoFocus->start();
+    }
 }
 
 QString SPIM::getRunName() const
@@ -332,6 +439,16 @@ QList<PIDevice *> SPIM::getPIDevices() const
     return piDevList;
 }
 
+galvoRamp *SPIM::getCorrectionGalvo(int i) 
+{
+    return getCorrectionGalvos->at(i);  //will be used to update each galvo depending on which correcion signal
+}
+
+QList<correctionGalvos *> SPIM::getCorrectionGalvos() const
+{
+    return correctionGalvos;
+}
+
 void SPIM::startFreeRun()
 {
     freeRun = true;
@@ -452,6 +569,7 @@ void SPIM::setupStateMachine()
             }
 
             tasks->start();
+            autoFocus->start();
         } catch (std::runtime_error e) {
             onError(e.what());
         }
@@ -527,6 +645,7 @@ void SPIM::setupStateMachine()
             return;
         }
         tasks->stop();
+        autoFocus->stop();
         completedJobs = successJobs = 0;
 
         // compute target position
@@ -611,6 +730,7 @@ void SPIM::setupStateMachine()
                 }
                 tasks->start();
                 dev->move(stackTo);
+                autoFocus->start();
             } catch (std::runtime_error e) {
                 onError(e.what());
                 return;
@@ -676,7 +796,8 @@ void SPIM::_setExposureTime(double expTime)
 
         double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double fraction = 0.95;
-        triggerRate = fraction * frameRate;
+        double totalFrameRate = 1 / (1 / frameRate + tasks->getCameraTrigger()->getDelay() / 1000);
+        triggerRate = fraction * totalFrameRate;
 
         logger->info(QString("Exposure time: %1 ms").arg(expTime * 1000));
         logger->info(QString("Line interval: %1 us").arg(lineInterval));
@@ -705,6 +826,7 @@ void SPIM::incrementCompleted(bool ok)
     }
     if (successJobs == 1) {
         tasks->stop();
+        autoFocus->stop();
     }
     if (++completedJobs == SPIM_NCAMS) {
         if (successJobs == SPIM_NCAMS) {

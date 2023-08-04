@@ -32,6 +32,8 @@ public:
 
     void setBinning(const uint &value);
 
+    void setVerticalFlipEnabled(bool value);
+
 signals:
     void error(QString msg = "");
     void captureCompleted(bool ok);
@@ -40,6 +42,7 @@ private:
     QString timeoutString(double delta, int i);
 
     bool stopped, triggerCompleted;
+    bool flipVertically = false;
     double timeout;
     QString outputFileName;
     QString outputPath;

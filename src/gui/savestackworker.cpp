@@ -64,8 +64,16 @@ void SaveStackWorker::start()
     void *buf;
     size_t width = 2048;
     size_t height = 2048;
-    int n = 2 * width * height;
-    int binned_n = n / binning / binning;
+    const int binnedHeight = height / binning;
+    const int binnedWidth = width / binning;
+    const int binned_n = binnedWidth * binnedHeight;
+    const int nBytes = 2 * binned_n;
+
+    uint16_t *tempRowBuf = nullptr;
+
+    if (flipVertically) {
+        tempRowBuf = new uint16_t[binnedWidth];
+    }
 
     readFrames = 0;
     triggerCompleted = false;
@@ -77,7 +85,7 @@ void SaveStackWorker::start()
     const int32_t nFramesInBuffer = orca->nFramesInBuffer();
     QVector<qint64> timeStamps(frameCount, 0);
 #else
-    buf = malloc(n);
+    buf = malloc(nBytes);
 #endif
 
     uint16_t *binnedBuf = nullptr;
@@ -144,7 +152,7 @@ void SaveStackWorker::start()
             continue;
         }
 #else
-        orca->copyLastFrame(buf, n);
+        orca->copyLastFrame(buf, nBytes);
 #endif
 
         if (stopped) {
@@ -154,8 +162,22 @@ void SaveStackWorker::start()
         if (binning > 1) {
             performBinning(binning, static_cast<uint16_t *>(buf), binnedBuf);
         }
-        ssize_t written = write(fd, binning > 1 ? binnedBuf : buf, binned_n);
-        if (written != binned_n) {
+
+        uint16_t *toBeWritten = binning > 1 ? binnedBuf : static_cast<uint16_t *>(buf);
+
+        if (flipVertically) {
+            size_t n = binnedWidth * sizeof(uint16_t);
+            for (int i = 0; i < binnedHeight / 2; ++i) {
+                void *topRow = &toBeWritten[i * binnedWidth];
+                void *bottomRow = &toBeWritten[(binnedHeight - 1 - i) * binnedWidth];
+                memcpy(tempRowBuf, topRow, n);
+                memcpy(topRow, bottomRow, n);
+                memcpy(bottomRow, tempRowBuf, n);
+            }
+        }
+
+        ssize_t written = write(fd, toBeWritten, nBytes);
+        if (written != nBytes) {
             logger->critical(QString("Camera %1: written %2/%3 bytes")
                                  .arg(orca->getCameraIndex())
                                  .arg(written)
@@ -172,6 +194,10 @@ void SaveStackWorker::start()
 
     if (binnedBuf != nullptr) {
         delete[] binnedBuf;
+    }
+
+    if (tempRowBuf != nullptr) {
+        delete[] tempRowBuf;
     }
 
     emit captureCompleted(readFrames == frameCount);
@@ -230,6 +256,11 @@ QString SaveStackWorker::timeoutString(double delta, int i)
         .arg(delta * 1e-3)
         .arg(i + 1)
         .arg(timeout / 1e3);
+}
+
+void SaveStackWorker::setVerticalFlipEnabled(bool value)
+{
+    flipVertically = value;
 }
 
 void SaveStackWorker::setBinning(const uint &value)

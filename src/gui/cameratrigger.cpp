@@ -56,7 +56,10 @@ void CameraTrigger::initializeTask_impl()
     for (int i = 0; i < nCams; i++) {
         // camera trigger
         QString chanName = QString("CamTrig%1").arg(i);
-        double delay = i * (1 / pulseFreq) / nCams;
+        double delay = 0;
+        if (i == 1) {
+            delay = this->delay / 1000.;
+        }
         createCOPulseChanFreq(counters.at(counterIdx++),
                               chanName,
                               DAQmx_Val_Hz,
@@ -66,6 +69,8 @@ void CameraTrigger::initializeTask_impl()
                               0.1);
         setCOPulseTerm(chanName, pulseTerms.at(i));
 
+        if (i > 0)
+            continue;
         // blanking
         chanName = QString("Blanking%1").arg(i);
         createCOPulseChanFreq(counters.at(counterIdx++),
@@ -84,6 +89,16 @@ void CameraTrigger::initializeTask_impl()
         cfgImplicitTiming(SampMode_FiniteSamps, nPulses);
         cfgDigEdgeStartTrig(startTriggerTerm, Edge_Rising);
     }
+}
+
+double CameraTrigger::getDelay() const
+{
+    return delay;
+}
+
+void CameraTrigger::setDelay(double ms)
+{
+    delay = ms;
 }
 
 int CameraTrigger::getNPulses() const

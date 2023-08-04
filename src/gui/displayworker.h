@@ -14,6 +14,8 @@ public:
 
     void setBinning(uint value);
 
+    void setVerticalFlipEnabled(bool enable);
+
 signals:
     void newImage(double *data, size_t n);
 
@@ -24,6 +26,7 @@ private:
     OrcaFlash *orca;
     double *mybufDouble;
     bool running;
+    bool flipVertically = false;
     uint binning = 1;
 };
 

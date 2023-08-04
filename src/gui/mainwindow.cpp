@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "autofocus.h"
+#include "autofocuswidget.h"
 #include "camerapage.h"
 #include "coboltwidget.h"
 #include "filterswidget.h"
@@ -7,6 +9,7 @@
 #include "spim.h"
 #include "stagewidget.h"
 #include "version.h"
+#include "galvosWidget.h"
 
 #include <qtlab/core/logmanager.h>
 #include <qtlab/hw/ni/natinst.h>
@@ -109,6 +112,21 @@ void MainWindow::setupUi()
     vLayout->addWidget(new StageWidget());
     cw->setLayout(vLayout);
     cw->setWindowTitle("Stages");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    vLayout->addWidget(new galvosWidget());
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Galvos");
+    closableWidgets << cw;
+
+    vLayout = new QVBoxLayout();
+    cw = new QWidget();
+    AutofocusWidget *afw = new AutofocusWidget();
+    vLayout->addWidget(afw);
+    cw->setLayout(vLayout);
+    cw->setWindowTitle("Autofocus");
     closableWidgets << cw;
 
     vLayout = new QVBoxLayout();
