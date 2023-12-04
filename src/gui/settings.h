@@ -7,6 +7,7 @@
 #define SETTINGSGROUP_OTHERSETTINGS "OtherSettings"
 
 #define SETTINGSGROUP_AXIS(n) QString("AXIS_%1").arg(n)
+#define SETTINGSGROUP_CAMERAS(n) QString("CAMERA_%1").arg(n)
 #define SETTINGSGROUP_FILTERWHEEL(n) QString("FilterWheel_%1").arg(n)
 
 #define SETTING_LUTPATH "LUTPath"
