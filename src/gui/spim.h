@@ -171,7 +171,7 @@ private:
 
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
-    QList<bool> enabledCameras;
+    QList<bool> camEnabled;
 
     QStateMachine *sm = nullptr;
 

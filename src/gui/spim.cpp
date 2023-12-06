@@ -89,7 +89,7 @@ SPIM::SPIM(QObject *parent)
     }
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        enabledCameras << false;
+        camEnabled << false;
     }
 
     PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
@@ -231,12 +231,12 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
 
 bool SPIM::isCameraEnabled(uint camera)
 {
-    return enabledCameras[camera];
+    return camEnabled[camera];
 }
 
 void SPIM::setCameraEnabled(uint camera, bool enable)
 {
-    enabledCameras[camera] = enable;
+    camEnabled[camera] = enable;
 }
 
 QString SPIM::getRunName() const
@@ -426,12 +426,10 @@ void SPIM::setupStateMachine()
     QState *freeRunState = newState(STATE_FREERUN, capturingState);
     connect(freeRunState, &QState::entered, this, [=]() {
         try {
-            int i = 0;
-            for (OrcaFlash *orca : camList) {
-                if (enabledCameras[i] == true) {
-                    orca->cap_start();
+            for (int i = 0; i < SPIM_NCAMS; ++i) {
+                if (camEnabled[i]) {
+                    camList[i]->cap_start();
                 }
-                i++;
             }
 
 #ifdef MASTER_SPIM
@@ -599,7 +597,7 @@ void SPIM::setupStateMachine()
 
                 // prepare and start acquisition thread
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
-                    if (enabledCameras[i] == true) {
+                    if (camEnabled[i]) {
                         SaveStackWorker *ssWorker = ssWorkerList.at(i);
                         ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
                         ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
@@ -610,7 +608,7 @@ void SPIM::setupStateMachine()
                 }
 
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
-                    if (enabledCameras[i] == true) {
+                    if (camEnabled[i]) {
                         camList.at(i)->cap_start();
                         QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
                     }
@@ -710,7 +708,7 @@ void SPIM::_setExposureTime(double expTime)
 void SPIM::incrementCompleted(bool ok)
 {
     int nEnabledCameras = 0;
-    nEnabledCameras = std::accumulate(enabledCameras.begin(), enabledCameras.end(), nEnabledCameras);
+    nEnabledCameras = std::accumulate(camEnabled.begin(), camEnabled.end(), nEnabledCameras);
 #define EXPECTED_N_JOBS nEnabledCameras
     if (freeRun) {
         return;

@@ -84,7 +84,7 @@ void ProgressWidget::setupUI()
 
     connect(timer, &QTimer::timeout, this, [=]() {
         for (int i = 0; i < SPIM_NCAMS; ++i) {
-            if (spim().isCameraEnabled(i) == 1) {
+            if (spim().isCameraEnabled(i)) {
                 stackPbList.at(i)->setRange(0, spim().getSSWorker(i)->getFrameCount());
                 stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
             }
@@ -118,7 +118,7 @@ void ProgressWidget::setupUI()
         etaLabel->setText(startDateTime->addSecs(remainingSeconds).toString());
         progressBar->setValue(currentStep);
         for (int i = 0; i < SPIM_NCAMS; ++i) {
-            if (spim().isCameraEnabled(i) == 1) {
+            if (spim().isCameraEnabled(i)) {
                 stackPbList.at(i)->setValue(spim().getSSWorker(i)->getReadFrames());
             }
         }
