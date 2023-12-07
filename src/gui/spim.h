@@ -103,6 +103,7 @@ public:
 
     bool isCameraEnabled(uint dev);
     void setCameraEnabled(uint camera, bool enable);
+    int nEnabledCameras();
 
     int getBinning() const;
     bool setBinning(uint value);
