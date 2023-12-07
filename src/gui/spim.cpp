@@ -23,6 +23,7 @@
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
+
 #endif
 
 static Logger *logger = getLogger("SPIM");
@@ -85,6 +86,10 @@ SPIM::SPIM(QObject *parent)
         SPIM_PI_DEVICES dev = static_cast<SPIM_PI_DEVICES>(i);
         scanRangeMap.insert(dev, new QList<double>({0, 0, 0}));
         enabledMosaicStageMap[dev] = false;
+    }
+
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        camEnabled << false;
     }
 
     PIDevice *xaxis = getPIDevice(PI_DEVICE_X_AXIS);
@@ -224,6 +229,22 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
     enabledMosaicStageMap[dev] = enable;
 }
 
+bool SPIM::isCameraEnabled(uint camera)
+{
+    return camEnabled[camera];
+}
+
+void SPIM::setCameraEnabled(uint camera, bool enable)
+{
+    camEnabled[camera] = enable;
+}
+
+int SPIM::nEnabledCameras()
+{
+    int nEnabledCameras = std::count(camEnabled.begin(), camEnabled.end(), true);
+    return nEnabledCameras;
+}
+
 QString SPIM::getRunName() const
 {
     return runName;
@@ -292,63 +313,82 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 }
 void SPIM::startFreeRun()
 {
-    freeRun = true;
-    logger->info("Start free run");
-    _startCapture();
+    try {
+        if (nEnabledCameras() == 0) {
+            throw std::runtime_error(
+                QString("Can't start free run with no cameras enabled").toStdString());
+        }
+        freeRun = true;
+        logger->info("Start free run");
+        _startCapture();
+    } catch (std::runtime_error e) {
+        onError(e.what());
+        return;
+    }
 }
 
 bool SPIM::startAcquisition()
 {
-    freeRun = false;
-    logger->info("Start acquisition");
+    try {
+        if (nEnabledCameras() == 0) {
+            throw std::runtime_error(
+                QString("Can't start capture with no cameras enabled").toStdString());
+        }
+        freeRun = false;
+        logger->info("Start acquisition");
 
 #ifdef MASTER_SPIM
-    enabledMosaicStages.clear();
-    for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
-        if (enabledMosaicStageMap[d_enum]) {
-            enabledMosaicStages << d_enum;
+        enabledMosaicStages.clear();
+        for (const SPIM_PI_DEVICES d_enum : mosaicStages) {
+            if (enabledMosaicStageMap[d_enum]) {
+                enabledMosaicStages << d_enum;
+            }
         }
-    }
 
-    QList<SPIM_PI_DEVICES> stageEnumList;
-    stageEnumList << enabledMosaicStages << stackStage;
+        QList<SPIM_PI_DEVICES> stageEnumList;
+        stageEnumList << enabledMosaicStages << stackStage;
 
-    QList<PIDevice *> stageList;
-    for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
-        stageList << getPIDevice(d_enum);
+        QList<PIDevice *> stageList;
+        for (const SPIM_PI_DEVICES d_enum : stageEnumList) {
+            stageList << getPIDevice(d_enum);
 
-        int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX)
-                                    * pow(10, SPIM_SCAN_DECIMALS));
-        int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX)
-                                  * pow(10, SPIM_SCAN_DECIMALS));
-        int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX)
-                                    * pow(10, SPIM_SCAN_DECIMALS));
+            int from = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_FROM_IDX)
+                                        * pow(10, SPIM_SCAN_DECIMALS));
+            int to = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_TO_IDX)
+                                      * pow(10, SPIM_SCAN_DECIMALS));
+            int step = static_cast<int>(scanRangeMap[d_enum]->at(SPIM_RANGE_STEP_IDX)
+                                        * pow(10, SPIM_SCAN_DECIMALS));
 
-        if (step == 0) {
-            nSteps[d_enum] = 1;
-        } else {
-            nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
+            if (step == 0) {
+                nSteps[d_enum] = 1;
+            } else {
+                nSteps[d_enum] = static_cast<int>(ceil((to - from) / step) + 1);
+            }
         }
-    }
 
-    totalSteps = 1;
-    for (const SPIM_PI_DEVICES d_enum : enabledMosaicStages) {
-        totalSteps *= nSteps[d_enum];
-        currentSteps[d_enum] = 0;
-    }
-    logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
-                     .arg(totalSteps)
-                     .arg(nSteps[stackStage]));
+        totalSteps = 1;
+        for (const SPIM_PI_DEVICES d_enum : enabledMosaicStages) {
+            totalSteps *= nSteps[d_enum];
+            currentSteps[d_enum] = 0;
+        }
+        logger->info(QString("Total number of stacks to acquire: %1 (with %2 frames in each)")
+                         .arg(totalSteps)
+                         .arg(nSteps[stackStage]));
 
-    currentStep = 0;
+        currentStep = 0;
 #endif
 
-    // create output directories
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
-        getFullOutputDir(i).mkpath(".");
-    }
+        // create output directories
+        for (int i = 0; i < SPIM_NCAMS; ++i) {
+            getFullOutputDir(i).mkpath(".");
+        }
 
-    _startCapture();
+        _startCapture();
+
+    } catch (std::runtime_error e) {
+        onError(e.what());
+        return false;
+    }
     return true;
 }
 
@@ -411,8 +451,10 @@ void SPIM::setupStateMachine()
     QState *freeRunState = newState(STATE_FREERUN, capturingState);
     connect(freeRunState, &QState::entered, this, [=]() {
         try {
-            for (OrcaFlash *orca : camList) {
-                orca->cap_start();
+            for (int i = 0; i < SPIM_NCAMS; ++i) {
+                if (camEnabled[i]) {
+                    camList[i]->cap_start();
+                }
             }
 
 #ifdef MASTER_SPIM
@@ -580,17 +622,21 @@ void SPIM::setupStateMachine()
 
                 // prepare and start acquisition thread
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
-                    SaveStackWorker *ssWorker = ssWorkerList.at(i);
-                    ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
-                    ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
-                    ssWorker->setOutputFileName(outputFname + "_cam_" + side.at(i));
-                    ssWorker->setFrameCount(frameCount);
-                    ssWorker->setBinning(binning);
+                    if (camEnabled[i]) {
+                        SaveStackWorker *ssWorker = ssWorkerList.at(i);
+                        ssWorker->setTimeout(2 * 1e6 / getTriggerRate());
+                        ssWorker->setOutputPath(getFullOutputDir(i).absolutePath());
+                        ssWorker->setOutputFileName(outputFname + "_cam_" + side.at(i));
+                        ssWorker->setFrameCount(frameCount);
+                        ssWorker->setBinning(binning);
+                    }
                 }
 
                 for (int i = 0; i < SPIM_NCAMS; ++i) {
-                    camList.at(i)->cap_start();
-                    QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
+                    if (camEnabled[i]) {
+                        camList.at(i)->cap_start();
+                        QMetaObject::invokeMethod(ssWorkerList.at(i), &SaveStackWorker::start);
+                    }
                 }
 #ifdef MASTER_SPIM
                 tasks->start();
@@ -686,7 +732,7 @@ void SPIM::_setExposureTime(double expTime)
 
 void SPIM::incrementCompleted(bool ok)
 {
-#define EXPECTED_N_JOBS SPIM_NCAMS
+#define EXPECTED_N_JOBS nEnabledCameras()
     if (freeRun) {
         return;
     }

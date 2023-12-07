@@ -101,6 +101,10 @@ public:
     bool isMosaicStageEnabled(SPIM_PI_DEVICES dev) const;
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
+    bool isCameraEnabled(uint dev);
+    void setCameraEnabled(uint camera, bool enable);
+    int nEnabledCameras();
+
     int getBinning() const;
     bool setBinning(uint value);
 
@@ -168,6 +172,7 @@ private:
 
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
+    QList<bool> camEnabled;
 
     QStateMachine *sm = nullptr;
 

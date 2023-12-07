@@ -52,6 +52,7 @@
 #define SETTING_EXPTIME "exposureTime"
 #define SETTING_RUN_NAME "runName"
 #define SETTING_BINNING "binning"
+#define SETTING_ENABLED_CAMERAS "CameraEnabled"
 
 #define SETTING_TURN_OFF_LASERS_AT_END_OF_ACQUISITION "turnOffLasersAtEndOfAcquisition"
 
@@ -144,8 +145,18 @@ void Settings::loadSettings()
     SET_VALUE(group, SETTING_EXPTIME, 0.15);
     SET_VALUE(group, SETTING_RUN_NAME, QString());
     SET_VALUE(group, SETTING_BINNING, 1);
-
     settings.endGroup();
+
+    groups.clear();
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        groups << SETTINGSGROUP_CAMERAS(i);
+    }
+
+    for (const QString &group : groups) {
+        settings.beginGroup(group);
+        SET_VALUE(group, SETTING_ENABLED_CAMERAS, false);
+        settings.endGroup();
+    }
 
     groups.clear();
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
@@ -255,6 +266,11 @@ void Settings::loadSettings()
     spim().setRunName(value(group, SETTING_RUN_NAME).toString());
     spim().setBinning(value(group, SETTING_BINNING).toUInt());
 
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        group = SETTINGSGROUP_CAMERAS(i);
+        spim().setCameraEnabled(i, value(group, SETTING_ENABLED_CAMERAS).toBool());
+    }
+
 #endif
 
     group = SETTINGSGROUP_OTHERSETTINGS;
@@ -330,6 +346,11 @@ void Settings::saveSettings()
     setValue(group, SETTING_EXPTIME, spim().getExposureTime());
     setValue(group, SETTING_RUN_NAME, spim().getRunName());
     setValue(group, SETTING_BINNING, spim().getBinning());
+
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        group = SETTINGSGROUP_CAMERAS(i);
+        setValue(group, SETTING_ENABLED_CAMERAS, spim().isCameraEnabled(i));
+    }
 #endif
     group = SETTINGSGROUP_OTHERSETTINGS;
 #ifdef MASTER_SPIM

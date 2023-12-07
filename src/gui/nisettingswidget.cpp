@@ -5,6 +5,7 @@
 #include "spim.h"
 #include "tasks.h"
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -24,6 +25,8 @@ void NISettingsWidget::setupUI()
 
     QComboBox *comboBox;
 
+    QCheckBox *checkBox;
+
     CameraTrigger *cameraTrigger = spim().getTasks()->getCameraTrigger();
 
     QStringList terminals = NI::getTerminals().filter("PFI");
@@ -36,6 +39,7 @@ void NISettingsWidget::setupUI()
     QList<QComboBox *> galvoRampComboBoxList;
     QList<QComboBox *> blankingComboBoxList;
     QList<QComboBox *> cameraTriggerPulseComboBoxList;
+    QList<QCheckBox *> checkBoxes;
 
     int row = 0;
     for (int i = 0; i < SPIM_NCAMS; ++i) {
@@ -59,12 +63,18 @@ void NISettingsWidget::setupUI()
         grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
         comboBox = new QComboBox();
         comboBox->addItems(NI::getAOPhysicalChans());
+
 #ifdef DEMO_MODE
         comboBox->addItems({"DemoDev/ao0", "DemoDev/ao1"});
 #endif
         comboBox->setCurrentText(spim().getTasks()->getGalvoRamp()->getPhysicalChannels().at(i));
         grid->addWidget(comboBox, row++, i * 2 + 1);
         galvoRampComboBoxList.insert(i, comboBox);
+
+        grid->addWidget(new QLabel("Enabled"), row, i * 2 + 0);
+        checkBox = new QCheckBox();
+        grid->addWidget(checkBox, row++, i * 2 + 1);
+        checkBoxes.insert(i, checkBox);
     }
 
     QFrame *line = new QFrame;
@@ -110,5 +120,14 @@ void NISettingsWidget::setupUI()
               << PITriggerOutputComboBox;
     for (QComboBox *combo : allCombos) {
         connect(combo, QOverload<int>::of(&QComboBox::activated), [=]() { apply(); });
+    }
+
+    int i = 0;
+    for (QCheckBox *checkBox : checkBoxes) {
+        connect(checkBox, &QCheckBox::toggled, [=](bool checked) {
+            spim().setCameraEnabled(i, checkBox->QCheckBox::isChecked());
+        });
+        checkBox->setChecked(spim().isCameraEnabled(i));
+        i++;
     }
 }
