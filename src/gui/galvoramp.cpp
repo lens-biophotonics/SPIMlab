@@ -21,6 +21,26 @@ void GalvoRamp::initializeTask_impl()
     }
     createTask("galvoRamp");
 
+    if (physicalChannels.size() > 1) {
+        QString first = physicalChannels.first();
+        QString last = physicalChannels.last();
+        bool ok = false;
+        int from = first.mid(first.size() - 1).toInt(&ok);
+        if (!ok) {
+            throw std::runtime_error(
+                QString("Cannot parse ch number in %1").arg(first).toStdString().c_str());
+        }
+        int to = last.mid(last.size() - 1).toInt(&ok);
+        if (!ok) {
+            throw std::runtime_error(
+                QString("Cannot parse ch number in %1").arg(first).toStdString().c_str());
+        }
+        if (to - from + 1 != physicalChannels.size()) {
+            throw std::runtime_error(
+                QString("Wrong AO settings: %1 %2").arg(first).arg(last).toStdString().c_str());
+        }
+    }
+
     createAOVoltageChan(physicalChannels.join(":"),
                         "galvoRampAOChan",
                         -10.0,
