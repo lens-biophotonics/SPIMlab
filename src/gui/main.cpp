@@ -6,8 +6,10 @@
 #ifdef MASTER_SPIM
 
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/pi/pidevice.h>
 
 #include <QSerialPortInfo>
+
 #endif
 #include <QStyleFactory>
 
@@ -41,6 +43,14 @@ int main(int argc, char *argv[])
         logger->info(descr);
     }
 #endif
+
+    QStringList piUsbDevices = PIDevice::enumerateUSBDevices();
+    if (!piUsbDevices.isEmpty()) {
+        logger->info("Available PI USB devices:");
+        for (QString s : piUsbDevices) {
+            logger->info(s);
+        }
+    }
 
     settings(); // force loading of settings
 
