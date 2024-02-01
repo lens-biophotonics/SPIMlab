@@ -155,8 +155,14 @@ bool SPIM::initializeSpim()
                                    OrcaFlash::OUTPUT_TRIGGER_SOURCE_HSYNC,
                                    OrcaFlash::POL_POSITIVE,
                                    2e-6);
-            orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
-                                   DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            if (i == 0) {
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__FORWARD);
+            } else if (i == 1) {
+                orca->setPropertyValue(DCAM::DCAM_IDPROP_READOUT_DIRECTION,
+                                       DCAM::DCAMPROP_READOUT_DIRECTION__BACKWARD);
+            }
+
             orca->setPropertyValue(DCAM::DCAM_IDPROP_OUTPUTTRIGGER_PREHSYNCCOUNT, 0);
             orca->buf_alloc(4000);
             orca->logInfo();
