@@ -35,7 +35,7 @@ void CameraDelayWidget::setupUI()
         grid->addWidget(new QLabel(QString("Cam %1").arg(i)), row, col++);
 
         DoubleSpinBox *delaySpinbox = new DoubleSpinBox();
-        delaySpinbox->setRange(-10, 10);
+        delaySpinbox->setRange(0, 100);
         delaySpinbox->setDecimals(3);
         delaySpinbox->setSingleStep(0.01);
         delaySpinbox->setSuffix(" ms");
