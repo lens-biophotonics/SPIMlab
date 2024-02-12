@@ -56,8 +56,8 @@ public:
     double getPulseFreq() const;
     void setPulseFreq(double value);
 
-    double getTriggerDelay(uint camera);
-    void setTriggerDelay(uint camera, double value);
+    double getCameraDelay(uint camera);
+    void setCameraDelay(uint camera, double value);
     void setCameraDelays();
 
     QStringList getPulseTerms() const;

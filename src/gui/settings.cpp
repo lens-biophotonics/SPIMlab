@@ -160,7 +160,7 @@ void Settings::loadSettings()
 
     groups.clear();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        groups << SETTINGSGROUP_CAMERAS(i);
+        groups << SETTINGSGROUP_CAMDELAYS(i);
     }
 
     for (const QString &group : groups) {
@@ -278,8 +278,8 @@ void Settings::loadSettings()
     spim().setBinning(value(group, SETTING_BINNING).toUInt());
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        group = SETTINGSGROUP_CAMERAS(i);
-        ct->setTriggerDelay(i, value(group, SETTING_CAMERA_DELAY).toDouble());
+        group = SETTINGSGROUP_CAMDELAYS(i);
+        ct->setCameraDelay(i, value(group, SETTING_CAMERA_DELAY).toDouble());
     }
 #endif
 
@@ -354,8 +354,8 @@ void Settings::saveSettings()
     setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
-        group = SETTINGSGROUP_CAMERAS(i);
-        setValue(group, SETTING_CAMERA_DELAY, ct->getTriggerDelay(i));
+        group = SETTINGSGROUP_CAMDELAYS(i);
+        setValue(group, SETTING_CAMERA_DELAY, ct->getCameraDelay(i));
     }
 
     group = SETTINGSGROUP_ACQUISITION;

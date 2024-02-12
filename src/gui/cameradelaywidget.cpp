@@ -39,11 +39,11 @@ void CameraDelayWidget::setupUI()
         delaySpinbox->setDecimals(3);
         delaySpinbox->setSingleStep(0.01);
         delaySpinbox->setSuffix(" ms");
-        delaySpinbox->setValue(ct->getTriggerDelay(i) * 1000.);
+        delaySpinbox->setValue(ct->getCameraDelay(i) * 1000.);
         grid->addWidget(delaySpinbox, row, col++);
 
         connect(delaySpinbox, &DoubleSpinBox::returnPressed, [=]() {
-            ct->setTriggerDelay(i, delaySpinbox->value() / 1000.);
+            ct->setCameraDelay(i, delaySpinbox->value() / 1000.);
         });
 
         row++;

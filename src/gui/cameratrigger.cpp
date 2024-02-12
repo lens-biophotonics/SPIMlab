@@ -149,12 +149,12 @@ double CameraTrigger::getPulseFreq() const
     return pulseFreq;
 }
 
-void CameraTrigger::setTriggerDelay(uint camera, double value)
+void CameraTrigger::setCameraDelay(uint camera, double value)
 {
     delay[camera] = value;
 }
 
-double CameraTrigger::getTriggerDelay(uint camera)
+double CameraTrigger::getCameraDelay(uint camera)
 {
     return delay[camera];
 }
