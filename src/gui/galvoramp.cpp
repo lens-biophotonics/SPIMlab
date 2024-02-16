@@ -162,10 +162,10 @@ void GalvoRamp::appendToWaveform(double offset,
 
     int i = 0;
     for (; i < nRamp; ++i)
-        temp[i] = offset - halfAmplitude + amplitude * i / nRamp;
+        temp[i] = offset + amplitude * i / nRamp;
     int nRamp2 = sampsPerChan - nRamp;
     for (; i < sampsPerChan; ++i)
-        temp[i] = offset + halfAmplitude - amplitude * (i - nRamp) / nRamp2;
+        temp[i] = offset + amplitude - amplitude * (i - nRamp) / nRamp2;
 
     if (nDelay == 0 || nDelay == temp.size()) {
         waveform << temp;
