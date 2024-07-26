@@ -161,6 +161,8 @@ public slots:
 
     bool signalTriggerCompletion();
 
+    void logMessage(const QString &msg);
+
 #ifdef MASTER_SPIM
     void haltStages();
 #endif

@@ -958,6 +958,11 @@ bool SPIM::signalTriggerCompletion()
     return true;
 }
 
+void SPIM::logMessage(const QString &msg)
+{
+    logger->info(msg);
+}
+
 QString SPIM::getRemoteNode() const
 {
     return remoteNode;

@@ -11,5 +11,7 @@ class SPIM
     SLOT(bool setFrameCount(int count));
     SLOT(bool signalTriggerCompletion());
 
+    SLOT(void logMessage(const QString &msg));
+
     SIGNAL(jobsCompleted(bool ok));
 };
