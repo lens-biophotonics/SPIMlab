@@ -598,8 +598,8 @@ void SPIM::setupStateMachine()
 #endif
 
         QString fname;
-#ifdef MASTER_SPIM
         try {
+#ifdef MASTER_SPIM
             // move stages to target position
             for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);

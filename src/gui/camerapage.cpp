@@ -59,9 +59,11 @@ void CameraPage::setupUI()
 #endif
     galvoProgressLayout->addWidget(new ProgressWidget());
 
+#ifdef MASTER_SPIM
     QBoxLayout *cameraDelay = new QVBoxLayout();
     cameraDelay->addWidget(new CameraDelayWidget());
     cameraDelay->addStretch();
+#endif
 
     QPushButton *initPushButton = new QPushButton("Initialize");
     connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
@@ -209,7 +211,9 @@ void CameraPage::setupUI()
     controlsHLayout->addWidget(acqWidget);
 #endif
     controlsHLayout->addLayout(galvoProgressLayout);
+#ifdef MASTER_SPIM
     controlsHLayout->addLayout(cameraDelay);
+#endif
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(controlsGb);
 

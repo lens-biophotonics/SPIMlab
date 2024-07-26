@@ -46,14 +46,6 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    QStringList piUsbDevices = PIDevice::enumerateUSBDevices();
-    if (!piUsbDevices.isEmpty()) {
-        logger->info("Available PI USB devices:");
-        for (QString s : piUsbDevices) {
-            logger->info(s);
-        }
-    }
-
     settings(); // force loading of settings
 
     MainWindow w;
