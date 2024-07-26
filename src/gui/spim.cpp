@@ -760,11 +760,9 @@ void SPIM::_setExposureTime(double expTime)
             }
         }
 
-        double delay = tasks->getCameraTrigger()->getCameraDelay(SPIM_NCAMS - 1);
-
         double sampRate = 1 / lineInterval;
 
-        double frameRate = 1 / (expTime + delay + (nOfLines + 10) * lineInterval);
+        double frameRate = 1 / (expTime + (nOfLines + 10) * lineInterval);
         double fraction = 0.95;
         triggerRate = fraction * frameRate;
 
