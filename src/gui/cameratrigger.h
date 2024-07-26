@@ -56,6 +56,10 @@ public:
     double getPulseFreq() const;
     void setPulseFreq(double value);
 
+    double getTriggerDelay(uint camera);
+    void setTriggerDelay(uint camera, double value);
+    void setCameraDelays();
+
     QStringList getPulseTerms() const;
     void setPulseTerms(const QStringList &value);
 
@@ -81,6 +85,7 @@ private:
     QString startTriggerTerm;
     QStringList pulseTerms;
     QStringList blankingPulseTerms;
+    QList<double> delay;
 
     TaskWaiter *waiter;
 };

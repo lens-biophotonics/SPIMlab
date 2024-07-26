@@ -56,12 +56,12 @@ void CameraTrigger::initializeTask_impl()
     for (int i = 0; i < nCams; i++) {
         // camera trigger
         QString chanName = QString("CamTrig%1").arg(i);
-        double delay = i * (1 / pulseFreq) / nCams;
+        //double delay = i * (1 / pulseFreq) / nCams;
         createCOPulseChanFreq(counters.at(counterIdx++),
                               chanName,
                               DAQmx_Val_Hz,
                               IdleState_Low,
-                              delay,
+                              delay[i],
                               pulseFreq,
                               0.1);
         setCOPulseTerm(chanName, pulseTerms.at(i));
@@ -72,7 +72,7 @@ void CameraTrigger::initializeTask_impl()
                               chanName,
                               DAQmx_Val_Hz,
                               IdleState_Low,
-                              delay,
+                              delay[i],
                               pulseFreq,
                               0.9485);
         setCOPulseTerm(chanName, blankingPulseTerms.at(i));
@@ -147,4 +147,21 @@ void CameraTrigger::setPulseFreq(double value)
 double CameraTrigger::getPulseFreq() const
 {
     return pulseFreq;
+}
+
+void CameraTrigger::setTriggerDelay(uint camera, double value)
+{
+    delay[camera] = value;
+}
+
+double CameraTrigger::getTriggerDelay(uint camera)
+{
+    return delay[camera];
+}
+
+void CameraTrigger::setCameraDelays()
+{
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        delay << 0.0;
+    }
 }

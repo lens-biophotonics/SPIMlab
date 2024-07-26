@@ -46,6 +46,7 @@
 
 #define SETTING_PHYSCHANS "physicalChannels"
 #define SETTING_WFPARAMS "waveformParams"
+#define SETTING_CAMERA_DELAY "CameraDelay"
 
 #define SETTING_TRIGGER_TERM "triggerTerm"
 
@@ -158,6 +159,17 @@ void Settings::loadSettings()
     settings.endGroup();
 
     groups.clear();
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        groups << SETTINGSGROUP_CAMERAS(i);
+    }
+
+    for (const QString &group : groups) {
+        settings.beginGroup(group);
+        SET_VALUE(group, SETTING_CAMERA_DELAY, 0.0);
+        settings.endGroup();
+    }
+
+    groups.clear();
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         groups << SETTINGSGROUP_COBOLT(i);
     }
@@ -265,6 +277,10 @@ void Settings::loadSettings()
     spim().setRunName(value(group, SETTING_RUN_NAME).toString());
     spim().setBinning(value(group, SETTING_BINNING).toUInt());
 
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        group = SETTINGSGROUP_CAMERAS(i);
+        ct->setTriggerDelay(i, value(group, SETTING_CAMERA_DELAY).toDouble());
+    }
 #endif
 
     group = SETTINGSGROUP_OTHERSETTINGS;
@@ -336,6 +352,11 @@ void Settings::saveSettings()
     setValue(group, SETTING_PULSE_TERMS, ct->getPulseTerms());
     setValue(group, SETTING_BLANKING_TERMS, ct->getBlankingPulseTerms());
     setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
+
+    for (int i = 0; i < SPIM_NCAMS; ++i) {
+        group = SETTINGSGROUP_CAMERAS(i);
+        setValue(group, SETTING_CAMERA_DELAY, ct->getTriggerDelay(i));
+    }
 
     group = SETTINGSGROUP_ACQUISITION;
     setValue(group, SETTING_EXPTIME, spim().getExposureTime());

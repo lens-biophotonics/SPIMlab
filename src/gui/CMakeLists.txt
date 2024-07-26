@@ -25,6 +25,7 @@ set(SPIMlab_SRCS
     filterwheelwidget.cpp
     acquisitionwidget.cpp
     progresswidget.cpp
+    cameradelaywidget.cpp
 
     stagewidget.cpp
     camerapage.cpp

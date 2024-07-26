@@ -1,6 +1,7 @@
 #include "camerapage.h"
 
 #include "acquisitionwidget.h"
+#include "cameradelaywidget.h"
 #include "displayworker.h"
 #include "galvowaveformwidget.h"
 #include "progresswidget.h"
@@ -57,6 +58,10 @@ void CameraPage::setupUI()
     galvoProgressLayout->addWidget(new GalvoWaveformWidget());
 #endif
     galvoProgressLayout->addWidget(new ProgressWidget());
+
+    QBoxLayout *cameraDelay = new QVBoxLayout();
+    cameraDelay->addWidget(new CameraDelayWidget());
+    cameraDelay->addStretch();
 
     QPushButton *initPushButton = new QPushButton("Initialize");
     connect(initPushButton, &QPushButton::clicked, &spim(), [=]() {
@@ -204,6 +209,7 @@ void CameraPage::setupUI()
     controlsHLayout->addWidget(acqWidget);
 #endif
     controlsHLayout->addLayout(galvoProgressLayout);
+    controlsHLayout->addLayout(cameraDelay);
     controlsHLayout->addStretch();
     controlsHLayout->addWidget(controlsGb);
 

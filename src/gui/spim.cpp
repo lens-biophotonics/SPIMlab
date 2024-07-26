@@ -109,6 +109,8 @@ SPIM::SPIM(QObject *parent)
         xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     });
 
+    tasks->getCameraTrigger()->setCameraDelays();
+
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
         Cobolt *cobolt = new Cobolt();
