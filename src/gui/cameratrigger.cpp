@@ -159,8 +159,9 @@ double CameraTrigger::getCameraDelay(uint camera)
     return delay[camera];
 }
 
-void CameraTrigger::setCameraDelays()
+void CameraTrigger::resetCameraDelays()
 {
+    delay.clear();
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         delay << 0.0;
     }

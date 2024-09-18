@@ -58,7 +58,7 @@ public:
 
     double getCameraDelay(uint camera);
     void setCameraDelay(uint camera, double value);
-    void setCameraDelays();
+    void resetCameraDelays();
 
     QStringList getPulseTerms() const;
     void setPulseTerms(const QStringList &value);

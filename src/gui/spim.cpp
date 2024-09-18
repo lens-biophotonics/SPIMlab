@@ -113,7 +113,7 @@ SPIM::SPIM(QObject *parent)
         camEnabled << false;
     }
 
-    tasks->getCameraTrigger()->setCameraDelays();
+    tasks->getCameraTrigger()->resetCameraDelays();
 
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
