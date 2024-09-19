@@ -10,6 +10,16 @@
 #ifndef SPIM_NCAMS
 #define SPIM_NCAMS 2
 #endif
+#ifndef SLAVE_SPIM_NCAMS
+#ifdef MASTER_SPIM
+#define SLAVE_SPIM_NCAMS 2
+#endif
+#ifdef SLAVE_SPIM
+#define SLAVE_SPIM_NCAMS 0
+#endif
+#endif
+
+
 #ifndef SPIM_NCOBOLT
 #define SPIM_NCOBOLT 4
 #endif
@@ -112,8 +122,10 @@ public:
     void setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable);
 
     bool isCameraEnabled(uint dev);
-    void setCameraEnabled(uint camera, bool enable);
-    int nEnabledCameras();
+    bool setCameraEnabled(uint camera, bool enable);
+    int nTotCamerasEnabled();
+    int nCamerasEnabled();
+    int nSlaveCamerasEnabled();
 
     int getBinning() const;
     bool setBinning(uint value);
@@ -202,6 +214,7 @@ private:
     QList<OrcaFlash *> camList;
     QList<SaveStackWorker *> ssWorkerList;
     QList<bool> camEnabled;
+    QList<bool> slaveCamEnabled;
 
     QStateMachine *sm = nullptr;
 

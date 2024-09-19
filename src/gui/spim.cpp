@@ -108,12 +108,16 @@ SPIM::SPIM(QObject *parent)
         xaxis->setTriggerOutput(PIDevice::OUTPUT_1, PIDevice::TriggerMode, PIDevice::InMotion);
         xaxis->setTriggerOutputEnabled(PIDevice::OUTPUT_1, true);
     });
+#endif
 
     for (int i = 0; i < SPIM_NCAMS; ++i) {
         camEnabled << false;
     }
 
-    tasks->getCameraTrigger()->resetCameraDelays();
+#ifdef MASTER_SPIM
+    for (int i = 0; i < SLAVE_SPIM_NCAMS; ++i) {
+        slaveCamEnabled << false;
+    }
 
     laserList.reserve(SPIM_NCOBOLT);
     for (int i = 0; i < SPIM_NCOBOLT; ++i) {
@@ -262,18 +266,36 @@ void SPIM::setMosaicStageEnabled(SPIM_PI_DEVICES dev, bool enable)
 
 bool SPIM::isCameraEnabled(uint camera)
 {
-    return camEnabled[camera];
+    if (camera >= SPIM_NCAMS) {
+        return slaveCamEnabled[camera - SPIM_NCAMS];
+    } else {
+        return camEnabled[camera];
+    }
 }
 
-void SPIM::setCameraEnabled(uint camera, bool enable)
+bool SPIM::setCameraEnabled(uint camera, bool enable)
 {
-    camEnabled[camera] = enable;
+    if (camera >= SPIM_NCAMS) {
+        slaveCamEnabled[camera - SPIM_NCAMS] = enable;
+    } else {
+        camEnabled[camera] = enable;
+    }
+    return true;
 }
 
-int SPIM::nEnabledCameras()
+int SPIM::nTotCamerasEnabled()
 {
-    int nEnabledCameras = std::count(camEnabled.begin(), camEnabled.end(), true);
-    return nEnabledCameras;
+    return nCamerasEnabled() + nSlaveCamerasEnabled();
+}
+
+int SPIM::nCamerasEnabled()
+{
+    return std::count(camEnabled.begin(), camEnabled.end(), true);
+}
+
+int SPIM::nSlaveCamerasEnabled()
+{
+    return std::count(slaveCamEnabled.begin(), slaveCamEnabled.end(), true);
 }
 
 QString SPIM::getRunName() const
@@ -346,13 +368,18 @@ OrcaFlash *SPIM::getCamera(int camNumber) const
 void SPIM::startFreeRun()
 {
     try {
-        if (nEnabledCameras() == 0) {
+#ifdef MASTER_SPIM
+        if (nTotCamerasEnabled() == 0) {
             throw std::runtime_error(
                 QString("Can't start free run with no cameras enabled").toStdString());
         }
-#ifdef MASTER_SPIM
-        spimReplica->setExposureTime(exposureTime);
-        spimReplica->startFreeRun();
+        if (nSlaveCamerasEnabled()) {
+            spimReplica->setExposureTime(exposureTime);
+            for (int i = 0; i < SLAVE_SPIM_NCAMS; ++i) {
+                spimReplica->setCameraEnabled(i, slaveCamEnabled[i]).waitForFinished();
+            }
+            spimReplica->startFreeRun();
+        }
 #endif
         freeRun = true;
         logger->info("Start free run");
@@ -366,10 +393,12 @@ void SPIM::startFreeRun()
 bool SPIM::startAcquisition()
 {
     try {
-        if (nEnabledCameras() == 0) {
+#ifdef MASTER_SPIM
+        if (nTotCamerasEnabled() == 0) {
             throw std::runtime_error(
                 QString("Can't start capture with no cameras enabled").toStdString());
         }
+#endif
         freeRun = false;
         logger->info("Start acquisition");
 
@@ -600,6 +629,17 @@ void SPIM::setupStateMachine()
         QString fname;
         try {
 #ifdef MASTER_SPIM
+            if (nSlaveCamerasEnabled()) {
+                spimReplica->setFrameCount(nSteps[stackStage]).waitForFinished();
+                spimReplica->setExposureTime(exposureTime).waitForFinished();
+                for (int i = 0; i < SLAVE_SPIM_NCAMS; ++i) {
+                    spimReplica->setCameraEnabled(i, slaveCamEnabled[i]).waitForFinished();
+                }
+                if (!spimReplica->startAcquisition().waitForFinished()) {
+                    throw std::runtime_error("Cannot start acquisition on remote SPIM");
+                }
+            }
+
             // move stages to target position
             for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
                 PIDevice *dev = getPIDevice(d_enum);
@@ -685,12 +725,6 @@ void SPIM::setupStateMachine()
                 }
 
 #ifdef MASTER_SPIM
-                spimReplica->setFrameCount(nSteps[stackStage]).waitForFinished();
-                spimReplica->setExposureTime(exposureTime).waitForFinished();
-                if (!spimReplica->startAcquisition().waitForFinished()) {
-                    throw std::runtime_error("Cannot start acquisition on remote SPIM");
-                }
-
                 tasks->start();
                 dev->move(stackTo);
 #endif
@@ -788,9 +822,9 @@ void SPIM::_setExposureTime(double expTime)
 void SPIM::incrementCompleted(bool ok)
 {
 #ifdef MASTER_SPIM
-#define EXPECTED_N_JOBS nEnabledCameras() + 1
+#define EXPECTED_N_JOBS (nCamerasEnabled() + (nSlaveCamerasEnabled() ? 1 : 0))
 #else
-#define EXPECTED_N_JOBS nEnabledCameras()
+#define EXPECTED_N_JOBS (nCamerasEnabled())
 #endif
     if (freeRun) {
         return;
@@ -803,8 +837,8 @@ void SPIM::incrementCompleted(bool ok)
         tasks->stop();
     }
 #endif
+    logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(EXPECTED_N_JOBS));
     if (++completedJobs == EXPECTED_N_JOBS) {
-        logger->info(QString("Success jobs: %1/%2").arg(successJobs).arg(EXPECTED_N_JOBS));
         if (successJobs == EXPECTED_N_JOBS) {
             currentStep++;
 

@@ -8,6 +8,7 @@ Tasks::Tasks(QObject *parent)
     : QObject(parent)
 {
     cameraTrigger = new CameraTrigger;
+    cameraTrigger->setBlankingEnabled(false);
     galvoRamp = new GalvoRamp;
 }
 

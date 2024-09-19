@@ -144,7 +144,9 @@ void Settings::loadSettings()
     group = SETTINGSGROUP_CAMTRIG;
     settings.beginGroup(group);
 
-    SET_VALUE(group, SETTING_PULSE_TERMS, QStringList({"/Dev1/PFI0", "/Dev1/PFI1"}));
+    SET_VALUE(group,
+              SETTING_PULSE_TERMS,
+              QStringList({"/Dev1/PFI0", "/Dev1/PFI1", "/Dev1/PFI5", "/Dev1/PFI6"}));
     SET_VALUE(group, SETTING_BLANKING_TERMS, QStringList({"/Dev1/PFI2", "/Dev1/PFI3"}));
     SET_VALUE(group, SETTING_TRIGGER_TERM, "/Dev1/PFI4");
 
@@ -160,7 +162,7 @@ void Settings::loadSettings()
     settings.endGroup();
 
     groups.clear();
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         groups << SETTINGSGROUP_CAMERAS(i);
     }
 
@@ -172,7 +174,7 @@ void Settings::loadSettings()
     }
 
     groups.clear();
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         groups << SETTINGSGROUP_CAMDELAYS(i);
     }
 
@@ -290,12 +292,12 @@ void Settings::loadSettings()
     spim().setRunName(value(group, SETTING_RUN_NAME).toString());
     spim().setBinning(value(group, SETTING_BINNING).toUInt());
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         group = SETTINGSGROUP_CAMERAS(i);
         spim().setCameraEnabled(i, value(group, SETTING_ENABLED_CAMERAS).toBool());
     }
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         group = SETTINGSGROUP_CAMDELAYS(i);
         ct->setCameraDelay(i, value(group, SETTING_CAMERA_DELAY).toDouble());
     }
@@ -371,12 +373,12 @@ void Settings::saveSettings()
     setValue(group, SETTING_BLANKING_TERMS, ct->getBlankingPulseTerms());
     setValue(group, SETTING_TRIGGER_TERM, ct->getStartTriggerTerm());
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         group = SETTINGSGROUP_CAMDELAYS(i);
         setValue(group, SETTING_CAMERA_DELAY, ct->getCameraDelay(i));
     }
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         group = SETTINGSGROUP_CAMERAS(i);
         setValue(group, SETTING_ENABLED_CAMERAS, spim().isCameraEnabled(i));
     }

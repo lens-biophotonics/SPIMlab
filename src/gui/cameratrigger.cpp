@@ -17,6 +17,7 @@ static Logger *logger = getLogger("CameraTrigger");
 CameraTrigger::CameraTrigger(QObject *parent)
     : NITask(parent)
 {
+    resetCameraDelays();
     waiter = new TaskWaiter(this);
 
     connect(this, &CameraTrigger::started, this, [=]() {
@@ -52,7 +53,7 @@ void CameraTrigger::initializeTask_impl()
     int counterIdx = 0;
 
     createTask("Camera trigger");
-    int nCams = SPIM_NCAMS;
+    int nCams = SPIM_NCAMS + SLAVE_SPIM_NCAMS;
     for (int i = 0; i < nCams; i++) {
         // camera trigger
         QString chanName = QString("CamTrig%1").arg(i);
@@ -66,16 +67,18 @@ void CameraTrigger::initializeTask_impl()
                               0.1);
         setCOPulseTerm(chanName, pulseTerms.at(i));
 
-        // blanking
-        chanName = QString("Blanking%1").arg(i);
-        createCOPulseChanFreq(counters.at(counterIdx++),
-                              chanName,
-                              DAQmx_Val_Hz,
-                              IdleState_Low,
-                              delay[i],
-                              pulseFreq,
-                              0.9485);
-        setCOPulseTerm(chanName, blankingPulseTerms.at(i));
+        if (blankingEnabled) {
+            // blanking
+            chanName = QString("Blanking%1").arg(i);
+            createCOPulseChanFreq(counters.at(counterIdx++),
+                                  chanName,
+                                  DAQmx_Val_Hz,
+                                  IdleState_Low,
+                                  delay[i],
+                                  pulseFreq,
+                                  0.9485);
+            setCOPulseTerm(chanName, blankingPulseTerms.at(i));
+        }
     }
 
     if (isFreeRun) {
@@ -84,6 +87,16 @@ void CameraTrigger::initializeTask_impl()
         cfgImplicitTiming(SampMode_FiniteSamps, nPulses);
         cfgDigEdgeStartTrig(startTriggerTerm, Edge_Rising);
     }
+}
+
+bool CameraTrigger::isBlankingEnabled() const
+{
+    return blankingEnabled;
+}
+
+void CameraTrigger::setBlankingEnabled(bool enable)
+{
+    blankingEnabled = enable;
 }
 
 int CameraTrigger::getNPulses() const
@@ -162,7 +175,7 @@ double CameraTrigger::getCameraDelay(uint camera)
 void CameraTrigger::resetCameraDelays()
 {
     delay.clear();
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         delay << 0.0;
     }
 }

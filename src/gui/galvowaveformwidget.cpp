@@ -31,7 +31,7 @@ void GalvoWaveformWidget::setupUI()
     grid->addWidget(new QLabel("Fraction"), row, col++);
     row++;
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < 1; ++i) {
         col = 0;
         QVector<double> wp = gr->getWaveformParams();
         wp = wp.mid(i * GALVORAMP_N_OF_PARAMS, GALVORAMP_N_OF_PARAMS);

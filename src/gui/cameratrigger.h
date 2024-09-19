@@ -72,6 +72,9 @@ public:
     int getNPulses() const;
     void setNPulses(int value);
 
+    bool isBlankingEnabled() const;
+    void setBlankingEnabled(bool enable);
+
 signals:
     void done();
 
@@ -80,6 +83,7 @@ protected:
 
 private:
     bool isFreeRun;
+    bool blankingEnabled = true;
     double pulseFreq;
     int nPulses = 0;
     QString startTriggerTerm;

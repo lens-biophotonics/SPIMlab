@@ -10,6 +10,7 @@ class SPIM
     SLOT(bool setBinning(uint value));
     SLOT(bool setFrameCount(int count));
     SLOT(bool signalTriggerCompletion());
+    SLOT(bool setCameraEnabled(uint camera, bool enable));
 
     SLOT(void logMessage(const QString &msg));
 

@@ -12,6 +12,11 @@
 #include <QLabel>
 #include <QPushButton>
 
+#ifdef SPIM_NCAMS
+#undef SPIM_NCAMS
+#define SPIM_NCAMS 4
+#endif
+
 NISettingsWidget::NISettingsWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -53,25 +58,30 @@ void NISettingsWidget::setupUI()
         grid->addWidget(comboBox, row++, i * 2 + 1);
         cameraTriggerPulseComboBoxList.insert(i, comboBox);
 
-        grid->addWidget(new QLabel("Blanking"), row, i * 2 + 0);
-        comboBox = new QComboBox();
-        comboBox->insertItems(0, terminals);
-        comboBox->setCurrentText(cameraTrigger->getBlankingPulseTerms().at(i));
-        grid->addWidget(comboBox, row++, i * 2 + 1);
-        blankingComboBoxList.insert(i, comboBox);
+        if (cameraTrigger->isBlankingEnabled()) {
+            grid->addWidget(new QLabel("Blanking"), row, i * 2 + 0);
+            comboBox = new QComboBox();
+            comboBox->insertItems(0, terminals);
+            comboBox->setCurrentText(cameraTrigger->getBlankingPulseTerms().at(i));
+            grid->addWidget(comboBox, row++, i * 2 + 1);
+            blankingComboBoxList.insert(i, comboBox);
+        }
 
-        grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
-        comboBox = new QComboBox();
-        comboBox->addItems(NI::getAOPhysicalChans());
+        if (i == 0) {
+            grid->addWidget(new QLabel("Galvo"), row, i * 2 + 0);
+            comboBox = new QComboBox();
+            comboBox->addItems(NI::getAOPhysicalChans());
 #ifdef DEMO_MODE
-        comboBox->addItems({"DemoDev/ao0", "DemoDev/ao1"});
+            comboBox->addItems({"DemoDev/ao0", "DemoDev/ao1"});
 #endif
-        comboBox->setCurrentText(spim().getTasks()->getGalvoRamp()->getPhysicalChannels().at(i));
-        grid->addWidget(comboBox, row++, i * 2 + 1);
-        galvoRampComboBoxList.insert(i, comboBox);
+            comboBox->setCurrentText(spim().getTasks()->getGalvoRamp()->getPhysicalChannels().at(i));
+            grid->addWidget(comboBox, row++, i * 2 + 1);
+            galvoRampComboBoxList.insert(i, comboBox);
+        } else {
+            row++;
+        }
 
-        grid->addWidget(new QLabel("Enabled"), row, i * 2 + 0);
-        checkBox = new QCheckBox();
+        checkBox = new QCheckBox("Enabled");
         grid->addWidget(checkBox, row++, i * 2 + 1);
         checkBoxes.insert(i, checkBox);
     }
@@ -80,7 +90,7 @@ void NISettingsWidget::setupUI()
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
 
-    grid->addWidget(line, row++, 0, 1, 4);
+    grid->addWidget(line, row++, 0, 1, 2 * (SPIM_NCAMS + SLAVE_SPIM_NCAMS));
 
     QComboBox *PITriggerOutputComboBox = new QComboBox();
     PITriggerOutputComboBox->insertItems(0, terminals);
@@ -102,8 +112,12 @@ void NISettingsWidget::setupUI()
 
         for (int i = 0; i < SPIM_NCAMS; ++i) {
             pulseTerms << cameraTriggerPulseComboBoxList.at(i)->currentText();
-            blankingTerms << blankingComboBoxList.at(i)->currentText();
-            galvoRampPhysChans << galvoRampComboBoxList.at(i)->currentText();
+            if (cameraTrigger->isBlankingEnabled()) {
+                blankingTerms << blankingComboBoxList.at(i)->currentText();
+            }
+            if (i == 0) {
+                galvoRampPhysChans << galvoRampComboBoxList.at(i)->currentText();
+            }
         }
 
         GalvoRamp *gr = spim().getTasks()->getGalvoRamp();

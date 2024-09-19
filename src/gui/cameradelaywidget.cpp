@@ -29,7 +29,7 @@ void CameraDelayWidget::setupUI()
     grid->addWidget(new QLabel("Delay"), row, col++);
     row++;
 
-    for (int i = 0; i < SPIM_NCAMS; ++i) {
+    for (int i = 0; i < SPIM_NCAMS + SLAVE_SPIM_NCAMS; ++i) {
         col = 0;
 
         grid->addWidget(new QLabel(QString("Cam %1").arg(i)), row, col++);
