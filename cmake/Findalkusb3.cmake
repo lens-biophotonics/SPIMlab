@@ -14,6 +14,7 @@ find_path(ALKUSB3_INCLUDE_DIR NAMES ICeleraCamera.h PATHS
     "${INCLUDE_DIRS}"
     /usr/include
     /usr/local/include
+    /usr/include/libalkusb3
     /usr/local/include/libalkusb3
     "$ENV{LIB_DIR}/include"
     "$ENV{INCLUDE}"
