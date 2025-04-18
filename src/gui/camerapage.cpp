@@ -78,7 +78,6 @@ void CameraPage::setupUI()
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Y_AXIS), "1", "Y");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_Z_AXIS), "1", "Z");
     stageCw->appendRow(spim().getPIDevice(PI_DEVICE_LEFT_OBJ_AXIS), "1", "Z L");
-    stageCw->appendRow(spim().getPIDevice(PI_DEVICE_RIGHT_OBJ_AXIS), "1", "Z R");
 
     for (int i = 0; i < SPIM_NPIDEVICES; ++i) {
         const Settings s = settings();
@@ -207,7 +206,10 @@ void CameraPage::setupUI()
 
     QHBoxLayout *controlsHLayout = new QHBoxLayout();
 #ifdef MASTER_SPIM
-    controlsHLayout->addWidget(stageCw);
+    QVBoxLayout *stageCwVLayout = new QVBoxLayout();
+    stageCwVLayout->addWidget(stageCw);
+    stageCwVLayout->addStretch();
+    controlsHLayout->addLayout(stageCwVLayout);
     controlsHLayout->addWidget(acqWidget);
 #endif
     controlsHLayout->addLayout(galvoProgressLayout);

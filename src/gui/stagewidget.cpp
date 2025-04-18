@@ -14,7 +14,7 @@ StageWidget::StageWidget(QWidget *parent)
     for (int i = 0; i < 3; ++i) {
         piHLayout->addWidget(new PIControllerSettingsWidget(spim().getPIDevice(i)));
     }
-    for (int i = 3; i < 5; ++i) {
+    for (int i = 3; i < 4; ++i) {
         piHLayout2->addWidget(new PIControllerSettingsWidget(spim().getPIDevice(i)));
     }
 

@@ -27,7 +27,7 @@
 #define SPIM_NAOTF 2
 #endif
 #ifndef SPIM_NPIDEVICES
-#define SPIM_NPIDEVICES 5
+#define SPIM_NPIDEVICES 4
 #endif
 
 #define SPIM_RANGE_FROM_IDX 0

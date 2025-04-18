@@ -91,7 +91,7 @@ SPIM::SPIM(QObject *parent)
     piDevList.insert(PI_DEVICE_Y_AXIS, new PIDevice("Y axis", this));
     piDevList.insert(PI_DEVICE_Z_AXIS, new PIDevice("Z axis", this));
     piDevList.insert(PI_DEVICE_LEFT_OBJ_AXIS, new PIDevice("Left objective", this));
-    piDevList.insert(PI_DEVICE_RIGHT_OBJ_AXIS, new PIDevice("Right objective", this));
+
     for (PIDevice *dev : piDevList) {
         connect(dev, &PIDevice::connected, this, [=]() { dev->setServoEnabled(true); });
     }
