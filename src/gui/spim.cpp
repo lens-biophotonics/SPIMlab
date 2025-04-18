@@ -629,26 +629,6 @@ void SPIM::setupStateMachine()
         QString fname;
         try {
 #ifdef MASTER_SPIM
-            if (nSlaveCamerasEnabled()) {
-                spimReplica->setFrameCount(nSteps[stackStage]).waitForFinished();
-                spimReplica->setExposureTime(exposureTime).waitForFinished();
-                for (int i = 0; i < SLAVE_SPIM_NCAMS; ++i) {
-                    spimReplica->setCameraEnabled(i, slaveCamEnabled[i]).waitForFinished();
-                }
-                if (!spimReplica->startAcquisition().waitForFinished()) {
-                    throw std::runtime_error("Cannot start acquisition on remote SPIM");
-                }
-            }
-
-            // move stages to target position
-            for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
-                PIDevice *dev = getPIDevice(d_enum);
-                dev->setVelocity(scanVelocity);
-
-                double pos = targetPositions[d_enum];
-                logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(pos));
-                dev->move(pos);
-            }
             QStringList axis = {"x_", "y_", "z_"};
             int k = 0;
             for (SPIM_PI_DEVICES d_enum : stageEnumList) {
@@ -666,11 +646,33 @@ void SPIM::setupStateMachine()
             setOutputFname(fname);
             setFrameCount(nSteps[stackStage]);
 
-            if (!spimReplica->setOutputFname(outputFname).waitForFinished()
-                || !spimReplica->setFrameCount(frameCount).waitForFinished()
-                || !spimReplica->setBinning(binning).waitForFinished()
-                || !spimReplica->setRunName(runName).waitForFinished()) {
-                throw std::runtime_error("Cannot reach remote SPIM");
+            if (nSlaveCamerasEnabled()) {
+                spimReplica->setFrameCount(nSteps[stackStage]).waitForFinished();
+                spimReplica->setExposureTime(exposureTime).waitForFinished();
+                for (int i = 0; i < SLAVE_SPIM_NCAMS; ++i) {
+                    spimReplica->setCameraEnabled(i, slaveCamEnabled[i]).waitForFinished();
+                }
+
+                if (!spimReplica->setOutputFname(outputFname).waitForFinished()
+                    || !spimReplica->setFrameCount(frameCount).waitForFinished()
+                    || !spimReplica->setBinning(binning).waitForFinished()
+                    || !spimReplica->setRunName(runName).waitForFinished()) {
+                    throw std::runtime_error("Cannot reach remote SPIM");
+                }
+
+                if (!spimReplica->startAcquisition().waitForFinished()) {
+                    throw std::runtime_error("Cannot start acquisition on remote SPIM");
+                }
+            }
+
+            // move stages to target position
+            for (SPIM_PI_DEVICES d_enum : myStageEnumList) {
+                PIDevice *dev = getPIDevice(d_enum);
+                dev->setVelocity(scanVelocity);
+
+                double pos = targetPositions[d_enum];
+                logger->info(QString("Moving %1 to %2").arg(dev->getVerboseName()).arg(pos));
+                dev->move(pos);
             }
 #endif
         } catch (std::runtime_error e) {
